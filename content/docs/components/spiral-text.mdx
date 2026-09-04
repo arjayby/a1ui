@@ -1,6 +1,6 @@
 ---
 title: Spiral Text
-description: Text set on a responsive spiral that tightens under pressure and ripples on release.
+description: Text set on a responsive spiral that tightens under pressure and surges past rest on release.
 ---
 
 ## Demo
@@ -44,8 +44,8 @@ export function Poster() {
 | ----------------- | -------- | -------- | ----------------------------------------------------------------------------- |
 | `text`            | `string` | Required | Repeats along the spiral path and names the graphic for assistive technology. |
 | `density`         | `number` | `1`      | Adjusts the number of resting turns between `0.65` and `1.6`.                 |
-| `tightenStrength` | `number` | `0.35`   | Controls how much the spiral tightens, clamped between `0.08` and `0.7`.      |
+| `tightenStrength` | `number` | `0.35`   | Controls how closely the coils draw together, clamped from `0.08` to `0.7`.   |
 | `rippleDuration`  | `number` | `1100`   | Sets the release duration in milliseconds, with a `300ms` minimum.            |
 | `className`       | `string` | None     | Sets layout constraints such as width or placement.                           |
 
-The interaction responds to mouse, touch, and pen input. It stays still when the user requests reduced motion.
+Holding changes the radial gap between coils without changing each character's angle, font size, or letter spacing. The interaction responds to mouse, touch, and pen input. It stays still when the user requests reduced motion.

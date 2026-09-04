@@ -101,7 +101,7 @@ export function SpiralTextDemo() {
         <SpiralText text="THE CONTENT ARCHITECTURE · " />
       </div>
       <p className="demo-caption">
-        Press and hold to tighten the spiral. Release to send a ripple from its center.
+        Press and hold to draw the coils closer. Release to send a wave past its resting shape.
       </p>
     </>
   );
