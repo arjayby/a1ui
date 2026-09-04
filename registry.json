@@ -1,0 +1,31 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry.json",
+  "name": "a1ui",
+  "homepage": "http://localhost:3000",
+  "items": [
+    {
+      "name": "section-rail",
+      "type": "registry:ui",
+      "title": "Section Rail",
+      "description": "A compact reading rail that tracks progress through page sections.",
+      "files": [
+        {
+          "path": "src/registry/section-rail.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "spiral-text",
+      "type": "registry:ui",
+      "title": "Spiral Text",
+      "description": "Text set on a responsive spiral that tightens under pressure and ripples on release.",
+      "files": [
+        {
+          "path": "src/registry/spiral-text.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    }
+  ]
+}

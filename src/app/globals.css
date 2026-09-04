@@ -1,26 +1,344 @@
 @import "tailwindcss";
+@import "fumadocs-ui/css/neutral.css";
+@import "fumadocs-ui/css/preset.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@font-face {
+  font-family: "Commit Mono";
+  src: url("/fonts/commit-mono.woff2") format("woff2-variations");
+  font-style: normal;
+  font-weight: 200 700;
+  font-display: swap;
 }
 
 @theme inline {
+  --font-sans: "Commit Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
+  --font-mono: "Commit Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-card: var(--card);
+  --color-card-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-ring: var(--ring);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+:root {
+  --background: oklch(0.9694 0.0011 197.14);
+  --foreground: oklch(0.19 0.004 95);
+  --card: var(--background);
+  --muted: oklch(0.925 0.006 95);
+  --muted-foreground: oklch(0.48 0.008 95);
+  --border: oklch(0.82 0.008 95);
+  --ring: oklch(0.48 0.008 95);
+  --radius: 0.25rem;
+
+  --color-fd-background: var(--background);
+  --color-fd-foreground: var(--foreground);
+  --color-fd-muted: var(--muted);
+  --color-fd-muted-foreground: var(--muted-foreground);
+  --color-fd-popover: var(--background);
+  --color-fd-popover-foreground: var(--foreground);
+  --color-fd-card: var(--card);
+  --color-fd-card-foreground: var(--foreground);
+  --color-fd-border: var(--border);
+  --color-fd-primary: var(--foreground);
+  --color-fd-primary-foreground: var(--background);
+  --color-fd-secondary: var(--muted);
+  --color-fd-secondary-foreground: var(--foreground);
+  --color-fd-accent: var(--muted);
+  --color-fd-accent-foreground: var(--foreground);
+  --color-fd-ring: var(--ring);
+  --color-fd-overlay: color-mix(in oklab, var(--foreground) 18%, transparent);
+}
+
+* {
+  border-color: var(--border);
+}
+
+html {
+  min-width: 20rem;
+  scroll-behavior: smooth;
+  scrollbar-gutter: stable;
+  background: var(--background);
+  color: var(--foreground);
 }
 
 body {
+  min-height: 100dvh;
+  margin: 0;
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "Commit Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
+  font-size: 0.8125rem;
+  font-weight: 450;
+  letter-spacing: -0.022em;
+  line-height: 1.45;
+}
+
+button,
+select,
+code,
+pre {
+  font: inherit;
+}
+
+a {
+  color: inherit;
+}
+
+a:focus-visible,
+button:focus-visible,
+select:focus-visible {
+  outline: 1px solid var(--foreground);
+  outline-offset: 0.2rem;
+}
+
+::selection {
+  background: var(--foreground);
+  color: var(--background);
+}
+
+.docs-shell {
+  min-height: 100dvh;
+}
+
+.docs-main {
+  min-width: 0;
+}
+
+.page-frame {
+  width: min(100%, 76rem);
+  margin-inline: auto;
+  padding: 4rem 3.5rem 7rem;
+}
+
+.page-heading {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 650;
+  line-height: inherit;
+  text-transform: uppercase;
+}
+
+.page-description {
+  max-width: 56rem;
+  margin: 0.2rem 0 0;
+}
+
+.catalog-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 17rem));
+  gap: 1rem;
+  margin-top: 3rem;
+}
+
+.catalog-card {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+  transition:
+    border-color 120ms ease,
+    transform 120ms ease;
+}
+
+.catalog-card:has(a:hover) {
+  border-color: var(--foreground);
+  transform: translateY(-1px);
+}
+
+.catalog-preview {
+  display: grid;
+  min-height: 12.5rem;
+  place-items: center;
+  overflow: hidden;
+  padding: 1.5rem;
+}
+
+.catalog-card-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.8rem 0.9rem;
+  border-top: 1px solid var(--border);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.component-doc {
+  width: min(100%, 62rem);
+  padding: 4rem 3.5rem 8rem;
+}
+
+.component-doc > header {
+  margin-bottom: 4rem;
+}
+
+.component-doc h1 {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 650;
+}
+
+.component-doc > header p {
+  max-width: 48rem;
+  margin: 0.25rem 0 0;
+  color: var(--muted-foreground);
+}
+
+.component-doc-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.component-doc-body h2 {
+  margin: 4rem 0 1.2rem;
+  scroll-margin-top: 5rem;
+  font-size: 0.8125rem;
+  font-weight: 650;
+  line-height: inherit;
+}
+
+.component-doc-body h2:first-child {
+  margin-top: 0;
+}
+
+.component-doc-body p {
+  margin: 0.8rem 0;
+}
+
+.component-doc-body table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.75rem;
+}
+
+.component-doc-body th,
+.component-doc-body td {
+  padding: 0.7rem 0.8rem;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  vertical-align: top;
+}
+
+.component-doc-body th {
+  font-weight: 650;
+}
+
+.component-doc-body :where(figure, [role="tablist"]),
+.component-doc-body [role="tabpanel"] > figure {
+  border-color: var(--border);
+  border-radius: var(--radius);
+}
+
+.demo-frame {
+  width: 100%;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--background);
+}
+
+.section-rail-demo {
+  display: grid;
+  grid-template-columns: 6rem minmax(0, 1fr);
+  gap: 2rem;
+  min-height: 25rem;
+  padding: 2.5rem;
+}
+
+.section-rail-demo-copy {
+  display: grid;
+  gap: 0;
+}
+
+.section-rail-demo-copy section {
+  min-height: 12rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.section-rail-demo-copy section + section {
+  padding-top: 2rem;
+}
+
+.section-rail-demo-copy section:last-child {
+  border-bottom: 0;
+}
+
+.section-rail-demo-copy h3 {
+  margin: 0 0 0.5rem;
+  font-size: inherit;
+  font-weight: 650;
+}
+
+.section-rail-demo-copy p {
+  max-width: 34rem;
+  margin: 0;
+  color: var(--muted-foreground);
+}
+
+.spiral-demo {
+  display: grid;
+  place-items: center;
+  padding: clamp(1rem, 4vw, 3rem);
+}
+
+.spiral-demo > div {
+  width: min(100%, 38rem);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.demo-caption {
+  margin: 0.7rem 0 0 !important;
+  color: var(--muted-foreground);
+  font-size: 0.7rem;
+}
+
+@media (min-width: 48rem) {
+  .docs-shell {
+    display: grid;
+    grid-template-columns: 15rem minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 47.999rem) {
+  .page-frame,
+  .component-doc {
+    padding: 2.25rem 1rem 5rem;
+  }
+
+  .catalog-grid {
+    grid-template-columns: minmax(0, 1fr);
+    margin-top: 2rem;
+  }
+
+  .catalog-preview {
+    min-height: 13rem;
+  }
+
+  .component-doc > header {
+    margin-bottom: 3rem;
+  }
+
+  .section-rail-demo {
+    grid-template-columns: 4rem minmax(0, 1fr);
+    gap: 1rem;
+    padding: 1.5rem 1rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .catalog-card {
+    transition: none;
+  }
 }

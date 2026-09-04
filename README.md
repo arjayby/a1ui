@@ -1,36 +1,48 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# a1ui
 
-## Getting Started
+Original React components built to be copied, changed, and shipped.
 
-First, run the development server:
+## Add a component
+
+With the documentation site running locally:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm dlx shadcn@latest add http://localhost:3000/r/section-rail.json
+pnpm dlx shadcn@latest add http://localhost:3000/r/spiral-text.json
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The components install into `src/components/ui` and use React, TypeScript, and Tailwind CSS v4.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Development
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+pnpm install
+pnpm dev
+```
 
-## Learn More
+The site uses `http://localhost:3000` in shadcn installation commands by default. Set `NEXT_PUBLIC_SITE_URL` when the docs move to another origin.
 
-To learn more about Next.js, take a look at the following resources:
+## Registry
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Validate and build the shadcn registry before shipping changes:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+pnpm registry:validate
+pnpm registry:build
+```
 
-## Deploy on Vercel
+Built registry items are served from `/r`.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Checks
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+pnpm test
+pnpm test:e2e
+pnpm typecheck
+pnpm lint
+pnpm build
+```
+
+## License
+
+The project source is MIT licensed. Commit Mono is distributed under SIL Open Font License 1.1. See [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md).
