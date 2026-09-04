@@ -50,14 +50,25 @@ test("section rail demo is compact, scrollable, and has more markers", async ({ 
 
   const demo = page.getByRole("region", { name: "Scrollable Section Rail demo" });
   const rail = demo.getByRole("navigation", { name: "Demo sections" });
-  const dimensions = await demo.evaluate(({ clientHeight, scrollHeight }) => ({
-    clientHeight,
-    scrollHeight,
-  }));
+  const layout = await demo.evaluate((element) => {
+    const rail = element.querySelector<HTMLElement>('nav[aria-label="Demo sections"]');
 
-  await expect(rail.getByRole("link")).toHaveCount(7);
-  expect(dimensions.clientHeight).toBeLessThanOrEqual(320);
-  expect(dimensions.scrollHeight).toBeGreaterThan(dimensions.clientHeight);
+    if (!rail) throw new Error("Demo rail is missing");
+
+    const demoRect = element.getBoundingClientRect();
+    const railRect = rail.getBoundingClientRect();
+
+    return {
+      clientHeight: element.clientHeight,
+      scrollHeight: element.scrollHeight,
+      centerDelta: Math.abs(railRect.top + railRect.height / 2 - (demoRect.top + demoRect.height / 2)),
+    };
+  });
+
+  await expect(rail.getByRole("link")).toHaveCount(12);
+  expect(layout.clientHeight).toBeLessThanOrEqual(320);
+  expect(layout.scrollHeight).toBeGreaterThan(layout.clientHeight);
+  expect(layout.centerDelta).toBeLessThanOrEqual(2);
 
   await demo.evaluate((element) => element.scrollTo({ top: element.scrollHeight }));
   await expect(rail.getByRole("link", { name: "Summary" })).toHaveAttribute("aria-current", "location");
