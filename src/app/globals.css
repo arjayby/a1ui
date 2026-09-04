@@ -258,9 +258,11 @@ select:focus-visible {
 .section-rail-demo {
   display: grid;
   grid-template-columns: 6rem minmax(0, 1fr);
-  gap: 2rem;
-  min-height: 25rem;
-  padding: 2.5rem;
+  gap: 1.5rem;
+  height: 18rem;
+  padding: 1.5rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .section-rail-demo-copy {
@@ -269,13 +271,13 @@ select:focus-visible {
 }
 
 .section-rail-demo-copy section {
-  min-height: 12rem;
-  padding-bottom: 2rem;
+  min-height: 7rem;
+  padding-bottom: 1rem;
   border-bottom: 1px solid var(--border);
 }
 
 .section-rail-demo-copy section + section {
-  padding-top: 2rem;
+  padding-top: 1rem;
 }
 
 .section-rail-demo-copy section:last-child {
@@ -341,7 +343,8 @@ select:focus-visible {
   .section-rail-demo {
     grid-template-columns: 4rem minmax(0, 1fr);
     gap: 1rem;
-    padding: 1.5rem 1rem;
+    height: 16rem;
+    padding: 1rem;
   }
 }
 

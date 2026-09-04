@@ -45,6 +45,21 @@ test("selected component navigation keeps its label visible", async ({ page }) =
   });
 });
 
+test("section rail demo is compact, scrollable, and has more markers", async ({ page }) => {
+  await page.goto("/components/section-rail");
+
+  const demo = page.getByRole("region", { name: "Scrollable Section Rail demo" });
+  const rail = demo.getByRole("navigation", { name: "Demo sections" });
+  const dimensions = await demo.evaluate(({ clientHeight, scrollHeight }) => ({
+    clientHeight,
+    scrollHeight,
+  }));
+
+  await expect(rail.getByRole("link")).toHaveCount(7);
+  expect(dimensions.clientHeight).toBeLessThanOrEqual(320);
+  expect(dimensions.scrollHeight).toBeGreaterThan(dimensions.clientHeight);
+});
+
 test("search finds component documentation", async ({ page }) => {
   await page.goto("/");
   await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");

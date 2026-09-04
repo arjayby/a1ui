@@ -42,40 +42,36 @@ export async function ComponentSource({ name }: { name: ComponentSlug }) {
 }
 
 const demoSections = [
-  { id: "rail-demo-introduction", label: "Introduction" },
-  { id: "rail-demo-decisions", label: "Decisions" },
-  { id: "rail-demo-details", label: "Details" },
+  { id: "rail-demo-overview", label: "Overview", description: "A quick read of the page." },
+  { id: "rail-demo-goals", label: "Goals", description: "What the work needs to solve." },
+  { id: "rail-demo-approach", label: "Approach", description: "The chosen direction." },
+  { id: "rail-demo-structure", label: "Structure", description: "How the pieces fit together." },
+  { id: "rail-demo-states", label: "States", description: "Pending, active, and complete." },
+  { id: "rail-demo-accessibility", label: "Accessibility", description: "Labels and keyboard focus." },
+  { id: "rail-demo-summary", label: "Summary", description: "The final result." },
 ];
 
 export function SectionRailDemo() {
   return (
-    <div className="demo-frame section-rail-demo">
+    <div
+      className="demo-frame section-rail-demo"
+      role="region"
+      aria-label="Scrollable Section Rail demo"
+      tabIndex={0}
+    >
       <SectionRail
         sections={demoSections}
         ariaLabel="Demo sections"
-        className="sticky top-20 h-fit self-start"
+        gap={0}
+        className="sticky top-6 h-fit self-start"
       />
       <div className="section-rail-demo-copy">
-        <section id="rail-demo-introduction">
-          <h3>Introduction</h3>
-          <p>
-            The rail marks the section nearest the reading line. Hover or focus a marker to reveal its label.
-          </p>
-        </section>
-        <section id="rail-demo-decisions">
-          <h3>Decisions</h3>
-          <p>
-            Sections above the active item remain visibly complete, so the rail doubles as a quiet progress
-            indicator.
-          </p>
-        </section>
-        <section id="rail-demo-details">
-          <h3>Details</h3>
-          <p>
-            Placement belongs to the page. This demo makes the rail sticky; your layout can make it fixed or
-            static.
-          </p>
-        </section>
+        {demoSections.map(({ id, label, description }) => (
+          <section key={id} id={id}>
+            <h3>{label}</h3>
+            <p>{description}</p>
+          </section>
+        ))}
       </div>
     </div>
   );

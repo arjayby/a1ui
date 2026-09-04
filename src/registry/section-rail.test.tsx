@@ -9,7 +9,7 @@ const sections = [
   { id: "finish", label: "Finish" },
 ];
 
-function addTrackedSection(id: string, top: number) {
+function addTrackedSection(id: string, top: number, parent: HTMLElement = document.body) {
   const section = document.createElement("section");
   section.id = id;
   section.getBoundingClientRect = vi.fn(() => ({
@@ -23,7 +23,7 @@ function addTrackedSection(id: string, top: number) {
     y: top,
     toJSON: () => ({}),
   }));
-  document.body.append(section);
+  parent.append(section);
   return section;
 }
 
@@ -76,5 +76,80 @@ describe("SectionRail", () => {
 
     expect(screen.getByRole("link", { name: "Start" })).toHaveAttribute("href", "#start");
     expect(screen.getByRole("navigation")).toHaveClass("fixed");
+  });
+
+  it("sets the gap between section markers", () => {
+    render(<SectionRail sections={sections} gap="0.5rem" />);
+
+    expect(screen.getByRole("list")).toHaveStyle({ gap: "0.5rem" });
+  });
+
+  it("tapers nearby markers around the hovered or focused section", () => {
+    const nearbySections = [
+      { id: "one", label: "One" },
+      { id: "two", label: "Two" },
+      { id: "three", label: "Three" },
+      { id: "four", label: "Four" },
+      { id: "five", label: "Five" },
+    ];
+    render(<SectionRail sections={nearbySections} />);
+
+    const links = screen.getAllByRole("link");
+    const markers = links.map((link) => link.querySelector("[aria-hidden='true']"));
+
+    fireEvent.pointerEnter(links[2]);
+    expect(markers[2]).toHaveStyle({ width: "24px", opacity: "1" });
+    expect(markers[1]).toHaveStyle({ width: "20px", opacity: "0.8" });
+    expect(markers[0]).toHaveStyle({ width: "16px", opacity: "0.6" });
+    expect(markers[3]).toHaveStyle({ width: "20px", opacity: "0.8" });
+    expect(markers[4]).toHaveStyle({ width: "16px", opacity: "0.6" });
+
+    fireEvent.pointerLeave(screen.getByRole("list"));
+    fireEvent.focus(links[1]);
+    expect(markers[1]).toHaveStyle({ width: "24px", opacity: "1" });
+    expect(markers[0]).toHaveStyle({ width: "20px", opacity: "0.8" });
+  });
+
+  it("tracks sections inside a scroll container", async () => {
+    const scrollContainer = document.createElement("div");
+    const reactRoot = document.createElement("div");
+    scrollContainer.style.overflowY = "auto";
+    Object.defineProperty(scrollContainer, "clientHeight", { configurable: true, value: 200 });
+    Object.defineProperty(scrollContainer, "scrollHeight", { configurable: true, value: 600 });
+    scrollContainer.getBoundingClientRect = vi.fn(() => ({
+      top: 100,
+      bottom: 300,
+      left: 0,
+      right: 100,
+      width: 100,
+      height: 200,
+      x: 0,
+      y: 100,
+      toJSON: () => ({}),
+    }));
+    scrollContainer.append(reactRoot);
+    document.body.append(scrollContainer);
+
+    addTrackedSection("start", 120, scrollContainer);
+    const details = addTrackedSection("details", 220, scrollContainer);
+    addTrackedSection("finish", 320, scrollContainer);
+    render(<SectionRail sections={sections} />, { container: reactRoot });
+
+    details.getBoundingClientRect = vi.fn(() => ({
+      top: 150,
+      bottom: 250,
+      left: 0,
+      right: 100,
+      width: 100,
+      height: 100,
+      x: 0,
+      y: 150,
+      toJSON: () => ({}),
+    }));
+    fireEvent.scroll(scrollContainer);
+
+    await waitFor(() =>
+      expect(screen.getByRole("link", { name: "Details" })).toHaveAttribute("aria-current", "location"),
+    );
   });
 });

@@ -28,7 +28,7 @@ const sections = [
 export function ArticlePage() {
   return (
     <>
-      <SectionRail sections={sections} className="fixed top-1/2 left-4 -translate-y-1/2" />
+      <SectionRail sections={sections} gap={0} className="fixed top-1/2 left-4 -translate-y-1/2" />
       <article>{/* Sections with matching IDs */}</article>
     </>
   );
@@ -43,11 +43,12 @@ export function ArticlePage() {
 
 ## API reference
 
-| Prop           | Type                              | Default           | Purpose                                                     |
-| -------------- | --------------------------------- | ----------------- | ----------------------------------------------------------- |
-| `sections`     | `{ id: string; label: string }[]` | Required          | Maps each marker to an element ID and readable label.       |
-| `activeOffset` | `number`                          | `0.36`            | Sets the reading line as a fraction of the viewport height. |
-| `ariaLabel`    | `string`                          | `"Page sections"` | Names the navigation landmark.                              |
-| `className`    | `string`                          | None              | Controls placement in the consuming page.                   |
+| Prop           | Type                              | Default           | Purpose                                                    |
+| -------------- | --------------------------------- | ----------------- | ---------------------------------------------------------- |
+| `sections`     | `{ id: string; label: string }[]` | Required          | Maps each marker to an element ID and readable label.      |
+| `activeOffset` | `number`                          | `0.36`            | Sets the reading line within the nearest scroll container. |
+| `ariaLabel`    | `string`                          | `"Page sections"` | Names the navigation landmark.                             |
+| `gap`          | `CSSProperties["gap"]`            | `0`               | Sets the gap between section markers.                      |
+| `className`    | `string`                          | None              | Controls placement in the consuming page.                  |
 
-The active link receives `aria-current="location"`. Every link also exposes `data-state="pending"`, `active`, or `complete` for styling.
+The active link receives `aria-current="location"`. Every link also exposes `data-state="pending"`, `active`, or `complete` for styling. Hovering or focusing a link expands the nearby markers into a tapered group.
