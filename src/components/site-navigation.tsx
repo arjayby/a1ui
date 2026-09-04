@@ -33,14 +33,14 @@ export function DesktopNavigation() {
 
   return (
     <aside className="border-border sticky top-0 hidden h-dvh flex-col border-r px-5 py-7 md:flex">
-      <Link href="/" className="w-fit font-semibold no-underline">
+      <Link href="/" className="w-fit font-bold no-underline">
         a1ui
       </Link>
       <div className="mt-6">
         <SearchButton />
       </div>
       <nav aria-label="Components" className="mt-8">
-        <p className="mb-3 font-semibold">Components</p>
+        <p className="mb-3 font-bold">Components</p>
         <ul className="flex list-none flex-col gap-1 p-0">
           {components.map((component) => {
             const href = `/components/${component.slug}`;
@@ -70,7 +70,7 @@ export function MobileNavigation() {
 
   return (
     <header className="bg-background border-border sticky top-0 z-20 flex items-center gap-3 border-b px-3 py-2 md:hidden">
-      <Link href="/" className="mr-auto font-semibold no-underline">
+      <Link href="/" className="mr-auto font-bold no-underline">
         a1ui
       </Link>
       <label className="sr-only" htmlFor="component-select">
