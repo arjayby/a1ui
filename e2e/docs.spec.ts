@@ -21,6 +21,30 @@ test("catalog opens component documentation in the agreed order", async ({ page 
   ]);
 });
 
+test("selected component navigation keeps its label visible", async ({ page }) => {
+  await page.goto("/components/section-rail");
+  const activeLink = page
+    .getByRole("navigation", { name: "Components" })
+    .getByRole("link", { name: "Section Rail" });
+
+  const colors = await activeLink.evaluate((element) => {
+    const linkStyles = getComputedStyle(element);
+    const pageStyles = getComputedStyle(document.body);
+
+    return {
+      background: linkStyles.backgroundColor,
+      color: linkStyles.color,
+      pageBackground: pageStyles.backgroundColor,
+      pageForeground: pageStyles.color,
+    };
+  });
+
+  expect(colors).toMatchObject({
+    background: colors.pageForeground,
+    color: colors.pageBackground,
+  });
+});
+
 test("search finds component documentation", async ({ page }) => {
   await page.goto("/");
   await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");

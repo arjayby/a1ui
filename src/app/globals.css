@@ -95,10 +95,6 @@ pre {
   font: inherit;
 }
 
-a {
-  color: inherit;
-}
-
 a:focus-visible,
 button:focus-visible,
 select:focus-visible {
