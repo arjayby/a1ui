@@ -162,4 +162,40 @@ describe("SectionRail", () => {
       expect(screen.getByRole("link", { name: "Details" })).toHaveAttribute("aria-current", "location"),
     );
   });
+
+  it("activates the last section when a scroll container reaches the bottom", async () => {
+    const scrollContainer = document.createElement("div");
+    const reactRoot = document.createElement("div");
+    scrollContainer.style.overflowY = "auto";
+    Object.defineProperty(scrollContainer, "clientHeight", { configurable: true, value: 200 });
+    Object.defineProperty(scrollContainer, "scrollHeight", { configurable: true, value: 600 });
+    Object.defineProperty(scrollContainer, "scrollTop", { configurable: true, value: 0, writable: true });
+    scrollContainer.getBoundingClientRect = vi.fn(() => ({
+      top: 100,
+      bottom: 300,
+      left: 0,
+      right: 100,
+      width: 100,
+      height: 200,
+      x: 0,
+      y: 100,
+      toJSON: () => ({}),
+    }));
+    scrollContainer.append(reactRoot);
+    document.body.append(scrollContainer);
+
+    addTrackedSection("start", 50, scrollContainer);
+    addTrackedSection("details", 150, scrollContainer);
+    addTrackedSection("finish", 250, scrollContainer);
+    render(<SectionRail sections={sections} />, { container: reactRoot });
+
+    expect(screen.getByRole("link", { name: "Details" })).toHaveAttribute("aria-current", "location");
+
+    scrollContainer.scrollTop = 400;
+    fireEvent.scroll(scrollContainer);
+
+    await waitFor(() =>
+      expect(screen.getByRole("link", { name: "Finish" })).toHaveAttribute("aria-current", "location"),
+    );
+  });
 });

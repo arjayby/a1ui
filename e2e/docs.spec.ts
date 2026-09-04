@@ -58,6 +58,9 @@ test("section rail demo is compact, scrollable, and has more markers", async ({ 
   await expect(rail.getByRole("link")).toHaveCount(7);
   expect(dimensions.clientHeight).toBeLessThanOrEqual(320);
   expect(dimensions.scrollHeight).toBeGreaterThan(dimensions.clientHeight);
+
+  await demo.evaluate((element) => element.scrollTo({ top: element.scrollHeight }));
+  await expect(rail.getByRole("link", { name: "Summary" })).toHaveAttribute("aria-current", "location");
 });
 
 test("search finds component documentation", async ({ page }) => {

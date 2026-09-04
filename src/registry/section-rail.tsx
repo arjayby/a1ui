@@ -27,6 +27,18 @@ function getScrollContainer(element: HTMLElement) {
   return window;
 }
 
+function isAtScrollEnd(scrollContainer: Window | HTMLElement) {
+  if (scrollContainer instanceof HTMLElement) {
+    return (
+      scrollContainer.scrollHeight > scrollContainer.clientHeight &&
+      scrollContainer.scrollTop + scrollContainer.clientHeight >= scrollContainer.scrollHeight - 1
+    );
+  }
+
+  const scrollHeight = Math.max(document.documentElement.scrollHeight, document.body.scrollHeight);
+  return scrollHeight > window.innerHeight && window.scrollY + window.innerHeight >= scrollHeight - 1;
+}
+
 export function SectionRail({
   sections,
   activeOffset = 0.36,
@@ -45,9 +57,10 @@ export function SectionRail({
 
   useEffect(() => {
     const nav = navRef.current;
-    const trackedSections = sections
-      .map(({ id }) => document.getElementById(id))
-      .filter((section): section is HTMLElement => section !== null);
+    const trackedSections = sections.flatMap(({ id }, index) => {
+      const element = document.getElementById(id);
+      return element ? [{ element, index }] : [];
+    });
 
     if (!nav || trackedSections.length === 0) return;
 
@@ -55,15 +68,20 @@ export function SectionRail({
     let frame = 0;
 
     const update = () => {
+      if (isAtScrollEnd(scrollContainer)) {
+        setActiveIndex(trackedSections[trackedSections.length - 1].index);
+        return;
+      }
+
       const offset = Math.min(1, Math.max(0, activeOffset));
       const marker =
         scrollContainer instanceof HTMLElement
           ? scrollContainer.getBoundingClientRect().top + scrollContainer.clientHeight * offset
           : window.innerHeight * offset;
-      let nextActiveIndex = 0;
+      let nextActiveIndex = trackedSections[0].index;
 
-      trackedSections.forEach((section, index) => {
-        if (section.getBoundingClientRect().top <= marker) nextActiveIndex = index;
+      trackedSections.forEach(({ element, index }) => {
+        if (element.getBoundingClientRect().top <= marker) nextActiveIndex = index;
       });
 
       setActiveIndex(nextActiveIndex);
