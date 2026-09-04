@@ -84,6 +84,16 @@ describe("SectionRail", () => {
     expect(screen.getByRole("list")).toHaveStyle({ gap: "0.5rem" });
   });
 
+  it("supports a short active marker without dimming its active color", () => {
+    const { rerender } = render(<SectionRail sections={sections} activeMarkerLength="short" />);
+    const activeMarker = screen.getByRole("link", { name: "Start" }).querySelector("[aria-hidden='true']");
+
+    expect(activeMarker).toHaveStyle({ width: "12px", opacity: "1" });
+
+    rerender(<SectionRail sections={sections} activeMarkerLength="long" />);
+    expect(activeMarker).toHaveStyle({ width: "20px", opacity: "1" });
+  });
+
   it("tapers nearby markers around the hovered or focused section", () => {
     const nearbySections = [
       { id: "one", label: "One" },
@@ -100,14 +110,14 @@ describe("SectionRail", () => {
     fireEvent.pointerEnter(links[2]);
     expect(markers[2]).toHaveStyle({ width: "24px", opacity: "1" });
     expect(markers[1]).toHaveStyle({ width: "20px", opacity: "0.8" });
-    expect(markers[0]).toHaveStyle({ width: "16px", opacity: "0.6" });
+    expect(markers[0]).toHaveStyle({ width: "16px", opacity: "1" });
     expect(markers[3]).toHaveStyle({ width: "20px", opacity: "0.8" });
     expect(markers[4]).toHaveStyle({ width: "16px", opacity: "0.6" });
 
     fireEvent.pointerLeave(screen.getByRole("list"));
     fireEvent.focus(links[1]);
     expect(markers[1]).toHaveStyle({ width: "24px", opacity: "1" });
-    expect(markers[0]).toHaveStyle({ width: "20px", opacity: "0.8" });
+    expect(markers[0]).toHaveStyle({ width: "20px", opacity: "1" });
   });
 
   it("tracks sections inside a scroll container", async () => {

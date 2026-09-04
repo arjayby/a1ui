@@ -10,6 +10,7 @@ export interface SectionRailItem {
 export interface SectionRailProps extends Omit<ComponentPropsWithoutRef<"nav">, "aria-label"> {
   sections: SectionRailItem[];
   activeOffset?: number;
+  activeMarkerLength?: "long" | "short";
   ariaLabel?: string;
   gap?: CSSProperties["gap"];
 }
@@ -29,12 +30,14 @@ function getScrollContainer(element: HTMLElement) {
 export function SectionRail({
   sections,
   activeOffset = 0.36,
+  activeMarkerLength = "long",
   ariaLabel = "Page sections",
   gap = 0,
   className,
   ...props
 }: SectionRailProps) {
   const navRef = useRef<HTMLElement>(null);
+  const activeMarkerWidth = activeMarkerLength === "long" ? 20 : 12;
   const [activeIndex, setActiveIndex] = useState(0);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
@@ -102,12 +105,12 @@ export function SectionRail({
         {sections.map(({ id, label }, index) => {
           const state = index < activeIndex ? "complete" : index === activeIndex ? "active" : "pending";
           const distance = highlightedIndex === null ? null : Math.abs(index - highlightedIndex);
-          let markerWidth = state === "active" ? 20 : 12;
+          let markerWidth = state === "active" ? activeMarkerWidth : 12;
           let markerOpacity = state === "active" ? 1 : state === "complete" ? 0.55 : 0.25;
 
           if (distance !== null) {
             markerWidth = Math.max(12, 24 - distance * 4);
-            markerOpacity = Math.max(0.25, 1 - distance * 0.2);
+            markerOpacity = state === "active" ? 1 : Math.max(0.25, 1 - distance * 0.2);
           }
 
           return (
