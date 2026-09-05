@@ -14,6 +14,7 @@ pnpm dlx shadcn@latest add http://localhost:3000/r/crypto-wallet.json
 pnpm dlx shadcn@latest add http://localhost:3000/r/multichain-swap.json
 pnpm dlx shadcn@latest add http://localhost:3000/r/select-menu.json
 pnpm dlx shadcn@latest add http://localhost:3000/r/text-scramble.json
+pnpm dlx shadcn@latest add http://localhost:3000/r/shape-flow.json
 ```
 
 The components install into `src/components/ui` and use React, TypeScript, and Tailwind CSS v4.

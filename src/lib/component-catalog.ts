@@ -32,6 +32,11 @@ export const components = [
     description: "A dropdown selector with icons, descriptions, and keyboard navigation.",
   },
   {
+    slug: "shape-flow",
+    title: "Shape Flow",
+    description: "Text that reflows around a draggable circle, powered by Pretext.",
+  },
+  {
     slug: "spiral-text",
     title: "Spiral Text",
     description: "Text set on a responsive spiral that tightens under pressure and ripples on release.",

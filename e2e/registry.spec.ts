@@ -5,6 +5,7 @@ for (const [name, exportedComponent] of [
   ["spiral-text", "SpiralText"],
   ["particle-menu", "ParticleMenu"],
   ["text-scramble", "TextScramble"],
+  ["shape-flow", "ShapeFlow"],
 ]) {
   test(`registry serves ${name} source`, async ({ request }) => {
     const response = await request.get(`/r/${name}.json`);

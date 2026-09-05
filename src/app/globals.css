@@ -298,6 +298,50 @@ pre {
   background: var(--background);
 }
 
+.shape-flow-demo {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  padding: clamp(1.25rem, 4vw, 3rem);
+}
+
+.shape-flow-demo-heading {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.shape-flow-demo-eyebrow {
+  color: var(--muted-foreground);
+  font-size: 0.625rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.shape-flow-demo-heading h3 {
+  margin: 0;
+  font-family: Georgia, serif;
+  font-size: clamp(2.5rem, 6vw, 4rem);
+  font-weight: 400;
+  letter-spacing: -0.05em;
+  line-height: 1;
+}
+
+.shape-flow-demo-footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.75rem;
+  border-top: 1px solid var(--border);
+  padding-top: 1rem;
+  color: var(--muted-foreground);
+  font-size: 0.625rem;
+}
+
+.shape-flow-preview {
+  padding: 1.5rem;
+}
+
 .arc-reel-artwork {
   position: absolute;
   inset: 0;

@@ -10,6 +10,7 @@ import { ParticleMenuDemo } from "@/components/particle-menu-demo";
 import { MultichainSwapDemo } from "@/components/multichain-swap-demo";
 import { TextScrambleDemo } from "@/components/text-scramble-demo";
 import { SelectMenuDemo } from "@/components/select-menu-demo";
+import { ShapeFlowDemo } from "@/components/shape-flow-demo";
 
 export function getMDXComponents(components?: MDXComponents) {
   return {
@@ -22,6 +23,7 @@ export function getMDXComponents(components?: MDXComponents) {
     ParticleMenuDemo,
     SectionRailDemo,
     SelectMenuDemo,
+    ShapeFlowDemo,
     SpiralTextDemo,
     TextScrambleDemo,
     Tab,

@@ -8,6 +8,7 @@
     "multichain-swap",
     "text-scramble",
     "select-menu",
-    "crypto-wallet"
+    "crypto-wallet",
+    "shape-flow"
   ]
 }

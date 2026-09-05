@@ -4,6 +4,14 @@
   "homepage": "http://localhost:3000",
   "items": [
     {
+      "name": "shape-flow",
+      "type": "registry:ui",
+      "title": "Shape Flow",
+      "description": "Text that reflows around a draggable circle, powered by Pretext.",
+      "dependencies": ["@chenglou/pretext@^0.0.8", "clsx"],
+      "files": [{ "path": "src/registry/shape-flow.tsx", "type": "registry:ui" }]
+    },
+    {
       "name": "crypto-wallet",
       "type": "registry:ui",
       "title": "Crypto Wallet",

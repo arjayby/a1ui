@@ -1,0 +1,57 @@
+---
+title: Shape Flow
+description: Text that reflows around a draggable circle, powered by Pretext.
+---
+
+## Demo
+
+<ShapeFlowDemo />
+
+## Installation
+
+<Installation name="shape-flow" />
+
+## Code
+
+<Tabs items={["Usage", "Source"]}>
+  <Tab value="Usage">
+
+```tsx
+import { ShapeFlow } from "@/components/ui/shape-flow";
+
+export function ShapeFlowExample() {
+  return (
+    <ShapeFlow
+      text="A page is a conversation between what is said and what is left open. Give the words a little room and they find their own rhythm. Move the circle and watch the paragraph find a new shape."
+      radius={64}
+      gap={14}
+      className="max-w-xl"
+    />
+  );
+}
+```
+
+  </Tab>
+  <Tab value="Source">
+    <ComponentSource name="shape-flow" />
+  </Tab>
+</Tabs>
+
+## API reference
+
+| Prop         | Type     | Default     | Purpose                                                                              |
+| ------------ | -------- | ----------- | ------------------------------------------------------------------------------------ |
+| `text`       | `string` | Required    | Plain text to wrap around the circle. Whitespace collapses as in a normal paragraph. |
+| `radius`     | `number` | `64`        | Circle radius in pixels. Shrinks to fit narrow containers.                           |
+| `gap`        | `number` | `14`        | Space between the circle and the text in pixels.                                     |
+| `height`     | `number` | `320`       | Minimum height and vertical drag area in pixels. Long text extends below it.         |
+| `fontSize`   | `number` | `18`        | Text size in pixels.                                                                 |
+| `lineHeight` | `number` | `28`        | Line height in pixels, with a minimum of `fontSize`.                                 |
+| `fontFamily` | `string` | `"Georgia"` | Named font family used for both measurement and rendering.                           |
+| `className`  | `string` | None        | Outer layout classes, such as `max-w-xl`.                                            |
+
+Drag with a mouse, pen, or touch. Focus the circle and use arrow keys to move it by 8 pixels, or hold Shift for 32-pixel steps. Home restores the starting position. The circle stays inside the drag area when the container resizes.
+
+The full paragraph renders on the server and remains available to screen readers. Once the font loads, the component uses [Pretext](https://github.com/chenglou/pretext) to measure the text once and reuse those measurements during dragging and resizing. If font measurement is unavailable, it keeps the ordinary paragraph. No automatic animation runs, including with reduced motion enabled.
+
+Use the typography props to keep measurement and rendering in sync. Supply a named font that your app loads, such as `Georgia` or `"Commit Mono"`, rather than `system-ui`. The interactive layout requires Canvas 2D, `Intl.Segmenter`, and `ResizeObserver`. This component lays out one plain-text paragraph from left to right; rich text and right-to-left paragraph flow are outside its scope.
