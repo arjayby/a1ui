@@ -3,15 +3,15 @@
 import useEmblaCarousel from "embla-carousel-react";
 import { useEffect, useId, useRef, useState, type CSSProperties, type ReactNode } from "react";
 
-export interface CinemaFilmItem {
+export interface ArcReelItem {
   id: string;
   name: string;
   logo?: ReactNode;
   artwork?: ReactNode;
 }
 
-export interface CinemaFilmProps {
-  items: CinemaFilmItem[];
+export interface ArcReelProps {
+  items: ArcReelItem[];
   initialIndex?: number;
   ariaLabel?: string;
   className?: string;
@@ -20,23 +20,17 @@ export interface CinemaFilmProps {
 
 const motionQuery = "(prefers-reduced-motion: reduce)";
 
-const filmTheme = {
-  "--film-background": "var(--background)",
-  "--film-frame": "var(--card, var(--background))",
-  "--film-image": "color-mix(in oklab, var(--background) 96%, var(--foreground))",
-  "--film-border": "var(--border)",
-  "--film-foreground": "var(--foreground)",
-  "--film-muted": "var(--muted-foreground)",
-  "--film-accent": "var(--foreground)",
+const arcReelTheme = {
+  "--arc-reel-background": "var(--background)",
+  "--arc-reel-frame": "var(--card, var(--background))",
+  "--arc-reel-image": "color-mix(in oklab, var(--background) 96%, var(--foreground))",
+  "--arc-reel-border": "var(--border)",
+  "--arc-reel-foreground": "var(--foreground)",
+  "--arc-reel-muted": "var(--muted-foreground)",
+  "--arc-reel-accent": "var(--foreground)",
 } as CSSProperties;
 
-export function CinemaFilm({
-  items,
-  initialIndex = 0,
-  ariaLabel = "Cinema film",
-  className,
-  style,
-}: CinemaFilmProps) {
+export function ArcReel({ items, initialIndex = 0, ariaLabel = "Arc Reel", className, style }: ArcReelProps) {
   const viewportId = useId();
   const [copies, setCopies] = useState(1);
   const copyCount = items.length > 1 ? copies : 1;
@@ -134,7 +128,7 @@ export function CinemaFilm({
     const measure = () => {
       const slides = api.slideNodes();
       engine = api.internalEngine();
-      frames = slides.map((slide) => slide.querySelector<HTMLElement>("[data-film-frame]"));
+      frames = slides.map((slide) => slide.querySelector<HTMLElement>("[data-arc-reel-frame]"));
       const spacing = slides.length > 1 ? slides[1].offsetLeft - slides[0].offsetLeft : 0;
       if (items.length > 1 && spacing > 0) {
         // Embla needs more than a viewport of cards to loop. Repeat short lists
@@ -205,25 +199,25 @@ export function CinemaFilm({
       aria-label={ariaLabel}
       aria-roledescription="carousel"
       className={[
-        "[container-type:inline-size] relative isolate w-full overflow-hidden bg-[var(--film-background)] text-[var(--film-foreground)]",
+        "[container-type:inline-size] relative isolate w-full overflow-hidden bg-[var(--arc-reel-background)] text-[var(--arc-reel-foreground)]",
         className,
       ]
         .filter(Boolean)
         .join(" ")}
-      style={{ ...filmTheme, ...style }}
+      style={{ ...arcReelTheme, ...style }}
     >
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 [background-image:radial-gradient(var(--film-muted)_0.65px,transparent_0.65px)] [background-size:16px_16px] opacity-20"
+        className="pointer-events-none absolute inset-0 [background-image:radial-gradient(var(--arc-reel-muted)_0.65px,transparent_0.65px)] [background-size:16px_16px] opacity-20"
       />
 
       <div
         ref={viewportRef}
         id={viewportId}
         role="group"
-        aria-label="Film cards. Use the left and right arrow keys to browse."
+        aria-label="Reel cards. Use the left and right arrow keys to browse."
         tabIndex={0}
-        className="relative cursor-grab touch-pan-y overflow-hidden px-0 py-[var(--film-stage-padding,3.75rem)] outline-none select-none focus-visible:ring-1 focus-visible:ring-[var(--film-accent)] focus-visible:ring-inset active:cursor-grabbing"
+        className="relative cursor-grab touch-pan-y overflow-hidden px-0 py-[var(--arc-reel-stage-padding,3.75rem)] outline-none select-none focus-visible:ring-1 focus-visible:ring-[var(--arc-reel-accent)] focus-visible:ring-inset active:cursor-grabbing"
         onKeyDown={(event) => {
           if (event.target !== event.currentTarget || !api) return;
           if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
@@ -258,28 +252,28 @@ export function CinemaFilm({
                 aria-current={position === slideIndex ? "true" : undefined}
                 aria-hidden={duplicate ? true : undefined}
                 inert={duplicate ? true : undefined}
-                className="mr-[var(--film-gap,1.75rem)] min-w-0 flex-[0_0_var(--film-card-width,clamp(10rem,26cqw,15.5rem))]"
+                className="mr-[var(--arc-reel-gap,1.75rem)] min-w-0 flex-[0_0_var(--arc-reel-card-width,clamp(10rem,26cqw,15.5rem))]"
               >
                 <div
-                  data-film-frame=""
-                  className="relative rounded-[var(--radius,0.25rem)] border border-[var(--film-border)] bg-[var(--film-frame)] p-2 will-change-transform backface-hidden"
+                  data-arc-reel-frame=""
+                  className="relative rounded-[var(--radius,0.25rem)] border border-[var(--arc-reel-border)] bg-[var(--arc-reel-frame)] p-2 will-change-transform backface-hidden"
                 >
                   <div aria-hidden="true" className="flex h-7 items-start justify-between px-0.5 pt-0.5">
-                    <span className="font-mono text-[0.5625rem] leading-none text-[var(--film-muted)]">
+                    <span className="font-mono text-[0.5625rem] leading-none text-[var(--arc-reel-muted)]">
                       {String(index + 1).padStart(2, "0")}
                     </span>
-                    <span className="flex gap-0.5 pt-1 text-[var(--film-muted)]">
+                    <span className="flex gap-0.5 pt-1 text-[var(--arc-reel-muted)]">
                       <span className="size-0.5 rounded-full bg-current" />
                       <span className="size-0.5 rounded-full bg-current" />
                       <span className="size-0.5 rounded-full bg-current" />
                     </span>
                   </div>
                   <div
-                    className="relative grid aspect-square place-items-center overflow-hidden rounded-[1px] border border-[var(--film-border)] bg-[var(--film-image)]"
+                    className="relative grid aspect-square place-items-center overflow-hidden rounded-[1px] border border-[var(--arc-reel-border)] bg-[var(--arc-reel-image)]"
                     onDragStart={(event) => event.preventDefault()}
                   >
                     {item.artwork ? <div className="absolute inset-0 size-full">{item.artwork}</div> : null}
-                    <span className="relative flex max-w-full items-center justify-center gap-2 px-3 text-center font-mono text-[length:var(--film-name-size,clamp(0.6875rem,1.5cqw,0.8125rem))] leading-tight font-bold tracking-normal uppercase">
+                    <span className="relative flex max-w-full items-center justify-center gap-2 px-3 text-center font-mono text-[length:var(--arc-reel-name-size,clamp(0.6875rem,1.5cqw,0.8125rem))] leading-tight font-bold tracking-normal uppercase">
                       {item.logo ?? item.name}
                     </span>
                   </div>
@@ -290,14 +284,14 @@ export function CinemaFilm({
         </div>
       </div>
 
-      <div className="relative flex items-center justify-center gap-5 pb-[var(--film-controls-padding,1.75rem)]">
+      <div className="relative flex items-center justify-center gap-5 pb-[var(--arc-reel-controls-padding,1.75rem)]">
         <button
           type="button"
           aria-label="Previous provider"
           aria-controls={viewportId}
           disabled={items.length < 2}
           onClick={() => step("previous")}
-          className="grid size-11 shrink-0 cursor-pointer place-items-center rounded-sm transition-colors hover:bg-[var(--film-image)] focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-[var(--film-accent)] disabled:cursor-default disabled:opacity-25 motion-reduce:transition-none"
+          className="grid size-11 shrink-0 cursor-pointer place-items-center rounded-sm transition-colors hover:bg-[var(--arc-reel-image)] focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-[var(--arc-reel-accent)] disabled:cursor-default disabled:opacity-25 motion-reduce:transition-none"
         >
           <svg
             aria-hidden="true"
@@ -311,11 +305,11 @@ export function CinemaFilm({
           </svg>
         </button>
 
-        <div className="relative flex h-11 w-36 items-center rounded-sm has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-[var(--film-accent)]">
-          <span aria-hidden="true" className="h-px w-full bg-[var(--film-border)]">
+        <div className="relative flex h-11 w-36 items-center rounded-sm has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-[var(--arc-reel-accent)]">
+          <span aria-hidden="true" className="h-px w-full bg-[var(--arc-reel-border)]">
             <span
               ref={markerRef}
-              className="block h-px w-1/5 bg-[var(--film-accent)] will-change-transform"
+              className="block h-px w-1/5 bg-[var(--arc-reel-accent)] will-change-transform"
             />
           </span>
           <input
@@ -340,7 +334,7 @@ export function CinemaFilm({
           aria-controls={viewportId}
           disabled={items.length < 2}
           onClick={() => step("next")}
-          className="grid size-11 shrink-0 cursor-pointer place-items-center rounded-sm transition-colors hover:bg-[var(--film-image)] focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-[var(--film-accent)] disabled:cursor-default disabled:opacity-25 motion-reduce:transition-none"
+          className="grid size-11 shrink-0 cursor-pointer place-items-center rounded-sm transition-colors hover:bg-[var(--arc-reel-image)] focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-[var(--arc-reel-accent)] disabled:cursor-default disabled:opacity-25 motion-reduce:transition-none"
         >
           <svg
             aria-hidden="true"

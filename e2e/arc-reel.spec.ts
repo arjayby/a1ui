@@ -11,14 +11,16 @@ async function expectCentered(viewport: Locator, name: string) {
 }
 
 test.beforeEach(async ({ page }) => {
-  await page.goto("/components/cinema-film");
+  await page.goto("/components/arc-reel");
   await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
+  await expect(page).toHaveTitle("Arc Reel | a1ui");
+  await expect(page.getByRole("heading", { name: "Arc Reel", exact: true })).toBeVisible();
   await expect(page.getByRole("slider", { name: "Choose provider" })).toHaveValue("3");
 });
 
 test("dragging updates the cards and marker together in both directions", async ({ page }) => {
-  const carousel = page.getByRole("region", { name: "AI provider cinema film" });
-  const viewport = carousel.getByRole("group", { name: "Film cards.", exact: false });
+  const carousel = page.getByRole("region", { name: "AI provider arc reel" });
+  const viewport = carousel.getByRole("group", { name: "Reel cards.", exact: false });
   const slider = carousel.getByRole("slider");
   const marker = slider.locator("..").locator("span span");
   const track = viewport.locator(":scope > div");
@@ -52,8 +54,8 @@ test("dragging updates the cards and marker together in both directions", async 
 });
 
 test("arrows, keyboard, and scrubber stay synchronized across the loop seam", async ({ page }) => {
-  const carousel = page.getByRole("region", { name: "AI provider cinema film" });
-  const viewport = carousel.getByRole("group", { name: "Film cards.", exact: false });
+  const carousel = page.getByRole("region", { name: "AI provider arc reel" });
+  const viewport = carousel.getByRole("group", { name: "Reel cards.", exact: false });
   const slider = carousel.getByRole("slider");
   const previous = carousel.getByRole("button", { name: "Previous provider" });
   const next = carousel.getByRole("button", { name: "Next provider" });
@@ -95,12 +97,12 @@ test("arrows, keyboard, and scrubber stay synchronized across the loop seam", as
   await expect(slider).toHaveValue("4");
   await expect(carousel.locator('[aria-current="true"]')).toHaveAttribute("aria-label", "Mistral AI, 5 of 9");
   await expect(carousel.locator("img")).toHaveCount(9);
-  await expect(carousel.locator("[data-film-frame]")).toHaveCount(9);
+  await expect(carousel.locator("[data-arc-reel-frame]")).toHaveCount(9);
 });
 
 test("reduced motion jumps directly to the requested card", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
-  const carousel = page.getByRole("region", { name: "AI provider cinema film" });
+  const carousel = page.getByRole("region", { name: "AI provider arc reel" });
   const slider = carousel.getByRole("slider");
   await carousel.getByRole("button", { name: "Next provider" }).click();
   await expect(slider).toHaveValue("4");
@@ -110,8 +112,8 @@ test("reduced motion jumps directly to the requested card", async ({ page }) => 
 });
 
 test("dragging crosses the seam in either direction without hitting an endpoint", async ({ page }) => {
-  const carousel = page.getByRole("region", { name: "AI provider cinema film" });
-  const viewport = carousel.getByRole("group", { name: "Film cards.", exact: false });
+  const carousel = page.getByRole("region", { name: "AI provider arc reel" });
+  const viewport = carousel.getByRole("group", { name: "Reel cards.", exact: false });
   const slider = carousel.getByRole("slider");
   const bounds = (await viewport.boundingBox())!;
   const center = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 };
@@ -127,7 +129,7 @@ test("dragging crosses the seam in either direction without hitting an endpoint"
     await page.mouse.down();
     await page.mouse.move(center.x + direction * spacing * 1.05, center.y, { steps: 24 });
     await expect(slider).toHaveValue(direction === -1 ? "0" : "8");
-    await expect(carousel.locator('[aria-current="true"] [data-film-frame]')).toBeVisible();
+    await expect(carousel.locator('[aria-current="true"] [data-arc-reel-frame]')).toBeVisible();
     await expect(carousel.getByRole("button", { name: "Previous provider" })).toBeEnabled();
     await expect(carousel.getByRole("button", { name: "Next provider" })).toBeEnabled();
     await page.mouse.up();
@@ -135,14 +137,14 @@ test("dragging crosses the seam in either direction without hitting an endpoint"
 });
 
 test("the projected card moves smoothly when the looping track resets", async ({ page }) => {
-  const carousel = page.getByRole("region", { name: "AI provider cinema film" });
-  const viewport = carousel.getByRole("group", { name: "Film cards.", exact: false });
+  const carousel = page.getByRole("region", { name: "AI provider arc reel" });
+  const viewport = carousel.getByRole("group", { name: "Reel cards.", exact: false });
   await viewport.press("End");
   await expectCentered(viewport, "xAI, 9 of 9");
   await carousel.getByRole("button", { name: "Next provider" }).click();
   const positions = await carousel
     .getByRole("group", { name: "OpenAI, 1 of 9", exact: true })
-    .locator("[data-film-frame]")
+    .locator("[data-arc-reel-frame]")
     .evaluate(
       (frame) =>
         new Promise<number[]>((resolve) => {
@@ -167,8 +169,8 @@ test("the projected card moves smoothly when the looping track resets", async ({
 test("scrubbing animates through intermediate positions and preserves repeated key input", async ({
   page,
 }) => {
-  const carousel = page.getByRole("region", { name: "AI provider cinema film" });
-  const viewport = carousel.getByRole("group", { name: "Film cards.", exact: false });
+  const carousel = page.getByRole("region", { name: "AI provider arc reel" });
+  const viewport = carousel.getByRole("group", { name: "Reel cards.", exact: false });
   const track = viewport.locator(":scope > div");
   const slider = carousel.getByRole("slider");
   const scrubber = (await slider.boundingBox())!;
@@ -214,10 +216,10 @@ test("scrubbing animates through intermediate positions and preserves repeated k
 test("touch swipes work on narrow screens without overflowing the page", async ({ browser }) => {
   const context = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true });
   const page = await context.newPage();
-  await page.goto("/components/cinema-film");
+  await page.goto("/components/arc-reel");
   const slider = page.getByRole("slider", { name: "Choose provider" });
   await expect(slider).toHaveValue("3");
-  const viewport = page.getByRole("group", { name: "Film cards.", exact: false });
+  const viewport = page.getByRole("group", { name: "Reel cards.", exact: false });
   await viewport.scrollIntoViewIfNeeded();
   const bounds = (await viewport.boundingBox())!;
   const session = await context.newCDPSession(page);
@@ -241,9 +243,12 @@ test("touch swipes work on narrow screens without overflowing the page", async (
 });
 
 test("the registry includes installable source and its carousel dependency", async ({ request }) => {
-  const response = await request.get("/r/cinema-film.json");
+  const response = await request.get("/r/arc-reel.json");
   expect(response.ok()).toBeTruthy();
   const item = await response.json();
+  expect(item.name).toBe("arc-reel");
+  expect(item.title).toBe("Arc Reel");
+  expect(item.files[0].path).toBe("src/registry/arc-reel.tsx");
   expect(item.dependencies).toContain("embla-carousel-react@^8.6.0");
-  expect(item.files[0].content).toContain("export function CinemaFilm");
+  expect(item.files[0].content).toContain("export function ArcReel");
 });

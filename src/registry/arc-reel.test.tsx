@@ -1,7 +1,7 @@
 import { act, cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { CinemaFilm, type CinemaFilmProps } from "./cinema-film";
+import { ArcReel, type ArcReelProps } from "./arc-reel";
 
 const items = [
   { id: "openai", name: "OpenAI" },
@@ -49,18 +49,18 @@ function advance(milliseconds = 4000) {
   act(() => vi.advanceTimersByTime(milliseconds));
 }
 
-function renderFilm(props: Partial<CinemaFilmProps> = {}) {
-  const result = render(<CinemaFilm items={items} {...props} />);
+function renderReel(props: Partial<ArcReelProps> = {}) {
+  const result = render(<ArcReel items={items} {...props} />);
   advance(32);
   return result;
 }
 
 function getViewport() {
-  return screen.getByRole("group", { name: /Film cards\. Use/ });
+  return screen.getByRole("group", { name: /Reel cards\. Use/ });
 }
 
 function getFrame(name: string) {
-  return screen.getByRole("group", { name }).querySelector<HTMLElement>("[data-film-frame]")!;
+  return screen.getByRole("group", { name }).querySelector<HTMLElement>("[data-arc-reel-frame]")!;
 }
 
 function projectedDepth(frame: HTMLElement) {
@@ -75,7 +75,7 @@ function yaw(frame: HTMLElement) {
   return Number(rotation[1]);
 }
 
-describe("CinemaFilm", () => {
+describe("ArcReel", () => {
   let viewportWidth: number;
   let layoutStyles: HTMLStyleElement;
   let preference: EventTarget & { matches: boolean; media: string };
@@ -118,14 +118,14 @@ describe("CinemaFilm", () => {
   });
 
   it("renders nothing for an empty list", () => {
-    const { container } = renderFilm({ items: [] });
+    const { container } = renderReel({ items: [] });
     expect(container).toBeEmptyDOMElement();
     expect(screen.queryByRole("slider")).not.toBeInTheDocument();
     expect(vi.getTimerCount()).toBe(0);
   });
 
   it("centers a single card with all navigation disabled", () => {
-    renderFilm({ items: items.slice(0, 1), initialIndex: 99 });
+    renderReel({ items: items.slice(0, 1), initialIndex: 99 });
     expect(screen.getByRole("status")).toHaveTextContent("OpenAI, 1 of 1");
     expect(screen.getByRole("slider")).toBeDisabled();
     expect(screen.getByRole("button", { name: "Previous provider" })).toBeDisabled();
@@ -142,7 +142,7 @@ describe("CinemaFilm", () => {
     [2.9, 2],
     [Number.NaN, 0],
   ])("clamps initialIndex %s to card %s", (initialIndex, index) => {
-    renderFilm({ initialIndex });
+    renderReel({ initialIndex });
     expect(screen.getByRole("slider")).toHaveValue(String(index));
     expect(screen.getByRole("status")).toHaveTextContent(`${items[index].name}, ${index + 1} of 9`);
     expect(screen.getByRole("group", { name: `${items[index].name}, ${index + 1} of 9` })).toHaveAttribute(
@@ -162,8 +162,8 @@ describe("CinemaFilm", () => {
     ];
     render(
       <>
-        <CinemaFilm items={customItems} ariaLabel="Custom providers" />
-        <CinemaFilm items={items} ariaLabel="All providers" />
+        <ArcReel items={customItems} ariaLabel="Custom providers" />
+        <ArcReel items={items} ariaLabel="All providers" />
       </>,
     );
     advance(32);
@@ -183,7 +183,7 @@ describe("CinemaFilm", () => {
   });
 
   it("wraps side cards toward the viewer and restores hidden cards as they reach the front", () => {
-    renderFilm({ initialIndex: 4 });
+    renderReel({ initialIndex: 4 });
     const left = getFrame("ElevenLabs, 4 of 9");
     const center = getFrame("Mistral AI, 5 of 9");
     const right = getFrame("DeepSeek, 6 of 9");
@@ -205,7 +205,7 @@ describe("CinemaFilm", () => {
   });
 
   it("keeps arrow and keyboard navigation synchronized with the active card", () => {
-    renderFilm();
+    renderReel();
     fireEvent.click(screen.getByRole("button", { name: "Next provider" }));
     advance();
     expect(screen.getByRole("slider")).toHaveValue("1");
@@ -222,7 +222,7 @@ describe("CinemaFilm", () => {
   });
 
   it.each(["Next provider", "Previous provider"])("loops through multiple laps using %s", (buttonName) => {
-    renderFilm();
+    renderReel();
     const direction = buttonName === "Next provider" ? 1 : -1;
     const button = screen.getByRole("button", { name: buttonName });
     for (let step = 1; step <= items.length * 2 + 1; step += 1) {
@@ -240,7 +240,7 @@ describe("CinemaFilm", () => {
   });
 
   it("keeps the inward projection continuous across the last-to-first seam", () => {
-    renderFilm({ initialIndex: 8 });
+    renderReel({ initialIndex: 8 });
     const first = getFrame("OpenAI, 1 of 9");
     const last = getFrame("xAI, 9 of 9");
     expect(first).toBeVisible();
@@ -261,7 +261,7 @@ describe("CinemaFilm", () => {
   });
 
   it("repeats short lists to fill the viewport while exposing each provider only once", () => {
-    renderFilm({ items: items.slice(0, 2) });
+    renderReel({ items: items.slice(0, 2) });
     expect(getViewport().querySelectorAll('[aria-roledescription="slide"]')).toHaveLength(6);
     expect(screen.getAllByRole("group", { name: /, [12] of 2$/ })).toHaveLength(2);
     expect(getViewport().querySelectorAll('[aria-hidden="true"][inert]')).toHaveLength(4);
@@ -279,7 +279,7 @@ describe("CinemaFilm", () => {
   });
 
   it("adds and removes looping copies on resize without changing the selected provider", () => {
-    renderFilm({ initialIndex: 8 });
+    renderReel({ initialIndex: 8 });
     act(() => {
       viewportWidth = 2400;
       [...ResizeObserverStub.instances].forEach((observer) => observer.notify());
@@ -301,7 +301,7 @@ describe("CinemaFilm", () => {
   });
 
   it("does not intercept keyboard events from content inside a card", () => {
-    renderFilm({ items: [{ ...items[0], artwork: <button>Artwork action</button> }, items[1]] });
+    renderReel({ items: [{ ...items[0], artwork: <button>Artwork action</button> }, items[1]] });
     const action = screen.getByRole("button", { name: "Artwork action" });
     expect(fireEvent.keyDown(action, { key: "ArrowRight" })).toBe(true);
     expect(fireEvent.keyDown(getViewport(), { key: "Tab" })).toBe(true);
@@ -310,7 +310,7 @@ describe("CinemaFilm", () => {
   });
 
   it("preserves scrubber intent during easing, then lets a drag interrupt it", () => {
-    renderFilm({ initialIndex: 2 });
+    renderReel({ initialIndex: 2 });
     const slider = screen.getByRole("slider");
     const track = getViewport().firstElementChild as HTMLElement;
     const original = track.style.transform;
@@ -333,7 +333,7 @@ describe("CinemaFilm", () => {
   });
 
   it("recomputes the projection after a resize without changing the active provider", () => {
-    renderFilm({ initialIndex: 4 });
+    renderReel({ initialIndex: 4 });
     const left = getFrame("ElevenLabs, 4 of 9");
     const original = left.style.transform;
     act(() => {
@@ -347,24 +347,24 @@ describe("CinemaFilm", () => {
   });
 
   it("handles the item list shrinking, becoming empty, and being populated again", async () => {
-    const { rerender } = renderFilm({ initialIndex: 4 });
+    const { rerender } = renderReel({ initialIndex: 4 });
     fireEvent.change(screen.getByRole("slider"), { target: { value: "8" } });
     advance(96);
-    await act(async () => rerender(<CinemaFilm items={items.slice(0, 1)} initialIndex={4} />));
+    await act(async () => rerender(<ArcReel items={items.slice(0, 1)} initialIndex={4} />));
     advance();
     expect(screen.getByRole("slider")).toBeDisabled();
     expect(screen.getByRole("status")).toHaveTextContent("OpenAI, 1 of 1");
 
-    rerender(<CinemaFilm items={[]} />);
+    rerender(<ArcReel items={[]} />);
     expect(screen.queryByRole("region")).not.toBeInTheDocument();
-    rerender(<CinemaFilm items={items} initialIndex={2} />);
+    rerender(<ArcReel items={items} initialIndex={2} />);
     advance(32);
     expect(screen.getByRole("status")).toHaveTextContent("Google, 3 of 9");
     expect(screen.getByRole("slider")).toBeEnabled();
   });
 
   it("jumps directly for reduced motion and cancels ongoing easing when the preference changes", () => {
-    renderFilm();
+    renderReel();
     fireEvent.click(screen.getByRole("button", { name: "Next provider" }));
     advance(96);
     act(() => {
@@ -383,7 +383,7 @@ describe("CinemaFilm", () => {
   });
 
   it("disconnects observers and cancels animation when unmounted during a scroll", () => {
-    const { unmount } = renderFilm();
+    const { unmount } = renderReel();
     fireEvent.click(screen.getByRole("button", { name: "Next provider" }));
     advance(48);
     expect(vi.getTimerCount()).toBeGreaterThan(0);

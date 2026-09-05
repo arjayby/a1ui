@@ -15,9 +15,9 @@ export const components = [
     description: "Grainy symbols that scatter around your pointer and spring back into place.",
   },
   {
-    slug: "cinema-film",
-    title: "Cinema Film",
-    description: "A curved filmstrip with draggable provider cards and synchronized scroll controls.",
+    slug: "arc-reel",
+    title: "Arc Reel",
+    description: "An infinitely looping reel with curved provider cards and synchronized scroll controls.",
   },
 ] as const;
 

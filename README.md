@@ -9,7 +9,7 @@ With the documentation site running locally:
 ```bash
 pnpm dlx shadcn@latest add http://localhost:3000/r/section-rail.json
 pnpm dlx shadcn@latest add http://localhost:3000/r/spiral-text.json
-pnpm dlx shadcn@latest add http://localhost:3000/r/cinema-film.json
+pnpm dlx shadcn@latest add http://localhost:3000/r/arc-reel.json
 ```
 
 The components install into `src/components/ui` and use React, TypeScript, and Tailwind CSS v4.

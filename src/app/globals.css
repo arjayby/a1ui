@@ -288,19 +288,19 @@ pre {
   background: var(--background);
 }
 
-.cinema-film-artwork {
+.arc-reel-artwork {
   position: absolute;
   inset: 0;
   pointer-events: none;
 }
 
-.cinema-film-artwork::after {
+.arc-reel-artwork::after {
   position: absolute;
   inset: 0;
   background: radial-gradient(
     ellipse at center,
-    color-mix(in oklab, var(--film-background) 88%, transparent) 0%,
-    color-mix(in oklab, var(--film-background) 60%, transparent) 24%,
+    color-mix(in oklab, var(--arc-reel-background) 88%, transparent) 0%,
+    color-mix(in oklab, var(--arc-reel-background) 60%, transparent) 24%,
     transparent 72%
   );
   content: "";

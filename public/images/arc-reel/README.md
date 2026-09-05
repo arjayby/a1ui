@@ -1,4 +1,4 @@
-# Cinema film artwork
+# Arc Reel artwork
 
 Generated with the built-in image generation tool. The nine images are exported as 768 × 768 WebP files at quality 88. Each provider card uses its own image.
 
@@ -20,7 +20,7 @@ Asset: [city.webp](./city.webp)
 
 ```text
 Use case: stylized-concept.
-Asset type: square photographic background for a small cinema film card in a minimal design component library.
+Asset type: square photographic background for a small arc reel card in a minimal design component library.
 Style/medium: art-directed analog black-and-white editorial photograph, soft fine 35mm film grain, matte silver-gelatin print, gently faded shadows, realistic material details, restrained and quiet.
 Color palette: extremely low saturation, almost monochrome light limestone gray, warm ivory, ash, graphite, charcoal. Match a pale-gray interface (#f4f5f5 approximately) with dark charcoal typography and subtle warm gray borders. No bright colors, no blue/purple neon, no strong sepia.
 Composition: full-bleed square image, strong recognizable subject even when displayed at 220px. Center must remain visually calm with soft light midtones for an HTML provider name later placed exactly in the center. Keep visible photographic detail around that area, no blank white box. Soft overcast or diffused studio light.
@@ -34,7 +34,7 @@ Asset: [railway.webp](./railway.webp)
 
 ```text
 Use case: stylized-concept.
-Asset type: square photographic background for a small cinema film card in a minimal design component library.
+Asset type: square photographic background for a small arc reel card in a minimal design component library.
 Style/medium: art-directed analog black-and-white editorial photograph, soft fine 35mm film grain, matte silver-gelatin print, gently faded shadows, realistic material details, restrained and quiet.
 Color palette: extremely low saturation, almost monochrome light limestone gray, warm ivory, ash, graphite, charcoal. Match a pale-gray interface (#f4f5f5 approximately) with dark charcoal typography and subtle warm gray borders. No bright colors, no blue/purple neon, no strong sepia.
 Composition: full-bleed square image, strong recognizable subject even when displayed at 220px. Center must remain visually calm with soft light midtones for an HTML provider name later placed exactly in the center. Keep visible photographic detail around that area, no blank white box. Soft overcast or diffused studio light.
@@ -48,7 +48,7 @@ Asset: [porsche-garage.webp](./porsche-garage.webp)
 
 ```text
 Use case: stylized-concept.
-Asset type: square photographic background for a small cinema film card in a minimal design component library.
+Asset type: square photographic background for a small arc reel card in a minimal design component library.
 Style/medium: art-directed analog black-and-white editorial photograph, soft fine 35mm film grain, matte silver-gelatin print, gently faded shadows, realistic material details, restrained and quiet.
 Color palette: extremely low saturation, almost monochrome light limestone gray, warm ivory, ash, graphite, charcoal. Match a pale-gray interface (#f4f5f5 approximately) with dark charcoal typography and subtle warm gray borders. No bright colors, no blue/purple neon, no strong sepia.
 Composition: full-bleed square image, strong recognizable subject even when displayed at 220px. Center must remain visually calm with soft light midtones for an HTML provider name later placed exactly in the center. Keep visible photographic detail around that area, no blank white box. Soft overcast or diffused studio light.
@@ -62,7 +62,7 @@ Asset: [sound-wave.webp](./sound-wave.webp)
 
 ```text
 Use case: stylized-concept.
-Asset type: square photographic background for a small cinema film card in a minimal design component library.
+Asset type: square photographic background for a small arc reel card in a minimal design component library.
 Style/medium: art-directed analog black-and-white editorial photograph, soft fine 35mm film grain, matte silver-gelatin print, gently faded shadows, realistic material details, restrained and quiet.
 Color palette: extremely low saturation, almost monochrome light limestone gray, warm ivory, ash, graphite, charcoal. Match a pale-gray interface (#f4f5f5 approximately) with dark charcoal typography and subtle warm gray borders. No bright colors, no blue/purple neon, no strong sepia.
 Composition: full-bleed square image, strong recognizable subject even when displayed at 220px. Center must remain visually calm with soft light midtones for an HTML provider name later placed exactly in the center. Keep visible photographic detail around that area, no blank white box. Soft overcast or diffused studio light.
@@ -76,7 +76,7 @@ Asset: [astral.webp](./astral.webp)
 
 ```text
 Use case: stylized-concept.
-Asset type: square photographic background for a small cinema film card in a minimal design component library.
+Asset type: square photographic background for a small arc reel card in a minimal design component library.
 Style/medium: art-directed analog black-and-white editorial photograph, soft fine 35mm film grain, matte silver-gelatin print, gently faded shadows, realistic material details, restrained and quiet.
 Color palette: extremely low saturation, almost monochrome light limestone gray, warm ivory, ash, graphite, charcoal. Match a pale-gray interface (#f4f5f5 approximately) with dark charcoal typography and subtle warm gray borders. No bright colors, no blue/purple neon, no strong sepia.
 Composition: full-bleed square image, strong recognizable subject even when displayed at 220px. Center must remain visually calm with soft light midtones for an HTML provider name later placed exactly in the center. Keep visible photographic detail around that area, no blank white box. Soft overcast or diffused studio light.
@@ -90,7 +90,7 @@ Asset: [deep-ocean.webp](./deep-ocean.webp)
 
 ```text
 Use case: stylized-concept.
-Asset type: square photographic background for a small cinema film card in a minimal design component library.
+Asset type: square photographic background for a small arc reel card in a minimal design component library.
 Style/medium: art-directed analog black-and-white editorial photograph, soft fine 35mm film grain, matte silver-gelatin print, gently faded shadows, realistic material details, restrained and quiet.
 Color palette: extremely low saturation, almost monochrome light limestone gray, warm ivory, ash, graphite, charcoal. Match a pale-gray interface (#f4f5f5 approximately) with dark charcoal typography and subtle warm gray borders. No bright colors, no blue/purple neon, no strong sepia.
 Composition: full-bleed square image, strong recognizable subject even when displayed at 220px. Center must remain visually calm with soft light midtones for an HTML provider name later placed exactly in the center. Keep visible photographic detail around that area, no blank white box. Soft overcast or diffused studio light.
@@ -104,7 +104,7 @@ Asset: [airport-runway.webp](./airport-runway.webp)
 
 ```text
 Use case: stylized-concept.
-Asset type: square photographic background for a small cinema film card in a minimal design component library.
+Asset type: square photographic background for a small arc reel card in a minimal design component library.
 Style/medium: art-directed analog black-and-white editorial photograph, soft fine 35mm film grain, matte silver-gelatin print, gently faded shadows, realistic material details, restrained and quiet.
 Color palette: extremely low saturation, almost monochrome light limestone gray, warm ivory, ash, graphite, charcoal. Match a pale-gray interface (#f4f5f5 approximately) with dark charcoal typography and subtle warm gray borders. No bright colors, no blue/purple neon, no strong sepia.
 Composition: full-bleed square image, strong recognizable subject even when displayed at 220px. Center must remain visually calm with soft light midtones for an HTML provider name later placed exactly in the center. Keep visible photographic detail around that area, no blank white box. Soft overcast or diffused studio light.
@@ -118,7 +118,7 @@ Asset: [library.webp](./library.webp)
 
 ```text
 Use case: stylized-concept.
-Asset type: square photographic background for a small cinema film card in a minimal design component library.
+Asset type: square photographic background for a small arc reel card in a minimal design component library.
 Style/medium: art-directed analog black-and-white editorial photograph, soft fine 35mm film grain, matte silver-gelatin print, gently faded shadows, realistic material details, restrained and quiet.
 Color palette: extremely low saturation, almost monochrome light limestone gray, warm ivory, ash, graphite, charcoal. Match a pale-gray interface (#f4f5f5 approximately) with dark charcoal typography and subtle warm gray borders. No bright colors, no blue/purple neon, no strong sepia.
 Composition: full-bleed square image, strong recognizable subject even when displayed at 220px. Center must remain visually calm with soft light midtones for an HTML provider name later placed exactly in the center. Keep visible photographic detail around that area, no blank white box. Soft overcast or diffused studio light.
@@ -132,7 +132,7 @@ Asset: [radio-telescope.webp](./radio-telescope.webp)
 
 ```text
 Use case: stylized-concept.
-Asset type: square photographic background for a small cinema film card in a minimal design component library.
+Asset type: square photographic background for a small arc reel card in a minimal design component library.
 Style/medium: art-directed analog black-and-white editorial photograph, soft fine 35mm film grain, matte silver-gelatin print, gently faded shadows, realistic material details, restrained and quiet.
 Color palette: extremely low saturation, almost monochrome light limestone gray, warm ivory, ash, graphite, charcoal. Match a pale-gray interface (#f4f5f5 approximately) with dark charcoal typography and subtle warm gray borders. No bright colors, no blue/purple neon, no strong sepia.
 Composition: full-bleed square image, strong recognizable subject even when displayed at 220px. Center must remain visually calm with soft light midtones for an HTML provider name later placed exactly in the center. Keep visible photographic detail around that area, no blank white box. Soft overcast or diffused studio light.

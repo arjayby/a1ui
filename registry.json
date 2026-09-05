@@ -40,14 +40,14 @@
       ]
     },
     {
-      "name": "cinema-film",
+      "name": "arc-reel",
       "type": "registry:ui",
-      "title": "Cinema Film",
-      "description": "A curved filmstrip with draggable provider cards and synchronized scroll controls.",
+      "title": "Arc Reel",
+      "description": "An infinitely looping reel with curved provider cards and synchronized scroll controls.",
       "dependencies": ["embla-carousel-react@^8.6.0"],
       "files": [
         {
-          "path": "src/registry/cinema-film.tsx",
+          "path": "src/registry/arc-reel.tsx",
           "type": "registry:ui"
         }
       ]
