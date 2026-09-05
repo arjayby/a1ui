@@ -92,3 +92,45 @@ test("action approval recovers from a failed save and resolves a rejection", asy
   await expect(approval.getByRole("status")).toHaveText("Rejected");
   await expect(approval.getByText("Decision note: Review the destination first")).toBeVisible();
 });
+
+test("artifact viewer safely previews documents and downloads chart data", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/components/artifact-viewer");
+  await page.getByLabel("Choose an artifact").selectOption("document");
+  const viewer = page.getByRole("region", { name: "Artifact viewer", exact: true });
+  await expect(viewer.getByRole("article")).toContainText("<script>alert('example')</script>");
+  expect(await viewer.locator("script, iframe").count()).toBe(0);
+  await page.getByLabel("Choose an artifact").selectOption("chart");
+  await expect(viewer.getByRole("table")).toContainText("Review");
+  const downloadEvent = page.waitForEvent("download");
+  await viewer.getByRole("button", { name: "Download artifact" }).click();
+  const download = await downloadEvent;
+  expect(download.suggestedFilename()).toBe("completion-rate.json");
+  const stream = await download.createReadStream();
+  const chunks = [];
+  for await (const chunk of stream!) chunks.push(chunk);
+  expect(JSON.parse(Buffer.concat(chunks).toString()).series).toContainEqual({ label: "Review", value: -4 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+});
+
+for (const slug of [
+  "conversation-history",
+  "attachments",
+  "message-actions",
+  "plan-viewer",
+  "action-approval",
+  "artifact-viewer",
+]) {
+  test(`${slug} remains within the mobile viewport`, async ({ page }, testInfo) => {
+    await page.setViewportSize({ width: 320, height: 900 });
+    await page.goto(`/components/${slug}`);
+    await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    await page.screenshot({ path: testInfo.outputPath(`${slug}-mobile.png`), fullPage: false });
+    await page.setViewportSize({ width: 1280, height: 1000 });
+    await page
+      .locator(".component-doc-body > .not-prose")
+      .first()
+      .screenshot({ path: testInfo.outputPath(`${slug}-desktop.png`) });
+  });
+}

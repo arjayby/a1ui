@@ -92,6 +92,19 @@
           "type": "registry:ui"
         }
       ]
+    },
+    {
+      "name": "artifact-viewer",
+      "type": "registry:ui",
+      "title": "Artifact viewer",
+      "description": "Preview code, documents, and charts with local download controls.",
+      "registryDependencies": ["button", "alert", "empty"],
+      "files": [
+        {
+          "path": "src/registry/artifact-viewer.tsx",
+          "type": "registry:ui"
+        }
+      ]
     }
   ]
 }

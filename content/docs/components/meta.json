@@ -8,6 +8,7 @@
     "attachments",
     "message-actions",
     "plan-viewer",
-    "action-approval"
+    "action-approval",
+    "artifact-viewer"
   ]
 }

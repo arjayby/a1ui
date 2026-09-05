@@ -1,3 +1,4 @@
+import { ArtifactViewerDemo } from "@/components/demos/artifact-viewer-demo";
 import { ActionApprovalDemo } from "@/components/demos/action-approval-demo";
 import { PlanViewerDemo } from "@/components/demos/plan-viewer-demo";
 import { MessageActionsDemo } from "@/components/demos/message-actions-demo";
@@ -19,6 +20,7 @@ export function getMDXComponents(components?: MDXComponents) {
     MessageActionsDemo,
     PlanViewerDemo,
     ActionApprovalDemo,
+    ArtifactViewerDemo,
     ComponentSource,
     Installation,
     SectionRailDemo,

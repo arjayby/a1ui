@@ -1,0 +1,66 @@
+---
+title: Artifact viewer
+description: Preview code, documents, and charts with local download controls.
+---
+
+## Demo
+
+<ArtifactViewerDemo />
+
+## Installation
+
+<Installation name="artifact-viewer" />
+
+## Code
+
+<Tabs items={["Usage", "Source", "Demo source"]}>
+<Tab value="Usage">
+
+```tsx
+import { ArtifactViewer } from "@/components/ui/artifact-viewer";
+
+<ArtifactViewer
+  artifact={{
+    id: "greeting",
+    kind: "code",
+    title: "Greeting",
+    filename: "greeting.tsx",
+    language: "tsx",
+    content: 'export const greeting = "Hello";',
+  }}
+/>;
+```
+
+</Tab>
+<Tab value="Source"><ComponentSource name="artifact-viewer" /></Tab>
+<Tab value="Demo source"><DemoSource name="artifact-viewer" /></Tab>
+</Tabs>
+
+## API reference
+
+| Prop            | Type                                                      | Purpose                                                               |
+| --------------- | --------------------------------------------------------- | --------------------------------------------------------------------- |
+| `artifact`      | `ChatArtifact`                                            | Required. Discriminated text/code or chart data.                      |
+| `status`        | `"ready" \| "streaming" \| "error"`                       | Defaults to ready. Only completed artifacts can be downloaded.        |
+| `error`         | `string`                                                  | Optional generation error text when status is error.                  |
+| `renderPreview` | `(artifact: ChatArtifact) => ReactNode`                   | Optional trusted application renderer, replacing the default preview. |
+| `onDownload`    | `(artifact, { blob, filename }) => void \| Promise<void>` | Optional download adapter. Default starts a browser download.         |
+| `className`     | `string`                                                  | Layout classes.                                                       |
+
+Every artifact has `id`, `title`, optional `filename`, and a discriminant `kind`. `TextArtifact` uses `kind: "code"` or `"document"`, `content: string`, and optional `language`. `ChartArtifact` uses `kind: "chart"`, `series: { label: string; value: number }[]`, and optional `unit`. Chart values must be finite. Negative, positive and zero values are supported. Empty charts display an empty state. The chart uses a table so labels and numbers remain available to screen readers.
+
+Exported `ArtifactCodePreview`, `ArtifactDocumentPreview` and `ArtifactChartPreview` can be composed independently. Each accepts its matching `artifact` prop. `serializeArtifact(artifact)` returns `{ filename, content, mimeType }` for download adapters. It preserves the full text, serializes chart data as JSON, and replaces path separators and control characters in filenames. Default filenames are `code.txt`, `document.txt`, and `chart.json`.
+
+Downloads use local Blobs. The viewer revokes object URLs after the browser starts reading them and on unmount. Callback failures appear inline and allow retry. A new artifact ID resets local download notices. Streaming previews can update the same ID while downloads stay disabled.
+
+## Safe rendering and composition
+
+The default code and document previews render escaped text. They do not execute JavaScript, compile JSX, embed iframes, load remote resources, or parse raw HTML. Documents are plain text, not PDF or Word viewers. The `language` label does not load a syntax engine. Chart downloads contain data, not a rendered image.
+
+Use a trusted renderer for Markdown, syntax highlighting, or a different chart library. For example, delegate code artifacts to a highlighter and return `ArtifactDocumentPreview` for documents. `renderPreview` is application code, not model-supplied code. It is responsible for sanitization and URL handling. Never pass generated HTML to `dangerouslySetInnerHTML`, evaluate generated source, or load arbitrary active content in the application origin.
+
+## Template integration
+
+Store structured artifacts separately from ordinary text parts in the reference template. Add a typed data/tool part case in `components/chat-message.tsx`, then pass that part's validated data to `ArtifactViewer` within `MessageContent`. Keep the template's `MessageScroller` for scrolling and Typeset for ordinary chat text. Pass `status="streaming"` until an artifact is complete, and show generation failures with `status="error"`.
+
+The default renderer adds no Typeset, AI SDK, charting library, or backend dependency. `renderPreview` lets you reuse the template's existing safe Markdown or code renderer without coupling the registry component to it.
