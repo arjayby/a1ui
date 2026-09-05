@@ -4,6 +4,7 @@ for (const [name, exportedComponent] of [
   ["section-rail", "SectionRail"],
   ["spiral-text", "SpiralText"],
   ["particle-menu", "ParticleMenu"],
+  ["text-scramble", "TextScramble"],
 ]) {
   test(`registry serves ${name} source`, async ({ request }) => {
     const response = await request.get(`/r/${name}.json`);

@@ -1,0 +1,69 @@
+---
+title: Text Scramble
+description: Reveals new text from left to right through a scramble of random characters.
+---
+
+## Demo
+
+<TextScrambleDemo />
+
+## Installation
+
+<Installation name="text-scramble" />
+
+## Code
+
+<Tabs items={["Usage", "Source"]}>
+  <Tab value="Usage">
+
+```tsx
+"use client";
+
+import { useState } from "react";
+import { TextScramble } from "@/components/ui/text-scramble";
+
+const phrases = ["MAKE IT CLEAR.", "MAKE IT COUNT.", "MAKE IT YOURS."];
+
+export function ScrambleExample() {
+  const [index, setIndex] = useState(0);
+
+  const randomizePhrase = () => {
+    const offset = 1 + Math.floor(Math.random() * (phrases.length - 1));
+    setIndex((current) => (current + offset) % phrases.length);
+  };
+
+  return (
+    <div className="flex flex-col items-start gap-4">
+      <TextScramble text={phrases[index]} duration={800} aria-live="polite" aria-atomic="true" />
+      <button type="button" onClick={randomizePhrase}>
+        Randomize phrase
+      </button>
+    </div>
+  );
+}
+```
+
+  </Tab>
+  <Tab value="Source">
+    <ComponentSource name="text-scramble" />
+  </Tab>
+</Tabs>
+
+## API reference
+
+| Prop         | Type      | Default                                     | Purpose                                                                            |
+| ------------ | --------- | ------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `text`       | `string`  | Required                                    | The final value. Changing it starts a scramble.                                    |
+| `duration`   | `number`  | `800`                                       | Total animation time in milliseconds. Zero or negative values resolve immediately. |
+| `interval`   | `number`  | `40`                                        | Time between character changes in milliseconds, with a `16ms` minimum.             |
+| `characters` | `string`  | `ABCDEFGHJKLMNPQRSTUVWXYZ0123456789#%&@$?/` | Replacement characters. Whitespace is ignored. An empty pool resolves immediately. |
+| `disabled`   | `boolean` | `false`                                     | Shows the final text immediately and stops any active animation.                   |
+| `className`  | `string`  | None                                        | Styles the outer span. Typography inherits from its parent.                        |
+
+Standard span attributes, including `id`, `style`, and `aria-live`, pass through to the outer element.
+
+The initial value renders as plain text, including on the server. Whenever the text changes, the entire phrase scrambles and resolves from left to right, including characters shared with the previous value. Whitespace stays in place. A new value interrupts an active scramble and resolves to the latest text.
+
+Emoji and combining characters stay together in browsers that support `Intl.Segmenter`. Older browsers fall back to Unicode code points. Non-finite timing values use the defaults. Use a monospace font to keep replacement characters from shifting the text width.
+
+Screen readers receive the final text as soon as the prop changes. Animated characters are hidden from the accessibility tree. Add `aria-live="polite"` and `aria-atomic="true"` when changes should be announced. The component does not announce changes by default. Reduced motion skips the animation, including when the preference changes during a scramble.

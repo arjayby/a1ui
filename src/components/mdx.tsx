@@ -7,6 +7,7 @@ import { SectionRailDemo, SpiralTextDemo } from "@/components/component-demos";
 import { ComponentSource, Installation } from "@/components/component-docs";
 import { ParticleMenuDemo } from "@/components/particle-menu-demo";
 import { MultichainSwapDemo } from "@/components/multichain-swap-demo";
+import { TextScrambleDemo } from "@/components/text-scramble-demo";
 
 export function getMDXComponents(components?: MDXComponents) {
   return {
@@ -18,6 +19,7 @@ export function getMDXComponents(components?: MDXComponents) {
     ParticleMenuDemo,
     SectionRailDemo,
     SpiralTextDemo,
+    TextScrambleDemo,
     Tab,
     Tabs,
     ...components,

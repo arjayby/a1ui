@@ -25,6 +25,11 @@ export const components = [
     title: "Spiral Text",
     description: "Text set on a responsive spiral that tightens under pressure and ripples on release.",
   },
+  {
+    slug: "text-scramble",
+    title: "Text Scramble",
+    description: "Reveals new text from left to right through a scramble of random characters.",
+  },
 ] as const;
 
 export type ComponentSlug = (typeof components)[number]["slug"];

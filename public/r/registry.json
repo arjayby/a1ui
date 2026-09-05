@@ -4,6 +4,13 @@
   "homepage": "http://localhost:3000",
   "items": [
     {
+      "name": "text-scramble",
+      "type": "registry:ui",
+      "title": "Text Scramble",
+      "description": "Reveals new text from left to right through a scramble of random characters.",
+      "files": [{ "path": "src/registry/text-scramble.tsx", "type": "registry:ui" }]
+    },
+    {
       "name": "multichain-swap",
       "type": "registry:ui",
       "title": "Multichain Swap",
