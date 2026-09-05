@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { SectionRail } from "./section-rail";
 
@@ -28,7 +28,92 @@ function addTrackedSection(id: string, top: number, parent: HTMLElement = docume
 }
 
 describe("SectionRail", () => {
-  afterEach(() => vi.restoreAllMocks());
+  beforeEach(() => {
+    vi.stubGlobal("innerHeight", 1000);
+    vi.stubGlobal("scrollY", 0);
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+    vi.unstubAllGlobals();
+  });
+
+  it("recomputes the active section when activeOffset changes", () => {
+    addTrackedSection("start", 0);
+    addTrackedSection("details", 400);
+    addTrackedSection("finish", 800);
+    const { rerender } = render(<SectionRail sections={sections} activeOffset={0.2} />);
+    expect(screen.getByRole("link", { name: "Start" })).toHaveAttribute("aria-current", "location");
+
+    rerender(<SectionRail sections={sections} activeOffset={0.5} />);
+    expect(screen.getByRole("link", { name: "Details" })).toHaveAttribute("aria-current", "location");
+
+    rerender(<SectionRail sections={sections} activeOffset={2} />);
+    expect(screen.getByRole("link", { name: "Finish" })).toHaveAttribute("aria-current", "location");
+
+    rerender(<SectionRail sections={sections} activeOffset={-1} />);
+    expect(screen.getByRole("link", { name: "Start" })).toHaveAttribute("aria-current", "location");
+  });
+
+  it("updates the reading position when the viewport resizes", async () => {
+    addTrackedSection("start", 0);
+    addTrackedSection("details", 300);
+    addTrackedSection("finish", 700);
+    render(<SectionRail sections={sections} />);
+    expect(screen.getByRole("link", { name: "Details" })).toHaveAttribute("aria-current", "location");
+
+    vi.stubGlobal("innerHeight", 500);
+    fireEvent.resize(window);
+    await waitFor(() =>
+      expect(screen.getByRole("link", { name: "Start" })).toHaveAttribute("aria-current", "location"),
+    );
+  });
+
+  it("activates the last section at the bottom of the page", async () => {
+    vi.spyOn(document.documentElement, "scrollHeight", "get").mockReturnValue(2000);
+    addTrackedSection("start", -100);
+    addTrackedSection("details", 200);
+    addTrackedSection("finish", 900);
+    render(<SectionRail sections={sections} />);
+    expect(screen.getByRole("link", { name: "Details" })).toHaveAttribute("aria-current", "location");
+
+    vi.stubGlobal("scrollY", 1000);
+    fireEvent.scroll(window);
+    await waitFor(() =>
+      expect(screen.getByRole("link", { name: "Finish" })).toHaveAttribute("aria-current", "location"),
+    );
+  });
+
+  it("moves highlighting between focused links and clears it when focus leaves", () => {
+    render(<SectionRail sections={sections} />);
+    const links = screen.getAllByRole("link");
+    const markers = links.map((link) => link.querySelector("[aria-hidden='true']"));
+
+    fireEvent.focus(links[1]);
+    expect(markers[1]).toHaveStyle({ width: "24px", opacity: "1" });
+    fireEvent.blur(links[1], { relatedTarget: links[2] });
+    fireEvent.focus(links[2], { relatedTarget: links[1] });
+    expect(markers[2]).toHaveStyle({ width: "24px", opacity: "1" });
+    expect(markers[1]).toHaveStyle({ width: "20px", opacity: "0.8" });
+
+    fireEvent.blur(links[2], { relatedTarget: document.body });
+    expect(markers[0]).toHaveStyle({ width: "20px", opacity: "1" });
+    expect(markers[1]).toHaveStyle({ width: "12px", opacity: "0.25" });
+    expect(markers[2]).toHaveStyle({ width: "12px", opacity: "0.25" });
+  });
+
+  it("skips missing section elements while preserving marker indexes", () => {
+    addTrackedSection("details", 100);
+    render(<SectionRail sections={sections} />);
+    expect(screen.getByRole("link", { name: "Details" })).toHaveAttribute("aria-current", "location");
+    expect(screen.getByRole("link", { name: "Finish" })).toHaveAttribute("data-state", "pending");
+  });
+
+  it("renders an empty navigation when no sections are supplied", () => {
+    render(<SectionRail sections={[]} />);
+    expect(screen.getByRole("navigation")).toBeInTheDocument();
+    expect(screen.queryByRole("link")).not.toBeInTheDocument();
+  });
 
   it("marks sections before, at, and after the reading position", async () => {
     Object.defineProperty(window, "innerHeight", { configurable: true, value: 1000 });

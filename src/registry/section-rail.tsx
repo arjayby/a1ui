@@ -150,7 +150,7 @@ export function SectionRail({
                   className="h-0.5 bg-current transition-[width,opacity] duration-150 ease-out motion-reduce:transition-none"
                   style={{ width: markerWidth, opacity: markerOpacity }}
                 />
-                <span className="bg-background text-foreground border-border absolute left-9 w-max max-w-52 -translate-x-1 rounded-sm border px-2 py-1 text-[0.6875rem] opacity-0 transition-[opacity,transform] duration-100 group-hover:translate-x-0 group-hover:opacity-100 group-focus-visible:translate-x-0 group-focus-visible:opacity-100 motion-reduce:transition-none">
+                <span className="bg-background text-foreground border-border pointer-events-none absolute left-9 w-max max-w-52 -translate-x-1 rounded-sm border px-2 py-1 text-[0.6875rem] opacity-0 transition-[opacity,transform] duration-100 group-hover:translate-x-0 group-hover:opacity-100 group-focus-visible:translate-x-0 group-focus-visible:opacity-100 motion-reduce:transition-none">
                   {label}
                 </span>
               </a>
