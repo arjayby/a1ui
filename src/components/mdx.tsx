@@ -6,6 +6,7 @@ import { ArcReelDemo } from "@/components/arc-reel-demo";
 import { SectionRailDemo, SpiralTextDemo } from "@/components/component-demos";
 import { ComponentSource, Installation } from "@/components/component-docs";
 import { ParticleMenuDemo } from "@/components/particle-menu-demo";
+import { MultichainSwapDemo } from "@/components/multichain-swap-demo";
 
 export function getMDXComponents(components?: MDXComponents) {
   return {
@@ -13,6 +14,7 @@ export function getMDXComponents(components?: MDXComponents) {
     ArcReelDemo,
     ComponentSource,
     Installation,
+    MultichainSwapDemo,
     ParticleMenuDemo,
     SectionRailDemo,
     SpiralTextDemo,

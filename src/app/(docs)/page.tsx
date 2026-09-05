@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArcReelPreview } from "@/components/arc-reel-demo";
 import { SectionRailPreview, SpiralTextPreview } from "@/components/component-demos";
 import { ParticleMenuPreview } from "@/components/particle-menu-demo";
+import { MultichainSwapPreview } from "@/components/multichain-swap-demo";
 import { components } from "@/lib/component-catalog";
 
 const previews = {
@@ -11,6 +12,7 @@ const previews = {
   "spiral-text": SpiralTextPreview,
   "particle-menu": ParticleMenuPreview,
   "arc-reel": ArcReelPreview,
+  "multichain-swap": MultichainSwapPreview,
 };
 
 export default function HomePage() {

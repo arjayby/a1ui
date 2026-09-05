@@ -6,6 +6,11 @@ export const components = [
     description: "An infinitely looping reel with curved provider cards and synchronized scroll controls.",
   },
   {
+    slug: "multichain-swap",
+    title: "Multichain Swap",
+    description: "A crypto swap form with network selection, token balances, and cross-chain quote details.",
+  },
+  {
     slug: "particle-menu",
     title: "Particle Menu",
     description: "Grainy symbols that scatter around your pointer and spring back into place.",

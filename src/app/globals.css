@@ -294,6 +294,59 @@ pre {
   pointer-events: none;
 }
 
+.multichain-swap-demo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  padding: clamp(0.75rem, 3vw, 3rem);
+  background-image: radial-gradient(var(--border) 0.65px, transparent 0.65px);
+  background-size: 16px 16px;
+}
+
+.multichain-swap-demo-note {
+  font-size: 0.625rem;
+  text-align: center;
+  color: var(--muted-foreground);
+}
+
+.catalog-preview .multichain-swap-preview {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 1rem 0 0;
+}
+
+.multichain-swap-preview > form {
+  width: 26rem;
+  flex-shrink: 0;
+  transform: scale(0.45);
+  transform-origin: top center;
+}
+
+.multichain-swap-preview > form > div {
+  display: none;
+}
+
+.multichain-swap-review {
+  position: fixed;
+  inset: 0;
+  width: min(26rem, calc(100vw - 2rem));
+  max-height: calc(100dvh - 2rem);
+  margin: auto;
+  padding: 1.5rem;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: var(--background);
+  color: var(--foreground);
+}
+
+.multichain-swap-review::backdrop {
+  background: color-mix(in oklab, var(--foreground) 30%, transparent);
+  backdrop-filter: blur(4px);
+}
+
 .arc-reel-artwork::after {
   position: absolute;
   inset: 0;
