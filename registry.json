@@ -26,6 +26,18 @@
           "type": "registry:ui"
         }
       ]
+    },
+    {
+      "name": "particle-menu",
+      "type": "registry:ui",
+      "title": "Particle Menu",
+      "description": "Grainy symbols that scatter around your pointer and spring back into place.",
+      "files": [
+        {
+          "path": "src/registry/particle-menu.tsx",
+          "type": "registry:ui"
+        }
+      ]
     }
   ]
 }

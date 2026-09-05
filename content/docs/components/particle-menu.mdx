@@ -1,0 +1,59 @@
+---
+title: Particle Menu
+description: Grainy symbols that scatter around your pointer and spring back into place.
+---
+
+## Demo
+
+<ParticleMenuDemo />
+
+Four original sigils inspired by Elden Ring mark Grace, Runes, Ashes, and Oaths. Each symbol breaks into particles around the pointer and returns to its original shape when you leave.
+
+## Installation
+
+<Installation name="particle-menu" />
+
+## Code
+
+<Tabs items={["Usage", "Source"]}>
+  <Tab value="Usage">
+
+```tsx
+import { ParticleMenu } from "@/components/ui/particle-menu";
+
+export function SiteNavigation() {
+  return (
+    <ParticleMenu
+      ariaLabel="Main navigation"
+      items={[
+        { id: "grace", label: "Grace", shape: "grace", href: "/grace" },
+        { id: "runes", label: "Runes", shape: "runes", href: "/runes" },
+        { id: "ashes", label: "Ashes", shape: "ashes", href: "/ashes" },
+        { id: "oaths", label: "Oaths", shape: "oaths", href: "/oaths" },
+      ]}
+    />
+  );
+}
+```
+
+  </Tab>
+  <Tab value="Source">
+    <ComponentSource name="particle-menu" />
+  </Tab>
+</Tabs>
+
+## API reference
+
+| Prop        | Type                 | Default           | Purpose                                                                  |
+| ----------- | -------------------- | ----------------- | ------------------------------------------------------------------------ |
+| `items`     | `ParticleMenuItem[]` | Required          | Items with a unique `id`, visible `label`, and `shape`.                  |
+| `ariaLabel` | `string`             | `"Particle menu"` | Accessible name for the navigation.                                      |
+| `strength`  | `number`             | `1`               | Particle displacement, clamped between `0` and `2`.                      |
+| `radius`    | `number`             | `38`              | Pointer influence in the 120-unit symbol, clamped between `10` and `70`. |
+| `className` | `string`             | None              | Layout classes for the navigation container.                             |
+
+Each item accepts `shape: "grace" | "runes" | "ashes" | "oaths"`. Labels and destinations are independent of the symbols, so you can use your own site structure. Provide `href` to render a link, or omit it and provide `onSelect` to render a button. Callbacks must be passed from a Client Component.
+
+Keyboard focus gently opens the symbol and keeps a visible focus outline. Touch input uses the same particle response without blocking page scrolling or requiring a second tap to activate an item. Reduced motion keeps the symbols still. Each animation stops once its particles settle, and pending frames are cancelled on unmount or when the tab is hidden.
+
+The component uses React, SVG, and Tailwind. It needs no animation library or external assets.

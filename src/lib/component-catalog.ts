@@ -9,6 +9,11 @@ export const components = [
     title: "Spiral Text",
     description: "Text set on a responsive spiral that tightens under pressure and ripples on release.",
   },
+  {
+    slug: "particle-menu",
+    title: "Particle Menu",
+    description: "Grainy symbols that scatter around your pointer and spring back into place.",
+  },
 ] as const;
 
 export type ComponentSlug = (typeof components)[number]["slug"];

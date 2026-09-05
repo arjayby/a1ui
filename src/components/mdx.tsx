@@ -4,12 +4,14 @@ import type { MDXComponents } from "mdx/types";
 
 import { SectionRailDemo, SpiralTextDemo } from "@/components/component-demos";
 import { ComponentSource, Installation } from "@/components/component-docs";
+import { ParticleMenuDemo } from "@/components/particle-menu-demo";
 
 export function getMDXComponents(components?: MDXComponents) {
   return {
     ...defaultMdxComponents,
     ComponentSource,
     Installation,
+    ParticleMenuDemo,
     SectionRailDemo,
     SpiralTextDemo,
     Tab,
