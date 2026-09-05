@@ -36,6 +36,23 @@ test("select menu supports keyboard navigation, typeahead, and focus return", as
   await expect(trigger).toBeFocused();
 });
 
+test("menus stay within narrow viewports and can extend outside the swap card", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 740 });
+  await page.goto("/components/multichain-swap");
+  const trigger = page.getByRole("combobox", { name: "Slippage" });
+  await trigger.click();
+  const listbox = page.getByRole("listbox", { name: "Slippage" });
+  await expect(listbox).toBeVisible();
+  const bounds = (await listbox.boundingBox())!;
+  expect(bounds.x).toBeGreaterThanOrEqual(0);
+  expect(bounds.x + bounds.width).toBeLessThanOrEqual(320);
+  expect(bounds.y).toBeGreaterThanOrEqual(0);
+  expect(bounds.y + bounds.height).toBeLessThanOrEqual(740);
+  expect(await listbox.evaluate((element) => element.closest("form"))).toBeNull();
+  await page.getByRole("option", { name: "0.1%", exact: true }).click();
+  await expect(trigger).toHaveText("0.1%");
+});
+
 test("option keycaps select an environment and return focus to the trigger", async ({ page }) => {
   await page.goto("/components/select-menu");
   await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
@@ -68,8 +85,11 @@ test("option keycaps select an environment and return focus to the trigger", asy
   }
 });
 
-test("registry serves the standalone selector", async ({ request }) => {
+test("selector installs alone and is also included with the swap", async ({ request }) => {
   const standalone = await (await request.get("/r/select-menu.json")).json();
-  expect(standalone.dependencies).toContain("@base-ui/react@^1.8.0");
+  const swap = await (await request.get("/r/multichain-swap.json")).json();
   expect(standalone.files[0].content).toContain("export function SelectMenu");
+  expect(swap.files.find((file: { path: string }) => file.path.endsWith("/select-menu.tsx")).content).toBe(
+    standalone.files[0].content,
+  );
 });

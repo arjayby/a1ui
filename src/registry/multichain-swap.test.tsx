@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { useState } from "react";
 import { describe, expect, it, vi } from "vitest";
 
@@ -143,18 +143,26 @@ describe("MultichainSwap", () => {
     expect(screen.getByRole("button", { name: "Review swap" })).toBeEnabled();
   });
 
-  it("keeps tokens available on the chosen network and prevents identical assets", () => {
+  it("keeps tokens available on the chosen network and prevents identical assets", async () => {
     function Harness() {
       const [selected, setSelected] = useState(value);
       return <MultichainSwap assets={assets} value={selected} onValueChange={setSelected} />;
     }
     render(<Harness />);
-    fireEvent.change(screen.getByLabelText("Destination network"), { target: { value: "1" } });
-    expect(screen.getByLabelText("Destination token")).toHaveValue("eth-usdc");
-    expect(screen.getByLabelText("Destination token").querySelector('option[value="eth"]')).toBeDisabled();
-    fireEvent.change(screen.getByLabelText("Destination network"), { target: { value: "solana" } });
-    expect(screen.getByLabelText("Destination token")).toHaveValue("sol");
-    expect(screen.getByLabelText("Destination token").querySelectorAll("option")).toHaveLength(1);
+    fireEvent.click(screen.getByRole("combobox", { name: "Destination network" }));
+    fireEvent.pointerDown(await screen.findByRole("option", { name: "Ethereum" }));
+    fireEvent.click(await screen.findByRole("option", { name: "Ethereum" }));
+    await waitFor(() => expect(screen.queryByRole("listbox")).not.toBeInTheDocument());
+    expect(screen.getByRole("combobox", { name: "Destination token" })).toHaveTextContent("USDC");
+    fireEvent.click(screen.getByRole("combobox", { name: "Destination token" }));
+    expect(await screen.findByRole("option", { name: "ETH" })).toHaveAttribute("aria-disabled", "true");
+    fireEvent.keyDown(screen.getByRole("listbox"), { key: "Escape" });
+    await waitFor(() => expect(screen.queryByRole("listbox")).not.toBeInTheDocument());
+    fireEvent.click(screen.getByRole("combobox", { name: "Destination network" }));
+    fireEvent.pointerDown(await screen.findByRole("option", { name: "Solana" }));
+    fireEvent.click(await screen.findByRole("option", { name: "Solana" }));
+    await waitFor(() => expect(screen.queryByRole("listbox")).not.toBeInTheDocument());
+    expect(screen.getByRole("combobox", { name: "Destination token" })).toHaveTextContent("SOL");
   });
 
   it("reverses the assets and uses only a current quote as the new amount", () => {

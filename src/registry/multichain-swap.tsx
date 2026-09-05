@@ -1,7 +1,9 @@
 "use client";
 
-import { ArrowDownUp, ArrowRight, ChevronDown, Clock3, Route, Wallet } from "lucide-react";
+import { ArrowDownUp, ArrowRight, Clock3, Route, Wallet } from "lucide-react";
 import { useId, type CSSProperties, type ReactNode } from "react";
+
+import { SelectMenu } from "./select-menu";
 
 export interface SwapAsset {
   /** Unique across chains, for example "base:usdc". */
@@ -108,6 +110,16 @@ export function MultichainSwap({
   style,
 }: MultichainSwapProps) {
   const id = useId();
+  // Portals render outside the form, so carry its palette into each menu.
+  const menuStyle = {
+    ...theme,
+    ...style,
+    "--select-menu-background": "var(--swap-background)",
+    "--select-menu-foreground": "var(--swap-foreground)",
+    "--select-menu-muted": "var(--swap-muted)",
+    "--select-menu-border": "var(--swap-border)",
+    "--select-menu-highlight": "var(--swap-panel)",
+  } as CSSProperties;
   const from = assets.find((asset) => asset.id === value.fromAssetId);
   const to = assets.find((asset) => asset.id === value.toAssetId);
   const chains = [...new Map(assets.map((asset) => [asset.chainId, asset.chainName])).entries()];
@@ -202,26 +214,22 @@ export function MultichainSwap({
                 <label htmlFor={`${id}-${side}-amount`} className="text-[var(--swap-muted)]">
                   {side === "from" ? "You pay" : "You receive"}
                 </label>
-                <div className="relative flex min-w-0 items-center gap-1">
-                  <select
-                    aria-label={`${side === "from" ? "Source" : "Destination"} network`}
-                    value={asset?.chainId ?? ""}
-                    onChange={(event) => chooseChain(side, event.target.value)}
-                    className={`max-w-36 cursor-pointer appearance-none truncate bg-transparent py-1 pr-5 text-right text-[11px] ${focus}`}
-                  >
-                    {!asset ? <option value="">Select network</option> : null}
-                    {chains.map(([chainId, name]) => (
-                      <option
-                        key={chainId}
-                        value={chainId}
-                        disabled={!assets.some((item) => item.chainId === chainId && item.id !== other?.id)}
-                      >
-                        {name}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown aria-hidden="true" className="pointer-events-none absolute right-0 size-3" />
-                </div>
+                <SelectMenu
+                  ariaLabel={`${side === "from" ? "Source" : "Destination"} network`}
+                  value={asset?.chainId ?? ""}
+                  onValueChange={(chainId) => chooseChain(side, chainId)}
+                  options={chains.map(([chainId, name]) => ({
+                    value: chainId,
+                    label: name,
+                    disabled: !assets.some((item) => item.chainId === chainId && item.id !== other?.id),
+                  }))}
+                  placeholder="Select network"
+                  disabled={disabled || assets.length === 0}
+                  variant="ghost"
+                  align="end"
+                  className="max-w-36"
+                  style={menuStyle}
+                />
               </div>
               <div className="flex min-w-0 items-center gap-3">
                 {side === "from" ? (
@@ -248,27 +256,29 @@ export function MultichainSwap({
                     {currentQuote?.amountOut ?? "—"}
                   </output>
                 )}
-                <div className="relative flex max-w-[52%] shrink-0 items-center gap-2 rounded-full border border-[var(--swap-border)] bg-[var(--swap-background)] py-1.5 pr-3 pl-1.5">
-                  <AssetIcon asset={asset} />
-                  <select
-                    aria-label={`${side === "from" ? "Source" : "Destination"} token`}
-                    value={asset?.id ?? ""}
-                    onChange={(event) =>
-                      update({ [side === "from" ? "fromAssetId" : "toAssetId"]: event.target.value })
-                    }
-                    className={`min-w-0 cursor-pointer appearance-none bg-transparent pr-4 font-bold ${focus}`}
-                  >
-                    {!asset ? <option value="">Token</option> : null}
-                    {assets
-                      .filter((item) => item.chainId === asset?.chainId)
-                      .map((item) => (
-                        <option key={item.id} value={item.id} disabled={item.id === other?.id}>
-                          {item.symbol}
-                        </option>
-                      ))}
-                  </select>
-                  <ChevronDown aria-hidden="true" className="pointer-events-none absolute right-3 size-3" />
-                </div>
+                <SelectMenu
+                  ariaLabel={`${side === "from" ? "Source" : "Destination"} token`}
+                  value={asset?.id ?? ""}
+                  onValueChange={(assetId) =>
+                    update({ [side === "from" ? "fromAssetId" : "toAssetId"]: assetId })
+                  }
+                  options={assets
+                    .filter((item) => item.chainId === asset?.chainId)
+                    .map((item) => ({
+                      value: item.id,
+                      label: item.symbol,
+                      description: item.name,
+                      detail: connected ? item.spendableBalance : undefined,
+                      icon: <AssetIcon asset={item} />,
+                      disabled: item.id === other?.id,
+                    }))}
+                  placeholder="Token"
+                  disabled={disabled || assets.length === 0}
+                  variant="pill"
+                  align="end"
+                  className="max-w-[52%] shrink-0"
+                  style={menuStyle}
+                />
               </div>
               <div className="flex min-h-4 items-center justify-between gap-2 text-[10px] text-[var(--swap-muted)]">
                 <span className="truncate" title={asset?.name}>
@@ -326,22 +336,21 @@ export function MultichainSwap({
             {from && to && from.chainId !== to.chainId ? "Cross-chain route" : "Same-chain swap"}
           </span>
         </span>
-        <label className="flex shrink-0 items-center gap-1">
+        <div className="flex shrink-0 items-center gap-1">
           Slippage
-          <select
-            value={value.slippageBps}
+          <SelectMenu
+            ariaLabel="Slippage"
+            value={String(value.slippageBps)}
+            onValueChange={(bps) => update({ slippageBps: Number(bps) })}
+            options={[...new Set([10, 50, 100, value.slippageBps])]
+              .sort((a, b) => a - b)
+              .map((bps) => ({ value: String(bps), label: `${bps / 100}%` }))}
             disabled={disabled}
-            onChange={(event) => update({ slippageBps: Number(event.target.value) })}
-            className={`cursor-pointer bg-transparent text-[var(--swap-foreground)] ${focus}`}
-          >
-            {![10, 50, 100].includes(value.slippageBps) ? (
-              <option value={value.slippageBps}>{value.slippageBps / 100}%</option>
-            ) : null}
-            <option value={10}>0.1%</option>
-            <option value={50}>0.5%</option>
-            <option value={100}>1%</option>
-          </select>
-        </label>
+            variant="ghost"
+            align="end"
+            style={menuStyle}
+          />
+        </div>
       </div>
 
       <div

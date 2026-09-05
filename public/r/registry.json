@@ -23,8 +23,11 @@
       "type": "registry:ui",
       "title": "Multichain Swap",
       "description": "A crypto swap form with network selection, token balances, and cross-chain quote details.",
-      "dependencies": ["lucide-react"],
-      "files": [{ "path": "src/registry/multichain-swap.tsx", "type": "registry:ui" }]
+      "dependencies": ["@base-ui/react@^1.8.0", "clsx", "lucide-react"],
+      "files": [
+        { "path": "src/registry/multichain-swap.tsx", "type": "registry:ui" },
+        { "path": "src/registry/select-menu.tsx", "type": "registry:ui" }
+      ]
     },
     {
       "name": "section-rail",
