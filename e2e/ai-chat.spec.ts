@@ -46,3 +46,21 @@ test("attachments simulate failure, retry and removal on mobile", async ({ page 
   await page.getByRole("button", { name: "Remove notes.txt" }).click();
   await expect(page.getByText("No files selected", { exact: true })).toBeVisible();
 });
+
+test("message actions copy full text, edit and retry a failed response", async ({ page, context }) => {
+  await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+  await page.goto("/components/message-actions");
+  const actions = page.getByRole("group", { name: "Message actions", exact: true });
+  await actions.getByRole("button", { name: "Copy response" }).click();
+  await expect(actions.getByRole("button", { name: "Copied" })).toBeVisible();
+  expect(await page.evaluate(() => navigator.clipboard.readText())).toContain(
+    "Test the main task with three people",
+  );
+  await actions.getByRole("button", { name: "Edit", exact: true }).click();
+  await actions.getByLabel("Edit message").fill("A revised response");
+  await actions.getByRole("button", { name: "Save edit" }).click();
+  await expect(page.getByText("A revised response", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Simulate response error" }).click();
+  await actions.getByRole("button", { name: "Retry response" }).click();
+  await expect(actions.getByRole("status")).toHaveText("Retry complete.");
+});

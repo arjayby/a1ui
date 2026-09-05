@@ -1,3 +1,4 @@
+import { MessageActionsDemo } from "@/components/demos/message-actions-demo";
 import { AttachmentsDemo } from "@/components/demos/attachments-demo";
 import { ConversationHistoryDemo } from "@/components/demos/conversation-history-demo";
 import defaultMdxComponents from "fumadocs-ui/mdx";
@@ -13,6 +14,7 @@ export function getMDXComponents(components?: MDXComponents) {
     ConversationHistoryDemo,
     DemoSource,
     AttachmentsDemo,
+    MessageActionsDemo,
     ComponentSource,
     Installation,
     SectionRailDemo,

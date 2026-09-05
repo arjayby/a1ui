@@ -23,6 +23,12 @@ export const components = [
     title: "Attachments",
     description: "File selection, local previews, and controlled upload states.",
   },
+  {
+    category: "AI chat components",
+    slug: "message-actions",
+    title: "Message actions",
+    description: "Copy, edit, regenerate, retry, and rate a response.",
+  },
 ] as const;
 
 export const componentCategories = ["Components", "AI chat components"] as const;

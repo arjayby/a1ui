@@ -1,4 +1,11 @@
 {
   "title": "Components",
-  "pages": ["section-rail", "spiral-text", "---AI chat components---", "conversation-history", "attachments"]
+  "pages": [
+    "section-rail",
+    "spiral-text",
+    "---AI chat components---",
+    "conversation-history",
+    "attachments",
+    "message-actions"
+  ]
 }

@@ -53,6 +53,19 @@
         }
       ],
       "dependencies": ["lucide-react"]
+    },
+    {
+      "name": "message-actions",
+      "type": "registry:ui",
+      "title": "Message actions",
+      "description": "Copy, edit, regenerate, retry, and rate a response.",
+      "registryDependencies": ["button", "textarea", "field", "alert"],
+      "files": [
+        {
+          "path": "src/registry/message-actions.tsx",
+          "type": "registry:ui"
+        }
+      ]
     }
   ]
 }
