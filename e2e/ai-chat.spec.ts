@@ -27,3 +27,22 @@ test("history fits a narrow viewport and supports keyboard editing", async ({ pa
   await expect(demo.getByLabel("Conversation title")).toHaveCount(0);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 });
+
+test("attachments simulate failure, retry and removal on mobile", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/components/attachments");
+  await page
+    .getByLabel("Attach files")
+    .setInputFiles({ name: "notes.txt", mimeType: "text/plain", buffer: Buffer.from("Meeting notes") });
+  await page.getByRole("button", { name: "Simulate failure" }).click();
+  await expect(
+    page.getByRole("region", { name: "Attachments", exact: true }).getByRole("alert"),
+  ).toContainText("Simulated connection failure");
+  await page.getByRole("button", { name: "Retry notes.txt" }).click();
+  await expect(
+    page.getByRole("region", { name: "Attachments", exact: true }).getByRole("status"),
+  ).toContainText("done");
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.getByRole("button", { name: "Remove notes.txt" }).click();
+  await expect(page.getByText("No files selected", { exact: true })).toBeVisible();
+});

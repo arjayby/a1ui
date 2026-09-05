@@ -32,12 +32,40 @@
       "type": "registry:ui",
       "title": "Conversation history",
       "description": "Saved conversations with search, selection, rename, and delete.",
-      "registryDependencies": ["button", "input", "field", "empty", "alert"],
+      "registryDependencies": [
+        "button",
+        "input",
+        "field",
+        "empty",
+        "alert"
+      ],
       "files": [
         {
           "path": "src/registry/conversation-history.tsx",
           "type": "registry:ui"
         }
+      ]
+    },
+    {
+      "name": "attachments",
+      "type": "registry:ui",
+      "title": "Attachments",
+      "description": "File selection, local previews, and controlled upload states.",
+      "registryDependencies": [
+        "attachment",
+        "input",
+        "field",
+        "alert",
+        "empty"
+      ],
+      "files": [
+        {
+          "path": "src/registry/attachments.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "dependencies": [
+        "lucide-react"
       ]
     }
   ]

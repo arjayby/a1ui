@@ -17,6 +17,12 @@ export const components = [
     title: "Conversation history",
     description: "Saved conversations with search, selection, rename, and delete.",
   },
+  {
+    category: "AI chat components",
+    slug: "attachments",
+    title: "Attachments",
+    description: "File selection, local previews, and controlled upload states.",
+  },
 ] as const;
 
 export const componentCategories = ["Components", "AI chat components"] as const;
