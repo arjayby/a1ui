@@ -6,6 +6,7 @@
     "---AI chat components---",
     "conversation-history",
     "attachments",
-    "message-actions"
+    "message-actions",
+    "plan-viewer"
   ]
 }

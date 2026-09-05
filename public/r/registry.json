@@ -66,6 +66,19 @@
           "type": "registry:ui"
         }
       ]
+    },
+    {
+      "name": "plan-viewer",
+      "type": "registry:ui",
+      "title": "Plan viewer",
+      "description": "Review and edit proposed steps, approve a revision, and follow progress.",
+      "registryDependencies": ["button", "input", "textarea", "field", "alert", "empty"],
+      "files": [
+        {
+          "path": "src/registry/plan-viewer.tsx",
+          "type": "registry:ui"
+        }
+      ]
     }
   ]
 }

@@ -1,3 +1,4 @@
+import { PlanViewerDemo } from "@/components/demos/plan-viewer-demo";
 import { MessageActionsDemo } from "@/components/demos/message-actions-demo";
 import { AttachmentsDemo } from "@/components/demos/attachments-demo";
 import { ConversationHistoryDemo } from "@/components/demos/conversation-history-demo";
@@ -15,6 +16,7 @@ export function getMDXComponents(components?: MDXComponents) {
     DemoSource,
     AttachmentsDemo,
     MessageActionsDemo,
+    PlanViewerDemo,
     ComponentSource,
     Installation,
     SectionRailDemo,

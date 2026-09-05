@@ -64,3 +64,19 @@ test("message actions copy full text, edit and retry a failed response", async (
   await actions.getByRole("button", { name: "Retry response" }).click();
   await expect(actions.getByRole("status")).toHaveText("Retry complete.");
 });
+
+test("plan viewer edits, approves and advances execution on mobile", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/components/plan-viewer");
+  const plan = page.getByRole("region", { name: "Plan viewer", exact: true });
+  await plan.getByRole("button", { name: "Edit plan" }).click();
+  await plan.getByLabel("Step 1 title").fill("Review accessibility");
+  await plan.getByRole("button", { name: "Save plan" }).click();
+  await expect(plan.getByText("1. Review accessibility", { exact: true })).toBeVisible();
+  await plan.getByRole("button", { name: "Approve plan" }).click();
+  await expect(plan.getByRole("status")).toContainText("approved");
+  for (let index = 0; index < 4; index++)
+    await page.getByRole("button", { name: "Advance simulated execution" }).click();
+  await expect(plan.getByRole("status")).toContainText("complete · 3 of 3");
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+});
