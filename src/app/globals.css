@@ -314,6 +314,20 @@ pre {
   background-size: 16px 16px;
 }
 
+.select-menu-demo {
+  display: grid;
+  min-height: 24rem;
+  place-items: center;
+  padding: 1.5rem;
+}
+
+.select-menu-preview {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
 .multichain-swap-demo-note {
   font-size: 0.625rem;
   text-align: center;

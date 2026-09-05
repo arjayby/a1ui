@@ -6,6 +6,7 @@ import { SectionRailPreview, SpiralTextPreview } from "@/components/component-de
 import { ParticleMenuPreview } from "@/components/particle-menu-demo";
 import { MultichainSwapPreview } from "@/components/multichain-swap-demo";
 import { TextScramblePreview } from "@/components/text-scramble-demo";
+import { SelectMenuPreview } from "@/components/select-menu-demo";
 import { components } from "@/lib/component-catalog";
 
 const previews = {
@@ -15,6 +16,7 @@ const previews = {
   "arc-reel": ArcReelPreview,
   "multichain-swap": MultichainSwapPreview,
   "text-scramble": TextScramblePreview,
+  "select-menu": SelectMenuPreview,
 };
 
 export default function HomePage() {

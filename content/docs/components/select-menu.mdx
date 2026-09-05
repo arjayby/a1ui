@@ -1,0 +1,91 @@
+---
+title: Select Menu
+description: A dropdown selector with icons, descriptions, and keyboard navigation.
+---
+
+## Demo
+
+<SelectMenuDemo />
+
+## Installation
+
+<Installation name="select-menu" />
+
+## Code
+
+<Tabs items={["Usage", "Source"]}>
+  <Tab value="Usage">
+
+```tsx
+"use client";
+
+import { useState } from "react";
+import { Globe, FlaskConical } from "lucide-react";
+import { SelectMenu, type SelectMenuOption } from "@/components/ui/select-menu";
+
+const options: SelectMenuOption[] = [
+  {
+    value: "production",
+    label: "Production",
+    description: "Visible to everyone",
+    icon: <Globe />,
+    shortcut: "1",
+  },
+  {
+    value: "staging",
+    label: "Staging",
+    description: "Review changes with your team",
+    icon: <FlaskConical />,
+    shortcut: "2",
+  },
+  { value: "archived", label: "Archived", disabled: true },
+];
+
+export function EnvironmentPicker() {
+  const [value, setValue] = useState("production");
+
+  return (
+    <SelectMenu
+      options={options}
+      value={value}
+      onValueChange={setValue}
+      ariaLabel="Environment"
+      className="w-72"
+    />
+  );
+}
+```
+
+  </Tab>
+  <Tab value="Source">
+    <ComponentSource name="select-menu" />
+  </Tab>
+</Tabs>
+
+## API reference
+
+| Prop            | Type                             | Default              | Purpose                                                                                |
+| --------------- | -------------------------------- | -------------------- | -------------------------------------------------------------------------------------- |
+| `options`       | `SelectMenuOption[]`             | Required             | Choices in display order.                                                              |
+| `value`         | `string`                         | Required             | Selected option value. Pass an empty string for the placeholder.                       |
+| `onValueChange` | `(value: string) => void`        | Required             | Receives the chosen enabled option.                                                    |
+| `ariaLabel`     | `string`                         | Required             | Accessible name and menu heading.                                                      |
+| `placeholder`   | `string`                         | `"Select an option"` | Shown when no option matches the value.                                                |
+| `disabled`      | `boolean`                        | `false`              | Prevents interaction. Empty lists and lists with no enabled options are also disabled. |
+| `variant`       | `"outline" \| "ghost" \| "pill"` | `"outline"`          | Trigger appearance.                                                                    |
+| `align`         | `"start" \| "center" \| "end"`   | `"start"`            | Menu alignment relative to the trigger.                                                |
+| `id`, `name`    | `string`                         | None                 | Label association and native form submission.                                          |
+| `className`     | `string`                         | None                 | Trigger layout, such as width or placement.                                            |
+| `style`         | `CSSProperties`                  | None                 | Theme overrides applied to the trigger and menu.                                       |
+
+Each option needs a unique, nonempty `value` and a plain-text `label`. Optional `description` and `detail` add a second line and a trailing value to the menu row. Optional `icon` content appears in both the row and selected trigger. Set `disabled` on individual options to keep them visible without allowing selection.
+
+Set an option's `shortcut` to a unique single letter or digit, such as `"1"`. It appears as a keycap in place of `detail`. With the menu open, pressing that key selects the option, closes the menu, and returns focus to the trigger. Disabled options ignore their shortcuts. Shortcuts do not run with modifier keys or while composing text. Number keys preserve letter-based typeahead; a letter shortcut takes priority over typeahead for that key.
+
+The component is controlled. Store the selected value in the parent and update it through `onValueChange`. When the options change and the current value is no longer available, the trigger displays its placeholder without choosing a replacement. The parent decides how to handle that change.
+
+Space, Enter, and the arrow keys open the menu. Arrow keys navigate options; Home and End move to the first and last choices. Disabled options can receive keyboard focus so their descriptions remain discoverable, but cannot be selected. Typing an option's label moves focus through the list. Enter or Space selects the focused enabled option. Escape and clicking outside close the menu and restore focus. The menu uses Base UI Select's combobox and listbox semantics and supports touch input.
+
+The menu renders in a portal so it can extend beyond cards with clipped content. It adjusts its position near viewport edges and scrolls long option lists. It inherits the project's theme tokens. To customize a single instance, pass `--select-menu-background`, `--select-menu-foreground`, `--select-menu-muted`, `--select-menu-border`, and `--select-menu-highlight` through `style`. Pass local theme variables through that same object so they are available inside the portal.
+
+Select Menu installs with `@base-ui/react`, `clsx`, and `lucide-react`.

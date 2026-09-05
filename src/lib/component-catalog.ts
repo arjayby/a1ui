@@ -21,6 +21,11 @@ export const components = [
     description: "A compact reading rail that tracks progress through page sections.",
   },
   {
+    slug: "select-menu",
+    title: "Select Menu",
+    description: "A dropdown selector with icons, descriptions, and keyboard navigation.",
+  },
+  {
     slug: "spiral-text",
     title: "Spiral Text",
     description: "Text set on a responsive spiral that tightens under pressure and ripples on release.",

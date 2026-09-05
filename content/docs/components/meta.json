@@ -1,4 +1,12 @@
 {
   "title": "Components",
-  "pages": ["section-rail", "spiral-text", "particle-menu", "arc-reel", "multichain-swap", "text-scramble"]
+  "pages": [
+    "section-rail",
+    "spiral-text",
+    "particle-menu",
+    "arc-reel",
+    "multichain-swap",
+    "text-scramble",
+    "select-menu"
+  ]
 }

@@ -4,6 +4,14 @@
   "homepage": "http://localhost:3000",
   "items": [
     {
+      "name": "select-menu",
+      "type": "registry:ui",
+      "title": "Select Menu",
+      "description": "A dropdown selector with icons, descriptions, and keyboard navigation.",
+      "dependencies": ["@base-ui/react@^1.8.0", "clsx", "lucide-react"],
+      "files": [{ "path": "src/registry/select-menu.tsx", "type": "registry:ui" }]
+    },
+    {
       "name": "text-scramble",
       "type": "registry:ui",
       "title": "Text Scramble",
