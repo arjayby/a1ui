@@ -1,4 +1,14 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Locator } from "@playwright/test";
+
+async function expectCentered(viewport: Locator, name: string) {
+  await expect
+    .poll(async () => {
+      const card = (await viewport.getByRole("group", { name, exact: true }).boundingBox())!;
+      const bounds = (await viewport.boundingBox())!;
+      return Math.abs(card.x + card.width / 2 - bounds.x - bounds.width / 2);
+    })
+    .toBeLessThan(2);
+}
 
 test.beforeEach(async ({ page }) => {
   await page.goto("/components/cinema-film");
@@ -33,7 +43,7 @@ test("dragging updates the cards and marker together in both directions", async 
   await slider.focus();
   await slider.press("End");
   await expect(slider).toHaveValue("8");
-  await expect(carousel.getByRole("button", { name: "Next provider" })).toBeDisabled();
+  await expectCentered(viewport, "xAI, 9 of 9");
   await page.mouse.move(center.x - 100, center.y);
   await page.mouse.down();
   await page.mouse.move(center.x + 160, center.y, { steps: 18 });
@@ -41,7 +51,7 @@ test("dragging updates the cards and marker together in both directions", async 
   await page.mouse.up();
 });
 
-test("arrows, keyboard, and scrubber share the same position and endpoints", async ({ page }) => {
+test("arrows, keyboard, and scrubber stay synchronized across the loop seam", async ({ page }) => {
   const carousel = page.getByRole("region", { name: "AI provider cinema film" });
   const viewport = carousel.getByRole("group", { name: "Film cards.", exact: false });
   const slider = carousel.getByRole("slider");
@@ -57,11 +67,23 @@ test("arrows, keyboard, and scrubber share the same position and endpoints", asy
   await viewport.focus();
   await viewport.press("End");
   await expect(slider).toHaveValue("8");
-  await expect(next).toBeDisabled();
+  await expect(next).toBeEnabled();
+  await expectCentered(viewport, "xAI, 9 of 9");
+  await next.click();
+  await expect(slider).toHaveValue("0");
+  await expectCentered(viewport, "OpenAI, 1 of 9");
+  await previous.click();
+  await expect(slider).toHaveValue("8");
+  await expectCentered(viewport, "xAI, 9 of 9");
   await expect(previous).toBeEnabled();
   await viewport.press("Home");
   await expect(slider).toHaveValue("0");
-  await expect(previous).toBeDisabled();
+  await expect(previous).toBeEnabled();
+  await expectCentered(viewport, "OpenAI, 1 of 9");
+  await viewport.press("ArrowLeft");
+  await expect(slider).toHaveValue("8");
+  await viewport.press("ArrowRight");
+  await expect(slider).toHaveValue("0");
   await expect(next).toBeEnabled();
   await viewport.press("ArrowRight");
   await expect(slider).toHaveValue("1");
@@ -85,6 +107,61 @@ test("reduced motion jumps directly to the requested card", async ({ page }) => 
   const activeCard = (await carousel.locator('[aria-current="true"]').boundingBox())!;
   const frame = (await carousel.boundingBox())!;
   expect(Math.abs(activeCard.x + activeCard.width / 2 - frame.x - frame.width / 2)).toBeLessThan(2);
+});
+
+test("dragging crosses the seam in either direction without hitting an endpoint", async ({ page }) => {
+  const carousel = page.getByRole("region", { name: "AI provider cinema film" });
+  const viewport = carousel.getByRole("group", { name: "Film cards.", exact: false });
+  const slider = carousel.getByRole("slider");
+  const bounds = (await viewport.boundingBox())!;
+  const center = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 };
+  const spacing = await carousel
+    .locator('[aria-roledescription="slide"]')
+    .first()
+    .evaluate((card) => card.getBoundingClientRect().width + parseFloat(getComputedStyle(card).marginRight));
+
+  for (const direction of [-1, 1]) {
+    await viewport.press(direction === -1 ? "End" : "Home");
+    await expectCentered(viewport, direction === -1 ? "xAI, 9 of 9" : "OpenAI, 1 of 9");
+    await page.mouse.move(center.x, center.y);
+    await page.mouse.down();
+    await page.mouse.move(center.x + direction * spacing * 1.05, center.y, { steps: 24 });
+    await expect(slider).toHaveValue(direction === -1 ? "0" : "8");
+    await expect(carousel.locator('[aria-current="true"] [data-film-frame]')).toBeVisible();
+    await expect(carousel.getByRole("button", { name: "Previous provider" })).toBeEnabled();
+    await expect(carousel.getByRole("button", { name: "Next provider" })).toBeEnabled();
+    await page.mouse.up();
+  }
+});
+
+test("the projected card moves smoothly when the looping track resets", async ({ page }) => {
+  const carousel = page.getByRole("region", { name: "AI provider cinema film" });
+  const viewport = carousel.getByRole("group", { name: "Film cards.", exact: false });
+  await viewport.press("End");
+  await expectCentered(viewport, "xAI, 9 of 9");
+  await carousel.getByRole("button", { name: "Next provider" }).click();
+  const positions = await carousel
+    .getByRole("group", { name: "OpenAI, 1 of 9", exact: true })
+    .locator("[data-film-frame]")
+    .evaluate(
+      (frame) =>
+        new Promise<number[]>((resolve) => {
+          const samples: number[] = [];
+          const sample = () => {
+            const bounds = frame.getBoundingClientRect();
+            samples.push(bounds.x + bounds.width / 2);
+            if (samples.length < 45) requestAnimationFrame(sample);
+            else resolve(samples);
+          };
+          requestAnimationFrame(sample);
+        }),
+    );
+  expect(new Set(positions.map(Math.round)).size).toBeGreaterThan(10);
+  for (let index = 1; index < positions.length; index += 1) {
+    expect(positions[index]).toBeLessThanOrEqual(positions[index - 1] + 0.1);
+    expect(positions[index - 1] - positions[index]).toBeLessThan(40);
+  }
+  await expectCentered(viewport, "OpenAI, 1 of 9");
 });
 
 test("scrubbing animates through intermediate positions and preserves repeated key input", async ({

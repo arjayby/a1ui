@@ -77,11 +77,15 @@ function yaw(frame: HTMLElement) {
 
 describe("CinemaFilm", () => {
   let viewportWidth: number;
+  let layoutStyles: HTMLStyleElement;
   let preference: EventTarget & { matches: boolean; media: string };
 
   beforeEach(() => {
     vi.useFakeTimers();
     viewportWidth = 800;
+    layoutStyles = document.createElement("style");
+    layoutStyles.textContent = '[aria-roledescription="slide"] { margin-right: 28px; }';
+    document.head.appendChild(layoutStyles);
     ResizeObserverStub.instances = [];
     IntersectionObserverStub.instances = [];
     preference = Object.assign(new EventTarget(), {
@@ -107,6 +111,7 @@ describe("CinemaFilm", () => {
 
   afterEach(() => {
     cleanup();
+    layoutStyles.remove();
     vi.restoreAllMocks();
     vi.unstubAllGlobals();
     vi.useRealTimers();
@@ -196,7 +201,7 @@ describe("CinemaFilm", () => {
     expect(first).toBeVisible();
     expect(Number(first.style.opacity)).toBeCloseTo(1);
     expect(projectedDepth(first)).toBeCloseTo(0);
-    expect(screen.getByRole("button", { name: "Previous provider" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Previous provider" })).toBeEnabled();
   });
 
   it("keeps arrow and keyboard navigation synchronized with the active card", () => {
@@ -213,7 +218,86 @@ describe("CinemaFilm", () => {
     fireEvent.keyDown(getViewport(), { key: "End" });
     advance();
     expect(screen.getByRole("status")).toHaveTextContent("xAI, 9 of 9");
-    expect(screen.getByRole("button", { name: "Next provider" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Next provider" })).toBeEnabled();
+  });
+
+  it.each(["Next provider", "Previous provider"])("loops through multiple laps using %s", (buttonName) => {
+    renderFilm();
+    const direction = buttonName === "Next provider" ? 1 : -1;
+    const button = screen.getByRole("button", { name: buttonName });
+    for (let step = 1; step <= items.length * 2 + 1; step += 1) {
+      fireEvent.click(button);
+      advance();
+      const index = (((direction * step) % items.length) + items.length) % items.length;
+      expect(screen.getByRole("slider")).toHaveValue(String(index));
+      const marker = screen.getByRole("slider").parentElement!.querySelector("span span") as HTMLElement;
+      const progress = Number(marker.style.transform.match(/translate3d\(([^%]+)%/)?.[1]);
+      expect(progress).toBeCloseTo((index / (items.length - 1)) * 400, 1);
+      expect(screen.getByRole("status")).toHaveTextContent(`${items[index].name}, ${index + 1} of 9`);
+      expect(projectedDepth(getFrame(`${items[index].name}, ${index + 1} of 9`))).toBeCloseTo(0);
+      expect(button).toBeEnabled();
+    }
+  });
+
+  it("keeps the inward projection continuous across the last-to-first seam", () => {
+    renderFilm({ initialIndex: 8 });
+    const first = getFrame("OpenAI, 1 of 9");
+    const last = getFrame("xAI, 9 of 9");
+    expect(first).toBeVisible();
+    expect(yaw(first)).toBeLessThan(0);
+    const depth = projectedDepth(first);
+    fireEvent.keyDown(getViewport(), { key: "ArrowRight" });
+    advance(96);
+    expect(first).toBeVisible();
+    expect(projectedDepth(first)).toBeLessThan(depth);
+    advance();
+    expect(projectedDepth(first)).toBeCloseTo(0);
+    expect(yaw(last)).toBeGreaterThan(0);
+    expect(screen.getByRole("slider")).toHaveValue("0");
+    fireEvent.keyDown(getViewport(), { key: "ArrowLeft" });
+    advance();
+    expect(screen.getByRole("slider")).toHaveValue("8");
+    expect(projectedDepth(last)).toBeCloseTo(0);
+  });
+
+  it("repeats short lists to fill the viewport while exposing each provider only once", () => {
+    renderFilm({ items: items.slice(0, 2) });
+    expect(getViewport().querySelectorAll('[aria-roledescription="slide"]')).toHaveLength(6);
+    expect(screen.getAllByRole("group", { name: /, [12] of 2$/ })).toHaveLength(2);
+    expect(getViewport().querySelectorAll('[aria-hidden="true"][inert]')).toHaveLength(4);
+    for (let step = 1; step <= 8; step += 1) {
+      fireEvent.click(screen.getByRole("button", { name: "Next provider" }));
+      advance();
+      const index = step % 2;
+      expect(screen.getByRole("slider")).toHaveValue(String(index));
+      expect(screen.getAllByRole("group", { name: /, [12] of 2$/ })).toHaveLength(2);
+      expect(projectedDepth(getFrame(`${items[index].name}, ${index + 1} of 2`))).toBeCloseTo(0);
+    }
+    fireEvent.change(screen.getByRole("slider"), { target: { value: "1" } });
+    advance();
+    expect(screen.getByRole("status")).toHaveTextContent("Anthropic, 2 of 2");
+  });
+
+  it("adds and removes looping copies on resize without changing the selected provider", () => {
+    renderFilm({ initialIndex: 8 });
+    act(() => {
+      viewportWidth = 2400;
+      [...ResizeObserverStub.instances].forEach((observer) => observer.notify());
+    });
+    advance();
+    expect(getViewport().querySelectorAll('[aria-roledescription="slide"]')).toHaveLength(18);
+    expect(screen.getByRole("status")).toHaveTextContent("xAI, 9 of 9");
+    fireEvent.click(screen.getByRole("button", { name: "Next provider" }));
+    advance();
+    expect(screen.getByRole("status")).toHaveTextContent("OpenAI, 1 of 9");
+    act(() => {
+      viewportWidth = 800;
+      [...ResizeObserverStub.instances].forEach((observer) => observer.notify());
+    });
+    advance();
+    expect(getViewport().querySelectorAll('[aria-roledescription="slide"]')).toHaveLength(9);
+    expect(screen.getByRole("status")).toHaveTextContent("OpenAI, 1 of 9");
+    expect(projectedDepth(getFrame("OpenAI, 1 of 9"))).toBeCloseTo(0);
   });
 
   it("does not intercept keyboard events from content inside a card", () => {
@@ -241,7 +325,7 @@ describe("CinemaFilm", () => {
     advance(32);
     expect(slider).toHaveValue("7");
     fireEvent.mouseDown(getViewport(), { button: 0, buttons: 1, clientX: 400, clientY: 100 });
-    expect(Number((slider as HTMLInputElement).value)).toBeLessThan(7);
+    expect(slider).not.toHaveValue("7");
     fireEvent.mouseUp(document, { button: 0, clientX: 400, clientY: 100 });
     advance();
     const index = Number((slider as HTMLInputElement).value);
