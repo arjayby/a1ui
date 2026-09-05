@@ -12,7 +12,7 @@ const demoItems: ParticleMenuItem[] = [
 export function ParticleMenuPreview() {
   return (
     <div className="demo-frame particle-menu-preview">
-      <ParticleMenu items={demoItems.slice(1, 3)} />
+      <ParticleMenu items={demoItems} />
     </div>
   );
 }

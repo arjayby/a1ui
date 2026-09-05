@@ -386,9 +386,19 @@ select:focus-visible {
   padding: 0;
 }
 
+.particle-menu-preview nav ul {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem 1rem;
+}
+
+.particle-menu-preview :is(a, button) {
+  padding-block: 0.25rem;
+}
+
 .particle-menu-preview svg {
-  width: 5rem;
-  height: 5rem;
+  width: 4rem;
+  height: 4rem;
 }
 
 .particle-menu-preview span {
