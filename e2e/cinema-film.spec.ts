@@ -72,7 +72,7 @@ test("arrows, keyboard, and scrubber share the same position and endpoints", asy
   await slider.click({ position: { x: scrubber.width / 2, y: scrubber.height / 2 } });
   await expect(slider).toHaveValue("4");
   await expect(carousel.locator('[aria-current="true"]')).toHaveAttribute("aria-label", "Mistral AI, 5 of 9");
-  await expect(carousel.locator("img")).toHaveCount(0);
+  await expect(carousel.locator("img")).toHaveCount(9);
   await expect(carousel.locator("[data-film-frame]")).toHaveCount(9);
 });
 

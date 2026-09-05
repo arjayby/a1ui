@@ -52,7 +52,7 @@ export function Providers() {
 | `className`    | `string`           | None            | Sets layout constraints such as width or placement.     |
 | `style`        | `CSSProperties`    | None            | Overrides the film's CSS variables.                     |
 
-Each item needs a unique `id` and a `name`. Optional `logo` content replaces the visible name. Optional `artwork` content fills the square behind it. The demo leaves every artwork slot empty.
+Each item needs a unique `id` and a `name`. Optional `logo` content replaces the visible name. Optional `artwork` content fills the square behind it while the name stays centered. Every provider in the demo has a unique generated monochrome image with a soft overlay to keep the names readable. Demo images are separate from the installable component; pass your own images through `artwork`.
 
 Cards line the inside of a sphere with the viewer at its center. The middle sits farther away, while the sides face inward and grow larger as they wrap toward the viewer. The perspective adapts to the available width.
 

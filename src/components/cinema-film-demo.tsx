@@ -1,18 +1,34 @@
+import Image from "next/image";
 import type { CSSProperties } from "react";
 
 import { CinemaFilm, type CinemaFilmItem } from "@/registry/cinema-film";
 
+function FilmArtwork({ scene }: { scene: string }) {
+  return (
+    <div aria-hidden="true" className="cinema-film-artwork">
+      <Image
+        src={`/images/cinema-film/${scene}.webp`}
+        alt=""
+        fill
+        sizes="(max-width: 640px) 200px, 320px"
+        className="object-cover"
+        draggable={false}
+      />
+    </div>
+  );
+}
+
 const providers: CinemaFilmItem[] = [
-  { id: "openai", name: "OpenAI" },
-  { id: "elevenlabs", name: "ElevenLabs" },
-  { id: "anthropic", name: "Anthropic" },
-  { id: "google", name: "Google" },
-  { id: "mistral", name: "Mistral AI" },
-  { id: "deepseek", name: "DeepSeek" },
-  { id: "runway", name: "Runway" },
-  { id: "cohere", name: "Cohere" },
-  { id: "xai", name: "xAI" },
-];
+  { id: "openai", name: "OpenAI", scene: "astral" },
+  { id: "elevenlabs", name: "ElevenLabs", scene: "sound-wave" },
+  { id: "anthropic", name: "Anthropic", scene: "porsche-garage" },
+  { id: "google", name: "Google", scene: "city" },
+  { id: "mistral", name: "Mistral AI", scene: "railway" },
+  { id: "deepseek", name: "DeepSeek", scene: "deep-ocean" },
+  { id: "runway", name: "Runway", scene: "airport-runway" },
+  { id: "cohere", name: "Cohere", scene: "library" },
+  { id: "xai", name: "xAI", scene: "radio-telescope" },
+].map(({ scene, ...provider }) => ({ ...provider, artwork: <FilmArtwork scene={scene} /> }));
 
 export function CinemaFilmPreview() {
   return (
