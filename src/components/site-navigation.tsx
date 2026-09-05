@@ -5,7 +5,7 @@ import { Search } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
-import { components, componentCategories } from "@/lib/component-catalog";
+import { components } from "@/lib/component-catalog";
 import { cn } from "@/lib/utils";
 
 function SearchButton({ compact = false }: { compact?: boolean }) {
@@ -40,31 +40,25 @@ export function DesktopNavigation() {
         <SearchButton />
       </div>
       <nav aria-label="Components" className="mt-8">
-        {componentCategories.map((category) => (
-          <div key={category} className="mb-6">
-            <p className="mb-3 font-bold">{category}</p>
-            <ul className="flex list-none flex-col gap-1 p-0">
-              {components
-                .filter((component) => component.category === category)
-                .map((component) => {
-                  const href = `/components/${component.slug}`;
-                  const current = pathname === href;
+        <p className="mb-3 font-bold">Components</p>
+        <ul className="flex list-none flex-col gap-1 p-0">
+          {components.map((component) => {
+            const href = `/components/${component.slug}`;
+            const current = pathname === href;
 
-                  return (
-                    <li key={component.slug}>
-                      <Link
-                        href={href}
-                        aria-current={current ? "page" : undefined}
-                        className="hover:bg-muted aria-[current=page]:bg-foreground aria-[current=page]:text-background block rounded-sm px-2 py-1.5 no-underline"
-                      >
-                        {component.title}
-                      </Link>
-                    </li>
-                  );
-                })}
-            </ul>
-          </div>
-        ))}
+            return (
+              <li key={component.slug}>
+                <Link
+                  href={href}
+                  aria-current={current ? "page" : undefined}
+                  className="hover:bg-muted aria-[current=page]:bg-foreground aria-[current=page]:text-background block rounded-sm px-2 py-1.5 no-underline"
+                >
+                  {component.title}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
       </nav>
     </aside>
   );
@@ -89,16 +83,10 @@ export function MobileNavigation() {
         onChange={(event) => router.push(event.target.value)}
       >
         <option value="/">Components</option>
-        {componentCategories.map((category) => (
-          <optgroup key={category} label={category}>
-            {components
-              .filter((component) => component.category === category)
-              .map((component) => (
-                <option key={component.slug} value={`/components/${component.slug}`}>
-                  {component.title}
-                </option>
-              ))}
-          </optgroup>
+        {components.map((component) => (
+          <option key={component.slug} value={`/components/${component.slug}`}>
+            {component.title}
+          </option>
         ))}
       </select>
       <SearchButton compact />
