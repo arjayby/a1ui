@@ -7,7 +7,7 @@
       "name": "shape-flow",
       "type": "registry:ui",
       "title": "Shape Flow",
-      "description": "Text that reflows around a draggable circle, powered by Pretext.",
+      "description": "Text that reflows around a draggable X, powered by Pretext.",
       "dependencies": ["@chenglou/pretext@^0.0.8", "clsx"],
       "files": [{ "path": "src/registry/shape-flow.tsx", "type": "registry:ui" }]
     },

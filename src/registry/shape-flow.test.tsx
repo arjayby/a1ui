@@ -6,7 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ShapeFlow } from "./shape-flow";
 
-// Browser tests cover real font metrics and circle collisions. These tests isolate
+// Browser tests cover real font metrics and X collisions. These tests isolate
 // the component's loading, accessibility, caching, and cleanup contracts.
 vi.mock("@chenglou/pretext", () => ({
   prepareWithSegments: vi.fn((text: string) => ({ segments: [text] })),
@@ -92,7 +92,7 @@ describe("ShapeFlow", () => {
       "aria-hidden",
       "true",
     );
-    expect(screen.getByRole("button", { name: "Move circle" })).toHaveAccessibleDescription(
+    expect(screen.getByRole("button", { name: "Move X" })).toHaveAccessibleDescription(
       /arrow keys.*Home to reset/,
     );
   });
@@ -148,7 +148,7 @@ describe("ShapeFlow", () => {
     const { rerender } = render(<ShapeFlow text="Measure once." />);
     resizeTo(500);
     await flush();
-    const handle = screen.getByRole("button", { name: "Move circle" });
+    const handle = screen.getByRole("button", { name: "Move X" });
     const start = handle.style.left;
     fireEvent.keyDown(handle, { key: "ArrowRight" });
     expect(handle.style.left).not.toBe(start);

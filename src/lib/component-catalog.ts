@@ -34,7 +34,7 @@ export const components = [
   {
     slug: "shape-flow",
     title: "Shape Flow",
-    description: "Text that reflows around a draggable circle, powered by Pretext.",
+    description: "Text that reflows around a draggable X, powered by Pretext.",
   },
   {
     slug: "spiral-text",

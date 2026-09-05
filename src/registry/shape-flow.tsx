@@ -21,15 +21,30 @@ export type ShapeFlowProps = {
   className?: string;
 };
 
-const initialPosition = { x: 0.55, y: 0.4 };
+const initialPosition = { x: 0.5, y: 0.5 };
+const xArms = [
+  [
+    [0, 20],
+    [20, 0],
+    [100, 80],
+    [80, 100],
+  ],
+  [
+    [80, 0],
+    [100, 20],
+    [20, 100],
+    [0, 80],
+  ],
+];
+const xPoints = xArms.map((arm) => arm.map((point) => point.join(",")).join(" "));
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 const positive = (value: number, fallback: number) =>
   Number.isFinite(value) && value > 0 ? value : fallback;
 
 export function ShapeFlow({
   text,
-  radius = 64,
-  gap = 14,
+  radius = 80,
+  gap = 4,
   height = 320,
   fontSize = 18,
   lineHeight = 28,
@@ -51,12 +66,10 @@ export function ShapeFlow({
   const size = positive(fontSize, 18);
   const leading = Math.max(size, positive(lineHeight, 28));
   const areaHeight = positive(height, 320);
-  const spacing = Number.isFinite(gap) ? Math.max(0, gap) : 14;
-  const circleRadius = Math.min(positive(radius, 64), width / 3, areaHeight / 3);
-  const travelX = Math.max(0, width - circleRadius * 2);
-  const travelY = Math.max(0, areaHeight - circleRadius * 2);
-  const centerX = circleRadius + position.x * travelX;
-  const centerY = circleRadius + position.y * travelY;
+  const spacing = Number.isFinite(gap) ? Math.max(0, gap) : 4;
+  const halfExtent = Math.min(positive(radius, 80), width / 3, areaHeight / 3);
+  const travelX = Math.max(0, width - halfExtent * 2);
+  const centerX = halfExtent + position.x * travelX;
   const font = `400 ${size}px ${fontFamily}`;
   const prepared = measurement?.text === text && measurement.font === font ? measurement.prepared : null;
 
@@ -88,36 +101,77 @@ export function ShapeFlow({
 
   const flow = useMemo(() => {
     if (!prepared || width <= 0) return null;
-    const fragments: { text: string; x: number; y: number; width: number }[] = [];
-    let cursor: LayoutCursor = { segmentIndex: 0, graphemeIndex: 0 };
-    let y = 0;
-    const exclusionRadius = circleRadius + spacing;
+    const layoutAtHeight = (layoutHeight: number) => {
+      const centerY = halfExtent + position.y * Math.max(0, layoutHeight - halfExtent * 2);
+      const fragments: { text: string; x: number; y: number; width: number }[] = [];
+      let cursor: LayoutCursor = { segmentIndex: 0, graphemeIndex: 0 };
+      let y = 0;
+      while (true) {
+        // Project each convex arm across the full line box separately. Combining
+        // their outer bounds would incorrectly block the gaps above and below the X.
+        const scale = (halfExtent * 2) / 100;
+        const bandTop = (y - spacing - (centerY - halfExtent)) / scale;
+        const bandBottom = (y + leading + spacing - (centerY - halfExtent)) / scale;
+        const blocked: [number, number][] = [];
+        for (const arm of xArms) {
+          let left = Infinity;
+          let right = -Infinity;
+          for (let index = 0; index < arm.length; index++) {
+            const [x1, y1] = arm[index];
+            const [x2, y2] = arm[(index + 1) % arm.length];
+            const top = Math.max(bandTop, Math.min(y1, y2));
+            const bottom = Math.min(bandBottom, Math.max(y1, y2));
+            if (top > bottom) continue;
+            for (const edgeY of [top, bottom]) {
+              const edgeX = x1 + ((edgeY - y1) / (y2 - y1)) * (x2 - x1);
+              left = Math.min(left, edgeX);
+              right = Math.max(right, edgeX);
+            }
+          }
+          if (left <= right)
+            blocked.push([
+              clamp(centerX - halfExtent + left * scale - spacing, 0, width),
+              clamp(centerX - halfExtent + right * scale + spacing, 0, width),
+            ]);
+        }
+        blocked.sort((a, b) => a[0] - b[0]);
+        const intervals: [number, number][] = [];
+        let nextLeft = 0;
+        for (const [left, right] of blocked) {
+          if (left > nextLeft) intervals.push([nextLeft, left]);
+          nextLeft = Math.max(nextLeft, right);
+        }
+        if (nextLeft < width) intervals.push([nextLeft, width]);
 
-    while (true) {
-      // Use the closest point on the entire line box, not just its baseline.
-      const distance = Math.max(y - centerY, centerY - (y + leading), 0);
-      const halfWidth = distance < exclusionRadius ? Math.sqrt(exclusionRadius ** 2 - distance ** 2) : 0;
-      const intervals =
-        halfWidth > 0
-          ? [
-              [0, Math.max(0, centerX - halfWidth)],
-              [Math.min(width, centerX + halfWidth), width],
-            ]
-          : [[0, width]];
-
-      for (const [left, right] of intervals) {
-        const available = right - left;
-        // Skip slivers beside the shape, but allow narrow containers below it.
-        if (available <= 0 || (halfWidth > 0 && available < size * 2)) continue;
-        const range = layoutNextLineRange(prepared, cursor, available);
-        if (!range) return { fragments, height: Math.max(areaHeight, y + leading) };
-        const line = materializeLineRange(prepared, range);
-        fragments.push({ text: line.text, x: left, y, width: available });
-        cursor = range.end;
+        for (const [left, right] of intervals) {
+          const available = right - left;
+          // Skip slivers beside the shape, but allow narrow containers below it.
+          if (available <= 0 || (blocked.length > 0 && available < size * 2)) continue;
+          const range = layoutNextLineRange(prepared, cursor, available);
+          if (!range) {
+            const lastLine = fragments[fragments.length - 1];
+            return { fragments, height: Math.max(layoutHeight, lastLine ? lastLine.y + leading : 0) };
+          }
+          const line = materializeLineRange(prepared, range);
+          fragments.push({ text: line.text, x: left, y, width: available });
+          cursor = range.end;
+        }
+        y += leading;
       }
-      y += leading;
+    };
+    // Text can make the area taller than its minimum. Reflow at the expanded
+    // height so the shape and its drag bounds use the same final rectangle.
+    // Only grow during this calculation to avoid oscillating between line breaks.
+    let layoutHeight = areaHeight;
+    while (true) {
+      const result = layoutAtHeight(layoutHeight);
+      if (result.height <= layoutHeight) return result;
+      layoutHeight = result.height;
     }
-  }, [prepared, width, circleRadius, spacing, centerX, centerY, leading, size, areaHeight]);
+  }, [prepared, width, halfExtent, spacing, centerX, position.y, leading, size, areaHeight]);
+
+  const travelY = Math.max(0, (flow?.height ?? areaHeight) - halfExtent * 2);
+  const centerY = halfExtent + position.y * travelY;
 
   function startDrag(event: PointerEvent<HTMLButtonElement>) {
     if (!event.isPrimary || event.button !== 0 || dragRef.current) return;
@@ -140,8 +194,8 @@ export function ShapeFlow({
     const drag = dragRef.current;
     if (!drag || drag.id !== event.pointerId) return;
     setPosition({
-      x: travelX ? clamp((event.clientX - drag.left - drag.x - circleRadius) / travelX, 0, 1) : 0.5,
-      y: travelY ? clamp((event.clientY - drag.top - drag.y - circleRadius) / travelY, 0, 1) : 0.5,
+      x: travelX ? clamp((event.clientX - drag.left - drag.x - halfExtent) / travelX, 0, 1) : 0.5,
+      y: travelY ? clamp((event.clientY - drag.top - drag.y - halfExtent) / travelY, 0, 1) : 0.5,
     });
   }
 
@@ -210,20 +264,20 @@ export function ShapeFlow({
             ))}
           </div>
           <span id={instructionsId} className="sr-only">
-            Drag to move the circle. Or use arrow keys, hold Shift for larger steps, and press Home to reset.
+            Drag to move the X. Or use arrow keys, hold Shift for larger steps, and press Home to reset.
           </span>
           <button
             type="button"
-            aria-label="Move circle"
+            aria-label="Move X"
             aria-describedby={instructionsId}
             data-slot="shape-flow-handle"
             data-dragging={dragging}
-            className="bg-foreground text-background focus-visible:outline-ring absolute flex touch-none items-center justify-center rounded-full border-0 p-0 select-none focus-visible:outline-2 focus-visible:outline-offset-4"
+            className="text-foreground focus-visible:outline-ring pointer-events-none absolute flex touch-none items-center justify-center border-0 bg-transparent p-0 select-none focus-visible:outline-2 focus-visible:outline-offset-4"
             style={{
-              left: centerX - circleRadius,
-              top: centerY - circleRadius,
-              width: circleRadius * 2,
-              height: circleRadius * 2,
+              left: centerX - halfExtent,
+              top: centerY - halfExtent,
+              width: halfExtent * 2,
+              height: halfExtent * 2,
               cursor: dragging ? "grabbing" : "grab",
             }}
             onPointerDown={startDrag}
@@ -233,20 +287,10 @@ export function ShapeFlow({
             onLostPointerCapture={endDrag}
             onKeyDown={moveWithKeyboard}
           >
-            <svg
-              aria-hidden="true"
-              viewBox="0 0 128 128"
-              className="absolute size-full"
-              fill="none"
-              stroke="currentColor"
-            >
-              {[24, 36, 48, 59].map((r) => (
-                <circle key={r} cx="64" cy="64" r={r} opacity="0.2" />
+            <svg aria-hidden="true" viewBox="0 0 100 100" className="absolute size-full" fill="currentColor">
+              {xPoints.map((points) => (
+                <polygon key={points} points={points} className="pointer-events-auto" />
               ))}
-              <path
-                d="M64 49v30m-15-15h30m-20-10 5-5 5 5m-10 20 5 5 5-5M54 59l-5 5 5 5m20-10 5 5-5 5"
-                strokeWidth="1.5"
-              />
             </svg>
           </button>
         </>
