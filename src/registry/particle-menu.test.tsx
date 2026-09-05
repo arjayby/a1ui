@@ -37,7 +37,7 @@ describe("ParticleMenu", () => {
   }
 
   it.each(["grace", "runes", "ashes", "oaths"] as const)(
-    "%s responds to the pointer, settles, and restores its exact silhouette",
+    "%s responds to the pointer, returns gradually, and restores its exact silhouette",
     (shape) => {
       const { unmount } = render(<ParticleMenu items={[{ ...items[0], shape }]} />);
       const control = screen.getByRole("button", { name: "Grace" });
@@ -53,7 +53,11 @@ describe("ParticleMenu", () => {
       expect(path.getAttribute("d")).not.toBe(firstPosition);
 
       fireEvent.pointerLeave(control);
-      act(() => vi.advanceTimersByTime(2000));
+      act(() => vi.advanceTimersByTime(750));
+      expect(path).not.toHaveAttribute("d", original);
+      expect(vi.getTimerCount()).toBeGreaterThan(0);
+
+      act(() => vi.advanceTimersByTime(4000));
       expect(path).toHaveAttribute("d", original);
       expect(vi.getTimerCount()).toBe(0);
       unmount();

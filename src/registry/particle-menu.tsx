@@ -551,6 +551,9 @@ function ParticleMenuEntry({
       // Normalize the spring to a 60 Hz timestep, including high-refresh displays.
       const step = previousTime ? Math.min((time - previousTime) / 16.667, 2) : 1;
       previousTime = time;
+      // Respond quickly to the pointer, then let the grains drift home after leaving.
+      const spring = active ? 0.085 : 0.004;
+      const damping = Math.pow(active ? 0.76 : 0.86, step);
       let movement = 0;
       particles.forEach((particle, index) => {
         const home = points[index];
@@ -563,11 +566,17 @@ function ParticleMenuEntry({
         // A slight tangential force gives the grain a curling, liquid movement.
         const targetX = home.x + (Math.cos(angle) - Math.sin(angle) * 0.35) * displacement;
         const targetY = home.y + (Math.sin(angle) + Math.cos(angle) * 0.35) * displacement;
-        particle.vx = (particle.vx + (targetX - particle.x) * 0.085 * step) * Math.pow(0.76, step);
-        particle.vy = (particle.vy + (targetY - particle.y) * 0.085 * step) * Math.pow(0.76, step);
+        particle.vx = (particle.vx + (targetX - particle.x) * spring * step) * damping;
+        particle.vy = (particle.vy + (targetY - particle.y) * spring * step) * damping;
         particle.x += particle.vx * step;
         particle.y += particle.vy * step;
-        movement = Math.max(movement, Math.abs(targetX - particle.x), Math.abs(targetY - particle.y));
+        movement = Math.max(
+          movement,
+          Math.abs(targetX - particle.x),
+          Math.abs(targetY - particle.y),
+          Math.abs(particle.vx),
+          Math.abs(particle.vy),
+        );
       });
 
       path.setAttribute("d", dotPath(particles));
