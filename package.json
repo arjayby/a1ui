@@ -20,6 +20,7 @@
   "dependencies": {
     "@types/mdx": "^2.0.14",
     "clsx": "^2.1.1",
+    "embla-carousel-react": "^8.6.0",
     "fumadocs-core": "^16.15.5",
     "fumadocs-mdx": "^15.4.0",
     "fumadocs-ui": "^16.15.5",

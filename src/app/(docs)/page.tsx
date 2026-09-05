@@ -1,6 +1,7 @@
 import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 
+import { CinemaFilmPreview } from "@/components/cinema-film-demo";
 import { SectionRailPreview, SpiralTextPreview } from "@/components/component-demos";
 import { ParticleMenuPreview } from "@/components/particle-menu-demo";
 import { components } from "@/lib/component-catalog";
@@ -9,6 +10,7 @@ const previews = {
   "section-rail": SectionRailPreview,
   "spiral-text": SpiralTextPreview,
   "particle-menu": ParticleMenuPreview,
+  "cinema-film": CinemaFilmPreview,
 };
 
 export default function HomePage() {

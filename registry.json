@@ -38,6 +38,19 @@
           "type": "registry:ui"
         }
       ]
+    },
+    {
+      "name": "cinema-film",
+      "type": "registry:ui",
+      "title": "Cinema Film",
+      "description": "A curved filmstrip with draggable provider cards and synchronized scroll controls.",
+      "dependencies": ["embla-carousel-react@^8.6.0"],
+      "files": [
+        {
+          "path": "src/registry/cinema-film.tsx",
+          "type": "registry:ui"
+        }
+      ]
     }
   ]
 }

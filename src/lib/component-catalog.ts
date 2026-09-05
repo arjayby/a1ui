@@ -14,6 +14,11 @@ export const components = [
     title: "Particle Menu",
     description: "Grainy symbols that scatter around your pointer and spring back into place.",
   },
+  {
+    slug: "cinema-film",
+    title: "Cinema Film",
+    description: "A curved filmstrip with draggable provider cards and synchronized scroll controls.",
+  },
 ] as const;
 
 export type ComponentSlug = (typeof components)[number]["slug"];

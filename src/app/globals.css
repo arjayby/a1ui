@@ -61,8 +61,17 @@
   --color-fd-overlay: color-mix(in oklab, var(--foreground) 18%, transparent);
 }
 
-* {
-  border-color: var(--border);
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+
+  a:focus-visible,
+  button:focus-visible,
+  select:focus-visible {
+    outline: 1px solid var(--foreground);
+    outline-offset: 0.2rem;
+  }
 }
 
 html {
@@ -93,13 +102,6 @@ select,
 code,
 pre {
   font: inherit;
-}
-
-a:focus-visible,
-button:focus-visible,
-select:focus-visible {
-  outline: 1px solid var(--foreground);
-  outline-offset: 0.2rem;
 }
 
 ::selection {
