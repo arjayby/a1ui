@@ -23,7 +23,7 @@ function SearchButton({ compact = false }: { compact?: boolean }) {
       onClick={() => setOpenSearch(true)}
     >
       <span className={cn(compact && "sr-only")}>Search...</span>
-      {compact ? <Search aria-hidden="true" /> : <kbd className="text-muted-foreground">⌘K</kbd>}
+      {compact ? <Search aria-hidden="true" /> : <kbd className="text-muted-foreground">⌘ K</kbd>}
     </button>
   );
 }
