@@ -7,6 +7,7 @@
     "conversation-history",
     "attachments",
     "message-actions",
-    "plan-viewer"
+    "plan-viewer",
+    "action-approval"
   ]
 }

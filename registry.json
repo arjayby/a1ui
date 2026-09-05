@@ -79,6 +79,19 @@
           "type": "registry:ui"
         }
       ]
+    },
+    {
+      "name": "action-approval",
+      "type": "registry:ui",
+      "title": "Action approval",
+      "description": "Review a proposed tool action and record an approval or rejection.",
+      "registryDependencies": ["button", "textarea", "field", "alert"],
+      "files": [
+        {
+          "path": "src/registry/action-approval.tsx",
+          "type": "registry:ui"
+        }
+      ]
     }
   ]
 }

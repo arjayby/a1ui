@@ -80,3 +80,15 @@ test("plan viewer edits, approves and advances execution on mobile", async ({ pa
   await expect(plan.getByRole("status")).toContainText("complete · 3 of 3");
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
+
+test("action approval recovers from a failed save and resolves a rejection", async ({ page }) => {
+  await page.goto("/components/action-approval");
+  const approval = page.getByRole("region", { name: "Action approval", exact: true });
+  await page.getByRole("button", { name: "Simulate save failure" }).click();
+  await approval.getByLabel("Decision note, optional").fill("Review the destination first");
+  await approval.getByRole("button", { name: "Reject action" }).click();
+  await expect(approval.getByRole("alert")).toContainText("Your decision was not recorded");
+  await approval.getByRole("button", { name: "Reject action" }).click();
+  await expect(approval.getByRole("status")).toHaveText("Rejected");
+  await expect(approval.getByText("Decision note: Review the destination first")).toBeVisible();
+});

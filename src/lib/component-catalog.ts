@@ -35,6 +35,12 @@ export const components = [
     title: "Plan viewer",
     description: "Review and edit proposed steps, approve a revision, and follow progress.",
   },
+  {
+    category: "AI chat components",
+    slug: "action-approval",
+    title: "Action approval",
+    description: "Review a proposed tool action and record an approval or rejection.",
+  },
 ] as const;
 
 export const componentCategories = ["Components", "AI chat components"] as const;

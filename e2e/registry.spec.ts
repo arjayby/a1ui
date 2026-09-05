@@ -3,6 +3,7 @@ import { expect, test } from "@playwright/test";
 for (const [name, exportedComponent] of [
   ["section-rail", "SectionRail"],
   ["spiral-text", "SpiralText"],
+  ["action-approval", "ActionApproval"],
   ["plan-viewer", "PlanViewer"],
   ["message-actions", "MessageActions"],
   ["attachments", "Attachments"],
