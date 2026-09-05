@@ -26,6 +26,85 @@
           "type": "registry:ui"
         }
       ]
+    },
+    {
+      "name": "conversation-history",
+      "type": "registry:ui",
+      "title": "Conversation history",
+      "description": "Saved conversations with search, selection, rename, and delete.",
+      "registryDependencies": ["button", "input", "field", "empty", "alert"],
+      "files": [
+        {
+          "path": "src/registry/conversation-history.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "attachments",
+      "type": "registry:ui",
+      "title": "Attachments",
+      "description": "File selection, local previews, and controlled upload states.",
+      "registryDependencies": ["attachment", "input", "field", "alert", "empty"],
+      "files": [
+        {
+          "path": "src/registry/attachments.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "dependencies": ["lucide-react"]
+    },
+    {
+      "name": "message-actions",
+      "type": "registry:ui",
+      "title": "Message actions",
+      "description": "Copy, edit, regenerate, retry, and rate a response.",
+      "registryDependencies": ["button", "textarea", "field", "alert"],
+      "files": [
+        {
+          "path": "src/registry/message-actions.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "plan-viewer",
+      "type": "registry:ui",
+      "title": "Plan viewer",
+      "description": "Review and edit proposed steps, approve a revision, and follow progress.",
+      "registryDependencies": ["button", "input", "textarea", "field", "alert", "empty"],
+      "files": [
+        {
+          "path": "src/registry/plan-viewer.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "action-approval",
+      "type": "registry:ui",
+      "title": "Action approval",
+      "description": "Review a proposed tool action and record an approval or rejection.",
+      "registryDependencies": ["button", "textarea", "field", "alert"],
+      "files": [
+        {
+          "path": "src/registry/action-approval.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "artifact-viewer",
+      "type": "registry:ui",
+      "title": "Artifact viewer",
+      "description": "Preview code, documents, and charts with local download controls.",
+      "registryDependencies": ["button", "alert", "empty"],
+      "files": [
+        {
+          "path": "src/registry/artifact-viewer.tsx",
+          "type": "registry:ui"
+        }
+      ]
     }
   ]
 }

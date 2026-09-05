@@ -1,0 +1,65 @@
+---
+title: Plan viewer
+description: Review and edit proposed steps, approve a revision, and follow progress.
+---
+
+## Demo
+
+<PlanViewerDemo />
+
+## Installation
+
+<Installation name="plan-viewer" />
+
+## Code
+
+<Tabs items={["Usage", "Source", "Demo source"]}>
+<Tab value="Usage">
+
+```tsx
+"use client";
+import { useState } from "react";
+import { PlanViewer, type ChatPlan } from "@/components/ui/plan-viewer";
+
+export function Proposal() {
+  const [plan, setPlan] = useState<ChatPlan>({
+    id: "release",
+    revision: 1,
+    title: "Release checklist",
+    status: "proposed",
+    steps: [{ id: "test", title: "Run checks", status: "pending" }],
+  });
+  return (
+    <PlanViewer
+      plan={plan}
+      onStepsChange={(next) => setPlan({ ...next, revision: next.revision + 1 })}
+      onApprove={(next) => setPlan({ ...next, status: "approved" })}
+    />
+  );
+}
+```
+
+</Tab>
+<Tab value="Source"><ComponentSource name="plan-viewer" /></Tab>
+<Tab value="Demo source"><DemoSource name="plan-viewer" /></Tab>
+</Tabs>
+
+## API reference
+
+| Prop            | Type                                        | Purpose                                                                                                                              |
+| --------------- | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `plan`          | `ChatPlan`                                  | Required controlled plan, including `id`, numeric `revision`, `title`, `status`, and `steps`.                                        |
+| `onStepsChange` | `(plan: ChatPlan) => void \| Promise<void>` | Optional. Enables editing, adding, removing and reordering proposed steps. Persist the returned snapshot and increment its revision. |
+| `onApprove`     | `(plan: ChatPlan) => void \| Promise<void>` | Optional. Approve the exact displayed ID, revision and steps.                                                                        |
+| `disabled`      | `boolean`                                   | Defaults to false. Blocks editing and approval.                                                                                      |
+| `className`     | `string`                                    | Layout classes.                                                                                                                      |
+
+Plan statuses are `proposed`, `approved`, `running`, `complete` and `error`. Each `PlanStep` has a unique `id`, `title`, optional `description`, `status`, and optional `error` string. Step statuses are `pending`, `running`, `complete`, `error` and `skipped`. Progress counts complete and skipped steps; running steps expose `aria-current="step"`.
+
+Editing is available only on proposed plans. Empty plans and blank step titles cannot be approved. Save waits for the host callback; rejected saves leave the draft available. Approval prevents duplicate submissions and stays locked for that revision after success, even if the host has not yet updated status. A new ID or revision resets drafts and pending UI. Increment the revision for changed proposals, including external edits, to avoid approving outdated content. Keep the ID and revision stable for execution status updates.
+
+## Template integration
+
+Render the viewer from a dedicated part component in the reference template's `components/parts/`, then add its typed part case to `components/chat-message.tsx`. Keep `MessageScroller` responsible for layout and streaming. Your host should validate plan data before rendering and map execution events to step states by stable ID.
+
+An approval callback records consent only. It does not run a plan. If your backend supports execution, verify the plan ID and revision on the server, store the decision, and stream actual progress separately. Return a rejected promise for stale revisions so the error is shown. A new revision requires a new approval. Do not use the browser's `approved` display as authorization to execute tools.

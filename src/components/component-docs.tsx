@@ -38,3 +38,11 @@ export async function ComponentSource({ name }: { name: ComponentSlug }) {
 
   return <DynamicCodeBlock lang="tsx" code={source} />;
 }
+
+export async function DemoSource({ name }: { name: ComponentSlug }) {
+  const source = await readFile(
+    path.join(process.cwd(), "src", "components", "demos", `${name}-demo.tsx`),
+    "utf8",
+  );
+  return <DynamicCodeBlock lang="tsx" code={source} />;
+}

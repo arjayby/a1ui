@@ -30,6 +30,14 @@
   --color-muted-foreground: var(--muted-foreground);
   --color-border: var(--border);
   --color-ring: var(--ring);
+  --color-primary: var(--foreground);
+  --color-primary-foreground: var(--background);
+  --color-secondary: var(--muted);
+  --color-secondary-foreground: var(--foreground);
+  --color-accent: var(--muted);
+  --color-accent-foreground: var(--foreground);
+  --color-input: var(--border);
+  --color-destructive: oklch(0.48 0.18 28);
 }
 
 :root {
@@ -250,25 +258,25 @@ select:focus-visible {
   margin-top: 0;
 }
 
-.component-doc-body p {
+.component-doc-body p:not(:where(.not-prose, .not-prose *)) {
   margin: 0.8rem 0;
 }
 
-.component-doc-body table {
+.component-doc-body table:not(:where(.not-prose, .not-prose *)) {
   width: 100%;
   border-collapse: collapse;
   font-size: 0.75rem;
 }
 
-.component-doc-body th,
-.component-doc-body td {
+.component-doc-body th:not(:where(.not-prose, .not-prose *)),
+.component-doc-body td:not(:where(.not-prose, .not-prose *)) {
   padding: 0.7rem 0.8rem;
   border-bottom: 1px solid var(--border);
   text-align: left;
   vertical-align: top;
 }
 
-.component-doc-body th {
+.component-doc-body th:not(:where(.not-prose, .not-prose *)) {
   font-weight: 700;
 }
 

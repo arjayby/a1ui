@@ -1,0 +1,68 @@
+---
+title: Attachments
+description: File selection, local previews, and controlled upload states.
+---
+
+## Demo
+
+<AttachmentsDemo />
+
+## Installation
+
+<Installation name="attachments" />
+
+## Code
+
+<Tabs items={["Usage", "Source", "Demo source"]}>
+<Tab value="Usage">
+
+```tsx
+"use client";
+import { useState } from "react";
+import { Attachments, type ChatAttachment } from "@/components/ui/attachments";
+
+export function FilePicker() {
+  const [items, setItems] = useState<ChatAttachment[]>([]);
+  return (
+    <Attachments
+      items={items}
+      onFilesSelected={(files) =>
+        setItems((current) => [
+          ...current,
+          ...files.map((file) => ({ id: crypto.randomUUID(), file, status: "idle" as const })),
+        ])
+      }
+      onRemove={(id) => setItems((current) => current.filter((item) => item.id !== id))}
+    />
+  );
+}
+```
+
+</Tab>
+<Tab value="Source"><ComponentSource name="attachments" /></Tab>
+<Tab value="Demo source"><DemoSource name="attachments" /></Tab>
+</Tabs>
+
+## API reference
+
+| Prop              | Type                                       | Purpose                                                                                       |
+| ----------------- | ------------------------------------------ | --------------------------------------------------------------------------------------------- |
+| `items`           | `readonly ChatAttachment[]`                | Required. Stable unique `id`, browser `file`, `status`, optional `progress` and `error`.      |
+| `onFilesSelected` | `(files: File[]) => void \| Promise<void>` | Required. Receive a validated batch. Rejections appear inline. Add items to controlled state. |
+| `onRemove`        | `(id: string) => void`                     | Required. Cancel any upload and remove the item from state.                                   |
+| `onRetry`         | `(id: string) => void`                     | Optional. Shows Retry for failed items. Host starts the request and updates state.            |
+| `accept`          | `string`                                   | Optional browser file-picker hint, such as `image/*,.pdf`.                                    |
+| `maxFiles`        | `number`                                   | Defaults to 5. Maximum selected files, including existing items.                              |
+| `maxFileSize`     | `number`                                   | Defaults to 10 MiB in bytes. Oversized batches are rejected together.                         |
+| `disabled`        | `boolean`                                  | Defaults to false. Disables selection, removal and retries.                                   |
+| `className`       | `string`                                   | Layout classes.                                                                               |
+
+Statuses are `idle`, `uploading`, `processing`, `done`, and `error`. Progress is a percentage, clamped to 0–100. Omit it for indeterminate uploads. `done` means the host considers the file ready. The component does not start network requests or fabricate uploaded URLs.
+
+Only local PNG, JPEG, GIF, WebP and AVIF files get previews. Object URLs are revoked when files change or unmount. Other formats display file metadata. Invalid images fall back to an icon. The native picker is keyboard accessible and supports multiple files. `accept` is a picker hint, not a security check. Validate content, types, count and size on your upload endpoint too. Supply positive limits.
+
+## Template integration
+
+Place `Attachments` above the input in the reference template's `components/prompt-form.tsx`, outside its `InputGroup`. Keep upload state in the client host. Use your upload service's progress events to set `progress` and `status`. Keep request cancellation handles by attachment ID and abort them in `onRemove` and on unmount.
+
+The template currently submits text only. Extend its submit callback to include verified uploaded file parts, or browser files if your chosen AI SDK transport supports them. Disable sending while attachments are still uploading or have failed. Never send the preview's `blob:` URL to a remote model. The demo source provides lifecycle handling with timers, clearly marked as simulation; replace those timers with your upload implementation.
