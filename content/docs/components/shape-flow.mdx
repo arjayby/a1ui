@@ -50,7 +50,7 @@ export function ShapeFlowExample() {
 | `fontFamily` | `string` | `"Georgia"` | Named font family used for both measurement and rendering.                         |
 | `className`  | `string` | None        | Outer layout classes, such as `max-w-xl`.                                          |
 
-Text fills the available spaces on either side and between the arms of the X. Gaps narrower than two characters are skipped. Drag with a mouse, pen, or touch. Focus the X and use arrow keys to move it by 8 pixels, or hold Shift for 32-pixel steps. Home centers the X in the full layout. The X stays inside the drag area when the container resizes.
+Text fills the available spaces on either side and between the arms of the X. Gaps narrower than two characters are skipped. Drag any arm with a mouse, pen, or touch. Focus the X and use arrow keys to move it by 8 pixels, or hold Shift for 32-pixel steps. Home centers the X in the full layout. The X stays inside the drag area when the container resizes.
 
 The full paragraph renders on the server and remains available to screen readers. Once the font loads, the component uses [Pretext](https://github.com/chenglou/pretext) to measure the text once and reuse those measurements during dragging and resizing. If font measurement is unavailable, it keeps the ordinary paragraph. No automatic animation runs, including with reduced motion enabled.
 

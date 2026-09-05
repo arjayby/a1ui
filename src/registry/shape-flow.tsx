@@ -22,19 +22,19 @@ export type ShapeFlowProps = {
 };
 
 const initialPosition = { x: 0.5, y: 0.5 };
+const upperLeftArm = [
+  [0, 0],
+  [16, 0],
+  [47, 31],
+  [47, 47],
+  [31, 47],
+  [0, 16],
+];
 const xArms = [
-  [
-    [0, 20],
-    [20, 0],
-    [100, 80],
-    [80, 100],
-  ],
-  [
-    [80, 0],
-    [100, 20],
-    [20, 100],
-    [0, 80],
-  ],
+  upperLeftArm,
+  upperLeftArm.map(([x, y]) => [100 - x, y]),
+  upperLeftArm.map(([x, y]) => [x, 100 - y]),
+  upperLeftArm.map(([x, y]) => [100 - x, 100 - y]),
 ];
 const xPoints = xArms.map((arm) => arm.map((point) => point.join(",")).join(" "));
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
@@ -122,6 +122,11 @@ export function ShapeFlow({
             const top = Math.max(bandTop, Math.min(y1, y2));
             const bottom = Math.min(bandBottom, Math.max(y1, y2));
             if (top > bottom) continue;
+            if (y1 === y2) {
+              left = Math.min(left, x1, x2);
+              right = Math.max(right, x1, x2);
+              continue;
+            }
             for (const edgeY of [top, bottom]) {
               const edgeX = x1 + ((edgeY - y1) / (y2 - y1)) * (x2 - x1);
               left = Math.min(left, edgeX);

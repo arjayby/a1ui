@@ -77,9 +77,10 @@ test("dragging reflows every word around the X and releases pointer capture", as
   const handle = flow.getByRole("button", { name: "Move X" });
   const before = await handle.boundingBox();
   const initialLines = await flow.locator('[data-slot="shape-flow-line"]').allTextContents();
-  await page.mouse.move(before!.x + before!.width / 2, before!.y + before!.height / 2);
+  // Grab an arm; the reference shape has an open cross at its center.
+  await page.mouse.move(before!.x + before!.width / 4, before!.y + before!.height / 4);
   await page.mouse.down();
-  await page.mouse.move(before!.x + before!.width / 2 - 90, before!.y + before!.height / 2 + 70, {
+  await page.mouse.move(before!.x + before!.width / 4 - 90, before!.y + before!.height / 4 + 70, {
     steps: 12,
   });
   await expect(handle).toHaveAttribute("data-dragging", "true");
@@ -169,8 +170,8 @@ test("touch dragging and cancellation release the X", async ({ browser }) => {
   const handle = flow.getByRole("button", { name: "Move X" });
   await handle.scrollIntoViewIfNeeded();
   const before = await handle.boundingBox();
-  const x = before!.x + before!.width / 2;
-  const y = before!.y + before!.height / 2;
+  const x = before!.x + before!.width / 4;
+  const y = before!.y + before!.height / 4;
   const session = await context.newCDPSession(page);
   await session.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x, y }] });
   await session.send("Input.dispatchTouchEvent", {
