@@ -138,10 +138,12 @@ select:focus-visible {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 17rem));
   gap: 1rem;
+  align-items: start;
   margin-top: 3rem;
 }
 
 .catalog-card {
+  position: relative;
   display: flex;
   min-width: 0;
   flex-direction: column;
@@ -153,17 +155,46 @@ select:focus-visible {
     transform 120ms ease;
 }
 
-.catalog-card:has(a:hover) {
+.catalog-card:has(.catalog-card-link:hover),
+.catalog-card:has(.catalog-card-link:focus-visible) {
   border-color: var(--foreground);
   transform: translateY(-1px);
 }
 
 .catalog-preview {
-  display: grid;
-  min-height: 12.5rem;
-  place-items: center;
+  --preview-height: 14rem;
+  --preview-padding: 1.5rem;
+  height: var(--preview-height);
   overflow: hidden;
-  padding: 1.5rem;
+  border-radius: var(--radius) var(--radius) 0 0;
+  pointer-events: none;
+}
+
+.catalog-preview .demo-frame {
+  height: 100%;
+  padding: var(--preview-padding);
+  border: 0;
+  border-radius: 0;
+}
+
+.catalog-preview .spiral-demo > div {
+  width: min(100%, calc(var(--preview-height) - 2 * var(--preview-padding)));
+}
+
+.catalog-card-link::after {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius);
+  content: "";
+}
+
+.catalog-card-link:focus-visible {
+  outline: none;
+}
+
+.catalog-card-link:focus-visible::after {
+  outline: 1px solid var(--foreground);
+  outline-offset: 0.2rem;
 }
 
 .catalog-card-link {
@@ -270,6 +301,11 @@ select:focus-visible {
   gap: 0;
 }
 
+.section-rail-demo.section-rail-preview {
+  grid-template-columns: minmax(0, 1fr);
+  place-items: center;
+}
+
 .section-rail-demo-copy section {
   min-height: 7rem;
   padding-bottom: 1rem;
@@ -330,10 +366,6 @@ select:focus-visible {
   .catalog-grid {
     grid-template-columns: minmax(0, 1fr);
     margin-top: 2rem;
-  }
-
-  .catalog-preview {
-    min-height: 13rem;
   }
 
   .component-doc > header {

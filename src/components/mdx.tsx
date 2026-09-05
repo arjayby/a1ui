@@ -2,7 +2,8 @@ import defaultMdxComponents from "fumadocs-ui/mdx";
 import { Tab, Tabs } from "fumadocs-ui/components/tabs";
 import type { MDXComponents } from "mdx/types";
 
-import { ComponentSource, Installation, SectionRailDemo, SpiralTextDemo } from "@/components/component-docs";
+import { SectionRailDemo, SpiralTextDemo } from "@/components/component-demos";
+import { ComponentSource, Installation } from "@/components/component-docs";
 
 export function getMDXComponents(components?: MDXComponents) {
   return {
