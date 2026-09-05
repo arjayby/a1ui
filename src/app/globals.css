@@ -118,9 +118,17 @@ pre {
 }
 
 .page-frame {
+  display: grid;
   width: min(100%, 76rem);
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 17rem));
+  column-gap: 1rem;
+  justify-content: center;
   margin-inline: auto;
   padding: 4rem 3.5rem 7rem;
+}
+
+.page-frame > header {
+  grid-column: 1 / -1;
 }
 
 .page-heading {
@@ -138,7 +146,8 @@ pre {
 
 .catalog-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 17rem));
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
   gap: 1rem;
   align-items: start;
   margin-top: 3rem;
@@ -211,6 +220,7 @@ pre {
 
 .component-doc {
   width: min(100%, 62rem);
+  margin-inline: auto;
   padding: 4rem 3.5rem 8rem;
 }
 
@@ -549,8 +559,11 @@ pre {
     padding: 2.25rem 1rem 5rem;
   }
 
-  .catalog-grid {
+  .page-frame {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .catalog-grid {
     margin-top: 2rem;
   }
 
