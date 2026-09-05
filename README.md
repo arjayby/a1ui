@@ -10,6 +10,7 @@ With the documentation site running locally:
 pnpm dlx shadcn@latest add http://localhost:3000/r/section-rail.json
 pnpm dlx shadcn@latest add http://localhost:3000/r/spiral-text.json
 pnpm dlx shadcn@latest add http://localhost:3000/r/arc-reel.json
+pnpm dlx shadcn@latest add http://localhost:3000/r/crypto-wallet.json
 pnpm dlx shadcn@latest add http://localhost:3000/r/multichain-swap.json
 pnpm dlx shadcn@latest add http://localhost:3000/r/select-menu.json
 pnpm dlx shadcn@latest add http://localhost:3000/r/text-scramble.json

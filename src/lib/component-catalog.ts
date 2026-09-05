@@ -6,6 +6,12 @@ export const components = [
     description: "An infinitely looping reel with curved provider cards and synchronized scroll controls.",
   },
   {
+    slug: "crypto-wallet",
+    title: "Crypto Wallet",
+    description:
+      "A wallet overview with token balances, recent activity, and send, receive, and swap actions.",
+  },
+  {
     slug: "multichain-swap",
     title: "Multichain Swap",
     description: "A crypto swap form with network selection, token balances, and cross-chain quote details.",

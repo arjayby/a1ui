@@ -3,6 +3,7 @@ import { Tab, Tabs } from "fumadocs-ui/components/tabs";
 import type { MDXComponents } from "mdx/types";
 
 import { ArcReelDemo } from "@/components/arc-reel-demo";
+import { CryptoWalletDemo } from "@/components/crypto-wallet-demo";
 import { SectionRailDemo, SpiralTextDemo } from "@/components/component-demos";
 import { ComponentSource, Installation } from "@/components/component-docs";
 import { ParticleMenuDemo } from "@/components/particle-menu-demo";
@@ -15,6 +16,7 @@ export function getMDXComponents(components?: MDXComponents) {
     ...defaultMdxComponents,
     ArcReelDemo,
     ComponentSource,
+    CryptoWalletDemo,
     Installation,
     MultichainSwapDemo,
     ParticleMenuDemo,

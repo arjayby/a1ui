@@ -1,0 +1,84 @@
+---
+title: Crypto Wallet
+description: A wallet overview with token balances, recent activity, and send, receive, and swap actions.
+---
+
+## Demo
+
+<CryptoWalletDemo />
+
+## Installation
+
+<Installation name="crypto-wallet" />
+
+## Code
+
+<Tabs items={["Usage", "Source"]}>
+  <Tab value="Usage">
+
+```tsx
+"use client";
+
+import { CryptoWallet, type CryptoWalletProps } from "@/components/ui/crypto-wallet";
+
+// Supply account data and callbacks from your wallet integration.
+export function WalletPanel({
+  account,
+  assets,
+  activity,
+  status,
+  error,
+  onConnect,
+  onDisconnect,
+  onSend,
+  onReceive,
+  onSwap,
+}: CryptoWalletProps) {
+  return (
+    <CryptoWallet
+      account={account}
+      assets={assets}
+      activity={activity}
+      status={status}
+      error={error}
+      onConnect={onConnect}
+      onDisconnect={onDisconnect}
+      onSend={onSend}
+      onReceive={onReceive}
+      onSwap={onSwap}
+    />
+  );
+}
+```
+
+  </Tab>
+  <Tab value="Source">
+    <ComponentSource name="crypto-wallet" />
+  </Tab>
+</Tabs>
+
+## API reference
+
+| Prop                            | Type                                             | Default          | Purpose                                                                                |
+| ------------------------------- | ------------------------------------------------ | ---------------- | -------------------------------------------------------------------------------------- |
+| `account`                       | `WalletAccount \| null`                          | Required         | Connected account, or `null` for the connection screen.                                |
+| `assets`                        | `WalletAsset[]`                                  | `[]`             | Token holdings for the current account and network.                                    |
+| `activity`                      | `WalletActivity[]`                               | `[]`             | Transactions in the order you want to display them.                                    |
+| `status`                        | `"idle" \| "connecting" \| "loading" \| "error"` | `"idle"`         | Connection or data state. Non-idle states hide balances and lists and disable actions. |
+| `error`                         | `string`                                         | Built-in message | Connection or data error displayed when status is `"error"`.                           |
+| `onConnect`                     | `() => void`                                     | None             | Opens your connection flow. Required to enable Connect wallet.                         |
+| `onDisconnect`                  | `() => void`                                     | None             | Disconnects through your adapter. Omit to hide the button.                             |
+| `onSend`, `onReceive`, `onSwap` | `(account: WalletAccount) => void`               | None             | Opens the corresponding flow for the current account. Omitted actions are disabled.    |
+| `className`, `style`            | `string`, `CSSProperties`                        | None             | Layout and theme overrides.                                                            |
+
+`WalletAccount` requires `name`, `address`, `network`, and `balance`. `balance` is a formatted display string, such as `"$12,840.50"`. The optional `change` is also a display string, such as `"+$284.32 · 2.26% today"`. The component does not calculate prices or balances.
+
+Each `WalletAsset` requires a unique `id`, `name`, `symbol`, `balance`, and `value`. Pass token quantities as formatted strings and fiat values with their currency symbols. An optional `icon` replaces the symbol's first letter. Each `WalletActivity` requires a unique `id`, `type` of `"send"`, `"receive"`, or `"swap"`, a `label`, formatted `time`, formatted `amount`, and `status` of `"confirmed"`, `"pending"`, or `"failed"`.
+
+Set `status="connecting"` while your wallet connection is pending and `status="loading"` while fetching holdings. On failure, use `status="error"` and supply an error message with recovery instructions. Return to `"idle"` after resolving the request. Clear or replace the account's assets and activity when the address or network changes, and discard responses for previous accounts. Callbacks hand control to your app; your adapter owns connections, data fetching, recipient validation, approvals, and transaction submission.
+
+Hiding balances removes monetary values from both the visible content and the accessibility tree, including activity amounts. It is a display preference, not encryption. The copy button writes the full address to the clipboard. If clipboard access fails, it shows the full selectable address. Copy feedback resets when the account address or network changes.
+
+Tokens and Activity use [Base UI Tabs](https://base-ui.com/react/components/tabs) for arrow-key navigation and panel associations. Buttons have keyboard focus styles, empty lists show an empty state, and copy, loading, and error messages are announced to assistive technology. Transitions respect reduced motion. The component inherits the app's theme; override `--wallet-background`, `--wallet-foreground`, `--wallet-muted`, `--wallet-border`, and `--wallet-panel` through `style` to change its colors.
+
+The demo uses sample data. Connect and disconnect only change its local state. Send simulates completion, Receive shows a sample address, and Swap links to [Multichain Swap](/components/multichain-swap). Installation includes the wallet component and its dependencies, without a wallet SDK.

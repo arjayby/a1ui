@@ -2,6 +2,7 @@ import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 
 import { ArcReelPreview } from "@/components/arc-reel-demo";
+import { CryptoWalletPreview } from "@/components/crypto-wallet-demo";
 import { SectionRailPreview, SpiralTextPreview } from "@/components/component-demos";
 import { ParticleMenuPreview } from "@/components/particle-menu-demo";
 import { MultichainSwapPreview } from "@/components/multichain-swap-demo";
@@ -10,6 +11,7 @@ import { SelectMenuPreview } from "@/components/select-menu-demo";
 import { components } from "@/lib/component-catalog";
 
 const previews = {
+  "crypto-wallet": CryptoWalletPreview,
   "section-rail": SectionRailPreview,
   "spiral-text": SpiralTextPreview,
   "particle-menu": ParticleMenuPreview,

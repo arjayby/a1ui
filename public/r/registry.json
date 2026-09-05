@@ -4,6 +4,14 @@
   "homepage": "http://localhost:3000",
   "items": [
     {
+      "name": "crypto-wallet",
+      "type": "registry:ui",
+      "title": "Crypto Wallet",
+      "description": "A wallet overview with token balances, recent activity, and send, receive, and swap actions.",
+      "dependencies": ["@base-ui/react@^1.8.0", "clsx", "lucide-react"],
+      "files": [{ "path": "src/registry/crypto-wallet.tsx", "type": "registry:ui" }]
+    },
+    {
       "name": "select-menu",
       "type": "registry:ui",
       "title": "Select Menu",

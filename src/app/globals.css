@@ -304,7 +304,8 @@ pre {
   pointer-events: none;
 }
 
-.multichain-swap-demo {
+.multichain-swap-demo,
+.crypto-wallet-demo {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -328,7 +329,8 @@ pre {
   gap: 0.75rem;
 }
 
-.multichain-swap-demo-note {
+.multichain-swap-demo-note,
+.crypto-wallet-demo-note {
   font-size: 0.625rem;
   text-align: center;
   color: var(--muted-foreground);
@@ -352,7 +354,22 @@ pre {
   display: none;
 }
 
-.multichain-swap-review {
+.catalog-preview .crypto-wallet-preview {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 1rem;
+}
+
+.crypto-wallet-preview > section {
+  width: 25rem;
+  flex-shrink: 0;
+  transform: scale(0.45);
+  transform-origin: top center;
+}
+
+.multichain-swap-review,
+.crypto-wallet-dialog {
   position: fixed;
   inset: 0;
   width: min(26rem, calc(100vw - 2rem));
@@ -366,7 +383,8 @@ pre {
   color: var(--foreground);
 }
 
-.multichain-swap-review::backdrop {
+.multichain-swap-review::backdrop,
+.crypto-wallet-dialog::backdrop {
   background: color-mix(in oklab, var(--foreground) 30%, transparent);
   backdrop-filter: blur(4px);
 }

@@ -7,6 +7,7 @@
     "arc-reel",
     "multichain-swap",
     "text-scramble",
-    "select-menu"
+    "select-menu",
+    "crypto-wallet"
   ]
 }
