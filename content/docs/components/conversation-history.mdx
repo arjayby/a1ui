@@ -1,0 +1,70 @@
+---
+title: Conversation history
+description: Saved conversations with search, selection, rename, and delete.
+---
+
+## Demo
+
+<ConversationHistoryDemo />
+
+## Installation
+
+<Installation name="conversation-history" />
+
+## Code
+
+<Tabs items={["Usage", "Source", "Persistence example"]}>
+<Tab value="Usage">
+
+```tsx
+"use client";
+import { useState } from "react";
+import { ConversationHistory } from "@/components/ui/conversation-history";
+
+export function History() {
+  const [items, setItems] = useState([{ id: "one", title: "Launch plan" }]);
+  const [selectedId, setSelectedId] = useState<string>();
+  return (
+    <ConversationHistory
+      conversations={items}
+      selectedId={selectedId}
+      onSelect={setSelectedId}
+      onRename={(id, title) =>
+        setItems((items) => items.map((item) => (item.id === id ? { ...item, title } : item)))
+      }
+      onDelete={(id) => {
+        setItems((items) => items.filter((item) => item.id !== id));
+        setSelectedId((current) => (current === id ? undefined : current));
+      }}
+    />
+  );
+}
+```
+
+</Tab>
+<Tab value="Source"><ComponentSource name="conversation-history" /></Tab>
+<Tab value="Persistence example"><DemoSource name="conversation-history" /></Tab>
+</Tabs>
+
+## API reference
+
+| Prop            | Type                                                   | Purpose                                                                                             |
+| --------------- | ------------------------------------------------------ | --------------------------------------------------------------------------------------------------- |
+| `conversations` | `readonly Conversation[]`                              | Required. Unique stable IDs, titles and optional plain-text previews, in display order.             |
+| `selectedId`    | `string`                                               | Controlled selection. Omit for no selection.                                                        |
+| `onSelect`      | `(id: string) => void`                                 | Required. Open the selected conversation.                                                           |
+| `onRename`      | `(id: string, title: string) => void \| Promise<void>` | Required. Persist the trimmed title and update the list.                                            |
+| `onDelete`      | `(id: string) => void \| Promise<void>`                | Required. Called after inline confirmation. Update the list and clear stale selection.              |
+| `onNew`         | `() => void`                                           | Optional. Shows New chat.                                                                           |
+| `disabled`      | `boolean`                                              | Defaults to false. Disables mutations and selection while the host is busy. Search stays available. |
+| `className`     | `string`                                               | Layout and width.                                                                                   |
+
+Search matches titles and previews locally. Rename and delete wait for the callback, prevent duplicate submissions, and show rejected promises as errors. Empty titles are disabled, Enter saves, and Escape cancels editing. Use unique IDs, and let the host load full messages on selection. A large or paginated history should perform server search in a separate adapter.
+
+The persistence example uses versioned localStorage, validates saved data, and subscribes to other tabs. Storage failures are reported. It stores summaries only and does not provide account sync. Replace its registry import with your installed `@/components/ui/conversation-history` path when copying it.
+
+## Template integration
+
+Reference inspected at [chatbot-template commit f794168](https://github.com/shadcn-ui/chatbot-template/tree/f79416827acd90244683903a34343f58193432ac). Add this beside `Chat` in `components/chat.tsx`. Keep the template's `MessageScroller` and composer. On selection, stop any active response, load that conversation's message bodies, then replace the chat messages through the host's `useChat` state. Store the conversation ID with message persistence so changing the selection cannot write a response to a different conversation.
+
+These components use common shadcn Button, Field and Input props supported by the template's Base UI components. Registry dependencies resolve against the consuming project's shadcn style. No AI SDK or provider dependency is installed.

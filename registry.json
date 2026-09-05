@@ -26,6 +26,19 @@
           "type": "registry:ui"
         }
       ]
+    },
+    {
+      "name": "conversation-history",
+      "type": "registry:ui",
+      "title": "Conversation history",
+      "description": "Saved conversations with search, selection, rename, and delete.",
+      "registryDependencies": ["button", "input", "field", "empty", "alert"],
+      "files": [
+        {
+          "path": "src/registry/conversation-history.tsx",
+          "type": "registry:ui"
+        }
+      ]
     }
   ]
 }

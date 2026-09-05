@@ -1,13 +1,16 @@
+import { ConversationHistoryDemo } from "@/components/demos/conversation-history-demo";
 import defaultMdxComponents from "fumadocs-ui/mdx";
 import { Tab, Tabs } from "fumadocs-ui/components/tabs";
 import type { MDXComponents } from "mdx/types";
 
 import { SectionRailDemo, SpiralTextDemo } from "@/components/component-demos";
-import { ComponentSource, Installation } from "@/components/component-docs";
+import { ComponentSource, DemoSource, Installation } from "@/components/component-docs";
 
 export function getMDXComponents(components?: MDXComponents) {
   return {
     ...defaultMdxComponents,
+    ConversationHistoryDemo,
+    DemoSource,
     ComponentSource,
     Installation,
     SectionRailDemo,
