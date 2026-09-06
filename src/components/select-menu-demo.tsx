@@ -39,7 +39,7 @@ const environments: SelectMenuOption[] = [
 
 export function SelectMenuPreview() {
   return (
-    <div className="demo-frame select-menu-preview">
+    <div className="not-prose demo-frame select-menu-preview">
       <span className="text-muted-foreground text-[10px]">Environment</span>
       <SelectMenu
         options={environments}
@@ -64,7 +64,7 @@ export function SelectMenuDemo() {
   const [value, setValue] = useState("production");
   return (
     <>
-      <div className="demo-frame select-menu-demo">
+      <div className="not-prose demo-frame select-menu-demo">
         <div className="flex w-full max-w-xs flex-col gap-3">
           <label htmlFor="environment-demo" className="text-muted-foreground text-[11px]">
             Environment

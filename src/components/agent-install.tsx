@@ -22,7 +22,7 @@ export function AgentInstall({ name }: { name?: string }) {
   ].join("\n\n");
 
   return (
-    <div className="mt-5 flex flex-wrap items-center gap-3">
+    <div className="not-prose mt-5 flex flex-wrap items-center gap-3">
       <CopyAgentPrompt key={prompt} prompt={prompt} />
       <a
         href={name ? `/docs/components/${name}.md` : "/llms.txt"}

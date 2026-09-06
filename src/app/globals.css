@@ -245,8 +245,34 @@ pre {
 
 .component-doc-body {
   display: flex;
+  min-width: 0;
   flex-direction: column;
   gap: 0;
+  color: inherit;
+  font-size: inherit;
+  line-height: 1.6;
+}
+
+.component-doc-body :where(strong, h5, h6):not(:where(.not-prose, .not-prose *)) {
+  font-weight: 700;
+}
+
+.component-doc-body :where(h5, h6):not(:where(.not-prose, .not-prose *)) {
+  margin: 1.5rem 0 0.5rem;
+  scroll-margin-top: 5rem;
+}
+
+.component-doc-body :where(code):not(:where(.not-prose, .not-prose *, pre *)) {
+  overflow-wrap: anywhere;
+  border-radius: var(--radius);
+}
+
+.component-doc-body :where(th, td) code {
+  white-space: nowrap;
+}
+
+.component-doc-body .not-prose {
+  line-height: 1.2;
 }
 
 .component-doc-body h2 {
@@ -268,6 +294,7 @@ pre {
 
 .component-doc-body table {
   width: 100%;
+  min-width: 40rem;
   border-collapse: collapse;
   font-size: 0.75rem;
 }

@@ -32,7 +32,7 @@ const demoSections = [
 
 export function SectionRailPreview() {
   return (
-    <div className="demo-frame section-rail-demo section-rail-preview">
+    <div className="not-prose demo-frame section-rail-demo section-rail-preview">
       <SectionRail sections={demoSections} gap={0} className="w-5" />
     </div>
   );
@@ -41,7 +41,7 @@ export function SectionRailPreview() {
 export function SectionRailDemo() {
   return (
     <div
-      className="demo-frame section-rail-demo"
+      className="not-prose demo-frame section-rail-demo"
       role="region"
       aria-label="Scrollable Section Rail demo"
       tabIndex={0}
@@ -66,7 +66,7 @@ export function SectionRailDemo() {
 
 export function SpiralTextPreview() {
   return (
-    <div className="demo-frame spiral-demo">
+    <div className="not-prose demo-frame spiral-demo">
       <SpiralText text="THE CONTENT ARCHITECTURE · " rotating={false} />
     </div>
   );

@@ -5,7 +5,7 @@ const text =
 
 export function ShapeFlowPreview() {
   return (
-    <div className="demo-frame shape-flow-preview">
+    <div className="not-prose demo-frame shape-flow-preview">
       <ShapeFlow
         text="Words find their way around a shape. A line bends, a sentence takes the long way, and the page finds a new rhythm. Leave a little room and watch the story take shape. There is always another way to read."
         height={176}
@@ -21,7 +21,7 @@ export function ShapeFlowPreview() {
 
 export function ShapeFlowDemo() {
   return (
-    <div className="demo-frame shape-flow-demo">
+    <div className="not-prose demo-frame shape-flow-demo">
       <div className="shape-flow-demo-heading">
         <span className="shape-flow-demo-eyebrow">An exercise in space</span>
         <h3>Room to move.</h3>

@@ -9,7 +9,7 @@ const phrases = ["MAKE IT CLEAR.", "MAKE IT COUNT.", "MAKE IT YOURS."];
 
 export function TextScramblePreview() {
   return (
-    <div className="demo-frame text-scramble-preview">
+    <div className="not-prose demo-frame text-scramble-preview">
       <TextScramble text="7#A? %Q 2X@9G/" disabled className="text-scramble-preview-text" />
     </div>
   );
@@ -24,7 +24,7 @@ export function TextScrambleDemo() {
   };
 
   return (
-    <div className="demo-frame text-scramble-demo">
+    <div className="not-prose demo-frame text-scramble-demo">
       <div className="text-scramble-demo-stage">
         <TextScramble
           text={phrases[index]}

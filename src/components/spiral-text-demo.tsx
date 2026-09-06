@@ -3,7 +3,7 @@ import { SpiralText } from "@/registry/spiral-text";
 export function SpiralTextDemo() {
   return (
     <>
-      <div className="demo-frame spiral-demo">
+      <div className="not-prose demo-frame spiral-demo">
         <SpiralText text="THE CONTENT ARCHITECTURE · " />
       </div>
       <p className="demo-caption">

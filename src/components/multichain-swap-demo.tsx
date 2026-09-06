@@ -130,7 +130,7 @@ function sampleQuote(value: SwapValue): SwapQuote | null {
 
 export function MultichainSwapPreview() {
   return (
-    <div className="demo-frame multichain-swap-preview">
+    <div className="not-prose demo-frame multichain-swap-preview">
       <MultichainSwap
         assets={assets}
         value={initialValue}
@@ -155,7 +155,7 @@ export function MultichainSwapDemo() {
 
   return (
     <>
-      <div className="demo-frame multichain-swap-demo">
+      <div className="not-prose demo-frame multichain-swap-demo">
         <MultichainSwap
           assets={assets}
           value={value}

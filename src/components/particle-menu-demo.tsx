@@ -11,7 +11,7 @@ const demoItems: ParticleMenuItem[] = [
 
 export function ParticleMenuPreview() {
   return (
-    <div className="demo-frame particle-menu-preview">
+    <div className="not-prose demo-frame particle-menu-preview">
       <ParticleMenu items={demoItems} />
     </div>
   );
@@ -20,7 +20,7 @@ export function ParticleMenuPreview() {
 export function ParticleMenuDemo() {
   return (
     <>
-      <div className="demo-frame particle-menu-demo">
+      <div className="not-prose demo-frame particle-menu-demo">
         <ParticleMenu ariaLabel="Particle menu demo" items={demoItems} />
       </div>
       <p className="demo-caption">

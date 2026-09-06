@@ -81,7 +81,7 @@ const activity: WalletActivity[] = [
 
 export function CryptoWalletPreview() {
   return (
-    <div className="demo-frame crypto-wallet-preview">
+    <div className="not-prose demo-frame crypto-wallet-preview">
       <CryptoWallet
         account={account}
         assets={assets}
@@ -114,7 +114,7 @@ export function CryptoWalletDemo() {
 
   return (
     <>
-      <div className="demo-frame crypto-wallet-demo">
+      <div className="not-prose demo-frame crypto-wallet-demo">
         <CryptoWallet
           account={connected ? account : null}
           assets={assets}

@@ -20,7 +20,7 @@ export default function AgentsPage() {
         <h1>{page.data.title}</h1>
         <p>{page.data.description}</p>
       </header>
-      <div className="component-doc-body">
+      <div className="component-doc-body prose">
         <MDX components={getMDXComponents()} />
       </div>
     </article>

@@ -52,7 +52,7 @@ export function ArcReelPreview() {
 export function ArcReelDemo() {
   return (
     <>
-      <div className="demo-frame">
+      <div className="not-prose demo-frame">
         <ArcReel items={providers} initialIndex={3} ariaLabel="AI provider arc reel" />
       </div>
       <p className="demo-caption">

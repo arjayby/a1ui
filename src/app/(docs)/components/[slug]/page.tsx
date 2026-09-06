@@ -22,7 +22,7 @@ export default async function ComponentPage({ params }: PageProps<"/components/[
         <p>{component.description}</p>
         <AgentInstall name={component.slug} />
       </header>
-      <div className="component-doc-body">
+      <div className="component-doc-body prose">
         <MDX components={getMDXComponents()} />
       </div>
     </article>
