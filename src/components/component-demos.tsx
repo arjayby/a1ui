@@ -67,7 +67,7 @@ export function SectionRailDemo() {
 export function SpiralTextPreview() {
   return (
     <div className="demo-frame spiral-demo">
-      <SpiralText text="THE CONTENT ARCHITECTURE · " />
+      <SpiralText text="THE CONTENT ARCHITECTURE · " rotating={false} />
     </div>
   );
 }
