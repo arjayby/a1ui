@@ -21,22 +21,41 @@ function coils(graphic: HTMLElement) {
   return Array.from(graphic.querySelectorAll<HTMLDivElement>("[data-spiral-coil]"));
 }
 
-function scale(coil: HTMLDivElement) {
-  return Number(coil.style.transform.match(/scale\(([^)]+)\)/)?.[1] ?? 1);
-}
-
 function expectResting(graphic: HTMLElement) {
   expect(graphic).toHaveAttribute("data-interaction", "resting");
   for (const coil of coils(graphic)) {
-    expect(scale(coil)).toBe(1);
-    expect(Number(coil.style.opacity || 1)).toBe(1);
+    expect(Number(coil.style.transform.match(/scale\(([^)]+)\)/)?.[1])).toBe(1);
+    expect(coil).toHaveStyle({ opacity: "1" });
   }
+}
+
+type MockAnimation = {
+  onfinish: (() => void) | null;
+  cancel: ReturnType<typeof vi.fn>;
+  options: KeyframeAnimationOptions;
+};
+let animations: MockAnimation[];
+
+// jsdom has no animation engine. Only mock its lifecycle here; real interpolation,
+// responsiveness, and interruption continuity are checked in the browser suite.
+function finishCurrentAnimation() {
+  act(() => animations.at(-1)?.onfinish?.());
 }
 
 describe("SpiralText", () => {
   beforeEach(() => {
-    vi.useFakeTimers();
+    animations = [];
     mockMotionPreference(false);
+    vi.stubGlobal(
+      "DOMMatrixReadOnly",
+      class {
+        a: number;
+        b = 0;
+        constructor(transform?: string) {
+          this.a = Number(transform?.match(/scale\(([^)]+)\)/)?.[1] ?? 1);
+        }
+      },
+    );
     vi.stubGlobal(
       "PointerEvent",
       class extends MouseEvent {
@@ -49,10 +68,20 @@ describe("SpiralText", () => {
         }
       },
     );
+    Object.defineProperty(document, "timeline", { configurable: true, value: { currentTime: 0 } });
+    Object.defineProperty(Element.prototype, "animate", {
+      configurable: true,
+      value: vi.fn((_frames: Keyframe[], options: KeyframeAnimationOptions) => {
+        const animation: MockAnimation = { onfinish: null, cancel: vi.fn(), options };
+        animations.push(animation);
+        return animation;
+      }),
+    });
   });
 
   afterEach(() => {
-    vi.useRealTimers();
+    Reflect.deleteProperty(Element.prototype, "animate");
+    Reflect.deleteProperty(document, "timeline");
     vi.unstubAllGlobals();
   });
 
@@ -67,88 +96,76 @@ describe("SpiralText", () => {
     }
   });
 
-  it("gathers the coils, then releases them with an outward swell without laying out text again", () => {
-    render(<SpiralText text="MAKE SMALL THINGS WELL · " rotating={false} />);
+  it("keeps a completed hold gathered until release, then cleans up the animations", () => {
+    render(<SpiralText text="HOLD · " />);
     const graphic = screen.getByRole("img");
-    const [inner, outer] = [coils(graphic)[2], coils(graphic)[11]];
-    const glyphsBefore = Array.from(graphic.querySelectorAll("text"), (text) => text.outerHTML);
-
     fireEvent.pointerDown(graphic, { pointerId: 1 });
-    act(() => vi.advanceTimersByTime(1300));
-    expect(scale(inner)).toBeLessThan(1);
-    const gatheredOuterScale = scale(outer);
-    expect(gatheredOuterScale).toBeLessThan(1);
-
+    finishCurrentAnimation();
+    expect(graphic).toHaveAttribute("data-interaction", "tightening");
+    expect(coils(graphic)[0]).toHaveStyle({ transform: "scale(0.86000)" });
+    expect(animations.every((animation) => animation.cancel.mock.calls.length === 1)).toBe(true);
     fireEvent.pointerUp(graphic, { pointerId: 1 });
-    act(() => vi.advanceTimersByTime(500));
-    expect(scale(inner)).toBeGreaterThan(1);
-    expect(scale(outer)).toBe(gatheredOuterScale);
-
-    act(() => vi.advanceTimersByTime(500));
-    expect(scale(outer)).toBeGreaterThan(1);
-    expect(scale(inner)).toBeCloseTo(1);
-    act(() => vi.advanceTimersByTime(900));
+    expect(graphic).toHaveAttribute("data-interaction", "releasing");
+    finishCurrentAnimation();
     expectResting(graphic);
-    expect(Array.from(graphic.querySelectorAll("text"), (text) => text.outerHTML)).toEqual(glyphsBefore);
+    expect(animations.every((animation) => animation.cancel.mock.calls.length === 1)).toBe(true);
   });
 
-  it("returns to rest when a pointer interaction is cancelled", () => {
+  it.each(["pointerCancel", "lostPointerCapture"] as const)("finishes a gesture after %s", (event) => {
     render(<SpiralText text="CANCEL ME · " />);
     const graphic = screen.getByRole("img");
     fireEvent.pointerDown(graphic, { pointerId: 1, pointerType: "touch" });
-    act(() => vi.advanceTimersByTime(640));
-    expect(scale(coils(graphic)[3])).toBeLessThan(1);
-    fireEvent.pointerCancel(graphic, { pointerId: 1, pointerType: "touch" });
+    fireEvent[event](graphic, { pointerId: 1, pointerType: "touch" });
     expect(graphic).toHaveAttribute("data-interaction", "releasing");
-    act(() => vi.advanceTimersByTime(1900));
+    finishCurrentAnimation();
     expectResting(graphic);
   });
 
-  it("can be pressed during release without the previous animation resetting it", () => {
+  it("ignores completion from an interrupted ripple", () => {
     render(<SpiralText text="TRY AGAIN · " />);
     const graphic = screen.getByRole("img");
     fireEvent.pointerDown(graphic, { pointerId: 1 });
-    act(() => vi.advanceTimersByTime(640));
     fireEvent.pointerUp(graphic, { pointerId: 1 });
-    act(() => vi.advanceTimersByTime(300));
-    const beforeRepress = coils(graphic).map(scale);
+    const oldAnimations = [...animations];
+    const staleFinish = animations.at(-1)!.onfinish!;
     fireEvent.pointerDown(graphic, { pointerId: 2 });
-    act(() => vi.advanceTimersByTime(16));
-    coils(graphic).forEach((coil, index) => {
-      expect(Math.abs(scale(coil) - beforeRepress[index])).toBeLessThan(0.002);
-    });
-    act(() => vi.advanceTimersByTime(1900));
+    expect(oldAnimations.every((animation) => animation.cancel.mock.calls.length === 1)).toBe(true);
+    act(staleFinish);
     expect(graphic).toHaveAttribute("data-interaction", "tightening");
-    expect(scale(coils(graphic)[3])).toBeLessThan(1);
+    finishCurrentAnimation();
+    expect(graphic).toHaveAttribute("data-interaction", "tightening");
     fireEvent.pointerUp(graphic, { pointerId: 2 });
-    act(() => vi.advanceTimersByTime(1900));
+    finishCurrentAnimation();
     expectResting(graphic);
   });
 
-  it("ignores unrelated pointers and repeated pointer-up events", () => {
+  it("ignores secondary buttons, unrelated pointers, and repeated release events", () => {
     render(<SpiralText text="ONE AT A TIME · " />);
     const graphic = screen.getByRole("img");
+    fireEvent.pointerDown(graphic, { pointerId: 1, button: 2 });
+    expect(animations).toHaveLength(0);
     fireEvent.pointerDown(graphic, { pointerId: 1 });
-    act(() => vi.advanceTimersByTime(640));
+    const count = animations.length;
     fireEvent.pointerDown(graphic, { pointerId: 2 });
     fireEvent.pointerUp(graphic, { pointerId: 2 });
+    expect(animations).toHaveLength(count);
     expect(graphic).toHaveAttribute("data-interaction", "tightening");
     fireEvent.pointerUp(graphic, { pointerId: 1 });
-    act(() => vi.advanceTimersByTime(1000));
     fireEvent.pointerUp(graphic, { pointerId: 1 });
-    act(() => vi.advanceTimersByTime(900));
+    expect(animations).toHaveLength(count * 2);
+    finishCurrentAnimation();
     expectResting(graphic);
   });
 
-  it.each(["tightening", "releasing"])("stops drawing when unmounted during %s", (phase) => {
+  it.each(["tightening", "releasing"])("cancels animations when unmounted during %s", (phase) => {
     const { unmount } = render(<SpiralText text="GOODBYE · " />);
     const graphic = screen.getByRole("img");
     fireEvent.pointerDown(graphic, { pointerId: 1 });
-    act(() => vi.advanceTimersByTime(320));
     if (phase === "releasing") fireEvent.pointerUp(graphic, { pointerId: 1 });
-    expect(vi.getTimerCount()).toBeGreaterThan(0);
     unmount();
-    expect(vi.getTimerCount()).toBe(0);
+    expect(animations.length).toBeGreaterThan(0);
+    expect(animations.every((animation) => animation.cancel.mock.calls.length === 1)).toBe(true);
+    expect(animations.every((animation) => animation.onfinish === null)).toBe(true);
   });
 
   it.each([
@@ -165,22 +182,23 @@ describe("SpiralText", () => {
     );
     const graphics = screen.getAllByRole("img");
     graphics.forEach((graphic) => fireEvent.pointerDown(graphic, { pointerId: 1 }));
-    act(() => vi.advanceTimersByTime(1300));
-    expect(coils(graphics[0]).map((coil) => [scale(coil), coil.querySelector("text")?.outerHTML])).toEqual(
-      coils(graphics[1]).map((coil) => [scale(coil), coil.querySelector("text")?.outerHTML]),
+    expect(
+      coils(graphics[0]).map((coil) => [coil.style.transform, coil.querySelector("text")?.outerHTML]),
+    ).toEqual(
+      coils(graphics[1]).map((coil) => [coil.style.transform, coil.querySelector("text")?.outerHTML]),
     );
   });
 
-  it("honors custom durations with a 300ms minimum", () => {
-    render(<SpiralText text="QUICK RELEASE · " rippleDuration={0} />);
+  it.each([
+    [0, 300],
+    [900, 900],
+    [Infinity, 1800],
+  ])("uses rippleDuration=%s as %sms", (input, expected) => {
+    render(<SpiralText text="QUICK RELEASE · " rippleDuration={input} />);
     const graphic = screen.getByRole("img");
     fireEvent.pointerDown(graphic, { pointerId: 1 });
-    act(() => vi.advanceTimersByTime(640));
     fireEvent.pointerUp(graphic, { pointerId: 1 });
-    act(() => vi.advanceTimersByTime(200));
-    expect(graphic).toHaveAttribute("data-interaction", "releasing");
-    act(() => vi.advanceTimersByTime(150));
-    expectResting(graphic);
+    expect(animations.at(-1)?.options.duration).toBe(expected);
   });
 
   it("keeps still when reduced motion is enabled", () => {
@@ -189,9 +207,7 @@ describe("SpiralText", () => {
     const graphic = screen.getByRole("img");
     fireEvent.pointerDown(graphic, { pointerId: 1 });
     expect(graphic).toHaveAttribute("data-interaction", "pressed-reduced");
-    act(() => vi.advanceTimersByTime(1300));
-    expect(coils(graphic).every((coil) => scale(coil) === 1)).toBe(true);
-    expect(vi.getTimerCount()).toBe(0);
+    expect(animations).toHaveLength(0);
     fireEvent.pointerUp(graphic, { pointerId: 1 });
     expectResting(graphic);
   });
@@ -201,36 +217,32 @@ describe("SpiralText", () => {
     render(<SpiralText text="QUIET NOW · " />);
     const graphic = screen.getByRole("img");
     fireEvent.pointerDown(graphic, { pointerId: 1 });
-    act(() => vi.advanceTimersByTime(640));
     fireEvent.pointerUp(graphic, { pointerId: 1 });
-    act(() => vi.advanceTimersByTime(300));
     act(() => setReducedMotion(true));
     expectResting(graphic);
-    expect(vi.getTimerCount()).toBe(0);
+    expect(animations.every((animation) => animation.cancel.mock.calls.length === 1)).toBe(true);
     expect(graphic.querySelector("[data-spiral-rotation]")).toHaveStyle({ animationPlayState: "paused" });
+    expect(coils(graphic)[0]).toHaveStyle({ willChange: "auto" });
   });
 
   it("resets an active gesture when the layout changes", () => {
     const { rerender } = render(<SpiralText text="ORIGINAL · " />);
     const graphic = screen.getByRole("img");
     fireEvent.pointerDown(graphic, { pointerId: 1 });
-    act(() => vi.advanceTimersByTime(600));
     rerender(<SpiralText text="UPDATED · " density={1.4} />);
     expectResting(graphic);
-    expect(vi.getTimerCount()).toBe(0);
+    expect(animations.every((animation) => animation.cancel.mock.calls.length === 1)).toBe(true);
   });
 
   it("can pause rotation during a ripple without cancelling the wave", () => {
     const { rerender } = render(<SpiralText text="PAUSE · " />);
     const graphic = screen.getByRole("img");
     fireEvent.pointerDown(graphic, { pointerId: 1 });
-    act(() => vi.advanceTimersByTime(600));
     fireEvent.pointerUp(graphic, { pointerId: 1 });
-    act(() => vi.advanceTimersByTime(300));
     rerender(<SpiralText text="PAUSE · " rotating={false} />);
     expect(graphic).toHaveAttribute("data-interaction", "releasing");
     expect(graphic.querySelector("[data-spiral-rotation]")).toHaveStyle({ animationPlayState: "paused" });
-    act(() => vi.advanceTimersByTime(1600));
+    finishCurrentAnimation();
     expectResting(graphic);
   });
 });

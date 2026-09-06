@@ -51,10 +51,10 @@ export function Poster() {
 | `rotationSpeed`   | `number`  | `1`      | Rotations per minute. Higher values spin faster. Non-positive or non-finite values use the default. |
 | `className`       | `string`  | None     | Sets layout constraints such as width or placement.                                                 |
 
-The text follows concentric circular rings. Holding gathers the rings toward the center. On release, a circular wave travels outward, swelling and fading each ring before it settles. Outer rings stay gathered until the wave reaches them. The interaction responds to mouse, touch, and pen input and stays still when the user requests reduced motion.
+The text follows concentric circular rings. Pressing starts gathering the rings immediately, reaching full tension after `450ms`. On release, a circular wave travels outward, swelling and fading each ring before it settles. Outer rings stay gathered until the wave reaches them. Repeated presses carry each ring's current position and velocity into the next motion, so you can interrupt a wave without abruptly stopping it. The interaction responds to mouse, touch, and pen input and stays still when the user requests reduced motion.
 
-The text rotates by default while the dotted background stays fixed. Set `rotating={false}` to pause it. Rotation works during press and release and is disabled when the user requests reduced motion.
+The text rotates by default while the dotted background stays fixed. Holding pauses rotation; releasing resumes it. Set `rotating={false}` to pause it independently. Rotation is disabled when the user requests reduced motion.
 
 Use `rotationSpeed` to control the speed. For example, `rotationSpeed={2}` completes two turns per minute, while `rotationSpeed={0.5}` completes one turn every two minutes.
 
-Glyph positions are calculated once per text or density change. Animation transforms the coil layers instead of recalculating every letter's coordinates each frame. Rotation pauses while the component is offscreen or the page is hidden.
+Glyph positions are calculated once per text or density change. Each interactive ring is drawn into a canvas cache after fonts load. The cache refreshes when its size, pixel density, font, or color changes. The Web Animations API transforms and fades these cached pixels without redrawing the text on every frame or press. SVG provides the initial rendering and the static homepage preview. Motion stops while the component is offscreen or the page is hidden.

@@ -3,13 +3,86 @@
 import {
   useCallback,
   useEffect,
-  useEffectEvent,
   useId,
   useMemo,
   useRef,
-  useState,
   type PointerEvent as ReactPointerEvent,
 } from "react";
+
+type CoilState = { scale: number; opacity: number; scaleVelocity?: number; opacityVelocity?: number };
+type CoilGeometry = { progress: number; radius: number };
+
+const HOLD_DURATION = 450;
+const RIPPLE_WIDTH = 0.3;
+const RIPPLE_HEIGHT = 24;
+const KEYFRAME_STEPS = 90;
+
+function smoothstep(value: number) {
+  const t = Math.min(1, Math.max(0, value));
+  return t * t * (3 - 2 * t);
+}
+
+function keyframe(state: CoilState, offset: number): Keyframe {
+  return { offset, transform: `scale(${state.scale.toFixed(5)})`, opacity: state.opacity };
+}
+
+function holdKeyframes(start: CoilState, tightenStrength: number): Keyframe[] {
+  return Array.from({ length: 91 }, (_, index) => {
+    const progress = index / 90;
+    const seconds = (progress * HOLD_DURATION) / 1000;
+    const settle = 1 - smoothstep((progress - 0.8) / 0.2);
+    const spring = (value: number, target: number, velocity = 0) => {
+      const displacement = value - target;
+      return (
+        target + (displacement + (velocity + 18 * displacement) * seconds) * Math.exp(-18 * seconds) * settle
+      );
+    };
+    return keyframe(
+      {
+        scale: spring(start.scale, 1 - tightenStrength * 0.4, start.scaleVelocity),
+        opacity: Math.min(1, Math.max(0, spring(start.opacity, 1, start.opacityVelocity))),
+      },
+      progress,
+    );
+  });
+}
+
+function rippleKeyframes(
+  coil: CoilGeometry,
+  start: CoilState,
+  tension: number,
+  duration: number,
+): Keyframe[] {
+  return Array.from({ length: KEYFRAME_STEPS + 1 }, (_, index) => {
+    const progress = index / KEYFRAME_STEPS;
+    const waveFront = progress * 1.4;
+    const attack = smoothstep(progress / 0.04);
+    const life = attack * (1 - smoothstep((progress - 0.78) / 0.22));
+    const wave = (1 - smoothstep(Math.abs(coil.progress - waveFront) / RIPPLE_WIDTH)) * life;
+    // The leading edge releases each ring, so the outward swell stays circular.
+    const releaseAmount = smoothstep((waveFront + RIPPLE_WIDTH - coil.progress) / RIPPLE_WIDTH) * attack;
+    const seconds = (progress * duration) / 1000;
+    const momentum = seconds * Math.exp(-seconds / 0.08) * (1 - smoothstep(progress / 0.2));
+    return keyframe(
+      {
+        scale:
+          start.scale +
+          (1 - start.scale) * releaseAmount +
+          (wave * RIPPLE_HEIGHT * (0.35 + tension * 0.65)) / Math.max(40, coil.radius) +
+          (start.scaleVelocity ?? 0) * momentum,
+        opacity: Math.min(
+          1,
+          Math.max(
+            0,
+            (start.opacity + (1 - start.opacity) * releaseAmount) * (1 - wave * 0.45) +
+              (start.opacityVelocity ?? 0) * momentum,
+          ),
+        ),
+      },
+      progress,
+    );
+  });
+}
 
 export interface SpiralTextProps {
   text: string;
@@ -22,35 +95,21 @@ export interface SpiralTextProps {
 }
 
 type Interaction = "resting" | "tightening" | "releasing" | "pressed-reduced";
-type CoilState = { scale: number; opacity: number };
 
 function readCoil(element: HTMLDivElement | null): CoilState {
-  return {
-    scale: Number(element?.style.transform.match(/scale\(([^)]+)\)/)?.[1] ?? 1),
-    opacity: Number(element?.style.opacity || 1),
-  };
-}
-
-function paintCoil(element: HTMLDivElement, scale: number, opacity: number) {
-  element.style.transform = `scale(${scale.toFixed(5)})`;
-  element.style.opacity = String(opacity);
+  if (!element) return { scale: 1, opacity: 1 };
+  const style = getComputedStyle(element);
+  const matrix = new DOMMatrixReadOnly(style.transform === "none" ? undefined : style.transform);
+  return { scale: Math.hypot(matrix.a, matrix.b), opacity: Number(style.opacity) };
 }
 
 const VIEWBOX_SIZE = 640;
 const CENTER = VIEWBOX_SIZE / 2;
 const OUTER_RADIUS = 448;
-const HOLD_DURATION = 1200;
 const TAU = Math.PI * 2;
-const RIPPLE_WIDTH = 0.3;
-const RIPPLE_HEIGHT = 24;
 const FONT_SIZE = 14;
 const LETTER_SPACING = 0.8;
 const GLYPH_ADVANCE = FONT_SIZE * 0.6 + LETTER_SPACING;
-
-function smoothstep(value: number) {
-  const t = Math.min(1, Math.max(0, value));
-  return t * t * (3 - 2 * t);
-}
 
 function createGlyphLayout(text: string, density: number) {
   const safeDensity = Math.min(1.6, Math.max(0.65, density));
@@ -104,66 +163,182 @@ export function SpiralText({
   const rootRef = useRef<HTMLDivElement>(null);
   const rotationRef = useRef<HTMLDivElement>(null);
   const coilRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const frameRef = useRef(0);
-  const tensionRef = useRef(0);
+  const canvasRefs = useRef<(HTMLCanvasElement | null)[]>([]);
+  const animationsRef = useRef<Animation[]>([]);
+  const keyframesRef = useRef<Keyframe[][]>([]);
+  const durationRef = useRef(0);
+  const interactionRef = useRef<Interaction>("resting");
+  const rotatingRef = useRef(rotating);
   const pointerRef = useRef<number | null>(null);
   const motionActiveRef = useRef(true);
-  const [interaction, setInteraction] = useState<Interaction>("resting");
 
   const safeTightenStrength = Math.min(0.7, Math.max(0.08, tightenStrength));
   const safeRotationSpeed = Number.isFinite(rotationSpeed) && rotationSpeed > 0 ? rotationSpeed : 1;
   const safeRippleDuration = Number.isFinite(rippleDuration) ? Math.max(300, rippleDuration) : 1800;
   const coils = useMemo(() => createGlyphLayout(text, density), [density, text]);
 
-  // Glyphs are laid out once. Animation updates only a small number of composited layers.
-  const draw = useCallback(
-    (tension: number, rippleProgress?: number, startingCoils?: CoilState[]) => {
-      const waveFront = rippleProgress === undefined ? -1 : smoothstep(rippleProgress) * 1.4;
-      const life =
-        rippleProgress === undefined
-          ? 0
-          : smoothstep(rippleProgress / 0.2) * (1 - smoothstep((rippleProgress - 0.78) / 0.22));
-      for (let index = 0; index < coils.length; index += 1) {
-        const element = coilRefs.current[index];
-        if (!element) continue;
-        const coil = coils[index];
-        const wave = (1 - smoothstep(Math.abs(coil.progress - waveFront) / RIPPLE_WIDTH)) * life;
-        // Each coil stays gathered until the leading edge reaches it.
-        const releaseAmount =
-          rippleProgress === undefined
-            ? 0
-            : smoothstep((waveFront + RIPPLE_WIDTH - coil.progress) / RIPPLE_WIDTH) *
-              smoothstep(rippleProgress / 0.12);
-        const start = startingCoils?.[index] ?? {
-          scale: 1 - safeTightenStrength * tension * 0.4,
-          opacity: 1,
-        };
-        const scale =
-          start.scale +
-          (1 - start.scale) * releaseAmount +
-          (wave * RIPPLE_HEIGHT * (0.35 + tension * 0.65)) / Math.max(40, coil.radius);
-        const opacity = start.opacity + (1 - start.opacity) * releaseAmount;
-        paintCoil(element, scale, opacity * (1 - wave * 0.45));
-      }
-    },
-    [coils, safeTightenStrength],
-  );
-
-  const stopAnimation = useCallback(() => {
-    window.cancelAnimationFrame(frameRef.current);
-    frameRef.current = 0;
+  const setInteraction = useCallback((value: Interaction) => {
+    interactionRef.current = value;
+    if (rootRef.current) rootRef.current.dataset.interaction = value;
   }, []);
 
-  const syncRotation = useEffectEvent(() => {
-    if (rotationRef.current) {
-      rotationRef.current.style.animationPlayState =
-        rotating && motionActiveRef.current ? "running" : "paused";
+  const stopAnimation = useCallback(() => {
+    for (const animation of animationsRef.current) {
+      animation.onfinish = null;
+      animation.cancel();
     }
-  });
+    animationsRef.current = [];
+    keyframesRef.current = [];
+  }, []);
+
+  const readMotion = () =>
+    coilRefs.current.map((element, index) => {
+      const state = readCoil(element);
+      const time = animationsRef.current[index]?.currentTime;
+      const frames = keyframesRef.current[index];
+      if (!frames || typeof time !== "number" || time < 0 || time >= durationRef.current) return state;
+      // Sample the existing browser timeline, including velocity, before replacing its motion.
+      const step = durationRef.current / (frames.length - 1);
+      const frame = Math.max(0, Math.min(frames.length - 2, Math.ceil(time / step) - 1));
+      const from = frames[frame];
+      const to = frames[frame + 1];
+      const scale = (value: Keyframe) => Number(String(value.transform).match(/scale\(([^)]+)\)/)?.[1] ?? 1);
+      return {
+        ...state,
+        scaleVelocity: ((scale(to) - scale(from)) / step) * 1000,
+        opacityVelocity: ((Number(to.opacity) - Number(from.opacity)) / step) * 1000,
+      };
+    });
+
+  const syncRotation = useCallback(() => {
+    if (rotationRef.current) {
+      const pressed = interactionRef.current === "tightening" || interactionRef.current === "pressed-reduced";
+      rotationRef.current.style.animationPlayState =
+        rotatingRef.current && motionActiveRef.current && !pressed ? "running" : "paused";
+    }
+  }, []);
 
   useEffect(() => {
+    rotatingRef.current = rotating;
     syncRotation();
-  }, [rotating]);
+  }, [rotating, syncRotation]);
+
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root || root.closest("[inert]") || !document.fonts) return;
+    const canvases = canvasRefs.current.slice(0, coils.length);
+    const layers = coilRefs.current.slice(0, coils.length);
+    let disposed = false;
+    let fontsReady = false;
+    let cacheKey = "";
+    const paint = () => {
+      if (disposed || !fontsReady || !root.clientWidth) return;
+      const text = root.querySelector("text");
+      if (!text) return;
+      const style = getComputedStyle(text);
+      const font = `${style.fontStyle} ${style.fontWeight} ${FONT_SIZE}px ${style.fontFamily}`;
+      const pixelRatio = window.devicePixelRatio || 1;
+      const key = `${root.clientWidth}|${pixelRatio}|${font}|${style.fill}`;
+      if (key === cacheKey) return;
+      cacheKey = key;
+      coils.forEach((coil, index) => {
+        const canvas = canvases[index];
+        const context = canvas?.getContext("2d");
+        if (!canvas || !context) return;
+        // Cache glyphs once at display resolution with some headroom for the swell.
+        // Transforming these bitmaps avoids re-rasterizing SVG text on every re-grab.
+        const maxScale = 1 + RIPPLE_HEIGHT / Math.max(40, coil.radius);
+        const size = Math.ceil((coil.diameter / VIEWBOX_SIZE) * root.clientWidth * pixelRatio * maxScale);
+        canvas.width = canvas.height = size;
+        context.font = font;
+        context.fillStyle = style.fill;
+        const scale = size / coil.diameter;
+        const origin = CENTER - coil.diameter / 2;
+        const x = coil.x.split(" ").map(Number);
+        const y = coil.y.split(" ").map(Number);
+        const angles = coil.rotations.split(" ").map(Number);
+        Array.from(coil.characters).forEach((character, glyph) => {
+          const angle = (angles[glyph] * Math.PI) / 180;
+          const cos = Math.cos(angle) * scale;
+          const sin = Math.sin(angle) * scale;
+          context.setTransform(cos, sin, -sin, cos, (x[glyph] - origin) * scale, (y[glyph] - origin) * scale);
+          context.fillText(character, 0, 0);
+        });
+        canvas.dataset.ready = "true";
+        canvas.style.visibility = "visible";
+        const svg = layers[index]?.querySelector("svg");
+        if (svg) svg.style.visibility = "hidden";
+      });
+    };
+    const fontsChanged = () => {
+      cacheKey = "";
+      paint();
+    };
+    const resize = new ResizeObserver(paint);
+    const theme = new MutationObserver(paint);
+    // Inherited font/color may change on any ancestor, without changing the ring geometry.
+    for (let element: HTMLElement | null = root; element; element = element.parentElement) {
+      theme.observe(element, { attributes: true, attributeFilter: ["class", "style"] });
+    }
+    void document.fonts.ready.then(() => {
+      if (disposed) return;
+      fontsReady = true;
+      paint();
+      resize.observe(root);
+      document.fonts.addEventListener("loadingdone", fontsChanged);
+      window.addEventListener("resize", paint);
+    });
+    return () => {
+      disposed = true;
+      resize.disconnect();
+      theme.disconnect();
+      document.fonts.removeEventListener("loadingdone", fontsChanged);
+      window.removeEventListener("resize", paint);
+      for (const canvas of canvases) {
+        if (!canvas) continue;
+        canvas.width = canvas.height = 0;
+        delete canvas.dataset.ready;
+        canvas.style.visibility = "hidden";
+      }
+      for (const coil of layers) {
+        const svg = coil?.querySelector("svg");
+        if (svg) svg.style.visibility = "visible";
+      }
+    };
+  }, [coils]);
+
+  const animateCoils = (frames: Keyframe[][], duration: number, phase: "tightening" | "releasing") => {
+    // One shared timeline keeps every ring synchronized. The browser interpolates transform
+    // and opacity without a JavaScript callback or DOM writes on every frame.
+    const startedAt = document.timeline.currentTime;
+    const animations: Animation[] = [];
+    for (let index = 0; index < coils.length; index += 1) {
+      const element = coilRefs.current[index];
+      if (!element) continue;
+      const last = frames[index].at(-1)!;
+      element.style.transform = String(last.transform);
+      element.style.opacity = String(last.opacity);
+      const animation = element.animate(frames[index], {
+        duration,
+        fill: "both",
+        easing: "linear",
+        id: `a1ui-spiral-${phase}`,
+      });
+      if (typeof startedAt === "number") animation.startTime = startedAt;
+      animations.push(animation);
+    }
+    animationsRef.current = animations;
+    keyframesRef.current = frames;
+    durationRef.current = duration;
+    const last = animations.at(-1);
+    if (last)
+      last.onfinish = () => {
+        if (animationsRef.current !== animations) return;
+        stopAnimation();
+        if (phase === "releasing") setInteraction("resting");
+        syncRotation();
+      };
+  };
 
   useEffect(() => {
     const root = rootRef.current;
@@ -177,13 +352,21 @@ export function SpiralText({
         root.releasePointerCapture(pointerRef.current);
       }
       pointerRef.current = null;
-      tensionRef.current = 0;
-      draw(0);
+      for (const coil of coilRefs.current) {
+        if (!coil) continue;
+        coil.style.transform = "scale(1)";
+        coil.style.opacity = "1";
+      }
       setInteraction("resting");
     };
     const syncMotion = () => {
       const active = visible && !document.hidden && !preference.matches;
       motionActiveRef.current = active;
+      // Prepare visible, interactive rings before a press rather than promoting them on demand.
+      const prepare = active && !root.closest("[inert]");
+      for (const coil of coilRefs.current) {
+        if (coil) coil.style.willChange = prepare ? "transform, opacity" : "auto";
+      }
       syncRotation();
       if (!active) reset();
     };
@@ -205,40 +388,28 @@ export function SpiralText({
       preference.removeEventListener("change", syncMotion);
       document.removeEventListener("visibilitychange", syncMotion);
     };
-  }, [draw, stopAnimation]);
+  }, [coils, safeTightenStrength, setInteraction, stopAnimation, syncRotation]);
 
   const handlePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (pointerRef.current !== null || (event.pointerType === "mouse" && event.button !== 0)) return;
     pointerRef.current = event.pointerId;
     event.currentTarget.setPointerCapture?.(event.pointerId);
+    const startingCoils = readMotion();
     stopAnimation();
 
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       setInteraction("pressed-reduced");
+      syncRotation();
       return;
     }
 
     setInteraction("tightening");
-    const startedAt = performance.now();
-    const startingTension = tensionRef.current;
-    const startingCoils = coilRefs.current.map(readCoil);
-    const tighten = (now: number) => {
-      const progress = Math.min(1, (now - startedAt) / HOLD_DURATION);
-      const eased = smoothstep(progress);
-      tensionRef.current = startingTension + (1 - startingTension) * eased;
-      for (let index = 0; index < coils.length; index += 1) {
-        const element = coilRefs.current[index];
-        if (!element) continue;
-        const start = startingCoils[index];
-        paintCoil(
-          element,
-          start.scale + (1 - safeTightenStrength * 0.4 - start.scale) * eased,
-          start.opacity + (1 - start.opacity) * eased,
-        );
-      }
-      if (progress < 1) frameRef.current = window.requestAnimationFrame(tighten);
-    };
-    frameRef.current = window.requestAnimationFrame(tighten);
+    syncRotation();
+    animateCoils(
+      startingCoils.map((start) => holdKeyframes(start, safeTightenStrength)),
+      HOLD_DURATION,
+      "tightening",
+    );
   };
 
   const release = (event: ReactPointerEvent<HTMLDivElement>) => {
@@ -247,30 +418,24 @@ export function SpiralText({
     if (event.currentTarget.hasPointerCapture?.(event.pointerId)) {
       event.currentTarget.releasePointerCapture(event.pointerId);
     }
+    const startingCoils = readMotion();
     stopAnimation();
 
-    if (interaction === "pressed-reduced") {
+    if (interactionRef.current === "pressed-reduced") {
       setInteraction("resting");
+      syncRotation();
       return;
     }
 
-    const releaseStartedAt = performance.now();
-    const releaseTension = tensionRef.current;
-    const startingCoils = coilRefs.current.map(readCoil);
+    const minimumScale = Math.min(...startingCoils.map((coil) => coil.scale));
+    const tension = Math.min(1, Math.max(0, (1 - minimumScale) / (safeTightenStrength * 0.4)));
     setInteraction("releasing");
-    const ripple = (now: number) => {
-      const progress = Math.min(1, (now - releaseStartedAt) / safeRippleDuration);
-      tensionRef.current = releaseTension * (1 - smoothstep(progress));
-      draw(releaseTension, progress, startingCoils);
-      if (progress < 1) {
-        frameRef.current = window.requestAnimationFrame(ripple);
-        return;
-      }
-      tensionRef.current = 0;
-      draw(0);
-      setInteraction("resting");
-    };
-    frameRef.current = window.requestAnimationFrame(ripple);
+    syncRotation();
+    animateCoils(
+      coils.map((coil, index) => rippleKeyframes(coil, startingCoils[index], tension, safeRippleDuration)),
+      safeRippleDuration,
+      "releasing",
+    );
   };
 
   return (
@@ -278,7 +443,7 @@ export function SpiralText({
       ref={rootRef}
       role="img"
       aria-label={text.trim()}
-      data-interaction={interaction}
+      data-interaction="resting"
       className={[
         "bg-background text-foreground relative isolate aspect-square w-full touch-none overflow-hidden select-none data-[interaction=pressed-reduced]:opacity-70",
         className,
@@ -288,6 +453,7 @@ export function SpiralText({
       onPointerDown={handlePointerDown}
       onPointerUp={release}
       onPointerCancel={release}
+      onLostPointerCapture={release}
     >
       <svg
         aria-hidden="true"
@@ -323,9 +489,16 @@ export function SpiralText({
               height: `${(coil.diameter / VIEWBOX_SIZE) * 100}%`,
               left: `${((VIEWBOX_SIZE - coil.diameter) / VIEWBOX_SIZE) * 50}%`,
               top: `${((VIEWBOX_SIZE - coil.diameter) / VIEWBOX_SIZE) * 50}%`,
-              willChange: interaction === "resting" ? undefined : "transform, opacity",
             }}
           >
+            <canvas
+              ref={(element) => {
+                canvasRefs.current[index] = element;
+              }}
+              aria-hidden="true"
+              className="absolute inset-0 size-full"
+              style={{ visibility: "hidden" }}
+            />
             <svg
               aria-hidden="true"
               className="size-full overflow-visible"
