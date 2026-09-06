@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Analytics } from "@vercel/analytics/next";
 import { RootProvider } from "fumadocs-ui/provider/next";
 
 import "./globals.css";
@@ -21,6 +22,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <RootProvider theme={{ enabled: false }} search={{ enabled: true, options: { api: "/api/search" } }}>
           {children}
         </RootProvider>
+        <Analytics />
       </body>
     </html>
   );
