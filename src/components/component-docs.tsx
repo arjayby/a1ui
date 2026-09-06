@@ -5,6 +5,7 @@ import { DynamicCodeBlock } from "fumadocs-ui/components/dynamic-codeblock";
 import { Tab, Tabs } from "fumadocs-ui/components/tabs";
 
 import type { ComponentSlug } from "@/lib/component-catalog";
+import { getSiteUrl } from "@/lib/site-url.mjs";
 
 const packageCommands = [
   { name: "npm", command: (url: string) => `npx shadcn@latest add ${url}` },
@@ -14,7 +15,7 @@ const packageCommands = [
 ] as const;
 
 export function Installation({ name }: { name: ComponentSlug }) {
-  const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000").replace(/\/$/, "");
+  const siteUrl = getSiteUrl();
   const registryUrl = `${siteUrl}/r/${name}.json`;
 
   return (

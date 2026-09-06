@@ -10,5 +10,25 @@
       "type": "registry:ui"
     }
   ],
-  "type": "registry:ui"
+  "meta": {
+    "a1ui": {
+      "useCases": [
+        "Decorative spiral typography with pointer interaction."
+      ],
+      "limitations": [
+        "A decorative text composition, not a reading paragraph or changing-label effect."
+      ],
+      "requirements": [
+        "Supply text and room for the responsive spiral."
+      ],
+      "docsUrl": "http://localhost:3000/docs/components/spiral-text.md",
+      "registryUrl": "http://localhost:3000/r/spiral-text.json"
+    }
+  },
+  "categories": [
+    "typography",
+    "animation"
+  ],
+  "type": "registry:ui",
+  "docs": "Read http://localhost:3000/docs/components/spiral-text.md for usage, required props, and integration instructions."
 }

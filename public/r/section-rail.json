@@ -10,5 +10,25 @@
       "type": "registry:ui"
     }
   ],
-  "type": "registry:ui"
+  "meta": {
+    "a1ui": {
+      "useCases": [
+        "Table of contents and reading progress for long pages with sections."
+      ],
+      "limitations": [
+        "Tracks existing DOM sections; it does not create the page content."
+      ],
+      "requirements": [
+        "Match every item ID to a section element on the page."
+      ],
+      "docsUrl": "http://localhost:3000/docs/components/section-rail.md",
+      "registryUrl": "http://localhost:3000/r/section-rail.json"
+    }
+  },
+  "categories": [
+    "navigation",
+    "reading-progress"
+  ],
+  "type": "registry:ui",
+  "docs": "Read http://localhost:3000/docs/components/section-rail.md for usage, required props, and integration instructions."
 }

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { getMDXComponents } from "@/components/mdx";
+import { AgentInstall } from "@/components/agent-install";
 import { components, getComponent } from "@/lib/component-catalog";
 import { source } from "@/lib/source";
 
@@ -19,6 +20,7 @@ export default async function ComponentPage({ params }: PageProps<"/components/[
       <header>
         <h1>{component.title}</h1>
         <p>{component.description}</p>
+        <AgentInstall name={component.slug} />
       </header>
       <div className="component-doc-body">
         <MDX components={getMDXComponents()} />

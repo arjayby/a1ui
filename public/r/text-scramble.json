@@ -10,5 +10,26 @@
       "type": "registry:ui"
     }
   ],
-  "type": "registry:ui"
+  "meta": {
+    "a1ui": {
+      "useCases": [
+        "Animating changing headings, labels, or status text through scrambled characters."
+      ],
+      "limitations": [
+        "The initial text does not animate. Animation starts when the text prop changes."
+      ],
+      "requirements": [
+        "Update the text prop to animate. Use a monospace font to reduce width shifts."
+      ],
+      "docsUrl": "http://localhost:3000/docs/components/text-scramble.md",
+      "registryUrl": "http://localhost:3000/r/text-scramble.json"
+    }
+  },
+  "categories": [
+    "typography",
+    "animation",
+    "text"
+  ],
+  "type": "registry:ui",
+  "docs": "Read http://localhost:3000/docs/components/text-scramble.md for usage, required props, and integration instructions."
 }

@@ -15,5 +15,25 @@
       "type": "registry:ui"
     }
   ],
-  "type": "registry:ui"
+  "meta": {
+    "a1ui": {
+      "useCases": [
+        "Wallet account overview, token holdings, and transaction activity."
+      ],
+      "limitations": [
+        "Presentation only. No wallet SDK, balance fetching, signing, or transaction submission is included."
+      ],
+      "requirements": [
+        "Supply account data and callbacks from the app wallet integration."
+      ],
+      "docsUrl": "http://localhost:3000/docs/components/crypto-wallet.md",
+      "registryUrl": "http://localhost:3000/r/crypto-wallet.json"
+    }
+  },
+  "categories": [
+    "wallet",
+    "web3"
+  ],
+  "type": "registry:ui",
+  "docs": "Read http://localhost:3000/docs/components/crypto-wallet.md for usage, required props, and integration instructions."
 }

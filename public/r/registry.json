@@ -8,42 +8,186 @@
       "type": "registry:ui",
       "title": "Shape Flow",
       "description": "Text that reflows around a draggable X, powered by Pretext.",
-      "dependencies": ["@chenglou/pretext@^0.0.8", "clsx"],
-      "files": [{ "path": "src/registry/shape-flow.tsx", "type": "registry:ui" }]
+      "dependencies": [
+        "@chenglou/pretext@^0.0.8",
+        "clsx"
+      ],
+      "files": [
+        {
+          "path": "src/registry/shape-flow.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "categories": [
+        "typography",
+        "interactive"
+      ],
+      "meta": {
+        "a1ui": {
+          "useCases": [
+            "Editorial text wrapping around a draggable X shape."
+          ],
+          "limitations": [
+            "One left-to-right plain-text paragraph. Rich text and right-to-left flow are unsupported."
+          ],
+          "requirements": [
+            "Use a loaded named font. Interactive layout needs Canvas 2D, Intl.Segmenter, and ResizeObserver."
+          ],
+          "docsUrl": "http://localhost:3000/docs/components/shape-flow.md",
+          "registryUrl": "http://localhost:3000/r/shape-flow.json"
+        }
+      },
+      "docs": "Read http://localhost:3000/docs/components/shape-flow.md for usage, required props, and integration instructions."
     },
     {
       "name": "crypto-wallet",
       "type": "registry:ui",
       "title": "Crypto Wallet",
       "description": "A wallet overview with token balances, recent activity, and send, receive, and swap actions.",
-      "dependencies": ["@base-ui/react@^1.8.0", "clsx", "lucide-react"],
-      "files": [{ "path": "src/registry/crypto-wallet.tsx", "type": "registry:ui" }]
+      "dependencies": [
+        "@base-ui/react@^1.8.0",
+        "clsx",
+        "lucide-react"
+      ],
+      "files": [
+        {
+          "path": "src/registry/crypto-wallet.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "categories": [
+        "wallet",
+        "web3"
+      ],
+      "meta": {
+        "a1ui": {
+          "useCases": [
+            "Wallet account overview, token holdings, and transaction activity."
+          ],
+          "limitations": [
+            "Presentation only. No wallet SDK, balance fetching, signing, or transaction submission is included."
+          ],
+          "requirements": [
+            "Supply account data and callbacks from the app wallet integration."
+          ],
+          "docsUrl": "http://localhost:3000/docs/components/crypto-wallet.md",
+          "registryUrl": "http://localhost:3000/r/crypto-wallet.json"
+        }
+      },
+      "docs": "Read http://localhost:3000/docs/components/crypto-wallet.md for usage, required props, and integration instructions."
     },
     {
       "name": "select-menu",
       "type": "registry:ui",
       "title": "Select Menu",
       "description": "A dropdown selector with icons, descriptions, and keyboard navigation.",
-      "dependencies": ["@base-ui/react@^1.8.0", "clsx", "lucide-react"],
-      "files": [{ "path": "src/registry/select-menu.tsx", "type": "registry:ui" }]
+      "dependencies": [
+        "@base-ui/react@^1.8.0",
+        "clsx",
+        "lucide-react"
+      ],
+      "files": [
+        {
+          "path": "src/registry/select-menu.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "categories": [
+        "form",
+        "select",
+        "dropdown"
+      ],
+      "meta": {
+        "a1ui": {
+          "useCases": [
+            "Single-choice dropdowns with icons, descriptions, and keyboard navigation."
+          ],
+          "limitations": [
+            "Single selection only; search and multi-select are not provided."
+          ],
+          "requirements": [
+            "Supply options, a controlled value, onValueChange, and an accessible ariaLabel."
+          ],
+          "docsUrl": "http://localhost:3000/docs/components/select-menu.md",
+          "registryUrl": "http://localhost:3000/r/select-menu.json"
+        }
+      },
+      "docs": "Read http://localhost:3000/docs/components/select-menu.md for usage, required props, and integration instructions."
     },
     {
       "name": "text-scramble",
       "type": "registry:ui",
       "title": "Text Scramble",
       "description": "Reveals new text from left to right through a scramble of random characters.",
-      "files": [{ "path": "src/registry/text-scramble.tsx", "type": "registry:ui" }]
+      "files": [
+        {
+          "path": "src/registry/text-scramble.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "categories": [
+        "typography",
+        "animation",
+        "text"
+      ],
+      "meta": {
+        "a1ui": {
+          "useCases": [
+            "Animating changing headings, labels, or status text through scrambled characters."
+          ],
+          "limitations": [
+            "The initial text does not animate. Animation starts when the text prop changes."
+          ],
+          "requirements": [
+            "Update the text prop to animate. Use a monospace font to reduce width shifts."
+          ],
+          "docsUrl": "http://localhost:3000/docs/components/text-scramble.md",
+          "registryUrl": "http://localhost:3000/r/text-scramble.json"
+        }
+      },
+      "docs": "Read http://localhost:3000/docs/components/text-scramble.md for usage, required props, and integration instructions."
     },
     {
       "name": "multichain-swap",
       "type": "registry:ui",
       "title": "Multichain Swap",
       "description": "A crypto swap form with network selection, token balances, and cross-chain quote details.",
-      "dependencies": ["@base-ui/react@^1.8.0", "clsx", "lucide-react"],
+      "dependencies": [
+        "@base-ui/react@^1.8.0",
+        "clsx",
+        "lucide-react"
+      ],
       "files": [
-        { "path": "src/registry/multichain-swap.tsx", "type": "registry:ui" },
-        { "path": "src/registry/select-menu.tsx", "type": "registry:ui" }
-      ]
+        {
+          "path": "src/registry/multichain-swap.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "src/registry/select-menu.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "categories": [
+        "form",
+        "web3",
+        "swap"
+      ],
+      "meta": {
+        "a1ui": {
+          "useCases": [
+            "Token swap forms with network selection, balances, slippage, and quote review."
+          ],
+          "limitations": [
+            "No live quotes, wallet connection, bridge execution, or transaction submission is included."
+          ],
+          "requirements": [
+            "Control the form value and supply wallet and quote callbacks. Select Menu is included in this item."
+          ],
+          "docsUrl": "http://localhost:3000/docs/components/multichain-swap.md",
+          "registryUrl": "http://localhost:3000/r/multichain-swap.json"
+        }
+      },
+      "docs": "Read http://localhost:3000/docs/components/multichain-swap.md for usage, required props, and integration instructions."
     },
     {
       "name": "section-rail",
@@ -55,7 +199,27 @@
           "path": "src/registry/section-rail.tsx",
           "type": "registry:ui"
         }
-      ]
+      ],
+      "categories": [
+        "navigation",
+        "reading-progress"
+      ],
+      "meta": {
+        "a1ui": {
+          "useCases": [
+            "Table of contents and reading progress for long pages with sections."
+          ],
+          "limitations": [
+            "Tracks existing DOM sections; it does not create the page content."
+          ],
+          "requirements": [
+            "Match every item ID to a section element on the page."
+          ],
+          "docsUrl": "http://localhost:3000/docs/components/section-rail.md",
+          "registryUrl": "http://localhost:3000/r/section-rail.json"
+        }
+      },
+      "docs": "Read http://localhost:3000/docs/components/section-rail.md for usage, required props, and integration instructions."
     },
     {
       "name": "spiral-text",
@@ -67,7 +231,27 @@
           "path": "src/registry/spiral-text.tsx",
           "type": "registry:ui"
         }
-      ]
+      ],
+      "categories": [
+        "typography",
+        "animation"
+      ],
+      "meta": {
+        "a1ui": {
+          "useCases": [
+            "Decorative spiral typography with pointer interaction."
+          ],
+          "limitations": [
+            "A decorative text composition, not a reading paragraph or changing-label effect."
+          ],
+          "requirements": [
+            "Supply text and room for the responsive spiral."
+          ],
+          "docsUrl": "http://localhost:3000/docs/components/spiral-text.md",
+          "registryUrl": "http://localhost:3000/r/spiral-text.json"
+        }
+      },
+      "docs": "Read http://localhost:3000/docs/components/spiral-text.md for usage, required props, and integration instructions."
     },
     {
       "name": "particle-menu",
@@ -79,20 +263,63 @@
           "path": "src/registry/particle-menu.tsx",
           "type": "registry:ui"
         }
-      ]
+      ],
+      "categories": [
+        "navigation",
+        "particles",
+        "animation"
+      ],
+      "meta": {
+        "a1ui": {
+          "useCases": [
+            "Artistic navigation with interactive particle symbols."
+          ],
+          "limitations": [
+            "A specialized visual navigation treatment, not a general dropdown selector."
+          ],
+          "requirements": [
+            "Supply labeled items with supported shapes and navigation destinations."
+          ],
+          "docsUrl": "http://localhost:3000/docs/components/particle-menu.md",
+          "registryUrl": "http://localhost:3000/r/particle-menu.json"
+        }
+      },
+      "docs": "Read http://localhost:3000/docs/components/particle-menu.md for usage, required props, and integration instructions."
     },
     {
       "name": "arc-reel",
       "type": "registry:ui",
       "title": "Arc Reel",
       "description": "An infinitely looping reel with curved provider cards and synchronized scroll controls.",
-      "dependencies": ["embla-carousel-react@^8.6.0"],
+      "dependencies": [
+        "embla-carousel-react@^8.6.0"
+      ],
       "files": [
         {
           "path": "src/registry/arc-reel.tsx",
           "type": "registry:ui"
         }
-      ]
+      ],
+      "categories": [
+        "carousel",
+        "gallery"
+      ],
+      "meta": {
+        "a1ui": {
+          "useCases": [
+            "Looping galleries, provider cards, or logo reels with drag and keyboard controls."
+          ],
+          "limitations": [
+            "Supply your own artwork; demo images are not installed."
+          ],
+          "requirements": [
+            "Theme tokens --background, --foreground, --border, and --muted-foreground must exist."
+          ],
+          "docsUrl": "http://localhost:3000/docs/components/arc-reel.md",
+          "registryUrl": "http://localhost:3000/r/arc-reel.json"
+        }
+      },
+      "docs": "Read http://localhost:3000/docs/components/arc-reel.md for usage, required props, and integration instructions."
     }
   ]
 }

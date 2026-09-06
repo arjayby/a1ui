@@ -3,6 +3,7 @@ import { Tab, Tabs } from "fumadocs-ui/components/tabs";
 import type { MDXComponents } from "mdx/types";
 
 import { ArcReelDemo } from "@/components/arc-reel-demo";
+import { AgentInstall, AgentRegistryConfiguration } from "@/components/agent-install";
 import { CryptoWalletDemo } from "@/components/crypto-wallet-demo";
 import { SectionRailDemo, SpiralTextDemo } from "@/components/component-demos";
 import { ComponentSource, Installation } from "@/components/component-docs";
@@ -15,6 +16,8 @@ import { ShapeFlowDemo } from "@/components/shape-flow-demo";
 export function getMDXComponents(components?: MDXComponents) {
   return {
     ...defaultMdxComponents,
+    AgentInstall,
+    AgentRegistryConfiguration,
     ArcReelDemo,
     ComponentSource,
     CryptoWalletDemo,

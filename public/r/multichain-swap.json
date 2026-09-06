@@ -20,5 +20,26 @@
       "type": "registry:ui"
     }
   ],
-  "type": "registry:ui"
+  "meta": {
+    "a1ui": {
+      "useCases": [
+        "Token swap forms with network selection, balances, slippage, and quote review."
+      ],
+      "limitations": [
+        "No live quotes, wallet connection, bridge execution, or transaction submission is included."
+      ],
+      "requirements": [
+        "Control the form value and supply wallet and quote callbacks. Select Menu is included in this item."
+      ],
+      "docsUrl": "http://localhost:3000/docs/components/multichain-swap.md",
+      "registryUrl": "http://localhost:3000/r/multichain-swap.json"
+    }
+  },
+  "categories": [
+    "form",
+    "web3",
+    "swap"
+  ],
+  "type": "registry:ui",
+  "docs": "Read http://localhost:3000/docs/components/multichain-swap.md for usage, required props, and integration instructions."
 }

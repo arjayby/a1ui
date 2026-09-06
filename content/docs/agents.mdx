@@ -1,0 +1,90 @@
+---
+title: Install with an agent
+description: Let your coding agent choose, install, and integrate an a1ui component.
+---
+
+Give your coding agent a description of what you want to build. It can browse the
+a1ui catalog, choose a component, install its source, and adapt it to your project.
+
+## Get started
+
+Open your project in a coding agent with terminal and web access. Copy the prompt
+below, replace `[describe what you want]` with your request, and send it to the agent.
+
+<AgentInstall />
+
+For example:
+
+```text
+Add a dropdown for switching environments, with an icon and description for each option.
+```
+
+The agent reads the catalog and component guide before installing. It checks your
+project's framework, package manager, import aliases, and styles, then integrates
+the component and verifies the result.
+
+## Choose a specific component
+
+If you already know which component you want, open its page and use **Copy prompt
+for agent** there. That prompt selects the component and links directly to its
+integration guide.
+
+For example, open [Select Menu](/components/select-menu) to install a dropdown, or
+[Section Rail](/components/section-rail) to add reading progress to a long page.
+
+If your browser blocks clipboard access, the button displays a selectable prompt
+that you can copy manually.
+
+## Project requirements
+
+a1ui uses React 19, TypeScript, and Tailwind CSS 4. Installation and the published
+examples are verified in a clean Next.js App Router project. Other React setups,
+including Vite, need their configuration checked by the agent.
+
+Components install as editable source through the shadcn CLI. The agent uses your
+project's package manager and existing `components.json` configuration. If that
+configuration is missing, it can initialize shadcn in a compatible project.
+
+The agent must be able to reach the documentation URL. A local URL such as
+`http://localhost:3000` works only when the agent can access that running server.
+Use the public site URL for an agent running elsewhere.
+
+## What the agent handles
+
+- Chooses a component using its description, use cases, and limitations.
+- Reads its props, examples, dependencies, and integration requirements.
+- Checks existing files before installing or merging changes.
+- Connects the component to your page, state, and app data.
+- Runs available project checks and inspects the result in the browser.
+
+Some components need services your app provides. [Crypto Wallet](/components/crypto-wallet)
+does not include a wallet SDK or fetch balances. [Multichain Swap](/components/multichain-swap)
+needs your wallet and quote integrations. Demo data and artwork are not a live
+integration. The agent should report anything that still needs connecting.
+
+## Optional shadcn MCP setup
+
+The copy-prompt workflow works without MCP. If your agent already uses the shadcn
+MCP server, add a1ui to the `registries` object in your project's `components.json`.
+Merge this entry with your existing registries:
+
+<AgentRegistryConfiguration />
+
+Your agent can then search `@a1ui`, inspect an item, and install it by name:
+
+```bash
+pnpm dlx shadcn@latest search @a1ui -q "dropdown"
+pnpm dlx shadcn@latest view @a1ui/select-menu
+pnpm dlx shadcn@latest add @a1ui/select-menu --yes
+```
+
+Use your project's package runner if it uses npm, Yarn, or Bun. Follow the
+[shadcn MCP setup guide](https://ui.shadcn.com/docs/registry/mcp) to configure your
+agent's MCP client.
+
+## Resources for agents
+
+The [agent entry point](/llms.txt) contains the discovery, installation, and
+verification instructions. The [registry catalog](/r/registry.json) lists the
+available components. Each component page also links to a plain Markdown guide
+with usage examples, API details, and limitations.

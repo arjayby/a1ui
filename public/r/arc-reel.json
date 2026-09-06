@@ -13,5 +13,25 @@
       "type": "registry:ui"
     }
   ],
-  "type": "registry:ui"
+  "meta": {
+    "a1ui": {
+      "useCases": [
+        "Looping galleries, provider cards, or logo reels with drag and keyboard controls."
+      ],
+      "limitations": [
+        "Supply your own artwork; demo images are not installed."
+      ],
+      "requirements": [
+        "Theme tokens --background, --foreground, --border, and --muted-foreground must exist."
+      ],
+      "docsUrl": "http://localhost:3000/docs/components/arc-reel.md",
+      "registryUrl": "http://localhost:3000/r/arc-reel.json"
+    }
+  },
+  "categories": [
+    "carousel",
+    "gallery"
+  ],
+  "type": "registry:ui",
+  "docs": "Read http://localhost:3000/docs/components/arc-reel.md for usage, required props, and integration instructions."
 }

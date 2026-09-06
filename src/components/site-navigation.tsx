@@ -39,6 +39,16 @@ export function DesktopNavigation() {
       <div className="mt-6">
         <SearchButton />
       </div>
+      <nav aria-label="Guides" className="mt-8">
+        <p className="mb-3 font-bold">Get started</p>
+        <Link
+          href="/agents"
+          aria-current={pathname === "/agents" ? "page" : undefined}
+          className="hover:bg-muted aria-[current=page]:bg-foreground aria-[current=page]:text-background block rounded-sm px-2 py-1.5 no-underline"
+        >
+          Install with an agent
+        </Link>
+      </nav>
       <nav aria-label="Components" className="mt-8">
         <p className="mb-3 font-bold">Components</p>
         <ul className="flex list-none flex-col gap-1 p-0">
@@ -74,15 +84,16 @@ export function MobileNavigation() {
         a1ui
       </Link>
       <label className="sr-only" htmlFor="component-select">
-        Choose a component
+        Choose documentation
       </label>
       <select
         id="component-select"
-        value={pathname.startsWith("/components/") ? pathname : "/"}
+        value={pathname.startsWith("/components/") || pathname === "/agents" ? pathname : "/"}
         className="border-border bg-background max-w-44 min-w-0 rounded-sm border px-2 py-1.5"
         onChange={(event) => router.push(event.target.value)}
       >
         <option value="/">Components</option>
+        <option value="/agents">Install with an agent</option>
         {components.map((component) => (
           <option key={component.slug} value={`/components/${component.slug}`}>
             {component.title}

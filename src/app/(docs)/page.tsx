@@ -1,5 +1,8 @@
 import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
+import type { ComponentType } from "react";
+
+import { AgentInstall } from "@/components/agent-install";
 
 import { ArcReelPreview } from "@/components/arc-reel-demo";
 import { CryptoWalletPreview } from "@/components/crypto-wallet-demo";
@@ -11,7 +14,7 @@ import { SelectMenuPreview } from "@/components/select-menu-demo";
 import { ShapeFlowPreview } from "@/components/shape-flow-demo";
 import { components } from "@/lib/component-catalog";
 
-const previews = {
+const previews: Record<string, ComponentType> = {
   "crypto-wallet": CryptoWalletPreview,
   "section-rail": SectionRailPreview,
   "spiral-text": SpiralTextPreview,
@@ -31,6 +34,7 @@ export default function HomePage() {
         <p className="page-description">
           Original React components you can drop into a project, change, and make your own.
         </p>
+        <AgentInstall />
       </header>
 
       <div className="catalog-grid">

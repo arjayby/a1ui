@@ -4,17 +4,18 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "dev": "pnpm registry:build && next dev",
+    "build": "node scripts/build-registry.mjs --production && next build",
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
+    "test:consumer": "pnpm registry:build && node scripts/verify-consumer.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "registry:build": "pnpm dlx shadcn@latest build registry.json --output public/r",
+    "registry:build": "node scripts/build-registry.mjs",
     "registry:validate": "pnpm dlx shadcn@latest registry validate ./registry.json"
   },
   "dependencies": {
@@ -33,6 +34,7 @@
     "tailwind-merge": "^3.6.0"
   },
   "devDependencies": {
+    "@next/env": "16.3.4",
     "@playwright/test": "^1.62.1",
     "@tailwindcss/postcss": "^4",
     "@testing-library/jest-dom": "^7.0.1",

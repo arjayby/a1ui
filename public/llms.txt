@@ -1,0 +1,52 @@
+# a1ui
+
+> Original React components installed as editable source through the shadcn CLI.
+
+## Supported projects
+
+The supported baseline is React 19, TypeScript, and Tailwind CSS 4. Installation and the published examples are verified in a clean Next.js App Router project. Vite and other React frameworks may work but are not covered by that verification. Check their configuration before proceeding. These are client components; retain their "use client" directives. Parent components with state or callback props also need a client boundary in a React Server Components app.
+
+## Choose and install
+
+1. Inspect the user's request, package.json, lockfile, components.json, import aliases, and global CSS in the target project. Work in the app or workspace that owns components.json. Do not silently change frameworks or upgrade an incompatible project.
+2. Read the [registry catalog](http://localhost:3000/r/registry.json). Match descriptions, categories, and meta.a1ui.useCases to the request. Check meta.a1ui.limitations and requirements. If nothing fits, explain the gap instead of installing an unrelated component.
+3. Read the chosen component's Markdown guide below. It includes actual imports, props, examples, dependencies, and integration requirements. Read the registry item's embedded source when needed.
+4. If components.json is missing in an otherwise compatible project, initialize shadcn using the project's package runner and the existing framework and theme. Inspect `shadcn init --help` for current options. Preserve existing styles. Do not force initialization over an existing configuration.
+5. Inspect any existing destination files. Use `shadcn add <item-url> --dry-run` and `--diff` before updating them. Reuse existing compatible components or merge deliberately. Never use `--overwrite` automatically. In particular, multichain-swap also installs select-menu.tsx.
+6. Install from the selected item's URL using the target project's package manager. Replace NAME with the exact catalog name:
+
+```text
+npm: npx shadcn@latest add http://localhost:3000/r/NAME.json --yes
+pnpm: pnpm dlx shadcn@latest add http://localhost:3000/r/NAME.json --yes
+yarn: yarn dlx shadcn@latest add http://localhost:3000/r/NAME.json --yes
+bun: bunx --bun shadcn@latest add http://localhost:3000/r/NAME.json --yes
+```
+
+7. Adapt the documented example to the requested page. Use the target project's actual import aliases, state, data, and callbacks. Keep accessible labels and reduced-motion behavior. Preserve the app's theme; check the guide for CSS tokens or font requirements. Demo artwork is not included. Wallet and swap components require the app's own integrations.
+8. Run the project's typecheck, lint, and build scripts where available. Render the result, check browser errors and styling, and exercise the primary interaction. Report the selected component, changed files, checks, and any missing integration data.
+
+## Components
+
+- [Arc Reel](http://localhost:3000/docs/components/arc-reel.md): An infinitely looping reel with curved provider cards and synchronized scroll controls. Looping galleries, provider cards, or logo reels with drag and keyboard controls.
+- [Crypto Wallet](http://localhost:3000/docs/components/crypto-wallet.md): A wallet overview with token balances, recent activity, and send, receive, and swap actions. Wallet account overview, token holdings, and transaction activity.
+- [Multichain Swap](http://localhost:3000/docs/components/multichain-swap.md): A crypto swap form with network selection, token balances, and cross-chain quote details. Token swap forms with network selection, balances, slippage, and quote review.
+- [Particle Menu](http://localhost:3000/docs/components/particle-menu.md): Grainy symbols that scatter around your pointer and spring back into place. Artistic navigation with interactive particle symbols.
+- [Section Rail](http://localhost:3000/docs/components/section-rail.md): A compact reading rail that tracks progress through page sections. Table of contents and reading progress for long pages with sections.
+- [Select Menu](http://localhost:3000/docs/components/select-menu.md): A dropdown selector with icons, descriptions, and keyboard navigation. Single-choice dropdowns with icons, descriptions, and keyboard navigation.
+- [Shape Flow](http://localhost:3000/docs/components/shape-flow.md): Text that reflows around a draggable X, powered by Pretext. Editorial text wrapping around a draggable X shape.
+- [Spiral Text](http://localhost:3000/docs/components/spiral-text.md): Text set on a responsive spiral that tightens under pressure and ripples on release. Decorative spiral typography with pointer interaction.
+- [Text Scramble](http://localhost:3000/docs/components/text-scramble.md): Reveals new text from left to right through a scramble of random characters. Animating changing headings, labels, or status text through scrambled characters.
+
+## Optional shadcn MCP setup
+
+Direct URL installation works without MCP. For agents that already use the shadcn MCP server, merge this entry into the target project's components.json registries object, preserving existing entries:
+
+```json
+{
+  "registries": {
+    "@a1ui": "http://localhost:3000/r/{name}.json"
+  }
+}
+```
+
+The [registry index](http://localhost:3000/r/registry.json) supports shadcn discovery. With this configuration, use `shadcn search @a1ui -q "dropdown"`, `shadcn view @a1ui/select-menu`, or `shadcn add @a1ui/select-menu --yes` through the project's package runner. See the [shadcn MCP setup guide](https://ui.shadcn.com/docs/registry/mcp) for client configuration.

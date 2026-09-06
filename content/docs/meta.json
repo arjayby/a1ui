@@ -1,4 +1,4 @@
 {
   "title": "a1ui",
-  "pages": ["index", "components"]
+  "pages": ["index", "agents", "components"]
 }

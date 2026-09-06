@@ -10,5 +10,26 @@
       "type": "registry:ui"
     }
   ],
-  "type": "registry:ui"
+  "meta": {
+    "a1ui": {
+      "useCases": [
+        "Artistic navigation with interactive particle symbols."
+      ],
+      "limitations": [
+        "A specialized visual navigation treatment, not a general dropdown selector."
+      ],
+      "requirements": [
+        "Supply labeled items with supported shapes and navigation destinations."
+      ],
+      "docsUrl": "http://localhost:3000/docs/components/particle-menu.md",
+      "registryUrl": "http://localhost:3000/r/particle-menu.json"
+    }
+  },
+  "categories": [
+    "navigation",
+    "particles",
+    "animation"
+  ],
+  "type": "registry:ui",
+  "docs": "Read http://localhost:3000/docs/components/particle-menu.md for usage, required props, and integration instructions."
 }

@@ -60,8 +60,8 @@ test("mobile navigation exposes the component selector and search", async ({ pag
   await page.goto("/");
   await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
 
-  await expect(page.getByLabel("Choose a component")).toBeVisible();
+  await expect(page.getByLabel("Choose documentation")).toBeVisible();
   await expect(page.getByRole("button", { name: "Search documentation" })).toBeVisible();
-  await page.getByLabel("Choose a component").selectOption("/components/spiral-text");
+  await page.getByLabel("Choose documentation").selectOption("/components/spiral-text");
   await expect(page).toHaveURL(/\/components\/spiral-text$/);
 });

@@ -15,5 +15,26 @@
       "type": "registry:ui"
     }
   ],
-  "type": "registry:ui"
+  "meta": {
+    "a1ui": {
+      "useCases": [
+        "Single-choice dropdowns with icons, descriptions, and keyboard navigation."
+      ],
+      "limitations": [
+        "Single selection only; search and multi-select are not provided."
+      ],
+      "requirements": [
+        "Supply options, a controlled value, onValueChange, and an accessible ariaLabel."
+      ],
+      "docsUrl": "http://localhost:3000/docs/components/select-menu.md",
+      "registryUrl": "http://localhost:3000/r/select-menu.json"
+    }
+  },
+  "categories": [
+    "form",
+    "select",
+    "dropdown"
+  ],
+  "type": "registry:ui",
+  "docs": "Read http://localhost:3000/docs/components/select-menu.md for usage, required props, and integration instructions."
 }

@@ -14,5 +14,25 @@
       "type": "registry:ui"
     }
   ],
-  "type": "registry:ui"
+  "meta": {
+    "a1ui": {
+      "useCases": [
+        "Editorial text wrapping around a draggable X shape."
+      ],
+      "limitations": [
+        "One left-to-right plain-text paragraph. Rich text and right-to-left flow are unsupported."
+      ],
+      "requirements": [
+        "Use a loaded named font. Interactive layout needs Canvas 2D, Intl.Segmenter, and ResizeObserver."
+      ],
+      "docsUrl": "http://localhost:3000/docs/components/shape-flow.md",
+      "registryUrl": "http://localhost:3000/r/shape-flow.json"
+    }
+  },
+  "categories": [
+    "typography",
+    "interactive"
+  ],
+  "type": "registry:ui",
+  "docs": "Read http://localhost:3000/docs/components/shape-flow.md for usage, required props, and integration instructions."
 }
