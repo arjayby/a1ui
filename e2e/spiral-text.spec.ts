@@ -5,6 +5,39 @@ test.beforeEach(async ({ page }) => {
   await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
 });
 
+test("text rotates by default while the background stays fixed", async ({ page }) => {
+  const spiral = page.getByRole("img", { name: "THE CONTENT ARCHITECTURE ·" });
+  const rotatingLayer = spiral.locator("div").first();
+  const transform = () => rotatingLayer.evaluate((element) => getComputedStyle(element).transform);
+
+  await expect(page.getByRole("button", { name: "Rotate text" })).toHaveCount(0);
+  await expect(rotatingLayer).toHaveCSS("animation-play-state", "running");
+  const restingTransform = await transform();
+  await expect.poll(transform).not.toBe(restingTransform);
+
+  // Tightening and release must still work while rotation is running.
+  await spiral.hover();
+  await page.mouse.down();
+  await expect(spiral).toHaveAttribute("data-interaction", "tightening");
+  await page.mouse.up();
+  await expect(spiral).toHaveAttribute("data-interaction", "resting");
+
+  await expect(spiral.locator(":scope > svg")).toHaveCSS("transform", "none");
+});
+
+test("rotation respects changes to reduced motion", async ({ page }) => {
+  const spiral = page.getByRole("img", { name: "THE CONTENT ARCHITECTURE ·" });
+  const rotatingLayer = spiral.locator("div").first();
+  await expect(rotatingLayer).toHaveCSS("animation-name", "spin");
+
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await expect(rotatingLayer).toHaveCSS("animation-name", "none");
+  await expect(rotatingLayer).toHaveCSS("transform", "none");
+
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await expect(rotatingLayer).toHaveCSS("animation-name", "spin");
+});
+
 for (const releaseOutside of [false, true]) {
   test(`spiral text moves and returns to rest after releasing ${releaseOutside ? "outside" : "inside"}`, async ({
     page,

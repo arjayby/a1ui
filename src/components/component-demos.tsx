@@ -1,6 +1,8 @@
 import { SectionRail } from "@/registry/section-rail";
 import { SpiralText } from "@/registry/spiral-text";
 
+export { SpiralTextDemo } from "./spiral-text-demo";
+
 const demoSections = [
   { id: "rail-demo-overview", label: "Overview", description: "A quick read of the page." },
   { id: "rail-demo-goals", label: "Goals", description: "What the work needs to solve." },
@@ -67,16 +69,5 @@ export function SpiralTextPreview() {
     <div className="demo-frame spiral-demo">
       <SpiralText text="THE CONTENT ARCHITECTURE · " />
     </div>
-  );
-}
-
-export function SpiralTextDemo() {
-  return (
-    <>
-      <SpiralTextPreview />
-      <p className="demo-caption">
-        Press and hold to draw the coils closer. Release to send a wave past its resting shape.
-      </p>
-    </>
   );
 }

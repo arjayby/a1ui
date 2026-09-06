@@ -15,6 +15,8 @@ export interface SpiralTextProps {
   density?: number;
   tightenStrength?: number;
   rippleDuration?: number;
+  rotating?: boolean;
+  rotationSpeed?: number;
   className?: string;
 }
 
@@ -139,6 +141,8 @@ export function SpiralText({
   density = 1,
   tightenStrength = 0.35,
   rippleDuration = 1100,
+  rotating = true,
+  rotationSpeed = 1,
   className,
 }: SpiralTextProps) {
   const generatedId = useId();
@@ -150,6 +154,7 @@ export function SpiralText({
   const [interaction, setInteraction] = useState<Interaction>("resting");
 
   const safeTightenStrength = Math.min(0.7, Math.max(0.08, tightenStrength));
+  const safeRotationSpeed = Number.isFinite(rotationSpeed) && rotationSpeed > 0 ? rotationSpeed : 1;
   const glyphLayout = useMemo(() => createGlyphLayout(text, density), [density, text]);
   const restingCoordinates = useMemo(
     () =>
@@ -256,26 +261,44 @@ export function SpiralText({
       onPointerUp={release}
       onPointerCancel={release}
     >
-      <svg aria-hidden="true" className="size-full" viewBox={`0 0 ${VIEWBOX_SIZE} ${VIEWBOX_SIZE}`}>
+      <svg
+        aria-hidden="true"
+        className="absolute inset-0 size-full"
+        viewBox={`0 0 ${VIEWBOX_SIZE} ${VIEWBOX_SIZE}`}
+      >
         <defs>
           <pattern id={gridId} width="16" height="16" patternUnits="userSpaceOnUse">
             <circle cx="1" cy="1" r="0.75" fill="currentColor" opacity="0.16" />
           </pattern>
         </defs>
         <rect width="100%" height="100%" fill={`url(#${gridId})`} />
-        <text
-          ref={textRef}
-          x={restingCoordinates.x}
-          y={restingCoordinates.y}
-          rotate={glyphLayout.rotations}
-          fill="currentColor"
-          fontSize={FONT_SIZE}
-          letterSpacing={LETTER_SPACING}
-          xmlSpace="preserve"
-        >
-          {glyphLayout.characters}
-        </text>
       </svg>
+      <div
+        className="size-full animate-spin motion-reduce:animate-none"
+        style={{
+          animationDuration: `${60 / safeRotationSpeed}s`,
+          animationPlayState: rotating ? "running" : "paused",
+        }}
+      >
+        <svg
+          aria-hidden="true"
+          className="size-full overflow-visible"
+          viewBox={`0 0 ${VIEWBOX_SIZE} ${VIEWBOX_SIZE}`}
+        >
+          <text
+            ref={textRef}
+            x={restingCoordinates.x}
+            y={restingCoordinates.y}
+            rotate={glyphLayout.rotations}
+            fill="currentColor"
+            fontSize={FONT_SIZE}
+            letterSpacing={LETTER_SPACING}
+            xmlSpace="preserve"
+          >
+            {glyphLayout.characters}
+          </text>
+        </svg>
+      </div>
     </div>
   );
 }
