@@ -4,45 +4,51 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { SpiralText } from "./spiral-text";
 
 function mockMotionPreference(reduced: boolean) {
-  vi.stubGlobal(
-    "matchMedia",
-    vi.fn().mockReturnValue({
-      matches: reduced,
-      media: "(prefers-reduced-motion: reduce)",
-      onchange: null,
-      addEventListener: vi.fn(),
-      removeEventListener: vi.fn(),
-      addListener: vi.fn(),
-      removeListener: vi.fn(),
-      dispatchEvent: vi.fn(),
-    }),
-  );
+  const events = new EventTarget();
+  const preference = {
+    matches: reduced,
+    addEventListener: events.addEventListener.bind(events),
+    removeEventListener: events.removeEventListener.bind(events),
+  };
+  vi.stubGlobal("matchMedia", vi.fn().mockReturnValue(preference));
+  return (value: boolean) => {
+    preference.matches = value;
+    events.dispatchEvent(new Event("change"));
+  };
 }
 
-function coordinates(text: Element | null, attribute: "x" | "y") {
-  return text?.getAttribute(attribute)?.split(" ").map(Number);
+function coils(graphic: HTMLElement) {
+  return Array.from(graphic.querySelectorAll<HTMLDivElement>("[data-spiral-coil]"));
 }
 
-function glyphRadius(text: Element | null, index: number) {
-  const x = coordinates(text, "x")?.[index];
-  const y = coordinates(text, "y")?.[index];
-  if (x === undefined || y === undefined) throw new Error("Spiral text has no glyph at this index");
-
-  return Math.hypot(x - 320, y - 320);
+function scale(coil: HTMLDivElement) {
+  return Number(coil.style.transform.match(/scale\(([^)]+)\)/)?.[1] ?? 1);
 }
 
-function glyphAngle(text: Element | null, index: number) {
-  const x = coordinates(text, "x")?.[index];
-  const y = coordinates(text, "y")?.[index];
-  if (x === undefined || y === undefined) throw new Error("Spiral text has no glyph at this index");
-
-  return Math.atan2(y - 320, x - 320);
+function expectResting(graphic: HTMLElement) {
+  expect(graphic).toHaveAttribute("data-interaction", "resting");
+  for (const coil of coils(graphic)) {
+    expect(scale(coil)).toBe(1);
+    expect(Number(coil.style.opacity || 1)).toBe(1);
+  }
 }
 
 describe("SpiralText", () => {
   beforeEach(() => {
     vi.useFakeTimers();
     mockMotionPreference(false);
+    vi.stubGlobal(
+      "PointerEvent",
+      class extends MouseEvent {
+        pointerId: number;
+        pointerType: string;
+        constructor(type: string, init: PointerEventInit = {}) {
+          super(type, init);
+          this.pointerId = init.pointerId ?? 1;
+          this.pointerType = init.pointerType ?? "mouse";
+        }
+      },
+    );
   });
 
   afterEach(() => {
@@ -50,46 +56,88 @@ describe("SpiralText", () => {
     vi.unstubAllGlobals();
   });
 
-  it("returns to its original geometry when a pointer interaction is cancelled", () => {
-    render(<SpiralText text="CANCEL ME · " />);
-    const graphic = screen.getByRole("img");
-    const text = graphic.querySelector("text");
-    const restingX = text?.getAttribute("x");
-    const restingY = text?.getAttribute("y");
-
-    fireEvent.pointerDown(graphic, { pointerId: 1, pointerType: "touch" });
-    act(() => vi.advanceTimersByTime(640));
-    expect(text?.getAttribute("x")).not.toBe(restingX);
-    fireEvent.pointerCancel(graphic, { pointerId: 1, pointerType: "touch" });
-    expect(graphic).toHaveAttribute("data-interaction", "releasing");
-
-    act(() => vi.advanceTimersByTime(1200));
-    expect(graphic).toHaveAttribute("data-interaction", "resting");
-    expect(text).toHaveAttribute("x", restingX);
-    expect(text).toHaveAttribute("y", restingY);
+  it.each([0.65, 1, 1.6])("keeps each wave layer circular at density %s", (density) => {
+    render(<SpiralText text="CIRCULAR WAVE · " density={density} rotating={false} />);
+    for (const coil of coils(screen.getByRole("img"))) {
+      const text = coil.querySelector("text")!;
+      const x = text.getAttribute("x")!.split(" ").map(Number);
+      const y = text.getAttribute("y")!.split(" ").map(Number);
+      const radii = x.map((value, index) => Math.hypot(value - 320, y[index] - 320));
+      expect(Math.max(...radii) - Math.min(...radii)).toBeLessThan(0.02);
+    }
   });
 
-  it("can be pressed again during release without an old animation resetting it", () => {
+  it("gathers the coils, then releases them with an outward swell without laying out text again", () => {
+    render(<SpiralText text="MAKE SMALL THINGS WELL · " rotating={false} />);
+    const graphic = screen.getByRole("img");
+    const [inner, outer] = [coils(graphic)[2], coils(graphic)[11]];
+    const glyphsBefore = Array.from(graphic.querySelectorAll("text"), (text) => text.outerHTML);
+
+    fireEvent.pointerDown(graphic, { pointerId: 1 });
+    act(() => vi.advanceTimersByTime(1300));
+    expect(scale(inner)).toBeLessThan(1);
+    const gatheredOuterScale = scale(outer);
+    expect(gatheredOuterScale).toBeLessThan(1);
+
+    fireEvent.pointerUp(graphic, { pointerId: 1 });
+    act(() => vi.advanceTimersByTime(500));
+    expect(scale(inner)).toBeGreaterThan(1);
+    expect(scale(outer)).toBe(gatheredOuterScale);
+
+    act(() => vi.advanceTimersByTime(500));
+    expect(scale(outer)).toBeGreaterThan(1);
+    expect(scale(inner)).toBeCloseTo(1);
+    act(() => vi.advanceTimersByTime(900));
+    expectResting(graphic);
+    expect(Array.from(graphic.querySelectorAll("text"), (text) => text.outerHTML)).toEqual(glyphsBefore);
+  });
+
+  it("returns to rest when a pointer interaction is cancelled", () => {
+    render(<SpiralText text="CANCEL ME · " />);
+    const graphic = screen.getByRole("img");
+    fireEvent.pointerDown(graphic, { pointerId: 1, pointerType: "touch" });
+    act(() => vi.advanceTimersByTime(640));
+    expect(scale(coils(graphic)[3])).toBeLessThan(1);
+    fireEvent.pointerCancel(graphic, { pointerId: 1, pointerType: "touch" });
+    expect(graphic).toHaveAttribute("data-interaction", "releasing");
+    act(() => vi.advanceTimersByTime(1900));
+    expectResting(graphic);
+  });
+
+  it("can be pressed during release without the previous animation resetting it", () => {
     render(<SpiralText text="TRY AGAIN · " />);
     const graphic = screen.getByRole("img");
-    const text = graphic.querySelector("text");
-    const restingX = text?.getAttribute("x");
-    const restingY = text?.getAttribute("y");
-
     fireEvent.pointerDown(graphic, { pointerId: 1 });
     act(() => vi.advanceTimersByTime(640));
     fireEvent.pointerUp(graphic, { pointerId: 1 });
     act(() => vi.advanceTimersByTime(300));
+    const beforeRepress = coils(graphic).map(scale);
     fireEvent.pointerDown(graphic, { pointerId: 2 });
-    act(() => vi.advanceTimersByTime(1300));
+    act(() => vi.advanceTimersByTime(16));
+    coils(graphic).forEach((coil, index) => {
+      expect(Math.abs(scale(coil) - beforeRepress[index])).toBeLessThan(0.002);
+    });
+    act(() => vi.advanceTimersByTime(1900));
     expect(graphic).toHaveAttribute("data-interaction", "tightening");
-    expect(text?.getAttribute("x")).not.toBe(restingX);
-
+    expect(scale(coils(graphic)[3])).toBeLessThan(1);
     fireEvent.pointerUp(graphic, { pointerId: 2 });
-    act(() => vi.advanceTimersByTime(1200));
-    expect(graphic).toHaveAttribute("data-interaction", "resting");
-    expect(text).toHaveAttribute("x", restingX);
-    expect(text).toHaveAttribute("y", restingY);
+    act(() => vi.advanceTimersByTime(1900));
+    expectResting(graphic);
+  });
+
+  it("ignores unrelated pointers and repeated pointer-up events", () => {
+    render(<SpiralText text="ONE AT A TIME · " />);
+    const graphic = screen.getByRole("img");
+    fireEvent.pointerDown(graphic, { pointerId: 1 });
+    act(() => vi.advanceTimersByTime(640));
+    fireEvent.pointerDown(graphic, { pointerId: 2 });
+    fireEvent.pointerUp(graphic, { pointerId: 2 });
+    expect(graphic).toHaveAttribute("data-interaction", "tightening");
+    fireEvent.pointerUp(graphic, { pointerId: 1 });
+    act(() => vi.advanceTimersByTime(1000));
+    fireEvent.pointerUp(graphic, { pointerId: 1 });
+    act(() => vi.advanceTimersByTime(900));
+    expectResting(graphic);
   });
 
   it.each(["tightening", "releasing"])("stops drawing when unmounted during %s", (phase) => {
@@ -99,7 +147,6 @@ describe("SpiralText", () => {
     act(() => vi.advanceTimersByTime(320));
     if (phase === "releasing") fireEvent.pointerUp(graphic, { pointerId: 1 });
     expect(vi.getTimerCount()).toBeGreaterThan(0);
-
     unmount();
     expect(vi.getTimerCount()).toBe(0);
   });
@@ -119,12 +166,12 @@ describe("SpiralText", () => {
     const graphics = screen.getAllByRole("img");
     graphics.forEach((graphic) => fireEvent.pointerDown(graphic, { pointerId: 1 }));
     act(() => vi.advanceTimersByTime(1300));
-    const texts = graphics.map((graphic) => graphic.querySelector("text"));
-    expect(texts[0]).toHaveAttribute("x", texts[1]?.getAttribute("x"));
-    expect(texts[0]).toHaveAttribute("y", texts[1]?.getAttribute("y"));
+    expect(coils(graphics[0]).map((coil) => [scale(coil), coil.querySelector("text")?.outerHTML])).toEqual(
+      coils(graphics[1]).map((coil) => [scale(coil), coil.querySelector("text")?.outerHTML]),
+    );
   });
 
-  it("uses a minimum release duration for very short rippleDuration values", () => {
+  it("honors custom durations with a 300ms minimum", () => {
     render(<SpiralText text="QUICK RELEASE · " rippleDuration={0} />);
     const graphic = screen.getByRole("img");
     fireEvent.pointerDown(graphic, { pointerId: 1 });
@@ -133,59 +180,57 @@ describe("SpiralText", () => {
     act(() => vi.advanceTimersByTime(200));
     expect(graphic).toHaveAttribute("data-interaction", "releasing");
     act(() => vi.advanceTimersByTime(150));
-    expect(graphic).toHaveAttribute("data-interaction", "resting");
+    expectResting(graphic);
   });
 
-  it("reduces coil spacing without rotating, then overshoots and returns to rest", () => {
-    render(<SpiralText text="MAKE SMALL THINGS WELL · " rippleDuration={1100} />);
-
-    const graphic = screen.getByRole("img", { name: "MAKE SMALL THINGS WELL ·" });
-    const text = graphic.querySelector("text");
-    const restingX = text?.getAttribute("x");
-    const restingY = text?.getAttribute("y");
-    const restingRotation = text?.getAttribute("rotate");
-    const glyphIndex = 400;
-    const outerGlyphIndex = (coordinates(text, "x")?.length ?? 1) - 1;
-    const restingRadius = glyphRadius(text, glyphIndex);
-    const restingOuterRadius = glyphRadius(text, outerGlyphIndex);
-    const restingAngle = glyphAngle(text, glyphIndex);
-
-    fireEvent.pointerDown(graphic, { pointerId: 1, pointerType: "mouse" });
-    expect(graphic).toHaveAttribute("data-interaction", "tightening");
-
-    act(() => vi.advanceTimersByTime(640));
-    expect(glyphRadius(text, glyphIndex)).toBeLessThan(restingRadius);
-    expect(glyphAngle(text, glyphIndex)).toBeCloseTo(restingAngle, 3);
-    expect(text).toHaveAttribute("rotate", restingRotation);
-
-    fireEvent.pointerUp(graphic, { pointerId: 1, pointerType: "mouse" });
-    expect(graphic).toHaveAttribute("data-interaction", "releasing");
-
-    act(() => vi.advanceTimersByTime(550));
-    expect(glyphRadius(text, outerGlyphIndex)).toBeGreaterThan(restingOuterRadius);
-
-    act(() => vi.advanceTimersByTime(1200));
-    expect(graphic).toHaveAttribute("data-interaction", "resting");
-    expect(text).toHaveAttribute("x", restingX);
-    expect(text).toHaveAttribute("y", restingY);
-  });
-
-  it("keeps the geometry still when reduced motion is enabled", () => {
+  it("keeps still when reduced motion is enabled", () => {
     mockMotionPreference(true);
     render(<SpiralText text="QUIET TYPE · " />);
-
-    const graphic = screen.getByRole("img", { name: "QUIET TYPE ·" });
-    const text = graphic.querySelector("text");
-    const restingX = text?.getAttribute("x");
-    const restingY = text?.getAttribute("y");
-
-    fireEvent.pointerDown(graphic, { pointerId: 2, pointerType: "touch" });
+    const graphic = screen.getByRole("img");
+    fireEvent.pointerDown(graphic, { pointerId: 1 });
     expect(graphic).toHaveAttribute("data-interaction", "pressed-reduced");
     act(() => vi.advanceTimersByTime(1300));
-    expect(text).toHaveAttribute("x", restingX);
-    expect(text).toHaveAttribute("y", restingY);
+    expect(coils(graphic).every((coil) => scale(coil) === 1)).toBe(true);
+    expect(vi.getTimerCount()).toBe(0);
+    fireEvent.pointerUp(graphic, { pointerId: 1 });
+    expectResting(graphic);
+  });
 
-    fireEvent.pointerUp(graphic, { pointerId: 2, pointerType: "touch" });
-    expect(graphic).toHaveAttribute("data-interaction", "resting");
+  it("cancels a running ripple when reduced motion is enabled", () => {
+    const setReducedMotion = mockMotionPreference(false);
+    render(<SpiralText text="QUIET NOW · " />);
+    const graphic = screen.getByRole("img");
+    fireEvent.pointerDown(graphic, { pointerId: 1 });
+    act(() => vi.advanceTimersByTime(640));
+    fireEvent.pointerUp(graphic, { pointerId: 1 });
+    act(() => vi.advanceTimersByTime(300));
+    act(() => setReducedMotion(true));
+    expectResting(graphic);
+    expect(vi.getTimerCount()).toBe(0);
+    expect(graphic.querySelector("[data-spiral-rotation]")).toHaveStyle({ animationPlayState: "paused" });
+  });
+
+  it("resets an active gesture when the layout changes", () => {
+    const { rerender } = render(<SpiralText text="ORIGINAL · " />);
+    const graphic = screen.getByRole("img");
+    fireEvent.pointerDown(graphic, { pointerId: 1 });
+    act(() => vi.advanceTimersByTime(600));
+    rerender(<SpiralText text="UPDATED · " density={1.4} />);
+    expectResting(graphic);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it("can pause rotation during a ripple without cancelling the wave", () => {
+    const { rerender } = render(<SpiralText text="PAUSE · " />);
+    const graphic = screen.getByRole("img");
+    fireEvent.pointerDown(graphic, { pointerId: 1 });
+    act(() => vi.advanceTimersByTime(600));
+    fireEvent.pointerUp(graphic, { pointerId: 1 });
+    act(() => vi.advanceTimersByTime(300));
+    rerender(<SpiralText text="PAUSE · " rotating={false} />);
+    expect(graphic).toHaveAttribute("data-interaction", "releasing");
+    expect(graphic.querySelector("[data-spiral-rotation]")).toHaveStyle({ animationPlayState: "paused" });
+    act(() => vi.advanceTimersByTime(1600));
+    expectResting(graphic);
   });
 });

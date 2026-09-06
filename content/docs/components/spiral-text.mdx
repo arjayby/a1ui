@@ -25,7 +25,7 @@ export function Poster() {
       text="THE CONTENT ARCHITECTURE · "
       density={1}
       tightenStrength={0.35}
-      rippleDuration={1100}
+      rippleDuration={1800}
       rotationSpeed={2}
       className="max-w-2xl"
     />
@@ -46,13 +46,15 @@ export function Poster() {
 | `text`            | `string`  | Required | Repeats along the spiral path and names the graphic for assistive technology.                       |
 | `density`         | `number`  | `1`      | Adjusts the number of resting turns between `0.65` and `1.6`.                                       |
 | `tightenStrength` | `number`  | `0.35`   | Controls how closely the coils draw together, clamped from `0.08` to `0.7`.                         |
-| `rippleDuration`  | `number`  | `1100`   | Sets the release duration in milliseconds, with a `300ms` minimum.                                  |
+| `rippleDuration`  | `number`  | `1800`   | Sets the outward wave duration in milliseconds, with a `300ms` minimum.                             |
 | `rotating`        | `boolean` | `true`   | Rotates the text clockwise. Set to `false` to pause at the current angle.                           |
 | `rotationSpeed`   | `number`  | `1`      | Rotations per minute. Higher values spin faster. Non-positive or non-finite values use the default. |
 | `className`       | `string`  | None     | Sets layout constraints such as width or placement.                                                 |
 
-Holding changes the radial gap between coils without changing each character's angle, font size, or letter spacing. The interaction responds to mouse, touch, and pen input. It stays still when the user requests reduced motion.
+The text follows concentric circular rings. Holding gathers the rings toward the center. On release, a circular wave travels outward, swelling and fading each ring before it settles. Outer rings stay gathered until the wave reaches them. The interaction responds to mouse, touch, and pen input and stays still when the user requests reduced motion.
 
 The text rotates by default while the dotted background stays fixed. Set `rotating={false}` to pause it. Rotation works during press and release and is disabled when the user requests reduced motion.
 
 Use `rotationSpeed` to control the speed. For example, `rotationSpeed={2}` completes two turns per minute, while `rotationSpeed={0.5}` completes one turn every two minutes.
+
+Glyph positions are calculated once per text or density change. Animation transforms the coil layers instead of recalculating every letter's coordinates each frame. Rotation pauses while the component is offscreen or the page is hidden.

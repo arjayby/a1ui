@@ -3,6 +3,7 @@
 import {
   useCallback,
   useEffect,
+  useEffectEvent,
   useId,
   useMemo,
   useRef,
@@ -21,200 +22,231 @@ export interface SpiralTextProps {
 }
 
 type Interaction = "resting" | "tightening" | "releasing" | "pressed-reduced";
+type CoilState = { scale: number; opacity: number };
+
+function readCoil(element: HTMLDivElement | null): CoilState {
+  return {
+    scale: Number(element?.style.transform.match(/scale\(([^)]+)\)/)?.[1] ?? 1),
+    opacity: Number(element?.style.opacity || 1),
+  };
+}
+
+function paintCoil(element: HTMLDivElement, scale: number, opacity: number) {
+  element.style.transform = `scale(${scale.toFixed(5)})`;
+  element.style.opacity = String(opacity);
+}
 
 const VIEWBOX_SIZE = 640;
 const CENTER = VIEWBOX_SIZE / 2;
 const OUTER_RADIUS = 448;
 const HOLD_DURATION = 1200;
 const TAU = Math.PI * 2;
-const RELEASE_OVERSHOOT = 0.2;
-const RIPPLE_HEIGHT = 18;
-const RIPPLE_WAVELENGTH = 0.18;
+const RIPPLE_WIDTH = 0.3;
+const RIPPLE_HEIGHT = 24;
 const FONT_SIZE = 14;
 const LETTER_SPACING = 0.8;
 const GLYPH_ADVANCE = FONT_SIZE * 0.6 + LETTER_SPACING;
 
-type SpiralMotion = {
-  density: number;
-  tension?: number;
-  tightenStrength: number;
-  rippleProgress?: number;
-  rippleStrength?: number;
-};
-
-function spiralPoint(
-  progress: number,
-  { density, tension = 0, tightenStrength, rippleProgress, rippleStrength = 0 }: SpiralMotion,
-) {
-  const safeDensity = Math.min(1.6, Math.max(0.65, density));
-  const turns = 13.5 * safeDensity;
-  const radialScale = 1 - tightenStrength * tension * 0.4;
-  const angle = progress * turns * TAU - Math.PI / 2;
-  let radius = (5 + progress * (OUTER_RADIUS - 5)) * radialScale;
-
-  if (rippleProgress !== undefined) {
-    const waveFront = rippleProgress * 1.12 - 0.02;
-    const distance = progress - waveFront;
-    const envelopeWidth = distance > 0 ? 0.055 : 0.18;
-    const envelope = Math.exp(-Math.pow(distance / envelopeWidth, 2));
-    const oscillation = Math.cos((distance / RIPPLE_WAVELENGTH) * TAU);
-    const attack = Math.min(1, rippleProgress / 0.12);
-    const decay = attack * Math.pow(1 - rippleProgress, 0.75);
-    radius += oscillation * envelope * decay * rippleStrength * RIPPLE_HEIGHT;
-  }
-
-  return {
-    x: CENTER + Math.cos(angle) * radius,
-    y: CENTER + Math.sin(angle) * radius,
-  };
+function smoothstep(value: number) {
+  const t = Math.min(1, Math.max(0, value));
+  return t * t * (3 - 2 * t);
 }
 
 function createGlyphLayout(text: string, density: number) {
   const safeDensity = Math.min(1.6, Math.max(0.65, density));
   const turns = 13.5 * safeDensity;
-  const samples = Math.ceil(turns * 42);
-  const motion = { density, tightenStrength: 0 };
-  const points = Array.from({ length: samples + 1 }, (_, index) => spiralPoint(index / samples, motion));
-  const cumulativeLengths = [0];
+  const phrase = Array.from(`${text.trim()} `);
+  let characterIndex = 0;
 
-  for (let index = 1; index < points.length; index += 1) {
-    const previous = points[index - 1];
-    const current = points[index];
-    cumulativeLengths.push(
-      cumulativeLengths[index - 1] + Math.hypot(current.x - previous.x, current.y - previous.y),
-    );
-  }
+  return Array.from({ length: Math.ceil(turns) }, (_, index) => {
+    const progress = Math.min(1, (index + 0.5) / turns);
+    const radius = 5 + progress * (OUTER_RADIUS - 5);
+    const glyphCount = Math.max(1, Math.floor((TAU * radius) / GLYPH_ADVANCE));
+    const characters: string[] = [];
+    const x: string[] = [];
+    const y: string[] = [];
+    const rotations: string[] = [];
 
-  const pathLength = cumulativeLengths.at(-1) ?? 0;
-  const glyphCount = Math.max(1, Math.floor(pathLength / GLYPH_ADVANCE));
-  const phrase = `${text.trim()} `;
-  const characters = phrase.repeat(Math.ceil(glyphCount / phrase.length)).slice(0, glyphCount);
-  const progresses: number[] = [];
-  const rotations: string[] = [];
-  let segment = 1;
-
-  for (let index = 0; index < glyphCount; index += 1) {
-    const targetLength = index * GLYPH_ADVANCE;
-    while (segment < cumulativeLengths.length - 1 && cumulativeLengths[segment] < targetLength) {
-      segment += 1;
+    // Every glyph in a layer shares a radius, so scaling the layer preserves a circle.
+    // Divide the full circumference evenly to avoid a gap or overlap at the seam.
+    for (let glyphIndex = 0; glyphIndex < glyphCount; glyphIndex += 1) {
+      const angle = (glyphIndex / glyphCount) * TAU - Math.PI / 2;
+      characters.push(phrase[characterIndex % phrase.length]);
+      characterIndex += 1;
+      x.push((CENTER + Math.cos(angle) * radius).toFixed(2));
+      y.push((CENTER + Math.sin(angle) * radius).toFixed(2));
+      rotations.push(((angle * 180) / Math.PI + 90).toFixed(2));
     }
 
-    const segmentStart = cumulativeLengths[segment - 1];
-    const segmentLength = cumulativeLengths[segment] - segmentStart;
-    const segmentProgress = segmentLength === 0 ? 0 : (targetLength - segmentStart) / segmentLength;
-    const progress = (segment - 1 + segmentProgress) / samples;
-    const radius = 5 + progress * (OUTER_RADIUS - 5);
-    const angle = progress * turns * TAU - Math.PI / 2;
-    const radialVelocity = OUTER_RADIUS - 5;
-    const angularVelocity = turns * TAU;
-    const tangentX = Math.cos(angle) * radialVelocity - Math.sin(angle) * radius * angularVelocity;
-    const tangentY = Math.sin(angle) * radialVelocity + Math.cos(angle) * radius * angularVelocity;
-
-    progresses.push(progress);
-    rotations.push(((Math.atan2(tangentY, tangentX) * 180) / Math.PI).toFixed(2));
-  }
-
-  return { characters, progresses, rotations: rotations.join(" ") };
-}
-
-function glyphCoordinates(progresses: number[], motion: SpiralMotion) {
-  const x: string[] = [];
-  const y: string[] = [];
-
-  for (const progress of progresses) {
-    const point = spiralPoint(progress, motion);
-    x.push(point.x.toFixed(2));
-    y.push(point.y.toFixed(2));
-  }
-
-  return { x: x.join(" "), y: y.join(" ") };
-}
-
-function releaseTensionAt(progress: number, releaseTension: number) {
-  const recoil = Math.pow(1 - progress, 3);
-  const overshoot = Math.pow(Math.sin(Math.PI * progress), 2) * RELEASE_OVERSHOOT;
-  return releaseTension * (recoil - overshoot);
+    return {
+      progress,
+      radius,
+      diameter: 2 * (radius + FONT_SIZE),
+      characters: characters.join(""),
+      x: x.join(" "),
+      y: y.join(" "),
+      rotations: rotations.join(" "),
+    };
+  });
 }
 
 export function SpiralText({
   text,
   density = 1,
   tightenStrength = 0.35,
-  rippleDuration = 1100,
+  rippleDuration = 1800,
   rotating = true,
   rotationSpeed = 1,
   className,
 }: SpiralTextProps) {
   const generatedId = useId();
   const gridId = `a1ui-spiral-grid-${generatedId.replaceAll(":", "")}`;
-  const textRef = useRef<SVGTextElement>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const rotationRef = useRef<HTMLDivElement>(null);
+  const coilRefs = useRef<(HTMLDivElement | null)[]>([]);
   const frameRef = useRef(0);
-  const holdStartedAtRef = useRef(0);
   const tensionRef = useRef(0);
+  const pointerRef = useRef<number | null>(null);
+  const motionActiveRef = useRef(true);
   const [interaction, setInteraction] = useState<Interaction>("resting");
 
   const safeTightenStrength = Math.min(0.7, Math.max(0.08, tightenStrength));
   const safeRotationSpeed = Number.isFinite(rotationSpeed) && rotationSpeed > 0 ? rotationSpeed : 1;
-  const glyphLayout = useMemo(() => createGlyphLayout(text, density), [density, text]);
-  const restingCoordinates = useMemo(
-    () =>
-      glyphCoordinates(glyphLayout.progresses, {
-        density,
-        tightenStrength: safeTightenStrength,
-      }),
-    [density, glyphLayout.progresses, safeTightenStrength],
-  );
+  const safeRippleDuration = Number.isFinite(rippleDuration) ? Math.max(300, rippleDuration) : 1800;
+  const coils = useMemo(() => createGlyphLayout(text, density), [density, text]);
 
+  // Glyphs are laid out once. Animation updates only a small number of composited layers.
   const draw = useCallback(
-    (tension: number, rippleProgress?: number, rippleStrength = 0) => {
-      const coordinates = glyphCoordinates(glyphLayout.progresses, {
-        density,
-        tension,
-        tightenStrength: safeTightenStrength,
-        rippleProgress,
-        rippleStrength,
-      });
-      textRef.current?.setAttribute("x", coordinates.x);
-      textRef.current?.setAttribute("y", coordinates.y);
+    (tension: number, rippleProgress?: number, startingCoils?: CoilState[]) => {
+      const waveFront = rippleProgress === undefined ? -1 : smoothstep(rippleProgress) * 1.4;
+      const life =
+        rippleProgress === undefined
+          ? 0
+          : smoothstep(rippleProgress / 0.2) * (1 - smoothstep((rippleProgress - 0.78) / 0.22));
+      for (let index = 0; index < coils.length; index += 1) {
+        const element = coilRefs.current[index];
+        if (!element) continue;
+        const coil = coils[index];
+        const wave = (1 - smoothstep(Math.abs(coil.progress - waveFront) / RIPPLE_WIDTH)) * life;
+        // Each coil stays gathered until the leading edge reaches it.
+        const releaseAmount =
+          rippleProgress === undefined
+            ? 0
+            : smoothstep((waveFront + RIPPLE_WIDTH - coil.progress) / RIPPLE_WIDTH) *
+              smoothstep(rippleProgress / 0.12);
+        const start = startingCoils?.[index] ?? {
+          scale: 1 - safeTightenStrength * tension * 0.4,
+          opacity: 1,
+        };
+        const scale =
+          start.scale +
+          (1 - start.scale) * releaseAmount +
+          (wave * RIPPLE_HEIGHT * (0.35 + tension * 0.65)) / Math.max(40, coil.radius);
+        const opacity = start.opacity + (1 - start.opacity) * releaseAmount;
+        paintCoil(element, scale, opacity * (1 - wave * 0.45));
+      }
     },
-    [density, glyphLayout.progresses, safeTightenStrength],
+    [coils, safeTightenStrength],
   );
 
   const stopAnimation = useCallback(() => {
     window.cancelAnimationFrame(frameRef.current);
+    frameRef.current = 0;
   }, []);
 
-  useEffect(() => stopAnimation, [stopAnimation]);
+  const syncRotation = useEffectEvent(() => {
+    if (rotationRef.current) {
+      rotationRef.current.style.animationPlayState =
+        rotating && motionActiveRef.current ? "running" : "paused";
+    }
+  });
 
-  const prefersReducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  useEffect(() => {
+    syncRotation();
+  }, [rotating]);
+
+  useEffect(() => {
+    const root = rootRef.current;
+    const rotation = rotationRef.current;
+    if (!root || !rotation) return;
+    const preference = window.matchMedia("(prefers-reduced-motion: reduce)");
+    let visible = true;
+    const reset = () => {
+      stopAnimation();
+      if (pointerRef.current !== null && root.hasPointerCapture?.(pointerRef.current)) {
+        root.releasePointerCapture(pointerRef.current);
+      }
+      pointerRef.current = null;
+      tensionRef.current = 0;
+      draw(0);
+      setInteraction("resting");
+    };
+    const syncMotion = () => {
+      const active = visible && !document.hidden && !preference.matches;
+      motionActiveRef.current = active;
+      syncRotation();
+      if (!active) reset();
+    };
+    const observer =
+      typeof IntersectionObserver === "undefined"
+        ? null
+        : new IntersectionObserver(([entry]) => {
+            visible = entry.isIntersecting;
+            syncMotion();
+          });
+    observer?.observe(root);
+    preference.addEventListener("change", syncMotion);
+    document.addEventListener("visibilitychange", syncMotion);
+    reset();
+    syncMotion();
+    return () => {
+      stopAnimation();
+      observer?.disconnect();
+      preference.removeEventListener("change", syncMotion);
+      document.removeEventListener("visibilitychange", syncMotion);
+    };
+  }, [draw, stopAnimation]);
 
   const handlePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (event.pointerType === "mouse" && event.button !== 0) return;
-
+    if (pointerRef.current !== null || (event.pointerType === "mouse" && event.button !== 0)) return;
+    pointerRef.current = event.pointerId;
     event.currentTarget.setPointerCapture?.(event.pointerId);
     stopAnimation();
 
-    if (prefersReducedMotion()) {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       setInteraction("pressed-reduced");
       return;
     }
 
     setInteraction("tightening");
-    holdStartedAtRef.current = performance.now();
-
+    const startedAt = performance.now();
+    const startingTension = tensionRef.current;
+    const startingCoils = coilRefs.current.map(readCoil);
     const tighten = (now: number) => {
-      tensionRef.current = Math.min(1, (now - holdStartedAtRef.current) / HOLD_DURATION);
-      draw(tensionRef.current);
-      if (tensionRef.current < 1) frameRef.current = window.requestAnimationFrame(tighten);
+      const progress = Math.min(1, (now - startedAt) / HOLD_DURATION);
+      const eased = smoothstep(progress);
+      tensionRef.current = startingTension + (1 - startingTension) * eased;
+      for (let index = 0; index < coils.length; index += 1) {
+        const element = coilRefs.current[index];
+        if (!element) continue;
+        const start = startingCoils[index];
+        paintCoil(
+          element,
+          start.scale + (1 - safeTightenStrength * 0.4 - start.scale) * eased,
+          start.opacity + (1 - start.opacity) * eased,
+        );
+      }
+      if (progress < 1) frameRef.current = window.requestAnimationFrame(tighten);
     };
-
     frameRef.current = window.requestAnimationFrame(tighten);
   };
 
   const release = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (interaction === "resting") return;
-
-    event.currentTarget.releasePointerCapture?.(event.pointerId);
+    if (pointerRef.current !== event.pointerId) return;
+    pointerRef.current = null;
+    if (event.currentTarget.hasPointerCapture?.(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
     stopAnimation();
 
     if (interaction === "pressed-reduced") {
@@ -224,30 +256,26 @@ export function SpiralText({
 
     const releaseStartedAt = performance.now();
     const releaseTension = tensionRef.current;
+    const startingCoils = coilRefs.current.map(readCoil);
     setInteraction("releasing");
-
     const ripple = (now: number) => {
-      const progress = Math.min(1, (now - releaseStartedAt) / Math.max(300, rippleDuration));
-      const rippleStrength = Math.min(0.55, 0.1 + releaseTension * 0.45);
-      tensionRef.current = releaseTensionAt(progress, releaseTension);
-      draw(tensionRef.current, progress, rippleStrength);
-
+      const progress = Math.min(1, (now - releaseStartedAt) / safeRippleDuration);
+      tensionRef.current = releaseTension * (1 - smoothstep(progress));
+      draw(releaseTension, progress, startingCoils);
       if (progress < 1) {
         frameRef.current = window.requestAnimationFrame(ripple);
         return;
       }
-
       tensionRef.current = 0;
-      textRef.current?.setAttribute("x", restingCoordinates.x);
-      textRef.current?.setAttribute("y", restingCoordinates.y);
+      draw(0);
       setInteraction("resting");
     };
-
     frameRef.current = window.requestAnimationFrame(ripple);
   };
 
   return (
     <div
+      ref={rootRef}
       role="img"
       aria-label={text.trim()}
       data-interaction={interaction}
@@ -274,30 +302,49 @@ export function SpiralText({
         <rect width="100%" height="100%" fill={`url(#${gridId})`} />
       </svg>
       <div
-        className="size-full animate-spin motion-reduce:animate-none"
+        ref={rotationRef}
+        data-spiral-rotation=""
+        className="relative size-full animate-spin motion-reduce:animate-none"
         style={{
           animationDuration: `${60 / safeRotationSpeed}s`,
           animationPlayState: rotating ? "running" : "paused",
         }}
       >
-        <svg
-          aria-hidden="true"
-          className="size-full overflow-visible"
-          viewBox={`0 0 ${VIEWBOX_SIZE} ${VIEWBOX_SIZE}`}
-        >
-          <text
-            ref={textRef}
-            x={restingCoordinates.x}
-            y={restingCoordinates.y}
-            rotate={glyphLayout.rotations}
-            fill="currentColor"
-            fontSize={FONT_SIZE}
-            letterSpacing={LETTER_SPACING}
-            xmlSpace="preserve"
+        {coils.map((coil, index) => (
+          <div
+            key={index}
+            ref={(element) => {
+              coilRefs.current[index] = element;
+            }}
+            data-spiral-coil={index}
+            className="pointer-events-none absolute"
+            style={{
+              width: `${(coil.diameter / VIEWBOX_SIZE) * 100}%`,
+              height: `${(coil.diameter / VIEWBOX_SIZE) * 100}%`,
+              left: `${((VIEWBOX_SIZE - coil.diameter) / VIEWBOX_SIZE) * 50}%`,
+              top: `${((VIEWBOX_SIZE - coil.diameter) / VIEWBOX_SIZE) * 50}%`,
+              willChange: interaction === "resting" ? undefined : "transform, opacity",
+            }}
           >
-            {glyphLayout.characters}
-          </text>
-        </svg>
+            <svg
+              aria-hidden="true"
+              className="size-full overflow-visible"
+              viewBox={`${CENTER - coil.diameter / 2} ${CENTER - coil.diameter / 2} ${coil.diameter} ${coil.diameter}`}
+            >
+              <text
+                x={coil.x}
+                y={coil.y}
+                rotate={coil.rotations}
+                fill="currentColor"
+                fontSize={FONT_SIZE}
+                letterSpacing={LETTER_SPACING}
+                xmlSpace="preserve"
+              >
+                {coil.characters}
+              </text>
+            </svg>
+          </div>
+        ))}
       </div>
     </div>
   );
