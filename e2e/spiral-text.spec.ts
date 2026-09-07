@@ -65,6 +65,44 @@ test("cached text refreshes after color and size changes", async ({ page }) => {
   await expect(canvas).toBeVisible();
 });
 
+test("theme changes recolor cached text without rasterizing the glyphs again", async ({ page }) => {
+  const spiral = page.getByRole("img", { name: "THE CONTENT ARCHITECTURE ·" });
+  const canvas = spiral.locator("canvas").nth(5);
+  await expect(canvas).toHaveAttribute("data-ready", "true");
+  await page.evaluate(() => {
+    const original = CanvasRenderingContext2D.prototype.fillText;
+    CanvasRenderingContext2D.prototype.fillText = function (...args: Parameters<typeof original>) {
+      document.documentElement.dataset.textRedrawn = "true";
+      return original.apply(this, args);
+    };
+  });
+  for (const theme of ["dark", "light", "dark"]) {
+    await page.getByRole("button", { name: "Toggle theme", exact: true }).click();
+    await expect(page.locator("html")).toHaveClass(theme);
+    await expect(page.locator("html")).not.toHaveAttribute("data-text-redrawn", "true");
+    await expect
+      .poll(() =>
+        canvas.evaluate((element: HTMLCanvasElement) => {
+          const context = element.getContext("2d")!;
+          const pixels = context.getImageData(0, 0, element.width, element.height).data;
+          const sample = document.createElement("canvas");
+          sample.width = sample.height = 1;
+          const expected = sample.getContext("2d")!;
+          expected.fillStyle = getComputedStyle(
+            element.closest("[data-spiral-coil]")!.querySelector("text")!,
+          ).fill;
+          expected.fillRect(0, 0, 1, 1);
+          const color = expected.getImageData(0, 0, 1, 1).data;
+          for (let i = 0; i < pixels.length; i += 4) {
+            if (pixels[i + 3] === 255) return color.every((value, channel) => value === pixels[i + channel]);
+          }
+          return false;
+        }),
+      )
+      .toBe(true);
+  }
+});
+
 test("the homepage spiral stays static without allocating canvas caches", async ({ page }) => {
   await page.goto("/");
   await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");

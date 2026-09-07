@@ -227,43 +227,68 @@ export function SpiralText({
     const root = rootRef.current;
     if (!root || root.closest("[inert]") || !document.fonts) return;
     const canvases = canvasRefs.current.slice(0, coils.length);
+    const masks = canvases.map(() => document.createElement("canvas"));
     const layers = coilRefs.current.slice(0, coils.length);
     let disposed = false;
     let fontsReady = false;
     let cacheKey = "";
+    let cachedFill = "";
     const paint = () => {
-      if (disposed || !fontsReady || !root.clientWidth) return;
+      if (disposed || !fontsReady) return;
+      const width = root.clientWidth;
+      if (!width) return;
       const text = root.querySelector("text");
       if (!text) return;
       const style = getComputedStyle(text);
       const font = `${style.fontStyle} ${style.fontWeight} ${FONT_SIZE}px ${style.fontFamily}`;
+      const fill = style.fill;
       const pixelRatio = window.devicePixelRatio || 1;
-      const key = `${root.clientWidth}|${pixelRatio}|${font}|${style.fill}`;
-      if (key === cacheKey) return;
+      const key = `${width}|${pixelRatio}|${font}`;
+      const geometryChanged = key !== cacheKey;
+      if (!geometryChanged && fill === cachedFill) return;
       cacheKey = key;
+      cachedFill = fill;
       coils.forEach((coil, index) => {
         const canvas = canvases[index];
         const context = canvas?.getContext("2d");
-        if (!canvas || !context) return;
+        const mask = masks[index];
+        const glyphs = mask.getContext("2d");
+        if (!canvas || !context || !glyphs) return;
         // Cache glyphs once at display resolution with some headroom for the swell.
         // Transforming these bitmaps avoids re-rasterizing SVG text on every re-grab.
-        const maxScale = 1 + RIPPLE_HEIGHT / Math.max(40, coil.radius);
-        const size = Math.ceil((coil.diameter / VIEWBOX_SIZE) * root.clientWidth * pixelRatio * maxScale);
-        canvas.width = canvas.height = size;
-        context.font = font;
-        context.fillStyle = style.fill;
-        const scale = size / coil.diameter;
-        const origin = CENTER - coil.diameter / 2;
-        const x = coil.x.split(" ").map(Number);
-        const y = coil.y.split(" ").map(Number);
-        const angles = coil.rotations.split(" ").map(Number);
-        Array.from(coil.characters).forEach((character, glyph) => {
-          const angle = (angles[glyph] * Math.PI) / 180;
-          const cos = Math.cos(angle) * scale;
-          const sin = Math.sin(angle) * scale;
-          context.setTransform(cos, sin, -sin, cos, (x[glyph] - origin) * scale, (y[glyph] - origin) * scale);
-          context.fillText(character, 0, 0);
-        });
+        if (geometryChanged) {
+          const maxScale = 1 + RIPPLE_HEIGHT / Math.max(40, coil.radius);
+          const size = Math.ceil((coil.diameter / VIEWBOX_SIZE) * width * pixelRatio * maxScale);
+          canvas.width = canvas.height = mask.width = mask.height = size;
+          glyphs.font = font;
+          const scale = size / coil.diameter;
+          const origin = CENTER - coil.diameter / 2;
+          const x = coil.x.split(" ").map(Number);
+          const y = coil.y.split(" ").map(Number);
+          const angles = coil.rotations.split(" ").map(Number);
+          Array.from(coil.characters).forEach((character, glyph) => {
+            const angle = (angles[glyph] * Math.PI) / 180;
+            const cos = Math.cos(angle) * scale;
+            const sin = Math.sin(angle) * scale;
+            glyphs.setTransform(
+              cos,
+              sin,
+              -sin,
+              cos,
+              (x[glyph] - origin) * scale,
+              (y[glyph] - origin) * scale,
+            );
+            glyphs.fillText(character, 0, 0);
+          });
+        }
+        // Recolor the cached glyph mask in two draws instead of rasterizing every letter.
+        // Start from the mask so translucent colors do not lose opacity on repeated changes.
+        context.globalCompositeOperation = "copy";
+        context.drawImage(mask, 0, 0);
+        context.globalCompositeOperation = "source-in";
+        context.fillStyle = fill;
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        context.globalCompositeOperation = "source-over";
         canvas.dataset.ready = "true";
         canvas.style.visibility = "visible";
         const svg = layers[index]?.querySelector("svg");
@@ -294,6 +319,7 @@ export function SpiralText({
       theme.disconnect();
       document.fonts.removeEventListener("loadingdone", fontsChanged);
       window.removeEventListener("resize", paint);
+      for (const mask of masks) mask.width = mask.height = 0;
       for (const canvas of canvases) {
         if (!canvas) continue;
         canvas.width = canvas.height = 0;
