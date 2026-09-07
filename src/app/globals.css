@@ -41,7 +41,10 @@
   --border: oklch(0.84 0.008 95);
   --ring: oklch(0.48 0.008 95);
   --radius: 0.25rem;
+}
 
+:root,
+.dark {
   --color-fd-background: var(--background);
   --color-fd-foreground: var(--foreground);
   --color-fd-muted: var(--muted);
@@ -59,6 +62,16 @@
   --color-fd-accent-foreground: var(--foreground);
   --color-fd-ring: var(--ring);
   --color-fd-overlay: color-mix(in oklab, var(--foreground) 18%, transparent);
+}
+
+.dark {
+  --background: oklch(0.19 0.004 95);
+  --foreground: oklch(0.94 0.006 95);
+  --card: var(--background);
+  --muted: oklch(0.26 0.006 95);
+  --muted-foreground: oklch(0.7 0.008 95);
+  --border: oklch(0.36 0.008 95);
+  --ring: oklch(0.7 0.008 95);
 }
 
 @layer base {

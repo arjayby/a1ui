@@ -1,6 +1,7 @@
 "use client";
 
 import { useSearchContext } from "fumadocs-ui/contexts/search";
+import { ThemeSwitch } from "fumadocs-ui/layouts/shared/slots/theme-switch";
 import { Search } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -33,9 +34,12 @@ export function DesktopNavigation() {
 
   return (
     <aside className="border-border sticky top-0 hidden h-dvh flex-col border-r px-5 py-7 md:flex">
-      <Link href="/" className="w-fit font-bold no-underline">
-        a1ui
-      </Link>
+      <div className="flex items-center justify-between gap-3">
+        <Link href="/" className="w-fit font-bold no-underline">
+          a1ui
+        </Link>
+        <ThemeSwitch mode="light-dark" className="shrink-0" />
+      </div>
       <div className="mt-6">
         <SearchButton />
       </div>
@@ -101,6 +105,7 @@ export function MobileNavigation() {
         ))}
       </select>
       <SearchButton compact />
+      <ThemeSwitch mode="light-dark" className="shrink-0" />
     </header>
   );
 }
