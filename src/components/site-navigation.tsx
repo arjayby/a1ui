@@ -1,13 +1,30 @@
 "use client";
 
 import { useSearchContext } from "fumadocs-ui/contexts/search";
-import { ThemeSwitch } from "fumadocs-ui/layouts/shared/slots/theme-switch";
-import { Search } from "lucide-react";
+import { useTheme } from "fumadocs-ui/provider/base";
+import { Moon, Search, Sun } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
 import { components } from "@/lib/component-catalog";
 import { cn } from "@/lib/utils";
+
+function ThemeButton() {
+  const { resolvedTheme, setTheme } = useTheme();
+
+  return (
+    <button
+      type="button"
+      aria-label="Toggle theme"
+      title="Toggle theme"
+      className="hover:bg-muted flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-sm"
+      onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+    >
+      <Moon aria-hidden="true" className="size-4 dark:hidden" />
+      <Sun aria-hidden="true" className="hidden size-4 dark:block" />
+    </button>
+  );
+}
 
 function SearchButton({ compact = false }: { compact?: boolean }) {
   const { setOpenSearch } = useSearchContext();
@@ -38,7 +55,7 @@ export function DesktopNavigation() {
         <Link href="/" className="w-fit font-bold no-underline">
           a1ui
         </Link>
-        <ThemeSwitch mode="light-dark" className="shrink-0" />
+        <ThemeButton />
       </div>
       <div className="mt-6">
         <SearchButton />
@@ -105,7 +122,7 @@ export function MobileNavigation() {
         ))}
       </select>
       <SearchButton compact />
-      <ThemeSwitch mode="light-dark" className="shrink-0" />
+      <ThemeButton />
     </header>
   );
 }
