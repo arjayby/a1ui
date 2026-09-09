@@ -15,6 +15,7 @@ import { TextScramblePreview } from "@/components/text-scramble-demo";
 import { TextBannerPreview } from "@/components/text-banner-demo";
 import { SelectMenuPreview } from "@/components/select-menu-demo";
 import { ShapeFlowPreview } from "@/components/shape-flow-demo";
+import { Badge } from "@/components/ui/badge";
 import { components } from "@/lib/component-catalog";
 
 const previews: Record<string, ComponentType> = {
@@ -51,9 +52,16 @@ export default function HomePage() {
               <div inert aria-hidden="true" className="catalog-preview">
                 <Preview />
               </div>
-              <Link href={`/components/${component.slug}`} className="catalog-card-link">
+              <Link
+                href={`/components/${component.slug}`}
+                aria-description={component.isNew ? "New component shipped" : undefined}
+                className="catalog-card-link gap-2"
+              >
                 {component.title}
-                <ArrowUpRight aria-hidden="true" />
+                {component.isNew ? (
+                  <Badge variant="dot" className="absolute top-3 right-3" aria-hidden="true" />
+                ) : null}
+                <ArrowUpRight aria-hidden="true" className="shrink-0" />
               </Link>
             </article>
           );

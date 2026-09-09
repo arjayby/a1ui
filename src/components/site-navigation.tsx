@@ -6,7 +6,8 @@ import { Moon, Search, Sun } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
-import { components } from "@/lib/component-catalog";
+import { Badge } from "@/components/ui/badge";
+import { components, newComponentCount } from "@/lib/component-catalog";
 import { cn } from "@/lib/utils";
 
 function GitHubLink() {
@@ -102,9 +103,11 @@ export function DesktopNavigation() {
                 <Link
                   href={href}
                   aria-current={current ? "page" : undefined}
-                  className="hover:bg-muted aria-[current=page]:bg-foreground aria-[current=page]:text-background block rounded-sm px-2 py-1.5 no-underline"
+                  aria-description={component.isNew ? "New component shipped" : undefined}
+                  className="hover:bg-muted aria-[current=page]:bg-foreground aria-[current=page]:text-background flex items-center justify-between gap-2 rounded-sm px-2 py-1.5 no-underline"
                 >
                   {component.title}
+                  {component.isNew ? <Badge variant="dot" aria-hidden="true" /> : null}
                 </Link>
               </li>
             );
@@ -127,20 +130,36 @@ export function MobileNavigation() {
       <label className="sr-only" htmlFor="component-select">
         Choose documentation
       </label>
-      <select
-        id="component-select"
-        value={pathname.startsWith("/components/") || pathname === "/agents" ? pathname : "/"}
-        className="border-border bg-background max-w-44 min-w-0 rounded-sm border px-2 py-1.5"
-        onChange={(event) => router.push(event.target.value)}
-      >
-        <option value="/">Components</option>
-        <option value="/agents">Install with an agent</option>
-        {components.map((component) => (
-          <option key={component.slug} value={`/components/${component.slug}`}>
-            {component.title}
-          </option>
-        ))}
-      </select>
+      <div className="relative min-w-0">
+        <select
+          id="component-select"
+          value={pathname.startsWith("/components/") || pathname === "/agents" ? pathname : "/"}
+          className="border-border bg-background w-full max-w-44 min-w-0 rounded-sm border px-2 py-1.5"
+          onChange={(event) => router.push(event.target.value)}
+        >
+          <option value="/">Components</option>
+          <option value="/agents">Install with an agent</option>
+          {components.map((component) => (
+            <option
+              key={component.slug}
+              value={`/components/${component.slug}`}
+              aria-label={component.isNew ? `${component.title}, new component shipped` : undefined}
+            >
+              {component.title}
+              {component.isNew ? " ●" : ""}
+            </option>
+          ))}
+        </select>
+        {newComponentCount > 0 ? (
+          <Badge
+            className="pointer-events-none absolute -top-1.5 right-1.5"
+            title={`${newComponentCount} new components shipped`}
+          >
+            <span aria-hidden="true">{newComponentCount}</span>
+            <span className="sr-only">{newComponentCount} new components shipped</span>
+          </Badge>
+        ) : null}
+      </div>
       <SearchButton compact />
       <GitHubLink />
       <ThemeButton />
