@@ -19,10 +19,6 @@ export function AsciiTerrainDemo() {
 
   return (
     <div className="not-prose demo-frame ascii-terrain-demo">
-      <div className="ascii-terrain-heading">
-        <span>Field notes / {String(seed).padStart(3, "0")}</span>
-        <span aria-hidden="true">. : - = + * # % @</span>
-      </div>
       <AsciiTerrain key={seed} seed={seed} paused={paused} />
       <div className="ascii-terrain-footer">
         <span className="ascii-terrain-hint">Move to shape. Click to ripple.</span>

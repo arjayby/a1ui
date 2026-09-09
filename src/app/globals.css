@@ -382,7 +382,6 @@ pre {
   padding: 1.5rem;
 }
 
-.ascii-terrain-heading,
 .ascii-terrain-footer {
   display: flex;
   flex-wrap: wrap;
@@ -392,11 +391,6 @@ pre {
   padding: 1.25rem 1.5rem;
   color: var(--muted-foreground);
   font-size: 0.625rem;
-}
-
-.ascii-terrain-heading {
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
 }
 
 .ascii-terrain-footer {
