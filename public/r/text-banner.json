@@ -1,0 +1,39 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "text-banner",
+  "title": "Text Banner",
+  "description": "Bold text and staggered pixel separators in a seamless, infinitely scrolling banner.",
+  "dependencies": [
+    "clsx"
+  ],
+  "files": [
+    {
+      "path": "src/registry/text-banner.tsx",
+      "content": "\"use client\";\n\nimport { clsx } from \"clsx\";\nimport { useEffect, useRef, useState, type ComponentPropsWithoutRef, type CSSProperties } from \"react\";\n\nexport interface TextBannerProps extends Omit<\n  ComponentPropsWithoutRef<\"div\">,\n  \"children\" | \"dangerouslySetInnerHTML\"\n> {\n  items: readonly string[];\n  speed?: number;\n  direction?: \"left\" | \"right\";\n  paused?: boolean;\n  pauseOnHover?: boolean;\n  separator?: string;\n}\n\nconst styles = `\n  [data-slot=\"text-banner\"] {\n    position: relative;\n    width: 100%;\n    overflow: hidden;\n    padding-block: 0.4em;\n    border-block: 1px solid var(--border, currentColor);\n    background: var(--text-banner-background, var(--muted, transparent));\n    color: var(--text-banner-foreground, var(--foreground, currentColor));\n    font-family: inherit;\n    font-size: clamp(1.25rem, 3.5vw, 2.5rem);\n    font-weight: 700;\n    letter-spacing: -0.04em;\n    line-height: 1;\n    text-transform: uppercase;\n  }\n  [data-slot=\"text-banner\"] .a1ui-text-banner-track {\n    display: flex;\n    width: max-content;\n    animation: a1ui-text-banner-scroll var(--text-banner-duration, 20s) linear infinite;\n    animation-direction: var(--text-banner-direction, normal);\n    animation-play-state: var(--text-banner-play-state, paused);\n  }\n  [data-slot=\"text-banner\"] .a1ui-text-banner-group,\n  [data-slot=\"text-banner\"] .a1ui-text-banner-unit,\n  [data-slot=\"text-banner\"] .a1ui-text-banner-item {\n    display: flex;\n    flex: none;\n    align-items: center;\n  }\n  [data-slot=\"text-banner\"] .a1ui-text-banner-item {\n    gap: 0.45em;\n    padding-inline-end: 0.45em;\n    white-space: nowrap;\n  }\n  [data-slot=\"text-banner\"] .a1ui-text-banner-separator {\n    flex: none;\n    font-weight: 400;\n    opacity: 0.55;\n  }\n  [data-slot=\"text-banner\"] .a1ui-text-banner-mark {\n    width: 0.5em;\n    height: 0.5em;\n    flex: none;\n  }\n  [data-slot=\"text-banner\"][data-pause-on-hover=\"true\"]:hover .a1ui-text-banner-track {\n    animation-play-state: paused;\n  }\n  @keyframes a1ui-text-banner-scroll {\n    from { transform: translateX(-50%); }\n    to { transform: translateX(0); }\n  }\n  @media (prefers-reduced-motion: reduce) {\n    [data-slot=\"text-banner\"] .a1ui-text-banner-track {\n      width: 100%;\n      animation: none;\n    }\n    [data-slot=\"text-banner\"] .a1ui-text-banner-group {\n      width: 100%;\n    }\n    [data-slot=\"text-banner\"] .a1ui-text-banner-group + .a1ui-text-banner-group,\n    [data-slot=\"text-banner\"] .a1ui-text-banner-unit + .a1ui-text-banner-unit {\n      display: none;\n    }\n    [data-slot=\"text-banner\"] .a1ui-text-banner-unit {\n      width: 100%;\n      flex-wrap: wrap;\n      justify-content: center;\n      row-gap: 0.3em;\n    }\n    [data-slot=\"text-banner\"] .a1ui-text-banner-item {\n      max-width: 100%;\n      white-space: normal;\n      overflow-wrap: anywhere;\n    }\n    [data-slot=\"text-banner\"] .a1ui-text-banner-item > span:first-child {\n      min-width: 0;\n    }\n  }\n`;\n\nexport function TextBanner({\n  items,\n  speed = 80,\n  direction = \"right\",\n  paused = false,\n  pauseOnHover = false,\n  separator,\n  className,\n  style,\n  ...props\n}: TextBannerProps) {\n  const rootRef = useRef<HTMLDivElement>(null);\n  const unitRef = useRef<HTMLDivElement>(null);\n  const [layout, setLayout] = useState({ copies: 1, unitWidth: 0 });\n  const safeSpeed = Number.isFinite(speed) ? Math.max(0, speed) : 80;\n  const visibleItems = items.filter((item) => item.trim().length > 0);\n  const hasItems = visibleItems.length > 0;\n\n  useEffect(() => {\n    const root = rootRef.current;\n    const unit = unitRef.current;\n    if (!root || !unit) return;\n\n    // The first unit includes its trailing gap. Observe it for text, font,\n    // and size changes so both halves always cover the full container.\n    const observer = new ResizeObserver(() => {\n      const unitWidth = unit.getBoundingClientRect().width;\n      if (unitWidth <= 0) return;\n      const copies = Math.max(1, Math.ceil(root.clientWidth / unitWidth));\n      setLayout((current) =>\n        current.copies === copies && current.unitWidth === unitWidth ? current : { copies, unitWidth },\n      );\n    });\n    observer.observe(root);\n    observer.observe(unit);\n    return () => observer.disconnect();\n  }, [hasItems]);\n\n  if (!hasItems) return null;\n\n  return (\n    <div\n      {...props}\n      ref={rootRef}\n      data-slot=\"text-banner\"\n      data-pause-on-hover={pauseOnHover}\n      className={clsx(\"isolate\", className)}\n      style={\n        {\n          \"--text-banner-duration\": `${(layout.unitWidth * layout.copies) / (safeSpeed || 80)}s`,\n          \"--text-banner-direction\": direction === \"right\" ? \"normal\" : \"reverse\",\n          \"--text-banner-play-state\": paused || safeSpeed === 0 || !layout.unitWidth ? \"paused\" : \"running\",\n          ...style,\n        } as CSSProperties\n      }\n    >\n      <style>{styles}</style>\n      <span className=\"sr-only\">{visibleItems.join(\" · \")}</span>\n      <div className=\"a1ui-text-banner-track\" aria-hidden=\"true\" dir=\"ltr\">\n        {[0, 1].map((group) => (\n          <div key={group} className=\"a1ui-text-banner-group\">\n            {Array.from({ length: layout.copies }, (_, copy) => (\n              <div\n                key={copy}\n                ref={group === 0 && copy === 0 ? unitRef : undefined}\n                className=\"a1ui-text-banner-unit\"\n              >\n                {visibleItems.map((item, index) => (\n                  <div key={index} className=\"a1ui-text-banner-item\">\n                    <span dir=\"auto\">{item}</span>\n                    {separator === undefined ? (\n                      <svg className=\"a1ui-text-banner-mark\" viewBox=\"0 0 24 24\" fill=\"currentColor\">\n                        <path d=\"M6 0h6v6H6zM0 6h6v6H0zM12 6h6v6h-6zM6 12h6v6H6zM18 12h6v6h-6zM12 18h6v6h-6z\" />\n                      </svg>\n                    ) : separator ? (\n                      <span className=\"a1ui-text-banner-separator\">{separator}</span>\n                    ) : null}\n                  </div>\n                ))}\n              </div>\n            ))}\n          </div>\n        ))}\n      </div>\n    </div>\n  );\n}\n",
+      "type": "registry:ui"
+    }
+  ],
+  "meta": {
+    "a1ui": {
+      "useCases": [
+        "Continuously scrolling words or phrases with separators for page banners."
+      ],
+      "limitations": [
+        "Plain text only. Repeated content is decorative and cannot contain links or controls."
+      ],
+      "requirements": [
+        "Supply items and a pause control using the paused prop. Requires ResizeObserver. Reduced motion displays one static sequence."
+      ],
+      "docsUrl": "http://localhost:3000/docs/components/text-banner.md",
+      "registryUrl": "http://localhost:3000/r/text-banner.json"
+    }
+  },
+  "categories": [
+    "typography",
+    "animation",
+    "marquee",
+    "banner"
+  ],
+  "type": "registry:ui",
+  "docs": "Read http://localhost:3000/docs/components/text-banner.md for usage, required props, and integration instructions."
+}

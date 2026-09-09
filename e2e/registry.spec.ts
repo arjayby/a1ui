@@ -5,6 +5,7 @@ for (const [name, exportedComponent] of [
   ["spiral-text", "SpiralText"],
   ["particle-menu", "ParticleMenu"],
   ["text-scramble", "TextScramble"],
+  ["text-banner", "TextBanner"],
   ["shape-flow", "ShapeFlow"],
   ["confirmation-button", "ConfirmationButton"],
 ]) {

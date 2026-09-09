@@ -11,6 +11,7 @@ import { ComponentSource, Installation } from "@/components/component-docs";
 import { ParticleMenuDemo } from "@/components/particle-menu-demo";
 import { MultichainSwapDemo } from "@/components/multichain-swap-demo";
 import { TextScrambleDemo } from "@/components/text-scramble-demo";
+import { TextBannerDemo } from "@/components/text-banner-demo";
 import { SelectMenuDemo } from "@/components/select-menu-demo";
 import { ShapeFlowDemo } from "@/components/shape-flow-demo";
 
@@ -31,6 +32,7 @@ export function getMDXComponents(components?: MDXComponents) {
     ShapeFlowDemo,
     SpiralTextDemo,
     TextScrambleDemo,
+    TextBannerDemo,
     Tab,
     Tabs,
     ...components,

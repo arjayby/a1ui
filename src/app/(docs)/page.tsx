@@ -11,6 +11,7 @@ import { SectionRailPreview, SpiralTextPreview } from "@/components/component-de
 import { ParticleMenuPreview } from "@/components/particle-menu-demo";
 import { MultichainSwapPreview } from "@/components/multichain-swap-demo";
 import { TextScramblePreview } from "@/components/text-scramble-demo";
+import { TextBannerPreview } from "@/components/text-banner-demo";
 import { SelectMenuPreview } from "@/components/select-menu-demo";
 import { ShapeFlowPreview } from "@/components/shape-flow-demo";
 import { components } from "@/lib/component-catalog";
@@ -24,6 +25,7 @@ const previews: Record<string, ComponentType> = {
   "arc-reel": ArcReelPreview,
   "multichain-swap": MultichainSwapPreview,
   "text-scramble": TextScramblePreview,
+  "text-banner": TextBannerPreview,
   "select-menu": SelectMenuPreview,
   "shape-flow": ShapeFlowPreview,
 };

@@ -4,6 +4,43 @@
   "homepage": "http://localhost:3000",
   "items": [
     {
+      "name": "text-banner",
+      "type": "registry:ui",
+      "title": "Text Banner",
+      "description": "Bold text and staggered pixel separators in a seamless, infinitely scrolling banner.",
+      "dependencies": [
+        "clsx"
+      ],
+      "files": [
+        {
+          "path": "src/registry/text-banner.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "categories": [
+        "typography",
+        "animation",
+        "marquee",
+        "banner"
+      ],
+      "meta": {
+        "a1ui": {
+          "useCases": [
+            "Continuously scrolling words or phrases with separators for page banners."
+          ],
+          "limitations": [
+            "Plain text only. Repeated content is decorative and cannot contain links or controls."
+          ],
+          "requirements": [
+            "Supply items and a pause control using the paused prop. Requires ResizeObserver. Reduced motion displays one static sequence."
+          ],
+          "docsUrl": "http://localhost:3000/docs/components/text-banner.md",
+          "registryUrl": "http://localhost:3000/r/text-banner.json"
+        }
+      },
+      "docs": "Read http://localhost:3000/docs/components/text-banner.md for usage, required props, and integration instructions."
+    },
+    {
       "name": "confirmation-button",
       "type": "registry:ui",
       "title": "Confirmation Button",

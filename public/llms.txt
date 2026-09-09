@@ -36,6 +36,7 @@ bun: bunx --bun shadcn@latest add http://localhost:3000/r/NAME.json --yes
 - [Select Menu](http://localhost:3000/docs/components/select-menu.md): A dropdown selector with icons, descriptions, and keyboard navigation. Single-choice dropdowns with icons, descriptions, and keyboard navigation.
 - [Shape Flow](http://localhost:3000/docs/components/shape-flow.md): Text that reflows around a draggable X, powered by Pretext. Editorial text wrapping around a draggable X shape.
 - [Spiral Text](http://localhost:3000/docs/components/spiral-text.md): Text set on a responsive spiral that tightens under pressure and ripples on release. Decorative spiral typography with pointer interaction.
+- [Text Banner](http://localhost:3000/docs/components/text-banner.md): Bold text and staggered pixel separators in a seamless, infinitely scrolling banner. Continuously scrolling words or phrases with separators for page banners.
 - [Text Scramble](http://localhost:3000/docs/components/text-scramble.md): Reveals new text from left to right through a scramble of random characters. Animating changing headings, labels, or status text through scrambled characters.
 
 ## Optional shadcn MCP setup

@@ -1,0 +1,62 @@
+---
+title: Text Banner
+description: Bold text and staggered pixel separators in a seamless, infinitely scrolling banner.
+---
+
+## Demo
+
+<TextBannerDemo />
+
+## Installation
+
+<Installation name="text-banner" />
+
+## Code
+
+<Tabs items={["Usage", "Source"]}>
+  <Tab value="Usage">
+
+```tsx
+"use client";
+
+import { useState } from "react";
+import { TextBanner } from "@/components/ui/text-banner";
+
+export function BannerExample() {
+  const [paused, setPaused] = useState(false);
+
+  return (
+    <div className="flex flex-col gap-4">
+      <TextBanner items={["a1ui", "Components"]} speed={80} direction="right" paused={paused} />
+      <button type="button" onClick={() => setPaused((current) => !current)} aria-pressed={paused}>
+        {paused ? "Resume banner" : "Pause banner"}
+      </button>
+    </div>
+  );
+}
+```
+
+  </Tab>
+  <Tab value="Source">
+    <ComponentSource name="text-banner" />
+  </Tab>
+</Tabs>
+
+## API reference
+
+| Prop           | Type                | Default     | Purpose                                                                                          |
+| -------------- | ------------------- | ----------- | ------------------------------------------------------------------------------------------------ |
+| `items`        | `readonly string[]` | Required    | Words or phrases to repeat. Blank entries are ignored.                                           |
+| `speed`        | `number`            | `80`        | Movement in pixels per second. Zero or negative values pause. Non-finite values use the default. |
+| `direction`    | `"left" \| "right"` | `"right"`   | Direction of travel. The default moves left to right.                                            |
+| `paused`       | `boolean`           | `false`     | Pauses at the current position. Clearing it resumes the loop.                                    |
+| `pauseOnHover` | `boolean`           | `false`     | Pauses while a pointer is over the banner.                                                       |
+| `separator`    | `string`            | Pixel motif | Replaces the six-pixel motif with text. An empty string removes it.                              |
+| `className`    | `string`            | None        | Adds classes to the outer element.                                                               |
+| `style`        | `CSSProperties`     | None        | Changes background, color, font size, font family, or padding.                                   |
+
+Standard div attributes pass through to the outer element. The banner inherits the page font and uses `--muted`, `--foreground`, and `--border` for its colors and thin borders. These tokens follow the project's light and dark themes. Set `--text-banner-background` and `--text-banner-foreground` on a parent to customize multiple banners, or use `style` for a single instance.
+
+The banner measures one sequence and repeats it enough to cover the container. Two matching groups loop at a constant speed, including when there is only one short word. `ResizeObserver` updates the layout when the container, text, or font size changes. Empty lists render nothing. The animation styles ship inside the component.
+
+Screen readers receive the text once. Repeated copies and separators are hidden from the accessibility tree. Reduced motion stops the animation and shows one wrapping sequence so every phrase remains readable. For a continuously moving banner, provide a pause button using `paused`, as in the example. Hover pausing is an optional addition to that control.
