@@ -6,6 +6,7 @@ import { AgentInstall } from "@/components/agent-install";
 
 import { ArcReelPreview } from "@/components/arc-reel-demo";
 import { CryptoWalletPreview } from "@/components/crypto-wallet-demo";
+import { ConfirmationButtonPreview } from "@/components/confirmation-button-demo";
 import { SectionRailPreview, SpiralTextPreview } from "@/components/component-demos";
 import { ParticleMenuPreview } from "@/components/particle-menu-demo";
 import { MultichainSwapPreview } from "@/components/multichain-swap-demo";
@@ -15,6 +16,7 @@ import { ShapeFlowPreview } from "@/components/shape-flow-demo";
 import { components } from "@/lib/component-catalog";
 
 const previews: Record<string, ComponentType> = {
+  "confirmation-button": ConfirmationButtonPreview,
   "crypto-wallet": CryptoWalletPreview,
   "section-rail": SectionRailPreview,
   "spiral-text": SpiralTextPreview,

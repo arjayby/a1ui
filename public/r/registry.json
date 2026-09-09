@@ -4,6 +4,43 @@
   "homepage": "http://localhost:3000",
   "items": [
     {
+      "name": "confirmation-button",
+      "type": "registry:ui",
+      "title": "Confirmation Button",
+      "description": "A drag-to-confirm button with a dotted arrow, pending feedback, and a confirmed state.",
+      "dependencies": [
+        "clsx",
+        "lucide-react"
+      ],
+      "files": [
+        {
+          "path": "src/registry/confirmation-button.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "categories": [
+        "button",
+        "confirmation",
+        "interactive"
+      ],
+      "meta": {
+        "a1ui": {
+          "useCases": [
+            "Deliberate confirmation actions with drag, keyboard, and asynchronous feedback."
+          ],
+          "limitations": [
+            "The app supplies the action. Dragging is left to right, and success stays visible until remount."
+          ],
+          "requirements": [
+            "Requires React 19.2 or later. Supply onConfirm. Return a promise for asynchronous work and reject it to allow retry. Change the React key to reset."
+          ],
+          "docsUrl": "http://localhost:3000/docs/components/confirmation-button.md",
+          "registryUrl": "http://localhost:3000/r/confirmation-button.json"
+        }
+      },
+      "docs": "Read http://localhost:3000/docs/components/confirmation-button.md for usage, required props, and integration instructions."
+    },
+    {
       "name": "shape-flow",
       "type": "registry:ui",
       "title": "Shape Flow",

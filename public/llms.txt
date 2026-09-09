@@ -28,6 +28,7 @@ bun: bunx --bun shadcn@latest add http://localhost:3000/r/NAME.json --yes
 ## Components
 
 - [Arc Reel](http://localhost:3000/docs/components/arc-reel.md): An infinitely looping reel with curved provider cards and synchronized scroll controls. Looping galleries, provider cards, or logo reels with drag and keyboard controls.
+- [Confirmation Button](http://localhost:3000/docs/components/confirmation-button.md): A drag-to-confirm button with a dotted arrow, pending feedback, and a confirmed state. Deliberate confirmation actions with drag, keyboard, and asynchronous feedback.
 - [Crypto Wallet](http://localhost:3000/docs/components/crypto-wallet.md): A wallet overview with token balances, recent activity, and send, receive, and swap actions. Wallet account overview, token holdings, and transaction activity.
 - [Multichain Swap](http://localhost:3000/docs/components/multichain-swap.md): A crypto swap form with network selection, token balances, and cross-chain quote details. Token swap forms with network selection, balances, slippage, and quote review.
 - [Particle Menu](http://localhost:3000/docs/components/particle-menu.md): Grainy symbols that scatter around your pointer and spring back into place. Artistic navigation with interactive particle symbols.

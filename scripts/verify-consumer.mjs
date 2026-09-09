@@ -232,6 +232,11 @@ body { margin: 0; padding: 32px; background: var(--background); color: var(--for
   await page.getByRole("option", { name: /Staging/ }).click();
   assert.match(await page.getByRole("combobox", { name: "Environment", exact: true }).innerText(), /Staging/);
   await page.getByRole("button", { name: "Randomize phrase" }).click();
+  const confirmation = page.locator('[data-component="confirmation-button"]');
+  await confirmation.getByRole("button", { name: "Slide to confirm" }).focus();
+  await page.keyboard.press("Enter");
+  await confirmation.locator('[data-state="confirmed"]').waitFor();
+  assert.match(await confirmation.innerText(), /Action confirmed\./);
   assert.deepEqual(errors, [], "Consumer browser emitted errors");
   console.log(
     `Verified ${catalog.items.length} installed components and their published examples in a clean Next.js production app.`,

@@ -1,6 +1,7 @@
 {
   "title": "Components",
   "pages": [
+    "confirmation-button",
     "section-rail",
     "spiral-text",
     "particle-menu",

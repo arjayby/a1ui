@@ -5,6 +5,7 @@ import type { MDXComponents } from "mdx/types";
 import { ArcReelDemo } from "@/components/arc-reel-demo";
 import { AgentInstall, AgentRegistryConfiguration } from "@/components/agent-install";
 import { CryptoWalletDemo } from "@/components/crypto-wallet-demo";
+import { ConfirmationButtonDemo } from "@/components/confirmation-button-demo";
 import { SectionRailDemo, SpiralTextDemo } from "@/components/component-demos";
 import { ComponentSource, Installation } from "@/components/component-docs";
 import { ParticleMenuDemo } from "@/components/particle-menu-demo";
@@ -20,6 +21,7 @@ export function getMDXComponents(components?: MDXComponents) {
     AgentRegistryConfiguration,
     ArcReelDemo,
     ComponentSource,
+    ConfirmationButtonDemo,
     CryptoWalletDemo,
     Installation,
     MultichainSwapDemo,
