@@ -382,6 +382,69 @@ pre {
   padding: 1.5rem;
 }
 
+.ascii-terrain-heading,
+.ascii-terrain-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  color: var(--muted-foreground);
+  font-size: 0.625rem;
+}
+
+.ascii-terrain-heading {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.ascii-terrain-footer {
+  border-top: 1px solid var(--border);
+}
+
+.ascii-terrain-controls {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.ascii-terrain-controls button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 1.75rem;
+  color: var(--foreground);
+  cursor: pointer;
+}
+
+.ascii-terrain-controls svg {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+.ascii-terrain-demo [data-slot="ascii-terrain"] {
+  height: clamp(16rem, 45vw, 24rem);
+}
+
+.catalog-preview .ascii-terrain-preview {
+  padding: 0;
+}
+
+.ascii-terrain-reduced-hint {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ascii-terrain-hint {
+    display: none;
+  }
+
+  .ascii-terrain-reduced-hint {
+    display: inline;
+  }
+}
+
 .arc-reel-artwork {
   position: absolute;
   inset: 0;

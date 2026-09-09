@@ -4,6 +4,43 @@
   "homepage": "http://localhost:3000",
   "items": [
     {
+      "name": "ascii-terrain",
+      "type": "registry:ui",
+      "title": "ASCII Terrain",
+      "description": "A landscape made of characters, with rolling hills, pointer sculpting, and click ripples.",
+      "dependencies": [
+        "clsx"
+      ],
+      "files": [
+        {
+          "path": "src/registry/ascii-terrain.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "categories": [
+        "ascii",
+        "animation",
+        "interactive",
+        "background"
+      ],
+      "meta": {
+        "a1ui": {
+          "useCases": [
+            "Interactive ASCII landscapes and decorative hero backgrounds."
+          ],
+          "limitations": [
+            "Procedural illustration only. No geographic data or persistent terrain editing. JavaScript is required to draw."
+          ],
+          "requirements": [
+            "Supply a pause control for automatic motion. Requires Canvas 2D, ResizeObserver, and IntersectionObserver. Reduced motion shows a static landscape."
+          ],
+          "docsUrl": "http://localhost:3000/docs/components/ascii-terrain.md",
+          "registryUrl": "http://localhost:3000/r/ascii-terrain.json"
+        }
+      },
+      "docs": "Read http://localhost:3000/docs/components/ascii-terrain.md for usage, required props, and integration instructions."
+    },
+    {
       "name": "text-banner",
       "type": "registry:ui",
       "title": "Text Banner",

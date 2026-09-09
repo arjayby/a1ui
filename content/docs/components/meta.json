@@ -1,6 +1,7 @@
 {
   "title": "Components",
   "pages": [
+    "ascii-terrain",
     "confirmation-button",
     "section-rail",
     "spiral-text",

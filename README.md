@@ -44,6 +44,7 @@ pnpm dlx shadcn@latest add http://localhost:3000/r/select-menu.json
 pnpm dlx shadcn@latest add http://localhost:3000/r/text-scramble.json
 pnpm dlx shadcn@latest add http://localhost:3000/r/text-banner.json
 pnpm dlx shadcn@latest add http://localhost:3000/r/shape-flow.json
+pnpm dlx shadcn@latest add http://localhost:3000/r/ascii-terrain.json
 pnpm dlx shadcn@latest add http://localhost:3000/r/confirmation-button.json
 ```
 

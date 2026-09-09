@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 for (const [name, exportedComponent] of [
+  ["ascii-terrain", "AsciiTerrain"],
   ["section-rail", "SectionRail"],
   ["spiral-text", "SpiralText"],
   ["particle-menu", "ParticleMenu"],

@@ -5,6 +5,7 @@ import type { ComponentType } from "react";
 import { AgentInstall } from "@/components/agent-install";
 
 import { ArcReelPreview } from "@/components/arc-reel-demo";
+import { AsciiTerrainPreview } from "@/components/ascii-terrain-demo";
 import { CryptoWalletPreview } from "@/components/crypto-wallet-demo";
 import { ConfirmationButtonPreview } from "@/components/confirmation-button-demo";
 import { SectionRailPreview, SpiralTextPreview } from "@/components/component-demos";
@@ -17,6 +18,7 @@ import { ShapeFlowPreview } from "@/components/shape-flow-demo";
 import { components } from "@/lib/component-catalog";
 
 const previews: Record<string, ComponentType> = {
+  "ascii-terrain": AsciiTerrainPreview,
   "confirmation-button": ConfirmationButtonPreview,
   "crypto-wallet": CryptoWalletPreview,
   "section-rail": SectionRailPreview,
