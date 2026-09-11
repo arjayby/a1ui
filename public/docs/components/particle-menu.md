@@ -22,7 +22,7 @@ Import paths in examples assume the default @/components/ui alias. Adapt them to
 
 [Interactive preview](http://localhost:3000/components/particle-menu)
 
-Four original sigils inspired by Elden Ring mark Grace, Runes, Ashes, and Oaths. Each symbol breaks into particles around the pointer and returns to its original shape when you leave.
+Four sigils inspired by Elden Ring mark Grace, Runes, Ashes, and Oaths. Each symbol breaks into particles around the pointer and returns to its original shape when you leave.
 
 ## Installation
 

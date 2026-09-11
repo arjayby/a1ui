@@ -67,7 +67,7 @@ export function renderComponentGuide(item, mdx, siteUrl) {
 export function renderAgentIndex(registry, siteUrl) {
   return `# a1ui
 
-> Original React components installed as editable source through the shadcn CLI.
+> A collection of React components inspired by designs found online, installed as editable source through the shadcn CLI.
 
 ## Supported projects
 

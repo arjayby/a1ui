@@ -38,9 +38,7 @@ export default function HomePage() {
     <div className="page-frame">
       <header>
         <h1 className="page-heading">Components</h1>
-        <p className="page-description">
-          Original React components you can drop into a project, change, and make your own.
-        </p>
+        <p className="page-description">A collection of React components inspired by designs found online.</p>
         <AgentInstall />
       </header>
 

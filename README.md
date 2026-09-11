@@ -1,6 +1,6 @@
 # a1ui
 
-Original React components built to be copied, changed, and shipped.
+A collection of React components inspired by designs found online. Copy them into your project and make them your own.
 
 ## Install with an agent
 

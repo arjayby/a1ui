@@ -30,7 +30,7 @@ function noise(seed: number) {
   return value - Math.floor(value);
 }
 
-// Original sigil silhouettes and precomputed scanlines for their particle fill.
+// Sigil silhouettes and precomputed scanlines for their particle fill.
 const GLYPHS: Record<ParticleShape, { path: string; rows: number[][] }> = {
   grace: {
     path: [
