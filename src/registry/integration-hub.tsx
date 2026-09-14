@@ -190,34 +190,36 @@ const styles = `
     gap: 10px;
     padding: 20px 8px 16px;
     transform: translate(-50%, -50%);
-    border: 1px solid #41463a;
-    border-radius: 23px;
-    background: var(--integration-hub-product-background, #252b24);
-    color: var(--integration-hub-product-foreground, #f6f8ed);
-    box-shadow: 0 0 0 6px color-mix(in srgb, var(--hub-surface) 80%, transparent), 0 12px 26px #18200c21, inset 0 1px 0 #ffffff18;
+    border: 1px solid var(--hub-line);
+    border-radius: var(--radius, 0.25rem);
+    background: var(--integration-hub-product-background, var(--hub-surface));
+    color: var(--integration-hub-product-foreground, var(--hub-ink));
+    box-shadow: 0 0 0 6px var(--hub-surface);
+    font-family: var(--font-mono, inherit);
     text-align: center;
   }
   [data-slot="integration-hub"] .a1ui-hub-product-icon {
     display: grid;
-    width: 40px;
-    height: 40px;
+    width: 32px;
+    height: 32px;
     place-items: center;
-    color: var(--integration-hub-accent, #d5f893);
+    color: var(--integration-hub-accent, currentColor);
   }
   [data-slot="integration-hub"] .a1ui-hub-product-icon svg {
     width: 100%;
     height: 100%;
   }
   [data-slot="integration-hub"] .a1ui-hub-product-name {
-    font-size: 25px;
+    font-size: 22px;
     line-height: 1;
-    font-weight: 550;
-    letter-spacing: -0.06em;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
     overflow-wrap: anywhere;
     max-width: 100%;
   }
   [data-slot="integration-hub"] .a1ui-hub-product-description {
-    opacity: 0.65;
+    opacity: 0.7;
     font-size: 10px;
     line-height: 1.4;
   }
@@ -229,7 +231,7 @@ const styles = `
     margin-top: 3px;
     font-size: 8px;
     line-height: 1.4;
-    color: var(--integration-hub-accent, #d5f893);
+    color: var(--integration-hub-accent, currentColor);
   }
   [data-slot="integration-hub"] .a1ui-hub-product-status::before {
     width: 4px;
@@ -264,10 +266,9 @@ const styles = `
       min-height: 130px;
       gap: 9px;
       padding: 14px 5px;
-      border-radius: 16px;
     }
-    [data-slot="integration-hub"] .a1ui-hub-product-icon { width: 30px; height: 30px; }
-    [data-slot="integration-hub"] .a1ui-hub-product-name { font-size: 20px; }
+    [data-slot="integration-hub"] .a1ui-hub-product-icon { width: 26px; height: 26px; }
+    [data-slot="integration-hub"] .a1ui-hub-product-name { font-size: clamp(12px, 4.2cqi, 16px); }
     [data-slot="integration-hub"] .a1ui-hub-product-description { font-size: 8px; }
     [data-slot="integration-hub"] .a1ui-hub-product-status { font-size: 7px; }
   }

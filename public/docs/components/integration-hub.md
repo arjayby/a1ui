@@ -100,9 +100,11 @@ Pulses travel from every tool toward the product, including the right column. Th
 
 The component inherits the page font and the `--background`, `--foreground`, `--border`, and `--muted-foreground` theme tokens. Override `--integration-hub-surface`, `--integration-hub-foreground`, `--integration-hub-border`, `--integration-hub-product-background`, `--integration-hub-product-foreground`, and `--integration-hub-accent` on a parent to customize it.
 
+The product tile uses the surface color as its background, the foreground color for text and its icon, and the theme border color. It follows `--radius` for corners and `--font-mono` for typography, falling back to the inherited font. These defaults adapt to light and dark themes. The product name is bold and uppercase. The documentation demo uses Commit Mono throughout.
+
 Provide a pause control for continuous motion, as in the example. Reduced motion hides the traveling pulses and retains the static connections. Tool selection still works. Without `onToolSelect`, the tool cards render as plain content with no extra tab stops.
 
-Relay is a fictional product in the demo. The component visualizes connections; it does not connect accounts, sync files, or measure live activity. Supply real integration data and status from your app. The demo's heading, tool artwork, and controls are separate from the installed component. The demo uses brand icons from [SVG Logos](https://github.com/gilbarbara/logos); source links and the collection's license are included with the demo assets.
+Relay is a fictional product in the demo. The component visualizes connections; it does not connect accounts, sync files, or measure live activity. Supply real integration data and status from your app. The demo's tool artwork and controls are separate from the installed component. The demo uses brand icons from [SVG Logos](https://github.com/gilbarbara/logos); source links and the collection's license are included with the demo assets.
 
 ## Verification
 

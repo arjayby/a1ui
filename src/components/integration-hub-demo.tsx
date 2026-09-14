@@ -12,8 +12,8 @@ function RelayMark() {
       <path
         d="M8 27 18 10M17 30 27 13M26 30l6-10"
         stroke="currentColor"
-        strokeWidth="6"
-        strokeLinecap="round"
+        strokeWidth="5"
+        strokeLinecap="square"
       />
     </svg>
   );
@@ -101,10 +101,6 @@ export function IntegrationHubDemo() {
 
   return (
     <div className="not-prose demo-frame integration-hub-demo">
-      <div className="integration-hub-demo-heading">
-        <h3>Your tools. One shared brain.</h3>
-        <p>Bring the context from your favorite tools into Relay.</p>
-      </div>
       <IntegrationHub
         tools={tools}
         product={{ ...product, status: activeTool ? `From ${activeTool.name}` : product.status }}
