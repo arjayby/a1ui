@@ -345,6 +345,47 @@ pre {
   padding: clamp(1.25rem, 4vw, 3rem);
 }
 
+.ascii-morph-demo [data-slot="ascii-morph"] {
+  height: clamp(17rem, 48vw, 27rem);
+}
+
+.ascii-morph-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.125rem 1.5rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.625rem;
+}
+
+.ascii-morph-caption,
+.ascii-morph-hint {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.ascii-morph-caption > span,
+.ascii-morph-hint {
+  color: var(--muted-foreground);
+}
+
+.ascii-morph-hint svg {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+.catalog-preview .ascii-morph-preview {
+  display: grid;
+  place-items: center;
+  padding: 0;
+}
+
+.ascii-morph-preview [data-slot="ascii-morph"] {
+  height: 100%;
+}
+
 .shape-flow-demo-heading {
   display: flex;
   flex-direction: column;

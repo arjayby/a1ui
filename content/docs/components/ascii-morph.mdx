@@ -1,0 +1,70 @@
+---
+title: ASCII Morph
+description: A cloud of characters that morphs into a globe, a flower, and an A1 monogram.
+---
+
+## Demo
+
+<AsciiMorphDemo />
+
+## Installation
+
+<Installation name="ascii-morph" />
+
+## Code
+
+<Tabs items={["Usage", "Source"]}>
+  <Tab value="Usage">
+
+```tsx
+import { AsciiMorph } from "@/components/ui/ascii-morph";
+
+export function AsciiMorphExample() {
+  return <AsciiMorph className="max-w-xl" />;
+}
+```
+
+  </Tab>
+  <Tab value="Source">
+    <ComponentSource name="ascii-morph" />
+  </Tab>
+</Tabs>
+
+## API reference
+
+| Prop            | Type                               | Default                | Purpose                                                                                                                    |
+| --------------- | ---------------------------------- | ---------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `shape`         | `"globe" \| "flower" \| "a1"`      | Uncontrolled           | Controlled destination. Update it in `onShapeChange` to accept user input.                                                 |
+| `defaultShape`  | `AsciiMorphShape`                  | `"globe"`              | Initial shape when uncontrolled. Read once on mount.                                                                       |
+| `onShapeChange` | `(shape: AsciiMorphShape) => void` | None                   | Called when a click or key requests another shape.                                                                         |
+| `duration`      | `number`                           | `1600`                 | Approximate settling time in milliseconds. Clamped to 400–4000. Spring velocity and travel distance affect the exact time. |
+| `interactive`   | `boolean`                          | `true`                 | Enables the button and animated transitions. Set to `false` for a static illustration that follows `shape`.                |
+| `ariaLabel`     | `string`                           | `"Change ASCII shape"` | Accessible name of the button.                                                                                             |
+| `className`     | `string`                           | None                   | Outer layout classes. The illustration fills its container with a 6:5 aspect ratio by default.                             |
+| `style`         | `CSSProperties`                    | None                   | Outer inline styles, including a custom height or color.                                                                   |
+
+`AsciiMorphShape` and `AsciiMorphProps` are exported types. The sequence is Globe, Flower, A1, then Globe again. A1 is a fixed monogram; this component does not accept custom images or text.
+
+### Controlled shape
+
+Use a Client Component when supplying a callback.
+
+```tsx
+"use client";
+
+import { useState } from "react";
+import { AsciiMorph, type AsciiMorphShape } from "@/components/ui/ascii-morph";
+
+export function ControlledAsciiMorphExample() {
+  const [shape, setShape] = useState<AsciiMorphShape>("flower");
+  return <AsciiMorph shape={shape} onShapeChange={setShape} duration={2000} />;
+}
+```
+
+### Interaction and motion
+
+Click or tap anywhere on the illustration to advance. Enter and Space activate the focused button. Right and Down go forward; Left and Up go back. The current shape is announced through a live status, and individual glyphs stay hidden from assistive technology.
+
+Each glyph keeps its identity, position, and velocity when you interrupt a transition. The animation updates SVG coordinates without rendering React on every frame. It stops once the shape settles and suspends while the component is offscreen or the document is hidden. Unmounting cancels the frame and removes observers and event listeners.
+
+Reduced motion skips travel and shows the requested silhouette immediately, including when the preference changes during a morph. There is no automatic cycling. The initial silhouette renders on the server, and a fixed SVG viewBox scales every position together when the container resizes. The glyphs inherit the component's color and stay visible across theme changes.

@@ -6,6 +6,7 @@ import { AgentInstall } from "@/components/agent-install";
 
 import { ArcReelPreview } from "@/components/arc-reel-demo";
 import { AsciiTerrainPreview } from "@/components/ascii-terrain-demo";
+import { AsciiMorphPreview } from "@/components/ascii-morph-demo";
 import { CryptoWalletPreview } from "@/components/crypto-wallet-demo";
 import { ConfirmationButtonPreview } from "@/components/confirmation-button-demo";
 import { SectionRailPreview, SpiralTextPreview } from "@/components/component-demos";
@@ -20,6 +21,7 @@ import { Badge } from "@/components/ui/badge";
 import { components } from "@/lib/component-catalog";
 
 const previews: Record<string, ComponentType> = {
+  "ascii-morph": AsciiMorphPreview,
   "integration-hub": IntegrationHubPreview,
   "ascii-terrain": AsciiTerrainPreview,
   "confirmation-button": ConfirmationButtonPreview,

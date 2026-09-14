@@ -4,6 +4,43 @@
   "homepage": "http://localhost:3000",
   "items": [
     {
+      "name": "ascii-morph",
+      "type": "registry:ui",
+      "title": "ASCII Morph",
+      "description": "A cloud of characters that morphs into a globe, a flower, and an A1 monogram.",
+      "dependencies": [
+        "clsx"
+      ],
+      "files": [
+        {
+          "path": "src/registry/ascii-morph.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "categories": [
+        "ascii",
+        "animation",
+        "interactive",
+        "typography"
+      ],
+      "meta": {
+        "a1ui": {
+          "useCases": [
+            "Interactive ASCII illustrations for landing pages, portfolios, and identity studies."
+          ],
+          "limitations": [
+            "Three built-in silhouettes only: globe, flower, and A1. Does not convert images or arbitrary text into ASCII."
+          ],
+          "requirements": [
+            "React and Tailwind CSS. Uses SVG, requestAnimationFrame, matchMedia, and IntersectionObserver. Reduced motion switches shapes instantly. No automatic animation or pause control is needed."
+          ],
+          "docsUrl": "http://localhost:3000/docs/components/ascii-morph.md",
+          "registryUrl": "http://localhost:3000/r/ascii-morph.json"
+        }
+      },
+      "docs": "Read http://localhost:3000/docs/components/ascii-morph.md for usage, required props, and integration instructions."
+    },
+    {
       "name": "integration-hub",
       "type": "registry:ui",
       "title": "Integration Hub",

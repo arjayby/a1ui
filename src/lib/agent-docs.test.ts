@@ -29,7 +29,9 @@ describe("agent documentation", () => {
     const item = registry.items[0];
     const mdx = await readFile(`content/docs/components/${item.name}.mdx`, "utf8");
     expect(() => renderComponentGuide(item, mdx + "\n<NewInstructions />", origin)).toThrow("Unresolved MDX");
-    expect(() => renderComponentGuide(item, mdx.replace("```tsx", "```text"), origin)).toThrow("Incomplete");
+    expect(() => renderComponentGuide(item, mdx.replaceAll("```tsx", "```text"), origin)).toThrow(
+      "Incomplete",
+    );
     expect(() => renderComponentGuide(item, mdx + "\n```tsx\n", origin)).toThrow("Incomplete");
   });
 
