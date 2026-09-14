@@ -15,10 +15,12 @@ import { TextScramblePreview } from "@/components/text-scramble-demo";
 import { TextBannerPreview } from "@/components/text-banner-demo";
 import { SelectMenuPreview } from "@/components/select-menu-demo";
 import { ShapeFlowPreview } from "@/components/shape-flow-demo";
+import { IntegrationHubPreview } from "@/components/integration-hub-demo";
 import { Badge } from "@/components/ui/badge";
 import { components } from "@/lib/component-catalog";
 
 const previews: Record<string, ComponentType> = {
+  "integration-hub": IntegrationHubPreview,
   "ascii-terrain": AsciiTerrainPreview,
   "confirmation-button": ConfirmationButtonPreview,
   "crypto-wallet": CryptoWalletPreview,

@@ -4,6 +4,28 @@
   "homepage": "http://localhost:3000",
   "items": [
     {
+      "name": "integration-hub",
+      "type": "registry:ui",
+      "title": "Integration Hub",
+      "description": "A connected workspace with six tools and animated pulses flowing into a central product.",
+      "dependencies": ["clsx", "lucide-react"],
+      "files": [{ "path": "src/registry/integration-hub.tsx", "type": "registry:ui" }],
+      "categories": ["integrations", "animation", "diagram"],
+      "meta": {
+        "a1ui": {
+          "useCases": [
+            "Product integration diagrams with up to six tools, inward pulses, and optional tool selection."
+          ],
+          "limitations": [
+            "Visualization only. No account connections, synchronization, or live activity data. Extra tools beyond six are ignored."
+          ],
+          "requirements": [
+            "Supply tools with unique IDs and a product. Icons are React nodes. Supply a pause control for automatic motion. Reduced motion retains static connections."
+          ]
+        }
+      }
+    },
+    {
       "name": "ascii-terrain",
       "type": "registry:ui",
       "title": "ASCII Terrain",

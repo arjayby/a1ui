@@ -15,6 +15,7 @@ import { TextScrambleDemo } from "@/components/text-scramble-demo";
 import { TextBannerDemo } from "@/components/text-banner-demo";
 import { SelectMenuDemo } from "@/components/select-menu-demo";
 import { ShapeFlowDemo } from "@/components/shape-flow-demo";
+import { IntegrationHubDemo } from "@/components/integration-hub-demo";
 
 export function getMDXComponents(components?: MDXComponents) {
   return {
@@ -27,6 +28,7 @@ export function getMDXComponents(components?: MDXComponents) {
     ConfirmationButtonDemo,
     CryptoWalletDemo,
     Installation,
+    IntegrationHubDemo,
     MultichainSwapDemo,
     ParticleMenuDemo,
     SectionRailDemo,

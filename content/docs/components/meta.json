@@ -1,6 +1,7 @@
 {
   "title": "Components",
   "pages": [
+    "integration-hub",
     "ascii-terrain",
     "confirmation-button",
     "section-rail",

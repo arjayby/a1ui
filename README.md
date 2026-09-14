@@ -46,6 +46,7 @@ pnpm dlx shadcn@latest add http://localhost:3000/r/text-banner.json
 pnpm dlx shadcn@latest add http://localhost:3000/r/shape-flow.json
 pnpm dlx shadcn@latest add http://localhost:3000/r/ascii-terrain.json
 pnpm dlx shadcn@latest add http://localhost:3000/r/confirmation-button.json
+pnpm dlx shadcn@latest add http://localhost:3000/r/integration-hub.json
 ```
 
 The components install into `src/components/ui` and use React, TypeScript, and Tailwind CSS v4.
