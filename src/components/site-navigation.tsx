@@ -121,6 +121,7 @@ export function DesktopNavigation() {
 export function MobileNavigation() {
   const pathname = usePathname();
   const router = useRouter();
+  const newComponentLabel = `${newComponentCount} new component${newComponentCount === 1 ? "" : "s"} shipped`;
 
   return (
     <header className="bg-background border-border sticky top-0 z-20 flex items-center gap-3 border-b px-3 py-2 md:hidden">
@@ -151,12 +152,9 @@ export function MobileNavigation() {
           ))}
         </select>
         {newComponentCount > 0 ? (
-          <Badge
-            className="pointer-events-none absolute -top-1.5 right-1.5"
-            title={`${newComponentCount} new components shipped`}
-          >
+          <Badge className="pointer-events-none absolute -top-1.5 right-1.5" title={newComponentLabel}>
             <span aria-hidden="true">{newComponentCount}</span>
-            <span className="sr-only">{newComponentCount} new components shipped</span>
+            <span className="sr-only">{newComponentLabel}</span>
           </Badge>
         ) : null}
       </div>
