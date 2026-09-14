@@ -449,7 +449,6 @@ pre {
   padding: clamp(1rem, 3vw, 2rem);
 }
 
-.integration-hub-demo-topline,
 .integration-hub-demo-footer {
   display: flex;
   align-items: center;
@@ -459,12 +458,6 @@ pre {
   font-size: 10px;
 }
 
-.integration-hub-demo-topline {
-  font-size: 8px;
-  letter-spacing: 0.12em;
-}
-
-.integration-hub-demo-topline > span:first-child,
 .integration-hub-demo-footer button,
 .integration-hub-demo-count {
   display: inline-flex;
@@ -472,14 +465,13 @@ pre {
   gap: 7px;
 }
 
-.integration-hub-demo-topline svg,
 .integration-hub-demo-footer svg {
   width: 12px;
   height: 12px;
 }
 
 .integration-hub-demo-heading {
-  margin-top: 38px;
+  margin-top: 12px;
   text-align: center;
 }
 
@@ -498,46 +490,21 @@ pre {
   line-height: 1.6;
 }
 
-.integration-hub-demo-detail {
-  display: flex;
-  width: fit-content;
-  max-width: 100%;
-  min-height: 46px;
-  align-items: center;
-  gap: 12px;
-  margin: 0 auto 28px;
-  padding: 9px 13px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  color: var(--muted-foreground);
+.integration-hub-tool-logo {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
 }
 
-.integration-hub-demo-detail p {
-  max-width: 340px;
-  margin: 0;
-  font-size: 11px;
-  line-height: 1.6;
+.dark .integration-hub-tool-logo[data-monochrome="true"] {
+  filter: brightness(0) invert(1);
 }
 
-.integration-hub-demo-detail-icon {
-  display: grid;
-  width: 26px;
-  height: 26px;
-  flex: none;
-  place-items: center;
-}
-
-.integration-hub-demo-detail svg {
-  width: 18px;
-  height: 18px;
-}
-
-.integration-hub-demo-detail button {
-  display: grid;
-  min-width: 28px;
-  min-height: 28px;
-  place-items: center;
-  cursor: pointer;
+@container (max-width: 580px) {
+  .integration-hub-tool-logo {
+    width: 24px;
+    height: 24px;
+  }
 }
 
 .integration-hub-demo-footer {
@@ -559,8 +526,7 @@ pre {
   cursor: pointer;
 }
 
-.integration-hub-demo-footer button:hover,
-.integration-hub-demo-detail button:hover {
+.integration-hub-demo-footer button:hover {
   color: var(--foreground);
 }
 
@@ -583,8 +549,7 @@ pre {
 }
 
 @media (max-width: 480px) {
-  .integration-hub-demo-hint,
-  .integration-hub-demo-topline > span:last-child {
+  .integration-hub-demo-hint {
     display: none;
   }
 }

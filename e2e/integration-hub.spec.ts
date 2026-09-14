@@ -48,23 +48,24 @@ test("all six pulses travel inward and pause and resume in place", async ({ page
   await expect(pulses.first()).toHaveCSS("animation-play-state", "running");
 });
 
-test("keyboard selection highlights a connection, explains it, and can be cleared", async ({ page }) => {
+test("keyboard selection highlights a connection and can be cleared", async ({ page }) => {
   const hub = page.getByRole("group", { name: "Tools connected to Relay" });
   const linear = hub.getByRole("button", { name: "Linear", exact: true });
   await linear.focus();
   await page.keyboard.press("Enter");
   await expect(linear).toHaveAttribute("aria-pressed", "true");
   await expect(hub.locator('.a1ui-hub-connection[data-active="true"]')).toHaveCount(1);
-  await expect(page.locator(".integration-hub-demo-detail")).toContainText(
-    "Bring issues, milestones, and priorities together.",
-  );
   await expect(hub.locator(".a1ui-hub-product-status")).toHaveText("From Linear");
 
   await page.keyboard.press("Enter");
   await expect(linear).toHaveAttribute("aria-pressed", "false");
   await expect(hub.locator('.a1ui-hub-connection[data-active="true"]')).toHaveCount(6);
   await hub.getByRole("button", { name: "Slack", exact: true }).click();
-  await page.getByRole("button", { name: "Show all connections" }).click();
+  await expect(hub.getByRole("button", { name: "Slack", exact: true })).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
+  await hub.getByRole("button", { name: "Slack", exact: true }).click();
   await expect(hub.locator('.a1ui-hub-connection[data-active="true"]')).toHaveCount(6);
 });
 
