@@ -237,6 +237,9 @@ body { margin: 0; padding: 32px; background: var(--background); color: var(--for
   await page.keyboard.press("Enter");
   await confirmation.locator('[data-state="confirmed"]').waitFor();
   assert.match(await confirmation.innerText(), /Action confirmed\./);
+  const peelStack = page.locator('[data-component="peel-stack"]');
+  await peelStack.getByRole("button", { name: "Next card" }).click();
+  assert.match(await peelStack.getByRole("status").innerText(), /Material notes/);
   assert.deepEqual(errors, [], "Consumer browser emitted errors");
   console.log(
     `Verified ${catalog.items.length} installed components and their published examples in a clean Next.js production app.`,

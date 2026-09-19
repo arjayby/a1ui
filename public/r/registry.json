@@ -4,6 +4,43 @@
   "homepage": "http://localhost:3000",
   "items": [
     {
+      "name": "peel-stack",
+      "type": "registry:ui",
+      "title": "Peel Stack",
+      "description": "A layered paper stack that rotates through collections with buttons, arrow keys, or a swipe.",
+      "dependencies": [
+        "clsx"
+      ],
+      "files": [
+        {
+          "path": "src/registry/peel-stack.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "categories": [
+        "cards",
+        "carousel",
+        "interactive",
+        "animation"
+      ],
+      "meta": {
+        "a1ui": {
+          "useCases": [
+            "Layered collections, portfolio studies, and attachment cards with manual navigation."
+          ],
+          "limitations": [
+            "Shows up to three visible layers. Cards have a fixed height; increase it for long content. Demo artwork is not installed."
+          ],
+          "requirements": [
+            "Supply items with unique IDs. Uses React 19, Tailwind CSS 4, and theme tokens. Inactive cards are inert; reduced motion disables transitions."
+          ],
+          "docsUrl": "http://localhost:3000/docs/components/peel-stack.md",
+          "registryUrl": "http://localhost:3000/r/peel-stack.json"
+        }
+      },
+      "docs": "Read http://localhost:3000/docs/components/peel-stack.md for usage, required props, and integration instructions."
+    },
+    {
       "name": "ascii-morph",
       "type": "registry:ui",
       "title": "ASCII Morph",

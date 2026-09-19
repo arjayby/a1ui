@@ -1,0 +1,78 @@
+---
+title: Peel Stack
+description: A layered paper stack that rotates through collections with buttons, arrow keys, or a swipe.
+---
+
+## Demo
+
+<PeelStackDemo />
+
+## Installation
+
+<Installation name="peel-stack" />
+
+Requires React 19 or later and Tailwind CSS 4.
+
+## Code
+
+<Tabs items={["Usage", "Source"]}>
+  <Tab value="Usage">
+
+```tsx
+import { PeelStack } from "@/components/ui/peel-stack";
+
+const collections = [
+  {
+    id: "form",
+    title: "Form studies",
+    description: "12 experiments / 2026",
+    label: "A1 / Studies",
+  },
+  {
+    id: "material",
+    title: "Material notes",
+    description: "08 textures / 2026",
+    label: "A1 / Archive",
+  },
+  {
+    id: "sound",
+    title: "Field recordings",
+    description: "24 moments / 2026",
+    label: "A1 / Sound",
+  },
+];
+
+export function Collections() {
+  return <PeelStack items={collections} ariaLabel="Design collections" />;
+}
+```
+
+  </Tab>
+  <Tab value="Source">
+    <ComponentSource name="peel-stack" />
+  </Tab>
+</Tabs>
+
+## API reference
+
+| Prop              | Type                   | Default           | Purpose                                                 |
+| ----------------- | ---------------------- | ----------------- | ------------------------------------------------------- |
+| `items`           | `PeelStackItem[]`      | Required          | Cards in display order. An empty array renders nothing. |
+| `activeId`        | `string`               | None              | Controlled selection. Pair with `onActiveChange`.       |
+| `defaultActiveId` | `string`               | First item        | Initial selection when uncontrolled.                    |
+| `onActiveChange`  | `(id: string) => void` | None              | Called when navigation requests a different card.       |
+| `ariaLabel`       | `string`               | `"Peel Stack"`    | Accessible name for the carousel.                       |
+| `previousLabel`   | `string`               | `"Previous card"` | Accessible name for the previous button.                |
+| `nextLabel`       | `string`               | `"Next card"`     | Accessible name for the next button.                    |
+| `className`       | `string`               | None              | Outer layout classes.                                   |
+| `style`           | `CSSProperties`        | None              | Inline styles and component theme tokens.               |
+
+Each item needs a stable, unique `id` and a `title`. Optional `label` text appears at the top of the card and defaults to `"Collection"`. `description` appears below the title. `artwork` accepts decorative React content behind the text; its contents are hidden from assistive technology and cannot receive focus. Use `content` for links or other interactive content below the description. The demo's line drawings are separate from the installable component.
+
+The stack shows up to three layers and loops in both directions. A single card disables both navigation buttons. Selection follows the item's ID when the list is reordered. If the selected ID no longer exists, the first card is shown. An uncontrolled stack keeps that fallback selection even if the removed card is later restored. Prop changes do not fire `onActiveChange`.
+
+Focus the stack to use Left and Right, or Home and End to select the first and last cards. Arrow keys inside your own controls keep their usual behavior. Horizontal swipes move one card on release; taps, vertical gestures, and canceled gestures keep the selection. Links and controls inside a card do not start a swipe. Only the active card is exposed to assistive technology and keyboard focus. The counter announces selection changes. Reduced motion disables the card transitions.
+
+The component inherits the background, foreground, card, border, and muted text theme tokens. Override `--peel-stack-background`, `--peel-stack-paper`, `--peel-stack-foreground`, `--peel-stack-muted`, `--peel-stack-border`, or `--peel-stack-shade` through `style` to adjust the palette.
+
+Use `--peel-stack-card-width`, `--peel-stack-card-height`, and `--peel-stack-stage-height` to change the card and stage dimensions. Cards use a fixed height, so increase the card and stage heights for longer descriptions or additional content. `--peel-stack-spread` accepts an angle such as `6deg`; `--peel-stack-radius`, `--peel-stack-title-size`, and `--peel-stack-label-size` adjust the remaining details.

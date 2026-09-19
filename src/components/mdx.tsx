@@ -17,6 +17,7 @@ import { TextBannerDemo } from "@/components/text-banner-demo";
 import { SelectMenuDemo } from "@/components/select-menu-demo";
 import { ShapeFlowDemo } from "@/components/shape-flow-demo";
 import { IntegrationHubDemo } from "@/components/integration-hub-demo";
+import { PeelStackDemo } from "@/components/peel-stack-demo";
 
 export function getMDXComponents(components?: MDXComponents) {
   return {
@@ -33,6 +34,7 @@ export function getMDXComponents(components?: MDXComponents) {
     IntegrationHubDemo,
     MultichainSwapDemo,
     ParticleMenuDemo,
+    PeelStackDemo,
     SectionRailDemo,
     SelectMenuDemo,
     ShapeFlowDemo,

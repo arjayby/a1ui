@@ -1,6 +1,7 @@
 {
   "title": "Components",
   "pages": [
+    "peel-stack",
     "ascii-morph",
     "integration-hub",
     "ascii-terrain",
