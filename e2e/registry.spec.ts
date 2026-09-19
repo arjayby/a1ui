@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 for (const [name, exportedComponent] of [
+  ["orbit-dial", "OrbitDial"],
   ["peel-stack", "PeelStack"],
   ["ascii-morph", "AsciiMorph"],
   ["integration-hub", "IntegrationHub"],

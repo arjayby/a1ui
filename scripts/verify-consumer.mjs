@@ -240,6 +240,12 @@ body { margin: 0; padding: 32px; background: var(--background); color: var(--for
   const peelStack = page.locator('[data-component="peel-stack"]');
   await peelStack.getByRole("button", { name: "Next card" }).click();
   assert.match(await peelStack.getByRole("status").innerText(), /Material notes/);
+  const orbitDial = page.locator('[data-component="orbit-dial"]');
+  const intensity = orbitDial.getByRole("slider", { name: "Intensity", exact: true });
+  await intensity.press("ArrowRight");
+  assert.equal(await intensity.inputValue(), "65");
+  await intensity.press("End");
+  assert.equal(await intensity.inputValue(), "100");
   assert.deepEqual(errors, [], "Consumer browser emitted errors");
   console.log(
     `Verified ${catalog.items.length} installed components and their published examples in a clean Next.js production app.`,

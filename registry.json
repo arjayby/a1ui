@@ -4,6 +4,26 @@
   "homepage": "http://localhost:3000",
   "items": [
     {
+      "name": "orbit-dial",
+      "type": "registry:ui",
+      "title": "Orbit Dial",
+      "description": "A circular control with radial ticks, a numeric readout, and a native range slider.",
+      "dependencies": ["clsx"],
+      "files": [{ "path": "src/registry/orbit-dial.tsx", "type": "registry:ui" }],
+      "categories": ["form", "slider", "interactive"],
+      "meta": {
+        "a1ui": {
+          "useCases": ["Numeric adjustments in creative tools, audio interfaces, and settings panels."],
+          "limitations": [
+            "One numeric value with a linear scale. Values snap to complete steps from the minimum. Long formatted values are truncated."
+          ],
+          "requirements": [
+            "Supply a label and connect onValueChange for controlled use. Requires React, Tailwind CSS 4, and the background, foreground, border, and muted text theme tokens."
+          ]
+        }
+      }
+    },
+    {
       "name": "peel-stack",
       "type": "registry:ui",
       "title": "Peel Stack",

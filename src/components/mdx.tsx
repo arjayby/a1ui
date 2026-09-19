@@ -18,6 +18,7 @@ import { SelectMenuDemo } from "@/components/select-menu-demo";
 import { ShapeFlowDemo } from "@/components/shape-flow-demo";
 import { IntegrationHubDemo } from "@/components/integration-hub-demo";
 import { PeelStackDemo } from "@/components/peel-stack-demo";
+import { OrbitDialDemo } from "@/components/orbit-dial-demo";
 
 export function getMDXComponents(components?: MDXComponents) {
   return {
@@ -35,6 +36,7 @@ export function getMDXComponents(components?: MDXComponents) {
     MultichainSwapDemo,
     ParticleMenuDemo,
     PeelStackDemo,
+    OrbitDialDemo,
     SectionRailDemo,
     SelectMenuDemo,
     ShapeFlowDemo,
