@@ -4,6 +4,26 @@
   "homepage": "http://localhost:3000",
   "items": [
     {
+      "name": "status-capsule",
+      "type": "registry:ui",
+      "title": "Status Capsule",
+      "description": "A collapsible task summary with a progress ring, file details, and retry states.",
+      "dependencies": ["clsx", "lucide-react"],
+      "files": [{ "path": "src/registry/status-capsule.tsx", "type": "registry:ui" }],
+      "categories": ["feedback", "progress", "interactive"],
+      "meta": {
+        "a1ui": {
+          "useCases": ["Collapsible upload, export, and background-job summaries with per-task state."],
+          "limitations": [
+            "Presentation only. The caller owns jobs, retries, downloads, and consistency between task status and progress."
+          ],
+          "requirements": [
+            "Requires React 19 and Tailwind CSS 4. Supply tasks with unique IDs, job state, and action callbacks. Reduced motion disables transitions and spinner rotation."
+          ]
+        }
+      }
+    },
+    {
       "name": "orbit-dial",
       "type": "registry:ui",
       "title": "Orbit Dial",

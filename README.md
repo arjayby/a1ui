@@ -49,6 +49,7 @@ pnpm dlx shadcn@latest add http://localhost:3000/r/confirmation-button.json
 pnpm dlx shadcn@latest add http://localhost:3000/r/integration-hub.json
 pnpm dlx shadcn@latest add http://localhost:3000/r/peel-stack.json
 pnpm dlx shadcn@latest add http://localhost:3000/r/orbit-dial.json
+pnpm dlx shadcn@latest add http://localhost:3000/r/status-capsule.json
 ```
 
 The components install into `src/components/ui` and use React, TypeScript, and Tailwind CSS v4.
