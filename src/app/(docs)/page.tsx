@@ -22,12 +22,14 @@ import { IntegrationHubPreview } from "@/components/integration-hub-demo";
 import { PeelStackPreview } from "@/components/peel-stack-demo";
 import { OrbitDialPreview } from "@/components/orbit-dial-demo";
 import { StatusCapsulePreview } from "@/components/status-capsule-demo";
+import { ToastQueuePreview } from "@/components/toast-queue-demo";
 import { Badge } from "@/components/ui/badge";
 import { components } from "@/lib/component-catalog";
 
 const previews: Record<string, ComponentType> = {
   "compare-curtain": CompareCurtainPreview,
   "status-capsule": StatusCapsulePreview,
+  "toast-queue": ToastQueuePreview,
   "orbit-dial": OrbitDialPreview,
   "peel-stack": PeelStackPreview,
   "ascii-morph": AsciiMorphPreview,

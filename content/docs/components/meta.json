@@ -3,6 +3,7 @@
   "pages": [
     "command-deck",
     "compare-curtain",
+    "toast-queue",
     "status-capsule",
     "orbit-dial",
     "peel-stack",

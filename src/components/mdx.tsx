@@ -22,6 +22,7 @@ import { IntegrationHubDemo } from "@/components/integration-hub-demo";
 import { PeelStackDemo } from "@/components/peel-stack-demo";
 import { OrbitDialDemo } from "@/components/orbit-dial-demo";
 import { StatusCapsuleDemo } from "@/components/status-capsule-demo";
+import { ToastQueueDemo } from "@/components/toast-queue-demo";
 
 export function getMDXComponents(components?: MDXComponents) {
   return {
@@ -43,6 +44,7 @@ export function getMDXComponents(components?: MDXComponents) {
     PeelStackDemo,
     OrbitDialDemo,
     StatusCapsuleDemo,
+    ToastQueueDemo,
     SectionRailDemo,
     SelectMenuDemo,
     ShapeFlowDemo,

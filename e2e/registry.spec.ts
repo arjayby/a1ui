@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 for (const [name, exportedComponent] of [
+  ["toast-queue", "ToastQueue"],
   ["status-capsule", "StatusCapsule"],
   ["orbit-dial", "OrbitDial"],
   ["peel-stack", "PeelStack"],

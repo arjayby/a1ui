@@ -7,6 +7,7 @@ const newlyShippedSlugs = new Set([
   "peel-stack",
   "orbit-dial",
   "status-capsule",
+  "toast-queue",
 ]);
 
 // The website and agent catalog share the registry's names and descriptions.

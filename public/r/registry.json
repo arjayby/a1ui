@@ -77,6 +77,43 @@
       "docs": "Read http://localhost:3000/docs/components/compare-curtain.md for usage, required props, and integration instructions."
     },
     {
+      "name": "toast-queue",
+      "type": "registry:ui",
+      "title": "Toast Queue",
+      "description": "Compact event notifications with animated entry, dismissal, and queue limits.",
+      "dependencies": [
+        "clsx",
+        "lucide-react"
+      ],
+      "files": [
+        {
+          "path": "src/registry/toast-queue.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "categories": [
+        "feedback",
+        "notification",
+        "animation"
+      ],
+      "meta": {
+        "a1ui": {
+          "useCases": [
+            "Event confirmations, publishing feedback, and small app notifications."
+          ],
+          "limitations": [
+            "The queue lives in the component that calls the hook; it is not a global provider."
+          ],
+          "requirements": [
+            "Render ToastQueue with a useToastQueue controller. Requires React, Tailwind CSS 4, and theme tokens. Reduced motion disables entry and exit animation."
+          ],
+          "docsUrl": "http://localhost:3000/docs/components/toast-queue.md",
+          "registryUrl": "http://localhost:3000/r/toast-queue.json"
+        }
+      },
+      "docs": "Read http://localhost:3000/docs/components/toast-queue.md for usage, required props, and integration instructions."
+    },
+    {
       "name": "status-capsule",
       "type": "registry:ui",
       "title": "Status Capsule",

@@ -1,0 +1,61 @@
+---
+title: Toast Queue
+description: Compact event notifications with animated entry, dismissal, and queue limits.
+---
+
+## Demo
+
+<ToastQueueDemo />
+
+## Installation
+
+<Installation name="toast-queue" />
+
+## Code
+
+<Tabs items={["Usage", "Source"]}>
+  <Tab value="Usage">
+
+```tsx
+"use client";
+
+import { ToastQueue, useToastQueue } from "@/components/ui/toast-queue";
+
+export function SaveFeedback() {
+  const queue = useToastQueue({ limit: 3 });
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() =>
+          queue.push({
+            tone: "success",
+            title: "Changes saved",
+            description: "All edits are up to date.",
+          })
+        }
+      >
+        Save
+      </button>
+      <ToastQueue {...queue} />
+    </>
+  );
+}
+```
+
+  </Tab>
+  <Tab value="Source">
+    <ComponentSource name="toast-queue" />
+  </Tab>
+</Tabs>
+
+## API reference
+
+`useToastQueue({ limit })` returns `toasts`, `announcement`, `push`, `dismiss`, `clear`, and `removeExited`. Pass the returned object to `ToastQueue`. The default limit is 3; a lower limit of 1 applies when `limit` is zero or negative. New messages appear first. Older messages leave when the queue fills.
+
+`push(message)` returns the new toast ID. Messages take `title`, optional `description`, optional `tone` (`"success"`, `"info"`, or `"error"`), and optional `durationMs`. Without `durationMs`, a message stays until dismissed or displaced by the limit. Call `dismiss(id)` for one toast or `clear()` for all. The stack calls `removeExited` after exit animation; the hook also removes exiting toasts on a timer if the animation event does not fire.
+
+`ToastQueue` accepts the controller plus optional `label`, `className`, and `style`. The visual list has an accessible name, each toast has a labeled dismiss button, and a separate polite live region announces new messages. Exit animation hides departing toasts from assistive technology. Reduced motion disables both entry and exit animation and removes dismissed toasts immediately.
+
+The component uses your `--background`, `--foreground`, and `--muted-foreground` theme tokens. Keep the queue near the related action or place it in a stable corner of the app. The hook is scoped to its caller, so put it in a shared client component if several actions should use one queue.

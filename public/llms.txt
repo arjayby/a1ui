@@ -46,6 +46,7 @@ bun: bunx --bun shadcn@latest add http://localhost:3000/r/NAME.json --yes
 - [Status Capsule](http://localhost:3000/docs/components/status-capsule.md): A collapsible task summary with a progress ring, file details, and retry states. Collapsible upload, export, and background-job summaries with per-task state.
 - [Text Banner](http://localhost:3000/docs/components/text-banner.md): Bold text and staggered pixel separators in a seamless, infinitely scrolling banner. Continuously scrolling words or phrases with separators for page banners.
 - [Text Scramble](http://localhost:3000/docs/components/text-scramble.md): Reveals new text from left to right through a scramble of random characters. Animating changing headings, labels, or status text through scrambled characters.
+- [Toast Queue](http://localhost:3000/docs/components/toast-queue.md): Compact event notifications with animated entry, dismissal, and queue limits. Event confirmations, publishing feedback, and small app notifications.
 
 ## Optional shadcn MCP setup
 
