@@ -1,7 +1,7 @@
 import registry from "../../registry.json";
 
 // The latest additions to the component catalog.
-const newlyShippedSlugs = new Set(["peel-stack", "orbit-dial", "status-capsule"]);
+const newlyShippedSlugs = new Set(["command-deck", "peel-stack", "orbit-dial", "status-capsule"]);
 
 // The website and agent catalog share the registry's names and descriptions.
 export const components = registry.items

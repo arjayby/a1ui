@@ -1,6 +1,7 @@
 {
   "title": "Components",
   "pages": [
+    "command-deck",
     "status-capsule",
     "orbit-dial",
     "peel-stack",

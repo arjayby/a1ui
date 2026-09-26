@@ -9,6 +9,7 @@ import { AsciiTerrainPreview } from "@/components/ascii-terrain-demo";
 import { AsciiMorphPreview } from "@/components/ascii-morph-demo";
 import { CryptoWalletPreview } from "@/components/crypto-wallet-demo";
 import { ConfirmationButtonPreview } from "@/components/confirmation-button-demo";
+import { CommandDeckPreview } from "@/components/command-deck-demo";
 import { SectionRailPreview, SpiralTextPreview } from "@/components/component-demos";
 import { ParticleMenuPreview } from "@/components/particle-menu-demo";
 import { MultichainSwapPreview } from "@/components/multichain-swap-demo";
@@ -31,6 +32,7 @@ const previews: Record<string, ComponentType> = {
   "integration-hub": IntegrationHubPreview,
   "ascii-terrain": AsciiTerrainPreview,
   "confirmation-button": ConfirmationButtonPreview,
+  "command-deck": CommandDeckPreview,
   "crypto-wallet": CryptoWalletPreview,
   "section-rail": SectionRailPreview,
   "spiral-text": SpiralTextPreview,

@@ -8,6 +8,7 @@ import { AsciiMorphDemo } from "@/components/ascii-morph-demo";
 import { AgentInstall, AgentRegistryConfiguration } from "@/components/agent-install";
 import { CryptoWalletDemo } from "@/components/crypto-wallet-demo";
 import { ConfirmationButtonDemo } from "@/components/confirmation-button-demo";
+import { CommandDeckDemo } from "@/components/command-deck-demo";
 import { SectionRailDemo, SpiralTextDemo } from "@/components/component-demos";
 import { ComponentSource, Installation } from "@/components/component-docs";
 import { ParticleMenuDemo } from "@/components/particle-menu-demo";
@@ -31,6 +32,7 @@ export function getMDXComponents(components?: MDXComponents) {
     AsciiMorphDemo,
     ComponentSource,
     ConfirmationButtonDemo,
+    CommandDeckDemo,
     CryptoWalletDemo,
     Installation,
     IntegrationHubDemo,

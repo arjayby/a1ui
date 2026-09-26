@@ -4,6 +4,43 @@
   "homepage": "http://localhost:3000",
   "items": [
     {
+      "name": "command-deck",
+      "type": "registry:ui",
+      "title": "Command Deck",
+      "description": "A keyboard-first action picker with search, shortcut hints, and an inline result.",
+      "dependencies": [
+        "clsx",
+        "lucide-react"
+      ],
+      "files": [
+        {
+          "path": "src/registry/command-deck.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "categories": [
+        "navigation",
+        "search",
+        "interactive"
+      ],
+      "meta": {
+        "a1ui": {
+          "useCases": [
+            "In-page command menus and searchable action lists."
+          ],
+          "limitations": [
+            "The deck is inline. Shortcut hints do not register application shortcuts."
+          ],
+          "requirements": [
+            "Supply actions with unique IDs and connect action callbacks. Enable Command/Ctrl+K on at most one deck per page."
+          ],
+          "docsUrl": "http://localhost:3000/docs/components/command-deck.md",
+          "registryUrl": "http://localhost:3000/r/command-deck.json"
+        }
+      },
+      "docs": "Read http://localhost:3000/docs/components/command-deck.md for usage, required props, and integration instructions."
+    },
+    {
       "name": "status-capsule",
       "type": "registry:ui",
       "title": "Status Capsule",

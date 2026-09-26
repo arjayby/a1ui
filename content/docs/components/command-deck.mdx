@@ -1,0 +1,57 @@
+---
+title: Command Deck
+description: A keyboard-first action picker with search, shortcut hints, and an inline result.
+---
+
+## Demo
+
+<CommandDeckDemo />
+
+## Installation
+
+<Installation name="command-deck" />
+
+## Code
+
+<Tabs items={["Usage", "Source"]}>
+  <Tab value="Usage">
+
+```tsx
+"use client";
+
+import { CommandDeck, type CommandDeckAction } from "@/components/ui/command-deck";
+
+const actions: CommandDeckAction[] = [
+  { id: "components", label: "Open components", shortcut: "G C" },
+  { id: "categories", label: "Browse categories", shortcut: "G B" },
+];
+
+export function PageCommands() {
+  return <CommandDeck actions={actions} onAction={(action) => console.log(action.id)} enableGlobalShortcut />;
+}
+```
+
+  </Tab>
+  <Tab value="Source">
+    <ComponentSource name="command-deck" />
+  </Tab>
+</Tabs>
+
+## API reference
+
+| Prop                   | Type                                  | Default                 | Purpose                                                          |
+| ---------------------- | ------------------------------------- | ----------------------- | ---------------------------------------------------------------- |
+| `actions`              | `readonly CommandDeckAction[]`        | Required                | Searchable actions with unique IDs.                              |
+| `onAction`             | `(action: CommandDeckAction) => void` | None                    | Runs after selecting an enabled action.                          |
+| `ariaLabel`            | `string`                              | `"Find an action"`      | Search input's accessible name.                                  |
+| `placeholder`          | `string`                              | `"Find an action..."`   | Search hint.                                                     |
+| `emptyMessage`         | `string`                              | `"No matching actions"` | Message when search has no matches.                              |
+| `enableGlobalShortcut` | `boolean`                             | `false`                 | Focuses the input with Command/Ctrl+K. Use on one deck per page. |
+| `className`            | `string`                              | None                    | Outer layout classes.                                            |
+| `style`                | `CSSProperties`                       | None                    | Inline styles and component theme tokens.                        |
+
+Each action requires `id` and `label`. It can include `description`, `icon`, `keywords`, `shortcut`, `disabled`, and `onSelect`. Search checks the label, description, and keywords without changing action order. `shortcut` is a displayed hint; wire the actual shortcut in your app if needed. Selecting an action calls its `onSelect`, then the deck's `onAction`.
+
+The search input is a combobox connected to an action list. Arrow Up and Arrow Down move through enabled matches, wrapping at the ends. Enter selects the active match. Escape clears a nonempty search; pressing it again releases focus. Pointer movement updates the active row, and a click selects it. The footer announces the selected action to assistive technology.
+
+Colors use the page's `--background`, `--foreground`, `--muted-foreground`, and `--border` tokens. Override `--command-deck-background`, `--command-deck-foreground`, `--command-deck-muted`, and `--command-deck-border` through `style` when needed.
