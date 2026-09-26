@@ -41,6 +41,42 @@
       "docs": "Read http://localhost:3000/docs/components/command-deck.md for usage, required props, and integration instructions."
     },
     {
+      "name": "compare-curtain",
+      "type": "registry:ui",
+      "title": "Compare Curtain",
+      "description": "A draggable divider that reveals two aligned images or design states.",
+      "dependencies": [
+        "clsx"
+      ],
+      "files": [
+        {
+          "path": "src/registry/compare-curtain.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "categories": [
+        "media",
+        "comparison",
+        "interactive"
+      ],
+      "meta": {
+        "a1ui": {
+          "useCases": [
+            "Before-and-after images, design revisions, and visual product comparisons."
+          ],
+          "limitations": [
+            "Horizontal comparison only. The caller supplies aligned layers with matching dimensions."
+          ],
+          "requirements": [
+            "Requires React 19 and Tailwind CSS 4. Supply accessible descriptions for images inside each layer. The divider supports pointer, touch, and keyboard input."
+          ],
+          "docsUrl": "http://localhost:3000/docs/components/compare-curtain.md",
+          "registryUrl": "http://localhost:3000/r/compare-curtain.json"
+        }
+      },
+      "docs": "Read http://localhost:3000/docs/components/compare-curtain.md for usage, required props, and integration instructions."
+    },
+    {
       "name": "status-capsule",
       "type": "registry:ui",
       "title": "Status Capsule",

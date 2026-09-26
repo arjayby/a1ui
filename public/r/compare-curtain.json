@@ -1,0 +1,38 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "compare-curtain",
+  "title": "Compare Curtain",
+  "description": "A draggable divider that reveals two aligned images or design states.",
+  "dependencies": [
+    "clsx"
+  ],
+  "files": [
+    {
+      "path": "src/registry/compare-curtain.tsx",
+      "content": "\"use client\";\n\nimport { clsx as cn } from \"clsx\";\nimport {\n  useRef,\n  useState,\n  type CSSProperties,\n  type KeyboardEvent,\n  type PointerEvent,\n  type ReactNode,\n} from \"react\";\n\nexport interface CompareCurtainProps {\n  before: ReactNode;\n  after: ReactNode;\n  beforeLabel?: string;\n  afterLabel?: string;\n  ariaLabel?: string;\n  value?: number;\n  defaultValue?: number;\n  onValueChange?: (value: number) => void;\n  disabled?: boolean;\n  className?: string;\n  style?: CSSProperties;\n}\n\nfunction clamp(value: number) {\n  if (Number.isNaN(value)) return 50;\n  return Math.max(0, Math.min(100, value));\n}\n\nexport function CompareCurtain({\n  before,\n  after,\n  beforeLabel = \"Before\",\n  afterLabel = \"After\",\n  ariaLabel = \"Reveal after image\",\n  value,\n  defaultValue = 50,\n  onValueChange,\n  disabled = false,\n  className,\n  style,\n}: CompareCurtainProps) {\n  const stageRef = useRef<HTMLDivElement>(null);\n  const activePointerRef = useRef<number | null>(null);\n  const [internalValue, setInternalValue] = useState(defaultValue);\n  const [dragging, setDragging] = useState(false);\n  const position = clamp(value ?? internalValue);\n\n  const update = (next: number) => {\n    if (disabled) return;\n    const bounded = clamp(next);\n    if (bounded === position) return;\n    if (value === undefined) setInternalValue(bounded);\n    onValueChange?.(bounded);\n  };\n\n  const updateFromPointer = (event: PointerEvent<HTMLDivElement>) => {\n    const bounds = stageRef.current?.getBoundingClientRect();\n    if (!bounds || bounds.width <= 0) return;\n    update(Math.round(((event.clientX - bounds.left) / bounds.width) * 100));\n  };\n\n  const finishDrag = (event: PointerEvent<HTMLDivElement>) => {\n    if (activePointerRef.current !== event.pointerId) return;\n    activePointerRef.current = null;\n    setDragging(false);\n    if (event.currentTarget.hasPointerCapture(event.pointerId)) {\n      event.currentTarget.releasePointerCapture(event.pointerId);\n    }\n  };\n\n  const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {\n    if (disabled) return;\n    let next: number;\n    switch (event.key) {\n      case \"ArrowLeft\":\n      case \"ArrowDown\":\n        next = position - (event.shiftKey ? 10 : 1);\n        break;\n      case \"ArrowRight\":\n      case \"ArrowUp\":\n        next = position + (event.shiftKey ? 10 : 1);\n        break;\n      case \"PageDown\":\n        next = position - 10;\n        break;\n      case \"PageUp\":\n        next = position + 10;\n        break;\n      case \"Home\":\n        next = 0;\n        break;\n      case \"End\":\n        next = 100;\n        break;\n      default:\n        return;\n    }\n    event.preventDefault();\n    update(next);\n  };\n\n  return (\n    <div\n      data-compare-curtain=\"\"\n      data-disabled={disabled || undefined}\n      className={cn(\"text-foreground w-full font-mono data-disabled:opacity-50\", className)}\n      style={style}\n    >\n      <div\n        ref={stageRef}\n        data-compare-stage=\"\"\n        className=\"border-foreground bg-muted relative aspect-[3/1] min-h-40 w-full overflow-hidden border\"\n      >\n        <div data-compare-before=\"\" className=\"absolute inset-0 overflow-hidden\">\n          {before}\n        </div>\n        <div\n          data-compare-after=\"\"\n          className=\"absolute inset-0 overflow-hidden\"\n          style={{ clipPath: `inset(0 ${100 - position}% 0 0)` }}\n        >\n          {after}\n        </div>\n        <div\n          aria-hidden=\"true\"\n          className=\"bg-background pointer-events-none absolute inset-y-0 z-10 w-px shadow-[0_0_0_1px_var(--foreground)]\"\n          style={{ left: `${position}%` }}\n        />\n        <div\n          data-compare-handle=\"\"\n          data-dragging={dragging || undefined}\n          role=\"slider\"\n          tabIndex={disabled ? -1 : 0}\n          aria-label={ariaLabel}\n          aria-valuemin={0}\n          aria-valuemax={100}\n          aria-valuenow={position}\n          aria-valuetext={`${position}% ${afterLabel.toLowerCase()}`}\n          aria-disabled={disabled || undefined}\n          aria-orientation=\"horizontal\"\n          className={cn(\n            \"absolute inset-y-0 z-20 w-11 -translate-x-1/2 touch-none outline-none select-none\",\n            \"focus-visible:[&>span]:ring-foreground focus-visible:[&>span]:ring-offset-background focus-visible:[&>span]:ring-2 focus-visible:[&>span]:ring-offset-2\",\n            disabled ? \"cursor-default\" : \"cursor-ew-resize\",\n          )}\n          style={{ left: `clamp(22px, ${position}%, calc(100% - 22px))` }}\n          onKeyDown={onKeyDown}\n          onPointerDown={(event) => {\n            if (disabled || event.button !== 0 || activePointerRef.current !== null) return;\n            event.preventDefault();\n            event.currentTarget.focus({ preventScroll: true });\n            activePointerRef.current = event.pointerId;\n            event.currentTarget.setPointerCapture(event.pointerId);\n            setDragging(true);\n            updateFromPointer(event);\n          }}\n          onPointerMove={(event) => {\n            if (activePointerRef.current === event.pointerId) updateFromPointer(event);\n          }}\n          onPointerUp={finishDrag}\n          onPointerCancel={finishDrag}\n          onLostPointerCapture={finishDrag}\n        >\n          <span\n            className=\"border-foreground bg-background text-foreground pointer-events-none absolute top-1/2 left-1/2 grid size-8 -translate-1/2 place-items-center rounded-full border shadow-sm\"\n            aria-hidden=\"true\"\n          >\n            <svg\n              viewBox=\"0 0 24 24\"\n              fill=\"none\"\n              className=\"size-4\"\n              stroke=\"currentColor\"\n              strokeWidth=\"1.7\"\n              strokeLinecap=\"round\"\n              strokeLinejoin=\"round\"\n            >\n              <path d=\"m9 7-5 5 5 5M15 7l5 5-5 5M4 12h16\" />\n            </svg>\n          </span>\n        </div>\n      </div>\n      <div className=\"text-muted-foreground mt-2 flex justify-between gap-4 text-[10px] tracking-widest uppercase\">\n        <span>{afterLabel}</span>\n        <span>{beforeLabel}</span>\n      </div>\n    </div>\n  );\n}\n",
+      "type": "registry:ui"
+    }
+  ],
+  "meta": {
+    "a1ui": {
+      "useCases": [
+        "Before-and-after images, design revisions, and visual product comparisons."
+      ],
+      "limitations": [
+        "Horizontal comparison only. The caller supplies aligned layers with matching dimensions."
+      ],
+      "requirements": [
+        "Requires React 19 and Tailwind CSS 4. Supply accessible descriptions for images inside each layer. The divider supports pointer, touch, and keyboard input."
+      ],
+      "docsUrl": "http://localhost:3000/docs/components/compare-curtain.md",
+      "registryUrl": "http://localhost:3000/r/compare-curtain.json"
+    }
+  },
+  "categories": [
+    "media",
+    "comparison",
+    "interactive"
+  ],
+  "type": "registry:ui",
+  "docs": "Read http://localhost:3000/docs/components/compare-curtain.md for usage, required props, and integration instructions."
+}

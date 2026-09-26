@@ -9,7 +9,12 @@
       "title": "Command Deck",
       "description": "A keyboard-first action picker with search, shortcut hints, and an inline result.",
       "dependencies": ["clsx", "lucide-react"],
-      "files": [{ "path": "src/registry/command-deck.tsx", "type": "registry:ui" }],
+      "files": [
+        {
+          "path": "src/registry/command-deck.tsx",
+          "type": "registry:ui"
+        }
+      ],
       "categories": ["navigation", "search", "interactive"],
       "meta": {
         "a1ui": {
@@ -22,12 +27,42 @@
       }
     },
     {
+      "name": "compare-curtain",
+      "type": "registry:ui",
+      "title": "Compare Curtain",
+      "description": "A draggable divider that reveals two aligned images or design states.",
+      "dependencies": ["clsx"],
+      "files": [
+        {
+          "path": "src/registry/compare-curtain.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "categories": ["media", "comparison", "interactive"],
+      "meta": {
+        "a1ui": {
+          "useCases": ["Before-and-after images, design revisions, and visual product comparisons."],
+          "limitations": [
+            "Horizontal comparison only. The caller supplies aligned layers with matching dimensions."
+          ],
+          "requirements": [
+            "Requires React 19 and Tailwind CSS 4. Supply accessible descriptions for images inside each layer. The divider supports pointer, touch, and keyboard input."
+          ]
+        }
+      }
+    },
+    {
       "name": "status-capsule",
       "type": "registry:ui",
       "title": "Status Capsule",
       "description": "A collapsible task summary with a progress ring, file details, and retry states.",
       "dependencies": ["clsx", "lucide-react"],
-      "files": [{ "path": "src/registry/status-capsule.tsx", "type": "registry:ui" }],
+      "files": [
+        {
+          "path": "src/registry/status-capsule.tsx",
+          "type": "registry:ui"
+        }
+      ],
       "categories": ["feedback", "progress", "interactive"],
       "meta": {
         "a1ui": {
@@ -47,7 +82,12 @@
       "title": "Orbit Dial",
       "description": "A circular control with radial ticks, a numeric readout, and a native range slider.",
       "dependencies": ["clsx"],
-      "files": [{ "path": "src/registry/orbit-dial.tsx", "type": "registry:ui" }],
+      "files": [
+        {
+          "path": "src/registry/orbit-dial.tsx",
+          "type": "registry:ui"
+        }
+      ],
       "categories": ["form", "slider", "interactive"],
       "meta": {
         "a1ui": {
@@ -67,7 +107,12 @@
       "title": "Peel Stack",
       "description": "A layered paper stack that rotates through collections with buttons, arrow keys, or a swipe.",
       "dependencies": ["clsx"],
-      "files": [{ "path": "src/registry/peel-stack.tsx", "type": "registry:ui" }],
+      "files": [
+        {
+          "path": "src/registry/peel-stack.tsx",
+          "type": "registry:ui"
+        }
+      ],
       "categories": ["cards", "carousel", "interactive", "animation"],
       "meta": {
         "a1ui": {
@@ -89,7 +134,12 @@
       "title": "ASCII Morph",
       "description": "A cloud of characters that morphs into a globe, a flower, and an A1 monogram.",
       "dependencies": ["clsx"],
-      "files": [{ "path": "src/registry/ascii-morph.tsx", "type": "registry:ui" }],
+      "files": [
+        {
+          "path": "src/registry/ascii-morph.tsx",
+          "type": "registry:ui"
+        }
+      ],
       "categories": ["ascii", "animation", "interactive", "typography"],
       "meta": {
         "a1ui": {
@@ -111,7 +161,12 @@
       "title": "Integration Hub",
       "description": "A connected workspace with six tools and animated pulses flowing into a central product.",
       "dependencies": ["clsx", "lucide-react"],
-      "files": [{ "path": "src/registry/integration-hub.tsx", "type": "registry:ui" }],
+      "files": [
+        {
+          "path": "src/registry/integration-hub.tsx",
+          "type": "registry:ui"
+        }
+      ],
       "categories": ["integrations", "animation", "diagram"],
       "meta": {
         "a1ui": {
@@ -133,7 +188,12 @@
       "title": "ASCII Terrain",
       "description": "A landscape made of characters, with rolling hills, pointer sculpting, and click ripples.",
       "dependencies": ["clsx"],
-      "files": [{ "path": "src/registry/ascii-terrain.tsx", "type": "registry:ui" }],
+      "files": [
+        {
+          "path": "src/registry/ascii-terrain.tsx",
+          "type": "registry:ui"
+        }
+      ],
       "categories": ["ascii", "animation", "interactive", "background"],
       "meta": {
         "a1ui": {

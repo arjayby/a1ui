@@ -9,6 +9,7 @@ import { AgentInstall, AgentRegistryConfiguration } from "@/components/agent-ins
 import { CryptoWalletDemo } from "@/components/crypto-wallet-demo";
 import { ConfirmationButtonDemo } from "@/components/confirmation-button-demo";
 import { CommandDeckDemo } from "@/components/command-deck-demo";
+import { CompareCurtainDemo } from "@/components/compare-curtain-demo";
 import { SectionRailDemo, SpiralTextDemo } from "@/components/component-demos";
 import { ComponentSource, Installation } from "@/components/component-docs";
 import { ParticleMenuDemo } from "@/components/particle-menu-demo";
@@ -33,6 +34,7 @@ export function getMDXComponents(components?: MDXComponents) {
     ComponentSource,
     ConfirmationButtonDemo,
     CommandDeckDemo,
+    CompareCurtainDemo,
     CryptoWalletDemo,
     Installation,
     IntegrationHubDemo,

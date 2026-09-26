@@ -1,0 +1,69 @@
+---
+title: Compare Curtain
+description: A draggable divider that reveals two aligned images or design states.
+---
+
+## Demo
+
+<CompareCurtainDemo />
+
+## Installation
+
+<Installation name="compare-curtain" />
+
+## Code
+
+<Tabs items={["Usage", "Source"]}>
+  <Tab value="Usage">
+
+```tsx
+"use client";
+
+import { useState } from "react";
+
+import { CompareCurtain } from "@/components/ui/compare-curtain";
+
+export function ImageComparison() {
+  const [reveal, setReveal] = useState(50);
+
+  return (
+    <CompareCurtain
+      before={<div className="grid size-full place-items-center bg-background">Draft design</div>}
+      after={<div className="grid size-full place-items-center bg-foreground text-background">Finished design</div>}
+      beforeLabel="Draft"
+      afterLabel="Finished"
+      ariaLabel="Reveal finished design"
+      value={reveal}
+      onValueChange={setReveal}
+    />
+  );
+}
+```
+
+  </Tab>
+  <Tab value="Source">
+    <ComponentSource name="compare-curtain" />
+  </Tab>
+</Tabs>
+
+## API reference
+
+| Prop            | Type                      | Default              | Purpose                                                   |
+| --------------- | ------------------------- | -------------------- | --------------------------------------------------------- |
+| `before`        | `ReactNode`               | Required             | Full layer behind the reveal.                             |
+| `after`         | `ReactNode`               | Required             | Layer revealed from the left.                             |
+| `beforeLabel`   | `string`                  | `Before`             | Label beneath the right side.                             |
+| `afterLabel`    | `string`                  | `After`              | Label beneath the left side and part of the spoken value. |
+| `ariaLabel`     | `string`                  | `Reveal after image` | Accessible name for the draggable divider.                |
+| `value`         | `number`                  | None                 | Controlled reveal percentage. Pair with `onValueChange`.  |
+| `defaultValue`  | `number`                  | `50`                 | Initial percentage in uncontrolled mode.                  |
+| `onValueChange` | `(value: number) => void` | None                 | Runs when the divider changes.                            |
+| `disabled`      | `boolean`                 | `false`              | Stops pointer and keyboard changes.                       |
+| `className`     | `string`                  | None                 | Outer layout classes.                                     |
+| `style`         | `CSSProperties`           | None                 | Inline styles on the outer element.                       |
+
+Drag the center arrow directly with a mouse, pen, or touch. The divider is the only control. It clamps to 0–100 percent, keeps its arrow visible at the ends, and has no automatic animation.
+
+The arrow has slider semantics. Focus it and use arrow keys for one percent, Shift with arrow keys or Page Up and Page Down for ten percent, and Home or End for the boundaries. Provide a clear `ariaLabel` and useful alternative text for any images in both layers.
+
+Both layers fill the same frame. Use images or other content that can be cropped without changing their alignment. The component uses the surrounding theme's foreground, background, and muted colors.

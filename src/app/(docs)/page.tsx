@@ -10,6 +10,7 @@ import { AsciiMorphPreview } from "@/components/ascii-morph-demo";
 import { CryptoWalletPreview } from "@/components/crypto-wallet-demo";
 import { ConfirmationButtonPreview } from "@/components/confirmation-button-demo";
 import { CommandDeckPreview } from "@/components/command-deck-demo";
+import { CompareCurtainPreview } from "@/components/compare-curtain-demo";
 import { SectionRailPreview, SpiralTextPreview } from "@/components/component-demos";
 import { ParticleMenuPreview } from "@/components/particle-menu-demo";
 import { MultichainSwapPreview } from "@/components/multichain-swap-demo";
@@ -25,6 +26,7 @@ import { Badge } from "@/components/ui/badge";
 import { components } from "@/lib/component-catalog";
 
 const previews: Record<string, ComponentType> = {
+  "compare-curtain": CompareCurtainPreview,
   "status-capsule": StatusCapsulePreview,
   "orbit-dial": OrbitDialPreview,
   "peel-stack": PeelStackPreview,
