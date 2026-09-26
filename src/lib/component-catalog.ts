@@ -4,9 +4,6 @@ import registry from "../../registry.json";
 const newlyShippedSlugs = new Set([
   "command-deck",
   "compare-curtain",
-  "peel-stack",
-  "orbit-dial",
-  "status-capsule",
   "toast-queue",
 ]);
 
