@@ -29,6 +29,7 @@ bun: bunx --bun shadcn@latest add http://localhost:3000/r/NAME.json --yes
 
 - [Arc Reel](http://localhost:3000/docs/components/arc-reel.md): An infinitely looping reel with curved provider cards and synchronized scroll controls. Looping galleries, provider cards, or logo reels with drag and keyboard controls.
 - [ASCII Morph](http://localhost:3000/docs/components/ascii-morph.md): A cloud of characters that morphs into a globe, a flower, and an A1 monogram. Interactive ASCII illustrations for landing pages, portfolios, and identity studies.
+- [ASCII Signal](http://localhost:3000/docs/components/ascii-signal.md): A small ASCII waveform that changes with an idle, processing, or complete state. Compact status displays for uploads, generation, and background tasks.
 - [ASCII Terrain](http://localhost:3000/docs/components/ascii-terrain.md): A landscape made of characters, with rolling hills, pointer sculpting, and click ripples. Interactive ASCII landscapes and decorative hero backgrounds.
 - [Command Deck](http://localhost:3000/docs/components/command-deck.md): A keyboard-first action picker with search, shortcut hints, and an inline result. In-page command menus and searchable action lists.
 - [Compare Curtain](http://localhost:3000/docs/components/compare-curtain.md): A draggable divider that reveals two aligned images or design states. Before-and-after images, design revisions, and visual product comparisons.

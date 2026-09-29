@@ -6,6 +6,7 @@ for (const [name, exportedComponent] of [
   ["orbit-dial", "OrbitDial"],
   ["peel-stack", "PeelStack"],
   ["ascii-morph", "AsciiMorph"],
+  ["ascii-signal", "AsciiSignal"],
   ["integration-hub", "IntegrationHub"],
   ["ascii-terrain", "AsciiTerrain"],
   ["section-rail", "SectionRail"],

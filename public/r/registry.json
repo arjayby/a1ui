@@ -261,6 +261,42 @@
       "docs": "Read http://localhost:3000/docs/components/ascii-morph.md for usage, required props, and integration instructions."
     },
     {
+      "name": "ascii-signal",
+      "type": "registry:ui",
+      "title": "ASCII Signal",
+      "description": "A small ASCII waveform that changes with an idle, processing, or complete state.",
+      "dependencies": [
+        "clsx"
+      ],
+      "files": [
+        {
+          "path": "src/registry/ascii-signal.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "categories": [
+        "ascii",
+        "status",
+        "animation"
+      ],
+      "meta": {
+        "a1ui": {
+          "useCases": [
+            "Compact status displays for uploads, generation, and background tasks."
+          ],
+          "limitations": [
+            "The signal has three fixed states and does not report numeric progress."
+          ],
+          "requirements": [
+            "Supply a status and a distinct label for each state. Reduced motion shows static frames."
+          ],
+          "docsUrl": "http://localhost:3000/docs/components/ascii-signal.md",
+          "registryUrl": "http://localhost:3000/r/ascii-signal.json"
+        }
+      },
+      "docs": "Read http://localhost:3000/docs/components/ascii-signal.md for usage, required props, and integration instructions."
+    },
+    {
       "name": "integration-hub",
       "type": "registry:ui",
       "title": "Integration Hub",

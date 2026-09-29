@@ -1,0 +1,62 @@
+---
+title: ASCII Signal
+description: A small ASCII waveform that changes with an idle, processing, or complete state.
+---
+
+## Demo
+
+<AsciiSignalDemo />
+
+## Installation
+
+<Installation name="ascii-signal" />
+
+## Code
+
+<Tabs items={["Usage", "Source"]}>
+  <Tab value="Usage">
+
+```tsx
+"use client";
+
+import { useState } from "react";
+import { AsciiSignal, type AsciiSignalStatus } from "@/components/ui/ascii-signal";
+
+export function GenerationStatus() {
+  const [status, setStatus] = useState<AsciiSignalStatus>("idle");
+
+  return (
+    <>
+      <AsciiSignal status={status} />
+      <button type="button" onClick={() => setStatus("processing")}>
+        Start
+      </button>
+      <button type="button" onClick={() => setStatus("complete")}>
+        Finish
+      </button>
+    </>
+  );
+}
+```
+
+  </Tab>
+  <Tab value="Source">
+    <ComponentSource name="ascii-signal" />
+  </Tab>
+</Tabs>
+
+## API reference
+
+| Prop        | Type                                   | Default                    | Purpose                                 |
+| ----------- | -------------------------------------- | -------------------------- | --------------------------------------- |
+| `status`    | `"idle" \| "processing" \| "complete"` | Required                   | Selects the waveform or checkmark.      |
+| `label`     | `string`                               | Text for the current state | Visible text announced when it changes. |
+| `paused`    | `boolean`                              | `false`                    | Holds a static frame and stops updates. |
+| `className` | `string`                               | None                       | Adds classes to the outer card.         |
+| `style`     | `CSSProperties`                        | None                       | Adds inline styles to the outer card.   |
+
+`AsciiSignalStatus` and `AsciiSignalProps` are exported types. Use a different `label` for each state so assistive technology can announce the change. The ASCII drawing is decorative; the visible label carries the status.
+
+The signal has three fixed states and does not report numeric progress. Give a separate percentage or progress bar when the exact amount matters.
+
+The idle wave moves gently, processing moves faster, and switching to complete draws a checkmark. Motion stops while the component is offscreen or the browser tab is hidden. Reduced motion and `paused` show a static frame.
