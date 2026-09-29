@@ -45,6 +45,22 @@ test("selected component navigation keeps its label visible", async ({ page }) =
   });
 });
 
+test("desktop sidebar can scroll to its final component", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.goto("/");
+
+  const sidebar = page.locator(".docs-shell > aside");
+  const finalLink = page.getByRole("navigation", { name: "Components" }).getByRole("link").last();
+
+  await sidebar.evaluate((element) => {
+    element.scrollTop = element.scrollHeight;
+  });
+
+  await expect
+    .poll(async () => finalLink.evaluate((element) => element.getBoundingClientRect().bottom))
+    .toBeLessThanOrEqual(800);
+});
+
 test("search finds component documentation", async ({ page }) => {
   await page.goto("/");
   await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");

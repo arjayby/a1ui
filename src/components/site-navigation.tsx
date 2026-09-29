@@ -68,7 +68,7 @@ export function DesktopNavigation() {
   const pathname = usePathname();
 
   return (
-    <aside className="border-border sticky top-0 hidden h-dvh flex-col border-r px-5 py-7 md:flex">
+    <aside className="border-border sticky top-0 hidden h-dvh flex-col overflow-y-auto border-r px-5 py-7 md:flex">
       <div className="flex items-center justify-between gap-3">
         <Link href="/" className="w-fit font-bold no-underline">
           a1ui
