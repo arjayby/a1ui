@@ -9,6 +9,7 @@ import { AsciiTerrainPreview } from "@/components/ascii-terrain-demo";
 import { AsciiMorphPreview } from "@/components/ascii-morph-demo";
 import { AsciiSignalPreview } from "@/components/ascii-signal-demo";
 import { AsciiClothPreview } from "@/components/ascii-cloth-demo";
+import { AsciiLensPreview } from "@/components/ascii-lens-demo";
 import { CryptoWalletPreview } from "@/components/crypto-wallet-demo";
 import { ConfirmationButtonPreview } from "@/components/confirmation-button-demo";
 import { CommandDeckPreview } from "@/components/command-deck-demo";
@@ -37,6 +38,7 @@ const previews: Record<string, ComponentType> = {
   "ascii-morph": AsciiMorphPreview,
   "ascii-signal": AsciiSignalPreview,
   "ascii-cloth": AsciiClothPreview,
+  "ascii-lens": AsciiLensPreview,
   "integration-hub": IntegrationHubPreview,
   "ascii-terrain": AsciiTerrainPreview,
   "confirmation-button": ConfirmationButtonPreview,

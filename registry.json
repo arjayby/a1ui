@@ -197,7 +197,9 @@
         "a1ui": {
           "useCases": ["Compact status displays for uploads, generation, and background tasks."],
           "limitations": ["The signal has three fixed states and does not report numeric progress."],
-          "requirements": ["Supply a status and a distinct label for each state. Reduced motion shows static frames."]
+          "requirements": [
+            "Supply a status and a distinct label for each state. Reduced motion shows static frames."
+          ]
         }
       }
     },
@@ -218,7 +220,34 @@
         "a1ui": {
           "useCases": ["Interactive fabric illustrations for identity, portfolio, and hero sections."],
           "limitations": ["The woven word is limited to 24 printable ASCII characters on one row."],
-          "requirements": ["Requires Canvas 2D, ResizeObserver, and IntersectionObserver. Supply a pause control for motion; reduced motion shows static cloth."]
+          "requirements": [
+            "Requires Canvas 2D, ResizeObserver, and IntersectionObserver. Supply a pause control for motion; reduced motion shows static cloth."
+          ]
+        }
+      }
+    },
+    {
+      "name": "ascii-lens",
+      "type": "registry:ui",
+      "title": "ASCII Lens",
+      "description": "An image rendered as ASCII, with a circular lens that reveals the original.",
+      "dependencies": ["clsx"],
+      "files": [
+        {
+          "path": "src/registry/ascii-lens.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "categories": ["ascii", "images", "interactive", "animation"],
+      "meta": {
+        "a1ui": {
+          "useCases": ["Portfolio and product cards that reveal source artwork through an interactive lens."],
+          "limitations": [
+            "Remote images must allow canvas pixel reads through CORS; otherwise ASCII sampling falls back to the original image."
+          ],
+          "requirements": [
+            "Supply an image URL and alt text. Requires Canvas 2D, ResizeObserver, and IntersectionObserver. Remote images need anonymous CORS permission for ASCII sampling."
+          ]
         }
       }
     },

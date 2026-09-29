@@ -334,6 +334,43 @@
       "docs": "Read http://localhost:3000/docs/components/ascii-cloth.md for usage, required props, and integration instructions."
     },
     {
+      "name": "ascii-lens",
+      "type": "registry:ui",
+      "title": "ASCII Lens",
+      "description": "An image rendered as ASCII, with a circular lens that reveals the original.",
+      "dependencies": [
+        "clsx"
+      ],
+      "files": [
+        {
+          "path": "src/registry/ascii-lens.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "categories": [
+        "ascii",
+        "images",
+        "interactive",
+        "animation"
+      ],
+      "meta": {
+        "a1ui": {
+          "useCases": [
+            "Portfolio and product cards that reveal source artwork through an interactive lens."
+          ],
+          "limitations": [
+            "Remote images must allow canvas pixel reads through CORS; otherwise ASCII sampling falls back to the original image."
+          ],
+          "requirements": [
+            "Supply an image URL and alt text. Requires Canvas 2D, ResizeObserver, and IntersectionObserver. Remote images need anonymous CORS permission for ASCII sampling."
+          ],
+          "docsUrl": "http://localhost:3000/docs/components/ascii-lens.md",
+          "registryUrl": "http://localhost:3000/r/ascii-lens.json"
+        }
+      },
+      "docs": "Read http://localhost:3000/docs/components/ascii-lens.md for usage, required props, and integration instructions."
+    },
+    {
       "name": "integration-hub",
       "type": "registry:ui",
       "title": "Integration Hub",
