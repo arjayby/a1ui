@@ -7,6 +7,7 @@ for (const [name, exportedComponent] of [
   ["peel-stack", "PeelStack"],
   ["ascii-morph", "AsciiMorph"],
   ["ascii-signal", "AsciiSignal"],
+  ["ascii-cloth", "AsciiCloth"],
   ["integration-hub", "IntegrationHub"],
   ["ascii-terrain", "AsciiTerrain"],
   ["section-rail", "SectionRail"],

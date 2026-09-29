@@ -6,6 +6,7 @@ const newlyShippedSlugs = new Set([
   "compare-curtain",
   "toast-queue",
   "ascii-signal",
+  "ascii-cloth",
 ]);
 
 // The website and agent catalog share the registry's names and descriptions.

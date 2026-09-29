@@ -1,0 +1,53 @@
+---
+title: ASCII Cloth
+description: A hanging sheet of ASCII characters that stretches under a drag and settles on release.
+---
+
+## Demo
+
+<AsciiClothDemo />
+
+## Installation
+
+<Installation name="ascii-cloth" />
+
+## Code
+
+<Tabs items={["Usage", "Source"]}>
+  <Tab value="Usage">
+
+```tsx
+import { AsciiCloth } from "@/components/ui/ascii-cloth";
+
+export function AsciiClothExample() {
+  return <AsciiCloth word="STUDIO" cellSize={15} className="h-96" />;
+}
+```
+
+  </Tab>
+  <Tab value="Source">
+    <ComponentSource name="ascii-cloth" />
+  </Tab>
+</Tabs>
+
+## API reference
+
+| Prop          | Type            | Default                                  | Purpose                                                                     |
+| ------------- | --------------- | ---------------------------------------- | --------------------------------------------------------------------------- |
+| `word`        | `string`        | `"A1 UI"`                                | Text woven into the middle row of the sheet.                                |
+| `cellSize`    | `number`        | `15`                                     | Approximate character spacing in pixels, clamped to 10–24.                  |
+| `interactive` | `boolean`       | `true`                                   | Enables pointer and keyboard dragging. False removes the focusable control. |
+| `paused`      | `boolean`       | `false`                                  | Freezes the current frame and disables dragging until resumed.              |
+| `ariaLabel`   | `string`        | `"ASCII cloth hanging from two corners"` | Accessible description of the illustration.                                 |
+| `className`   | `string`        | None                                     | Outer layout classes. The default height is 24rem.                          |
+| `style`       | `CSSProperties` | None                                     | Set height, text color, or a loaded monospace font.                         |
+
+The woven word is limited to 24 printable ASCII characters on one row. Longer words are clipped again if the sheet is too narrow. The word shares the cloth's character grid, so it bends and stretches with the other characters.
+
+The default accessible label includes the woven word. Pass `ariaLabel` to provide a different description.
+
+Drag a character to pull the sheet, then release it to watch the spring mesh settle. The top corners stay fixed. For keyboard use, focus the cloth and press Enter or Space to grab the center. Arrow keys pull it one cell at a time. Press Enter, Space, or Escape to release it.
+
+Reduced motion displays a static sheet and disables dragging. The simulation also stops when the component is offscreen, in an inert preview, or in a hidden tab. Set `interactive={false}` for decorative use.
+
+The component uses Canvas 2D, `ResizeObserver`, and `IntersectionObserver`. It inherits text color and the monospace font, with an accessible label in server-rendered HTML. Canvas size and character count are bounded. It has no image assets or graphics library dependency.

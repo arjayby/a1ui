@@ -28,6 +28,7 @@ bun: bunx --bun shadcn@latest add http://localhost:3000/r/NAME.json --yes
 ## Components
 
 - [Arc Reel](http://localhost:3000/docs/components/arc-reel.md): An infinitely looping reel with curved provider cards and synchronized scroll controls. Looping galleries, provider cards, or logo reels with drag and keyboard controls.
+- [ASCII Cloth](http://localhost:3000/docs/components/ascii-cloth.md): A hanging sheet of characters that stretches when dragged, with a word woven into the fabric. Interactive fabric illustrations for identity, portfolio, and hero sections.
 - [ASCII Morph](http://localhost:3000/docs/components/ascii-morph.md): A cloud of characters that morphs into a globe, a flower, and an A1 monogram. Interactive ASCII illustrations for landing pages, portfolios, and identity studies.
 - [ASCII Signal](http://localhost:3000/docs/components/ascii-signal.md): A small ASCII waveform that changes with an idle, processing, or complete state. Compact status displays for uploads, generation, and background tasks.
 - [ASCII Terrain](http://localhost:3000/docs/components/ascii-terrain.md): A landscape made of characters, with rolling hills, pointer sculpting, and click ripples. Interactive ASCII landscapes and decorative hero backgrounds.

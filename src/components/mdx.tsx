@@ -6,6 +6,7 @@ import { ArcReelDemo } from "@/components/arc-reel-demo";
 import { AsciiTerrainDemo } from "@/components/ascii-terrain-demo";
 import { AsciiMorphDemo } from "@/components/ascii-morph-demo";
 import { AsciiSignalDemo } from "@/components/ascii-signal-demo";
+import { AsciiClothDemo } from "@/components/ascii-cloth-demo";
 import { AgentInstall, AgentRegistryConfiguration } from "@/components/agent-install";
 import { CryptoWalletDemo } from "@/components/crypto-wallet-demo";
 import { ConfirmationButtonDemo } from "@/components/confirmation-button-demo";
@@ -34,6 +35,7 @@ export function getMDXComponents(components?: MDXComponents) {
     AsciiTerrainDemo,
     AsciiMorphDemo,
     AsciiSignalDemo,
+    AsciiClothDemo,
     ComponentSource,
     ConfirmationButtonDemo,
     CommandDeckDemo,
