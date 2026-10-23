@@ -100,7 +100,7 @@
     border: 1px solid var(--border);
     border-radius: 6px;
     padding: 4px 10px;
-    background: transparent;
+    background: var(--control-background);
     color: var(--foreground);
     font-family: var(--font-sans), sans-serif;
     font-size: var(--text-sm);
@@ -109,10 +109,6 @@
       border-color 120ms ease,
       box-shadow 120ms ease,
       background-color 120ms ease;
-  }
-  .dark .ui-input,
-  .dark .ui-check-glyph {
-    background: color-mix(in oklab, var(--border) 30%, transparent);
   }
   .ui-input::placeholder {
     color: var(--muted-foreground);
@@ -173,7 +169,7 @@
     place-items: center;
     border: 1px solid var(--border);
     border-radius: 4px;
-    background: transparent;
+    background: var(--control-background);
     pointer-events: none;
   }
   .ui-check-target:has(input:checked) .ui-check-glyph {

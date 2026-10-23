@@ -32,23 +32,25 @@
   --color-secondary-foreground: var(--foreground);
   --color-popover: var(--card);
   --color-popover-foreground: var(--foreground);
-  --color-destructive: var(--color-danger);
+  --color-destructive: var(--status-danger);
   --color-success: #a6b98b;
   --color-warning: #d7b77a;
   --color-danger: #d58a80;
 }
 
 :root {
-  /* Light mode is an application adaptation; Paper's confirmed palette is dark. */
-  --background: #f2f2ee;
-  --foreground: #101010;
-  --card: #ffffff;
-  --muted: #e5e5df;
-  --muted-foreground: #62625e;
-  --border: #c9c9c2;
-  --ring: #62625e;
-  --primary: #101010;
-  --on-primary: #f2f2ee;
+  /* Light Graphite: warm paper surfaces, charcoal ink, and quiet borders. */
+  --background: #f7f7f4;
+  --foreground: #242421;
+  --card: #fdfdfb;
+  --sidebar: #eeeee8;
+  --muted: #e9e9e2;
+  --muted-foreground: #65655d;
+  --border: #d9d9d0;
+  --ring: #858579;
+  --primary: #242421;
+  --on-primary: #f7f7f4;
+  --control-background: var(--card);
   --status-success: #45602e;
   --status-warning: #795a22;
   --status-danger: #983e34;
@@ -60,7 +62,6 @@
 
 :root,
 .dark {
-  --sidebar: var(--card);
   --color-fd-background: var(--background);
   --color-fd-foreground: var(--foreground);
   --color-fd-muted: var(--muted);
@@ -84,12 +85,14 @@
   --background: var(--color-canvas);
   --foreground: var(--color-text);
   --card: var(--color-surface);
+  --sidebar: var(--card);
   --muted: var(--color-surface-hover);
   --muted-foreground: var(--color-text-muted);
   --border: var(--color-border);
   --ring: var(--color-border-strong);
   --primary: var(--color-text);
   --on-primary: var(--color-on-primary);
+  --control-background: color-mix(in oklab, var(--border) 30%, transparent);
   --status-success: var(--color-success);
   --status-warning: var(--color-warning);
   --status-danger: var(--color-danger);

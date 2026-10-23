@@ -193,7 +193,7 @@ test("mobile, light mode, and reduced motion retain usable controls", async ({ p
   }
   await page.getByRole("button", { name: "Toggle theme" }).filter({ visible: true }).click();
   await expect(page.locator("html")).not.toHaveClass(/dark/);
-  await expect(page.locator("body")).toHaveCSS("background-color", "rgb(242, 242, 238)");
+  await expect(page.locator("body")).toHaveCSS("background-color", "rgb(247, 247, 244)");
   await page.emulateMedia({ reducedMotion: "reduce" });
   await expect(page.locator('[data-slot="spinner"]').first()).toHaveCSS("animation-name", "none");
   await expect(page.locator('[data-slot="skeleton"]').first()).toHaveCSS("animation-name", "none");
