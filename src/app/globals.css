@@ -567,13 +567,6 @@ h6 {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: 1.25rem 1.5rem;
-  color: var(--muted-foreground);
-  font-size: 0.625rem;
-}
-
-.ascii-terrain-footer {
-  border-top: 1px solid var(--border);
 }
 
 .ascii-terrain-controls {

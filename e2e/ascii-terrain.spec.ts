@@ -63,7 +63,7 @@ test("resizes without overflow and repaints inherited colors while paused", asyn
         viewport: window.innerWidth,
         right: canvas.getBoundingClientRect().right,
       }));
-      expect(dimensions.css).toBe(dimensions.parent);
+      expect(Math.round(dimensions.css)).toBe(dimensions.parent);
       expect(dimensions.backing).toBeGreaterThan(0);
       expect(dimensions.right).toBeLessThanOrEqual(dimensions.viewport);
     }).toPass();

@@ -18,9 +18,11 @@ export function AsciiTerrainDemo() {
   const [seed, setSeed] = useState(7);
 
   return (
-    <div className="not-prose demo-frame ascii-terrain-demo">
-      <AsciiTerrain key={seed} seed={seed} paused={paused} />
-      <div className="ascii-terrain-footer">
+    <>
+      <div className="not-prose demo-frame ascii-terrain-demo">
+        <AsciiTerrain key={seed} seed={seed} paused={paused} />
+      </div>
+      <div className="not-prose demo-caption ascii-terrain-footer">
         <span className="ascii-terrain-hint">Move to shape. Click to ripple.</span>
         <span className="ascii-terrain-reduced-hint">Static terrain. Reduced motion is on.</span>
         <div className="ascii-terrain-controls">
@@ -33,6 +35,6 @@ export function AsciiTerrainDemo() {
           </button>
         </div>
       </div>
-    </div>
+    </>
   );
 }
