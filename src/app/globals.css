@@ -735,6 +735,7 @@ h6 {
 }
 
 .spiral-demo:not(.demo-frame) {
+  padding-top: 0;
   padding-bottom: 0;
 }
 
