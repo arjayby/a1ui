@@ -734,6 +734,10 @@ h6 {
   padding: clamp(1rem, 4vw, 3rem);
 }
 
+.spiral-demo:not(.demo-frame) {
+  padding-bottom: 0;
+}
+
 .spiral-demo > div {
   width: min(100%, 38rem);
   border: 1px solid var(--border);
