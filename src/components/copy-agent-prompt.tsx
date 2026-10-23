@@ -22,7 +22,7 @@ export function CopyAgentPrompt({ prompt }: { prompt: string }) {
 
   return (
     <div className="max-w-full">
-      <Button variant="outline" size="sm" onClick={copy}>
+      <Button variant="outline" size="default" onClick={copy}>
         {status === "copied" ? (
           <CheckIcon aria-hidden="true" className="size-3.5" />
         ) : (

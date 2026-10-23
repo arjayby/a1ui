@@ -24,14 +24,6 @@ export function AgentInstall({ name }: { name?: string }) {
   return (
     <div className="not-prose mt-5 flex flex-wrap items-center gap-3">
       <CopyAgentPrompt key={prompt} prompt={prompt} />
-      <a
-        href={name ? `/docs/blocks/${name}.md` : "/llms.txt"}
-        className="ui-button text-muted-foreground text-xs"
-        data-variant="ghost"
-        data-size="sm"
-      >
-        Read agent guide
-      </a>
     </div>
   );
 }

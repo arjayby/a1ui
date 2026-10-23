@@ -20,7 +20,6 @@ export default async function BlockPage({ params }: PageProps<"/blocks/[slug]">)
     <article className="docs-article">
       <header>
         <div className="docs-page-meta">
-          <span className="graphite-eyebrow">Blocks / Documentation</span>
           <Badge variant="outline">React</Badge>
         </div>
         <h1>{block.title}</h1>
