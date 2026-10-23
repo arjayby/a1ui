@@ -65,6 +65,8 @@ export function AsciiMorphExample() {
 | `className`     | `string`                           | None                   | Outer layout classes. The illustration fills its container with a 6:5 aspect ratio by default.                             |
 | `style`         | `CSSProperties`                    | None                   | Outer inline styles, including a custom height or color.                                                                   |
 
+
+
 `AsciiMorphShape` and `AsciiMorphProps` are exported types. The sequence is Globe, Flower, A1, then Globe again. A1 is a fixed monogram; this component does not accept custom images or text.
 
 ### Controlled shape

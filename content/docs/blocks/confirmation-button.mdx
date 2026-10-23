@@ -55,6 +55,8 @@ export function ConfirmationButtonExample() {
 | `className`      | `string`                      | None                             | Outer layout classes, such as `max-w-xs`.                                                                                 |
 | `style`          | `CSSProperties`               | None                             | Inline styles and component theme tokens.                                                                                 |
 
+<AgentOnly>
+
 Drag the dotted arrow from left to right with a mouse, pen, or touch. Releasing within the last 5% of the track runs `onConfirm`. Letting go early, losing pointer capture, or pressing Escape returns the handle without running the action. Clicking or tapping the handle does not confirm.
 
 Keyboard users can focus the handle and press Enter or Space. Assistive-technology activation follows the same confirmation path. Pending and successful states prevent repeated submissions and announce their labels. Reduced motion disables the return animation and spinner rotation.
@@ -64,3 +66,5 @@ Return a promise from `onConfirm` for asynchronous work. The component shows suc
 Success stays visible until the component is remounted. Change its React `key` to start a new confirmation. The demo uses this to reset after its simulated action completes.
 
 The component uses your `--background`, `--foreground`, and `--border` theme tokens, with neutral fallbacks. You can override `--confirmation-background`, `--confirmation-foreground`, `--confirmation-border`, and `--confirmation-track` through `style`. Give the control enough width for its label and the handle; 16rem or more works for the default text. Dragging always moves from left to right.
+
+</AgentOnly>

@@ -77,6 +77,8 @@ export function BannerExample() {
 | `className`    | `string`            | None        | Adds classes to the outer element.                                                               |
 | `style`        | `CSSProperties`     | None        | Changes background, color, font size, font family, or padding.                                   |
 
+
+
 Standard div attributes pass through to the outer element. The banner inherits the page font and uses `--muted`, `--foreground`, and `--border` for its colors and thin borders. These tokens follow the project's light and dark themes. Set `--text-banner-background` and `--text-banner-foreground` on a parent to customize multiple banners, or use `style` for a single instance.
 
 The banner measures one sequence and repeats it enough to cover the container. Two matching groups loop at a constant speed, including when there is only one short word. `ResizeObserver` updates the layout when the container, text, or font size changes. Empty lists render nothing. The animation styles ship inside the component.

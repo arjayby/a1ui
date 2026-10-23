@@ -94,6 +94,8 @@ export function ConnectedWorkspace() {
 | `className`    | `string`                                                                   | None     | Adds classes to the outer element.                                                                                             |
 | `style`        | `CSSProperties`                                                            | None     | Inline styles and custom properties.                                                                                           |
 
+
+
 Each tool has a unique `id`, a `name`, an `icon` as a React node, and optional `description` and CSS `color`. Use compact, non-interactive icons and short names. The first half of the array goes on the left, the rest on the right. One tool sits at the middle of its column. Empty arrays leave only the product visible.
 
 Pulses travel from every tool toward the product, including the right column. The SVG paths and cards share proportional coordinates so their endpoints stay attached when the container resizes. Below a container width of 580 pixels, cards stack their icon and name and hide the secondary description. The component needs no measurement observers or animation library. Its scoped styles ship with the source.

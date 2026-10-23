@@ -79,6 +79,8 @@ export function ArticlePage() {
 | `gap`                | `CSSProperties["gap"]`            | `0`               | Sets the gap between section markers.                      |
 | `className`          | `string`                          | None              | Controls placement in the consuming page.                  |
 
+
+
 The active link receives `aria-current="location"`. Use `activeMarkerLength="short"` to keep it at the base width or `"long"` to extend it. Both options retain the full-opacity active color. Every link also exposes `data-state="pending"`, `active`, or `complete` for styling. Hovering or focusing a link expands the nearby markers into a tapered group.
 
 ## Verification

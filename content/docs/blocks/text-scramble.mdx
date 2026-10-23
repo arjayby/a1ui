@@ -60,6 +60,8 @@ export function ScrambleExample() {
 | `disabled`   | `boolean` | `false`                                     | Shows the final text immediately and stops any active animation.                   |
 | `className`  | `string`  | None                                        | Styles the outer span. Typography inherits from its parent.                        |
 
+<AgentOnly>
+
 Standard span attributes, including `id`, `style`, and `aria-live`, pass through to the outer element.
 
 The initial value renders as plain text, including on the server. Whenever the text changes, the entire phrase scrambles and resolves from left to right, including characters shared with the previous value. Whitespace stays in place. A new value interrupts an active scramble and resolves to the latest text.
@@ -67,3 +69,5 @@ The initial value renders as plain text, including on the server. Whenever the t
 Emoji and combining characters stay together in browsers that support `Intl.Segmenter`. Older browsers fall back to Unicode code points. Non-finite timing values use the defaults. Use a monospace font to keep replacement characters from shifting the text width.
 
 Screen readers receive the final text as soon as the prop changes. Animated characters are hidden from the accessibility tree. Add `aria-live="polite"` and `aria-atomic="true"` when changes should be announced. The component does not announce changes by default. Reduced motion skips the animation, including when the preference changes during a scramble.
+
+</AgentOnly>

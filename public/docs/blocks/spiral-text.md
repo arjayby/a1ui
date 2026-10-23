@@ -73,6 +73,8 @@ export function Poster() {
 | `rotationSpeed`   | `number`  | `1`      | Rotations per minute. Higher values spin faster. Non-positive or non-finite values use the default. |
 | `className`       | `string`  | None     | Sets layout constraints such as width or placement.                                                 |
 
+
+
 The text follows concentric circular rings. Pressing starts gathering the rings immediately, reaching full tension after `450ms`. On release, a circular wave travels outward, swelling and fading each ring before it settles. Outer rings stay gathered until the wave reaches them. Repeated presses carry each ring's current position and velocity into the next motion, so you can interrupt a wave without abruptly stopping it. The interaction responds to mouse, touch, and pen input and stays still when the user requests reduced motion.
 
 The text rotates by default while the dotted background stays fixed. Holding pauses rotation; releasing resumes it. Set `rotating={false}` to pause it independently. Rotation is disabled when the user requests reduced motion.

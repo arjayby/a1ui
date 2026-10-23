@@ -37,6 +37,7 @@ export function renderBlockGuide(item, mdx, siteUrl) {
       return `[Complete source and dependencies](${registryUrl}). Each file's content is embedded in the registry JSON.`;
     }
     if (/^\s*<\w+Demo\s*\/>\s*$/.test(line)) return `[Interactive preview](${pageUrl})`;
+    if (/^\s*<\/?AgentOnly>\s*$/.test(line)) return "";
     if (/^\s*<Tabs items=\{.*\}>\s*$/.test(line) || /^\s*<\/(Tab|Tabs)>\s*$/.test(line)) return "";
     const tab = line.match(/^\s*<Tab value="(Usage|Source)">\s*$/);
     if (tab) return `### ${tab[1]}`;

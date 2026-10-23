@@ -35,6 +35,7 @@ for (const { name, title } of registry.items) {
       .getByRole("link", { name: "API reference" })
       .click();
     await expect(page.getByRole("region", { name: "Reference table" })).toBeVisible();
+    await expect(page.locator(".docs-article-body > .docs-table ~ *")).toHaveCount(0);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   });
 }

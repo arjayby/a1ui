@@ -14,8 +14,11 @@ describe("agent documentation", () => {
       const guide = renderBlockGuide(item, mdx, origin);
       expect(guide).toContain(`${origin}/r/${item.name}.json --yes`);
       expect(guide).toContain("## API reference");
+      const agentContext = mdx.match(/<AgentOnly>\s*\n([\s\S]*?)\n\s*<\/AgentOnly>/)?.[1].trim();
+      expect(agentContext).toBeTruthy();
+      expect(guide).toContain(agentContext);
       expect(guide).toContain(item.meta.a1ui.limitations[0]);
-      expect(guide).not.toMatch(/<(?:Installation|BlockSource|Tabs|Tab|\w+Demo)\b/);
+      expect(guide).not.toMatch(/<(?:AgentOnly|Installation|BlockSource|Tabs|Tab|\w+Demo)\b/);
       expect(guide).not.toContain("localhost");
       // Preserve executable examples byte for byte, including JSX and code URLs.
       for (const block of mdx.matchAll(/```tsx\n([\s\S]*?)```/g)) {

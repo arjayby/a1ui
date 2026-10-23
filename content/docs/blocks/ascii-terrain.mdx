@@ -57,8 +57,12 @@ export function AsciiTerrainExample() {
 | `className`   | `string`        | None                                 | Outer layout classes. The default height is 24rem.                                                                               |
 | `style`       | `CSSProperties` | None                                 | Set height, text color, or a loaded monospace font.                                                                              |
 
+<AgentOnly>
+
 Move the pointer across the landscape to raise a hill. Click or tap to send a wave across it. Focus the terrain and use arrow keys to move the hill, Enter or Space to create a ripple, Home to return to the center, and Escape to release the hill. Touch scrolling stays available.
 
 Include a pause control for automatically moving terrain, as in the example. Reduced motion shows a static landscape and disables sculpting and ripples. The animation also stops while offscreen, inside an inert catalog preview, or in a hidden browser tab. Use `interactive={false}` for decorative backgrounds and keep page content outside the canvas.
 
 The component uses Canvas 2D and inherits text color and the monospace font. It needs `ResizeObserver`, `IntersectionObserver`, and JavaScript to draw; its accessible description is present in server-rendered HTML. It draws on each display frame with bounded character counts and canvas resolution. Hover hills ease toward the pointer, and click ripples build gradually before fading. It has no WebGL, image assets, or graphics library dependency. This is a procedural illustration, not a geographic map or terrain editor.
+
+</AgentOnly>

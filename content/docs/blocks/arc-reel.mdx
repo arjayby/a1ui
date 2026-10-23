@@ -52,6 +52,8 @@ export function Providers() {
 | `className`    | `string`        | None         | Sets layout constraints such as width or placement.     |
 | `style`        | `CSSProperties` | None         | Overrides the reel's CSS variables.                     |
 
+<AgentOnly>
+
 Each item needs a unique `id` and a `name`. Optional `logo` content replaces the visible name. Optional `artwork` content fills the square behind it while the name stays centered. Every provider in the demo has a unique generated monochrome image with a soft overlay to keep the names readable. Demo images are separate from the installable component; pass your own images through `artwork`.
 
 Cards line the inside of a sphere with the viewer at its center. The middle sits farther away, while the sides face inward and grow larger as they wrap toward the viewer. The perspective adapts to the available width.
@@ -61,3 +63,5 @@ Drag with a mouse or swipe on a touchscreen to move through the cards. The reel 
 The component uses Embla for dragging and momentum. It repeats short lists as needed to fill the viewport, while exposing each provider once to assistive technology. A single card stays centered with navigation disabled. It responds to resizing and item changes, and removes settling animation when reduced motion is requested. Installation includes `embla-carousel-react`.
 
 The reel inherits the project's background, foreground, card, and border colors and uses monospace labels. Override `--arc-reel-background`, `--arc-reel-frame`, `--arc-reel-image`, `--arc-reel-border`, `--arc-reel-foreground`, `--arc-reel-muted`, and `--arc-reel-accent` to change the palette. `--arc-reel-card-width` and `--arc-reel-gap` control card sizing and spacing.
+
+</AgentOnly>

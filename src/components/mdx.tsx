@@ -24,6 +24,7 @@ import { PeelStackDemo } from "@/components/block-demos/peel-stack-demo";
 export function getMDXComponents(components?: MDXComponents) {
   return {
     ...defaultMdxComponents,
+    AgentOnly: () => null,
     AgentInstall,
     AgentRegistryConfiguration,
     ArcReelDemo,

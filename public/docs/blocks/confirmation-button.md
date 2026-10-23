@@ -77,6 +77,8 @@ export function ConfirmationButtonExample() {
 | `className`      | `string`                      | None                             | Outer layout classes, such as `max-w-xs`.                                                                                 |
 | `style`          | `CSSProperties`               | None                             | Inline styles and component theme tokens.                                                                                 |
 
+
+
 Drag the dotted arrow from left to right with a mouse, pen, or touch. Releasing within the last 5% of the track runs `onConfirm`. Letting go early, losing pointer capture, or pressing Escape returns the handle without running the action. Clicking or tapping the handle does not confirm.
 
 Keyboard users can focus the handle and press Enter or Space. Assistive-technology activation follows the same confirmation path. Pending and successful states prevent repeated submissions and announce their labels. Reduced motion disables the return animation and spinner rotation.

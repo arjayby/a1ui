@@ -67,6 +67,8 @@ export function Collections() {
 | `className`       | `string`               | None              | Outer layout classes.                                   |
 | `style`           | `CSSProperties`        | None              | Inline styles and component theme tokens.               |
 
+<AgentOnly>
+
 Each item needs a stable, unique `id` and a `title`. Optional `label` text appears at the top of the card and defaults to `"Collection"`. `description` appears below the title. `artwork` accepts decorative React content behind the text; its contents are hidden from assistive technology and cannot receive focus. Use `content` for links or other interactive content below the description. The demo's line drawings are separate from the installable component.
 
 The stack shows up to three layers and loops in both directions. A single card disables both navigation buttons. Selection follows the item's ID when the list is reordered. If the selected ID no longer exists, the first card is shown. An uncontrolled stack keeps that fallback selection even if the removed card is later restored. Prop changes do not fire `onActiveChange`.
@@ -76,3 +78,5 @@ Focus the stack to use Left and Right, or Home and End to select the first and l
 The component inherits the background, foreground, card, border, and muted text theme tokens. Override `--peel-stack-background`, `--peel-stack-paper`, `--peel-stack-foreground`, `--peel-stack-muted`, `--peel-stack-border`, or `--peel-stack-shade` through `style` to adjust the palette.
 
 Use `--peel-stack-card-width`, `--peel-stack-card-height`, and `--peel-stack-stage-height` to change the card and stage dimensions. Cards use a fixed height, so increase the card and stage heights for longer descriptions or additional content. `--peel-stack-spread` accepts an angle such as `6deg`; `--peel-stack-radius`, `--peel-stack-title-size`, and `--peel-stack-label-size` adjust the remaining details.
+
+</AgentOnly>

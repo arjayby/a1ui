@@ -77,6 +77,8 @@ export function PortfolioCard() {
 | `className`   | `string`        | None          | Classes for the outer element. Its default aspect ratio is 4:3.      |
 | `style`       | `CSSProperties` | None          | Inline size, background, or text color.                              |
 
+
+
 Move the pointer or drag a touch contact over the image to reveal the source. The characters near the lens edge scatter outward. Focus the image and use arrow keys to move the lens, Home to center it, and Escape to close it. The source image and canvas are hidden from assistive technology; the component exposes `alt` as its accessible description and labels the keyboard control separately.
 
 The component loads a separate image with `crossOrigin="anonymous"` for canvas sampling. It samples pixels when that image loads and again when its size changes. It caps the character grid at 140 by 100 and the canvas backing resolution at 2400 pixels per side. Lens movement redraws the canvas without rerendering React. Reduced motion keeps the lens available but removes easing and scattered glyph movement. Offscreen and hidden tabs stop animation frames.

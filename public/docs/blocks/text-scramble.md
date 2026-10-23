@@ -82,6 +82,8 @@ export function ScrambleExample() {
 | `disabled`   | `boolean` | `false`                                     | Shows the final text immediately and stops any active animation.                   |
 | `className`  | `string`  | None                                        | Styles the outer span. Typography inherits from its parent.                        |
 
+
+
 Standard span attributes, including `id`, `style`, and `aria-live`, pass through to the outer element.
 
 The initial value renders as plain text, including on the server. Whenever the text changes, the entire phrase scrambles and resolves from left to right, including characters shared with the previous value. Whitespace stays in place. A new value interrupts an active scramble and resolves to the latest text.

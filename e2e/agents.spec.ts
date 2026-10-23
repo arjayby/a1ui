@@ -1,6 +1,14 @@
 import { expect, test } from "@playwright/test";
 import registry from "../registry.json" with { type: "json" };
 
+test("agent-only context stays in guides and out of website search", async ({ request }) => {
+  const guide = await request.get("/docs/blocks/ascii-morph.md");
+  expect(await guide.text()).toContain("### Controlled shape");
+  const search = await request.get("/api/search?query=Controlled%20shape");
+  expect(search.ok()).toBeTruthy();
+  expect(await search.text()).not.toContain("#controlled-shape");
+});
+
 test("the agent entry point leads to every installable item and Markdown guide", async ({ request }) => {
   const entry = await request.get("/llms.txt");
   expect(entry.ok()).toBeTruthy();

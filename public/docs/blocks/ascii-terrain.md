@@ -79,6 +79,8 @@ export function AsciiTerrainExample() {
 | `className`   | `string`        | None                                 | Outer layout classes. The default height is 24rem.                                                                               |
 | `style`       | `CSSProperties` | None                                 | Set height, text color, or a loaded monospace font.                                                                              |
 
+
+
 Move the pointer across the landscape to raise a hill. Click or tap to send a wave across it. Focus the terrain and use arrow keys to move the hill, Enter or Space to create a ripple, Home to return to the center, and Escape to release the hill. Touch scrolling stays available.
 
 Include a pause control for automatically moving terrain, as in the example. Reduced motion shows a static landscape and disables sculpting and ripples. The animation also stops while offscreen, inside an inert catalog preview, or in a hidden browser tab. Use `interactive={false}` for decorative backgrounds and keep page content outside the canvas.

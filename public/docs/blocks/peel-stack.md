@@ -89,6 +89,8 @@ export function Collections() {
 | `className`       | `string`               | None              | Outer layout classes.                                   |
 | `style`           | `CSSProperties`        | None              | Inline styles and component theme tokens.               |
 
+
+
 Each item needs a stable, unique `id` and a `title`. Optional `label` text appears at the top of the card and defaults to `"Collection"`. `description` appears below the title. `artwork` accepts decorative React content behind the text; its contents are hidden from assistive technology and cannot receive focus. Use `content` for links or other interactive content below the description. The demo's line drawings are separate from the installable component.
 
 The stack shows up to three layers and loops in both directions. A single card disables both navigation buttons. Selection follows the item's ID when the list is reordered. If the selected ID no longer exists, the first card is shown. An uncontrolled stack keeps that fallback selection even if the removed card is later restored. Prop changes do not fire `onActiveChange`.

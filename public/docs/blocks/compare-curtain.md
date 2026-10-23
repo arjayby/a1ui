@@ -86,6 +86,8 @@ export function ImageComparison() {
 | `className`     | `string`                  | None                 | Outer layout classes.                                     |
 | `style`         | `CSSProperties`           | None                 | Inline styles on the outer element.                       |
 
+
+
 Drag the center arrow directly with a mouse, pen, or touch. The divider is the only control. It clamps to 0–100 percent, keeps its arrow visible at the ends, and has no automatic animation.
 
 The arrow has slider semantics. Focus it and use arrow keys for one percent, Shift with arrow keys or Page Up and Page Down for ten percent, and Home or End for the boundaries. Provide a clear `ariaLabel` and useful alternative text for any images in both layers.
