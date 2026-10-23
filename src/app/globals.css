@@ -18,6 +18,14 @@
   --color-muted-foreground: var(--muted-foreground);
   --color-border: var(--border);
   --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--foreground);
+  --color-sidebar-primary: var(--primary);
+  --color-sidebar-primary-foreground: var(--on-primary);
+  --color-sidebar-accent: var(--muted);
+  --color-sidebar-accent-foreground: var(--foreground);
+  --color-sidebar-border: var(--border);
+  --color-sidebar-ring: var(--ring);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--on-primary);
   --color-secondary: var(--muted);
@@ -52,6 +60,7 @@
 
 :root,
 .dark {
+  --sidebar: var(--card);
   --color-fd-background: var(--background);
   --color-fd-foreground: var(--foreground);
   --color-fd-muted: var(--muted);
@@ -156,6 +165,47 @@ h6 {
 
 .docs-main {
   min-width: 0;
+}
+
+[data-sidebar="sidebar"] :is([data-sidebar="menu-button"], [data-sidebar="menu-sub-button"]) {
+  height: 32px;
+  border-radius: 16px;
+  color: var(--muted-foreground);
+  font-family: var(--font-sans), sans-serif;
+  font-size: var(--text-xs);
+  text-decoration: none;
+}
+
+[data-sidebar="sidebar"] :is([data-sidebar="menu-button"], [data-sidebar="menu-sub-button"]):hover {
+  color: var(--foreground);
+}
+
+[data-sidebar="sidebar"]
+  :is([data-sidebar="menu-button"], [data-sidebar="menu-sub-button"])[data-active="true"] {
+  background: var(--primary);
+  color: var(--on-primary);
+}
+
+.ui-dialog.ui-sheet[data-side="left"] {
+  right: auto;
+  left: 0;
+  border-right: 1px solid var(--border);
+  border-left: 0;
+}
+
+.ui-dialog.ui-sheet[data-sidebar="sidebar"] {
+  width: var(--sidebar-width);
+  max-width: calc(100vw - 48px);
+  gap: 0;
+  padding: 0;
+  background: var(--sidebar);
+  color: var(--foreground);
+}
+
+@media (pointer: coarse), (max-width: 47.999rem) {
+  [data-sidebar="sidebar"] :is([data-sidebar="menu-button"], [data-sidebar="menu-sub-button"]) {
+    min-height: 44px;
+  }
 }
 
 .page-frame {
@@ -899,13 +949,6 @@ h6 {
 
 .particle-menu-preview span {
   font-size: 0.625rem;
-}
-
-@media (min-width: 48rem) {
-  .docs-shell {
-    display: grid;
-    grid-template-columns: 15rem minmax(0, 1fr);
-  }
 }
 
 @media (max-width: 47.999rem) {

@@ -167,6 +167,7 @@ test("mobile, light mode, and reduced motion retain usable controls", async ({ p
   ]) {
     const targets = await page
       .locator(selector)
+      .filter({ visible: true })
       .evaluateAll((elements) => elements.map((element) => element.getBoundingClientRect().height));
     expect(
       targets.every((height) => height >= 44),

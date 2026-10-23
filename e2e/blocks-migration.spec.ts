@@ -15,9 +15,17 @@ test("blocks and reusable components have separate catalogs on desktop and mobil
   await expect(page.locator(".catalog-card")).toHaveCount(0);
 
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.getByLabel("Choose documentation").selectOption("/blocks");
+  await page.getByRole("button", { name: "Toggle Sidebar", exact: true }).click();
+  await page
+    .getByRole("dialog", { name: "Documentation", exact: true })
+    .getByRole("link", { name: "Blocks", exact: true })
+    .click();
   await expect(page.getByRole("heading", { name: "Blocks", exact: true })).toBeVisible();
-  await page.getByLabel("Choose documentation").selectOption("/components");
+  await page.getByRole("button", { name: "Toggle Sidebar", exact: true }).click();
+  await page
+    .getByRole("dialog", { name: "Documentation", exact: true })
+    .getByRole("link", { name: "Components", exact: true })
+    .click();
   await expect(page.getByRole("heading", { name: "01 / Foundations" })).toBeVisible();
 });
 

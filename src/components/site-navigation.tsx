@@ -4,10 +4,20 @@ import { useSearchContext } from "fumadocs-ui/contexts/search";
 import { useTheme } from "fumadocs-ui/provider/base";
 import { GithubLogoIcon, MoonIcon, MagnifyingGlassIcon, SunIcon } from "@phosphor-icons/react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 
-import { Badge } from "@/components/ui/badge";
-import { blocks, newBlockCount } from "@/lib/block-catalog";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
+import { getBlock } from "@/lib/block-catalog";
 import { cn } from "@/lib/utils";
 
 function GitHubLink() {
@@ -18,7 +28,9 @@ function GitHubLink() {
       rel="noopener noreferrer"
       aria-label="View a1ui on GitHub (opens in a new tab)"
       title="View on GitHub"
-      className="hover:bg-muted flex size-11 shrink-0 items-center justify-center rounded-sm"
+      className="ui-button hidden sm:inline-flex"
+      data-variant="ghost"
+      data-size="icon"
     >
       <GithubLogoIcon aria-hidden="true" className="size-4" weight="fill" />
     </a>
@@ -29,161 +41,82 @@ function ThemeButton() {
   const { resolvedTheme, setTheme } = useTheme();
 
   return (
-    <button
-      type="button"
+    <Button
+      variant="ghost"
+      size="icon"
       aria-label="Toggle theme"
       title="Toggle theme"
-      className="hover:bg-muted flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-sm"
       onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
     >
       <MoonIcon aria-hidden="true" className="size-4 dark:hidden" />
       <SunIcon aria-hidden="true" className="hidden size-4 dark:block" />
-    </button>
+    </Button>
   );
 }
 
-function SearchButton({ compact = false }: { compact?: boolean }) {
+export function SearchButton({ compact = false }: { compact?: boolean }) {
   const { setOpenSearch } = useSearchContext();
+  const { setOpenMobile } = useSidebar();
 
   return (
-    <button
-      type="button"
-      aria-label={compact ? "Search documentation" : undefined}
-      className={cn(
-        compact
-          ? "hover:bg-muted flex size-11 shrink-0 items-center justify-center rounded-sm"
-          : "border-border hover:border-foreground flex min-h-11 w-full items-center justify-between rounded-sm border px-2.5 py-2 text-left",
-      )}
-      onClick={() => setOpenSearch(true)}
+    <Button
+      variant={compact ? "ghost" : "secondary"}
+      size={compact ? "icon" : "default"}
+      aria-label="Search documentation"
+      className={cn(!compact && "text-muted-foreground w-full justify-between")}
+      onClick={() => {
+        setOpenMobile(false);
+        setOpenSearch(true);
+      }}
     >
-      <span className={cn(compact && "sr-only")}>Search...</span>
-      {compact ? (
+      <span className="flex items-center gap-2">
         <MagnifyingGlassIcon aria-hidden="true" className="size-4" />
-      ) : (
-        <kbd className="text-muted-foreground">⌘ K</kbd>
-      )}
-    </button>
+        <span className={cn(compact && "sr-only")}>Search...</span>
+      </span>
+      {!compact ? <kbd className="text-xs">⌘ K</kbd> : null}
+    </Button>
   );
 }
 
-export function DesktopNavigation() {
+export function DocsHeader() {
   const pathname = usePathname();
+  const block = getBlock(pathname.replace(/^\/blocks\//, ""));
+  const title =
+    block?.title ??
+    (pathname === "/agents" ? "Install with an agent" : pathname === "/components" ? "Components" : "Blocks");
 
   return (
-    <aside className="border-border sticky top-0 hidden h-dvh flex-col overflow-y-auto border-r px-5 py-7 md:flex">
-      <div className="flex items-center justify-between gap-3">
-        <Link href="/" className="inline-flex min-h-11 min-w-11 items-center font-semibold no-underline">
-          a1ui
-        </Link>
-        <div className="flex items-center gap-1">
-          <GitHubLink />
-          <ThemeButton />
-        </div>
+    <header className="bg-background border-border sticky top-0 z-20 flex min-h-14 shrink-0 items-center gap-2 border-b px-3 md:rounded-t-2xl md:px-4">
+      <SidebarTrigger className="shrink-0" />
+      <Separator orientation="vertical" className="mr-1 min-h-4 self-center" />
+      <Breadcrumb className="min-w-0 flex-1">
+        <BreadcrumbList className="flex-nowrap gap-2 text-xs">
+          <BreadcrumbItem className="hidden md:inline-flex">
+            <BreadcrumbLink asChild>
+              <Link href="/">Documentation</Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator className="hidden md:block" />
+          {block ? (
+            <>
+              <BreadcrumbItem className="hidden sm:inline-flex">
+                <BreadcrumbLink asChild>
+                  <Link href="/blocks">Blocks</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator className="hidden sm:block" />
+            </>
+          ) : null}
+          <BreadcrumbItem className="min-w-0">
+            <BreadcrumbPage className="truncate">{title}</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+      <div className="flex shrink-0 items-center gap-1">
+        <SearchButton compact />
+        <GitHubLink />
+        <ThemeButton />
       </div>
-      <div className="mt-6">
-        <SearchButton />
-      </div>
-      <nav aria-label="Guides" className="mt-8">
-        <p className="mb-3 font-semibold">Get started</p>
-        <Link
-          href="/agents"
-          aria-current={pathname === "/agents" ? "page" : undefined}
-          className="hover:bg-muted aria-[current=page]:bg-foreground aria-[current=page]:text-background block rounded-sm px-2 py-3 no-underline"
-        >
-          Install with an agent
-        </Link>
-      </nav>
-      <nav aria-label="Components" className="mt-8">
-        <Link
-          href="/components"
-          aria-current={pathname === "/components" ? "page" : undefined}
-          className="hover:bg-muted aria-[current=page]:bg-foreground aria-[current=page]:text-background block rounded-sm px-2 py-3 font-semibold no-underline"
-        >
-          Components
-        </Link>
-      </nav>
-      <nav aria-label="Blocks" className="mt-8">
-        <Link
-          href="/blocks"
-          aria-current={pathname === "/blocks" || pathname === "/" ? "page" : undefined}
-          className="hover:bg-muted aria-[current=page]:bg-foreground aria-[current=page]:text-background mb-3 block rounded-sm px-2 py-3 font-semibold no-underline"
-        >
-          Blocks
-        </Link>
-        <ul className="flex list-none flex-col gap-1 p-0">
-          {blocks.map((block) => {
-            const href = `/blocks/${block.slug}`;
-            const current = pathname === href;
-
-            return (
-              <li key={block.slug}>
-                <Link
-                  href={href}
-                  aria-current={current ? "page" : undefined}
-                  aria-description={block.isNew ? "New block shipped" : undefined}
-                  className="hover:bg-muted aria-[current=page]:bg-foreground aria-[current=page]:text-background flex items-center justify-between gap-2 rounded-sm px-2 py-3 no-underline"
-                >
-                  {block.title}
-                  {block.isNew ? <Badge variant="dot" aria-hidden="true" /> : null}
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-      </nav>
-    </aside>
-  );
-}
-
-export function MobileNavigation() {
-  const pathname = usePathname();
-  const router = useRouter();
-  const newBlockLabel = `${newBlockCount} new block${newBlockCount === 1 ? "" : "s"} shipped`;
-
-  return (
-    <header className="bg-background border-border sticky top-0 z-20 flex items-center gap-1 border-b px-3 py-2 md:hidden">
-      <Link
-        href="/"
-        className="mr-auto inline-flex min-h-11 min-w-11 items-center font-semibold no-underline"
-      >
-        a1ui
-      </Link>
-      <label className="sr-only" htmlFor="documentation-select">
-        Choose documentation
-      </label>
-      <div className="relative min-w-0">
-        <select
-          id="documentation-select"
-          value={pathname === "/" ? "/blocks" : pathname}
-          className="border-border bg-background min-h-11 w-full max-w-32 min-w-0 rounded-sm border px-2 py-3 text-xs"
-          onChange={(event) => router.push(event.target.value)}
-        >
-          <option value="/components">Components</option>
-          <option value="/blocks">Blocks</option>
-          <option value="/agents">Install with an agent</option>
-          <optgroup label="Blocks">
-            {blocks.map((block) => (
-              <option
-                key={block.slug}
-                value={`/blocks/${block.slug}`}
-                aria-label={block.isNew ? `${block.title}, new block shipped` : undefined}
-              >
-                {block.title}
-                {block.isNew ? " ●" : ""}
-              </option>
-            ))}
-          </optgroup>
-        </select>
-        {newBlockCount > 0 ? (
-          <Badge className="pointer-events-none absolute -top-1.5 right-1.5" title={newBlockLabel}>
-            <span aria-hidden="true">{newBlockCount}</span>
-            <span className="sr-only">{newBlockLabel}</span>
-          </Badge>
-        ) : null}
-      </div>
-      <SearchButton compact />
-      <GitHubLink />
-      <ThemeButton />
     </header>
   );
 }

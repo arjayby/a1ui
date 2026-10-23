@@ -14,6 +14,10 @@ export {
   DialogFooter as SheetFooter,
 } from "@/components/ui/dialog";
 
-export function SheetContent({ className, ...props }: ComponentProps<typeof DialogContent>) {
-  return <DialogContent className={cn("ui-sheet", className)} {...props} />;
+export function SheetContent({
+  className,
+  side = "right",
+  ...props
+}: ComponentProps<typeof DialogContent> & { side?: "left" | "right" }) {
+  return <DialogContent data-side={side} className={cn("ui-sheet", className)} {...props} />;
 }

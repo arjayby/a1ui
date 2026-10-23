@@ -1,17 +1,19 @@
 import type { ReactNode } from "react";
 
-import { DesktopNavigation, MobileNavigation } from "@/components/site-navigation";
+import { AppSidebar } from "@/components/app-sidebar";
+import { DocsHeader } from "@/components/site-navigation";
 import { HydrationMarker } from "@/components/hydration-marker";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
 export function DocsShell({ children }: { children: ReactNode }) {
   return (
-    <div className="docs-shell">
+    <SidebarProvider className="docs-shell">
       <HydrationMarker />
-      <DesktopNavigation />
-      <div className="docs-main">
-        <MobileNavigation />
-        <main>{children}</main>
-      </div>
-    </div>
+      <AppSidebar />
+      <SidebarInset className="docs-main md:ring-border min-w-0 md:ring-1">
+        <DocsHeader />
+        {children}
+      </SidebarInset>
+    </SidebarProvider>
   );
 }

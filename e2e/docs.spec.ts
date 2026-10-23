@@ -46,10 +46,10 @@ test("selected block navigation keeps its label visible", async ({ page }) => {
 });
 
 test("desktop sidebar can scroll to its final block", async ({ page }) => {
-  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.setViewportSize({ width: 1280, height: 600 });
   await page.goto("/");
 
-  const sidebar = page.locator(".docs-shell > aside");
+  const sidebar = page.locator('[data-sidebar="content"]');
   const finalLink = page.getByRole("navigation", { name: "Blocks" }).getByRole("link").last();
 
   await sidebar.evaluate((element) => {
@@ -58,26 +58,75 @@ test("desktop sidebar can scroll to its final block", async ({ page }) => {
 
   await expect
     .poll(async () => finalLink.evaluate((element) => element.getBoundingClientRect().bottom))
-    .toBeLessThanOrEqual(800);
+    .toBeLessThanOrEqual(600);
 });
 
 test("search finds block documentation", async ({ page }) => {
   await page.goto("/");
   await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
-  await page.getByRole("button", { name: /Search/ }).click();
+  await page.getByRole("button", { name: "Search documentation" }).first().click();
 
   const search = page.getByRole("dialog").getByRole("textbox");
   await search.fill("Spiral Text");
   await expect(page.getByRole("dialog").getByText("Spiral Text", { exact: true })).toBeVisible();
 });
 
-test("mobile navigation exposes the block selector and search", async ({ page }) => {
+test("mobile sidebar opens, navigates, closes, and restores focus", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
   await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
 
-  await expect(page.getByLabel("Choose documentation")).toBeVisible();
   await expect(page.getByRole("button", { name: "Search documentation" })).toBeVisible();
-  await page.getByLabel("Choose documentation").selectOption("/blocks/spiral-text");
+  const trigger = page.getByRole("button", { name: "Toggle Sidebar", exact: true });
+  await trigger.click();
+  const sidebar = page.getByRole("dialog", { name: "Documentation", exact: true });
+  await expect(sidebar).toBeVisible();
+  await sidebar.getByRole("link", { name: "Spiral Text", exact: true }).click();
   await expect(page).toHaveURL(/\/blocks\/spiral-text$/);
+  await expect(sidebar).not.toBeVisible();
+  await expect(trigger).toBeFocused();
+  await trigger.click();
+  await page.keyboard.press("Escape");
+  await expect(sidebar).not.toBeVisible();
+  await expect(trigger).toBeFocused();
 });
+
+test("desktop sidebar and block group support collapsing", async ({ page }) => {
+  await page.goto("/blocks/section-rail");
+  await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
+  const sidebar = page.locator('[data-slot="sidebar-container"]');
+  const blockToggle = page.getByRole("button", { name: "Toggle block navigation" });
+  const activeBlock = page
+    .getByRole("navigation", { name: "Blocks", exact: true })
+    .getByRole("link", { name: "Section Rail", exact: true });
+  await blockToggle.click();
+  await expect(activeBlock).not.toBeVisible();
+  await blockToggle.click();
+  await expect(activeBlock).toBeVisible();
+  await page.getByRole("button", { name: "Toggle Sidebar", exact: true }).click();
+  await expect(sidebar).not.toBeInViewport();
+  await page.keyboard.press("Control+b");
+  await expect(sidebar).toBeInViewport();
+});
+
+for (const method of ["button", "shortcut"]) {
+  test(`mobile sidebar search via ${method} leaves the selected page visible`, async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/blocks");
+    await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
+    await page.getByRole("button", { name: "Toggle Sidebar", exact: true }).click();
+    const sidebar = page.getByRole("dialog", { name: "Documentation", exact: true });
+    if (method === "button") {
+      await sidebar.getByRole("button", { name: "Search documentation" }).click();
+    } else {
+      await page.keyboard.press("Control+k");
+    }
+    await expect(sidebar).not.toBeVisible();
+    const search = page.getByRole("dialog").getByRole("textbox");
+    await expect(search).toBeFocused();
+    await search.fill("Spiral Text");
+    await page.getByRole("dialog").getByText("Spiral Text", { exact: true }).click();
+    await expect(page).toHaveURL(/\/blocks\/spiral-text$/);
+    await expect(page.getByRole("dialog")).not.toBeVisible();
+  });
+}
