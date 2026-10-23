@@ -1,113 +1,47 @@
 # a1ui
 
-A collection of React components inspired by designs found online. Copy them into your project and make them your own.
+Editable React components inspired by designs found online. The site has previews, documentation, and a shadcn registry for copying components into your project.
 
-## Install with an agent
+Components use React 19, TypeScript, and Tailwind CSS 4.
 
-The catalog and each component page have a **Copy prompt for agent** button. Paste
-the prompt into a coding agent with terminal and web access. The catalog prompt
-lets the agent choose a component for your request; component pages select that
-component directly. If clipboard access is blocked, a selectable prompt appears.
-
-With the site running locally, give your agent:
-
-```text
-Read http://localhost:3000/llms.txt and follow its setup instructions.
-Choose and install the a1ui component best suited for: [describe what you want].
-Integrate it into this project and verify the build and browser behavior.
-```
-
-The agent must be able to reach that URL. For remote agents, use the deployed
-site's public origin instead of localhost. The supported baseline is React 19,
-TypeScript, and Tailwind CSS 4. Installation adds editable source with the shadcn
-CLI; integration still requires the target app's data and callbacks.
-
-- `/llms.txt` provides discovery, setup, installation, and verification instructions.
-- `/r/registry.json` is the shared shadcn and agent catalog.
-- `/r/<name>.json` contains installable source and dependencies.
-- `/docs/components/<name>.md` provides plain Markdown examples, props, and limitations.
-
-The agent guide also documents optional `@a1ui` registry configuration for the
-existing shadcn MCP server. A custom MCP server is not required.
-
-## Add a component
-
-With the documentation site running locally:
-
-```bash
-pnpm dlx shadcn@latest add http://localhost:3000/r/section-rail.json
-pnpm dlx shadcn@latest add http://localhost:3000/r/spiral-text.json
-pnpm dlx shadcn@latest add http://localhost:3000/r/arc-reel.json
-pnpm dlx shadcn@latest add http://localhost:3000/r/crypto-wallet.json
-pnpm dlx shadcn@latest add http://localhost:3000/r/multichain-swap.json
-pnpm dlx shadcn@latest add http://localhost:3000/r/select-menu.json
-pnpm dlx shadcn@latest add http://localhost:3000/r/text-scramble.json
-pnpm dlx shadcn@latest add http://localhost:3000/r/text-banner.json
-pnpm dlx shadcn@latest add http://localhost:3000/r/shape-flow.json
-pnpm dlx shadcn@latest add http://localhost:3000/r/ascii-terrain.json
-pnpm dlx shadcn@latest add http://localhost:3000/r/confirmation-button.json
-pnpm dlx shadcn@latest add http://localhost:3000/r/integration-hub.json
-pnpm dlx shadcn@latest add http://localhost:3000/r/peel-stack.json
-pnpm dlx shadcn@latest add http://localhost:3000/r/orbit-dial.json
-pnpm dlx shadcn@latest add http://localhost:3000/r/status-capsule.json
-```
-
-The components install into `src/components/ui` and use React, TypeScript, and Tailwind CSS v4.
-
-## Development
+## Run locally
 
 ```bash
 pnpm install
 pnpm dev
 ```
 
-The site uses `http://localhost:3000` by default. Before deploying, set
-`NEXT_PUBLIC_SITE_URL` to the public origin, such as `https://ui.example.com`,
-and run `pnpm build`. This updates install commands, copied prompts, registry
-homepage and metadata, and all agent documentation together. Standard Next.js
-`.env` files are supported, including `.env.local` and `.env.production`.
+Open [http://localhost:3000](http://localhost:3000).
 
-## Registry
+## Add a component
 
-Validate and build the shadcn registry before shipping changes:
+With the site running, install a component from its registry URL:
+
+```bash
+pnpm dlx shadcn@latest add http://localhost:3000/r/section-rail.json
+```
+
+Replace `section-rail` with the name of any component in the catalog. The source is added to `src/components/ui` in your project, where you can edit it.
+
+To install with a coding agent, use **Copy prompt for agent** on the site. You can also point the agent to [http://localhost:3000/llms.txt](http://localhost:3000/llms.txt) for setup and installation instructions. A remote agent needs the site's public URL instead of `localhost`.
+
+## Work on the registry
+
+Edit component metadata in `registry.json` and documentation in `content/docs/components/<name>.mdx`. Do not edit generated files in `public/r`, `public/docs/components`, or `public/llms.txt`.
 
 ```bash
 pnpm registry:validate
 pnpm registry:build
-```
-
-Built registry items are served from `/r`.
-
-`pnpm dev` and `pnpm build` regenerate the registry and agent guides before
-starting Next.js. While the dev server is running, run `pnpm registry:build`
-after changing registry source or documentation to refresh the published files.
-
-Maintain names, descriptions, dependencies, categories, and `meta.a1ui` selection
-advice in `registry.json`. The website catalog reads those same definitions.
-Maintain examples and API documentation in `content/docs/components/<name>.mdx`.
-The generator expands installation instructions, preserves fenced code exactly,
-and replaces preview and source widgets with links. Unknown MDX widgets fail
-generation so instructions cannot silently disappear. Do not edit generated
-`public/r`, `public/docs/components`, or `public/llms.txt` files by hand.
-
-## Checks
-
-```bash
 pnpm test
-pnpm test:e2e
 pnpm typecheck
 pnpm lint
 pnpm build
-pnpm test:consumer
 ```
 
-`pnpm test:consumer` installs the published registry in a temporary Next.js app,
-checks each item's declared dependencies, compiles the generated guides' actual
-examples, builds for production, and checks rendering and interactions in Chromium.
-It requires network access and a Playwright browser, installed with
-`pnpm exec playwright install chromium`. The temporary app is removed afterward;
-use `node scripts/verify-consumer.mjs --keep` to retain it for debugging.
+`pnpm dev` and `pnpm build` generate the registry and agent guides. Run `pnpm registry:build` after changing registry content while the dev server is running. Use `pnpm test:e2e` for browser tests and `pnpm test:consumer` to verify installation in a separate Next.js app.
+
+Before deploying, set `NEXT_PUBLIC_SITE_URL` to the site's public origin and run `pnpm build`. This sets the public URLs used in install commands, copied prompts, and registry metadata.
 
 ## License
 
-The project source is MIT licensed. Commit Mono is distributed under SIL Open Font License 1.1. See [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md).
+The project source is MIT licensed. Commit Mono uses the SIL Open Font License 1.1. See [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md).
