@@ -310,7 +310,7 @@
       "name": "shape-flow",
       "type": "registry:block",
       "title": "Shape Flow",
-      "description": "Text that reflows around a draggable X, powered by Pretext.",
+      "description": "Text that reflows around a floating ASCII duck, powered by Pretext.",
       "dependencies": [
         "@chenglou/pretext@^0.0.8",
         "clsx"
@@ -329,7 +329,7 @@
       "meta": {
         "a1ui": {
           "useCases": [
-            "Editorial text wrapping around a draggable X shape."
+            "Editorial text wrapping around a floating ASCII duck."
           ],
           "limitations": [
             "One left-to-right plain-text paragraph. Rich text and right-to-left flow are unsupported."

@@ -2,9 +2,7 @@ import { expect, test, type Locator } from "@playwright/test";
 
 async function expectReadableFlow(flow: Locator) {
   const result = await flow.evaluate((element) => {
-    const shape = element.querySelector('[data-slot="shape-flow-handle"]')!.getBoundingClientRect();
-    const polygons = [...element.querySelectorAll("polygon")];
-    const toLocal = polygons[0].getScreenCTM()!.inverse();
+    const glyphRows = [...element.querySelectorAll('[data-slot="shape-flow-duck-row"]')];
     const container = element.getBoundingClientRect();
     const lines = [...element.querySelectorAll('[data-slot="shape-flow-line"]')];
     return {
@@ -15,14 +13,16 @@ async function expectReadableFlow(flow: Locator) {
         .replace(/\s/g, ""),
       overlaps: lines.some((line) => {
         const bounds = line.getBoundingClientRect();
-        // Test the actual SVG fill, independently of the layout's geometry.
-        for (let y = Math.max(bounds.top, shape.top); y < Math.min(bounds.bottom, shape.bottom); y++) {
-          for (let x = Math.max(bounds.left, shape.left); x < Math.min(bounds.right, shape.right); x++) {
-            const point = new DOMPoint(x, y).matrixTransform(toLocal);
-            if (polygons.some((polygon) => polygon.isPointInFill(point))) return true;
-          }
-        }
-        return false;
+        // Inspect rendered glyph bounds independently of the wrapping geometry.
+        return glyphRows.some((row) => {
+          const glyphs = row.getBoundingClientRect();
+          return (
+            bounds.left < glyphs.right &&
+            bounds.right > glyphs.left &&
+            bounds.top < glyphs.bottom &&
+            bounds.bottom > glyphs.top
+          );
+        });
       }),
       overflows: lines.some((line) => {
         const bounds = line.getBoundingClientRect();
@@ -35,57 +35,51 @@ async function expectReadableFlow(flow: Locator) {
   expect(result.overflows).toBe(false);
 }
 
-test("text fills the gaps between the X arms", async ({ page }) => {
+test("text follows the ASCII duck silhouette and idle motion respects reduced motion", async ({ page }) => {
   await page.goto("/blocks/shape-flow");
   const flow = page.locator('[data-slot="shape-flow"]');
   await expect(flow).toHaveAttribute("data-state", "ready");
-  const gaps = await flow.evaluate((element) => {
+  const besideHead = await flow.evaluate((element) => {
     const shape = element.querySelector('[data-slot="shape-flow-handle"]')!.getBoundingClientRect();
-    const centerX = shape.x + shape.width / 2;
-    const centerY = shape.y + shape.height / 2;
-    const lines = [...element.querySelectorAll('[data-slot="shape-flow-line"]')];
-    const inner = lines.filter((line) => {
+    return [...element.querySelectorAll('[data-slot="shape-flow-line"]')].some((line) => {
       const rect = line.getBoundingClientRect();
       return (
         line.textContent!.trim().length > 0 &&
-        rect.left > shape.left &&
-        rect.right < shape.right &&
-        rect.left < centerX &&
-        rect.right > shape.left + shape.width * 0.3
+        rect.left > shape.left + shape.width / 2 &&
+        rect.left < shape.right - shape.width * 0.1 &&
+        rect.top < shape.top + shape.height * 0.45 &&
+        rect.bottom > shape.top + shape.height * 0.1
       );
     });
-    return {
-      top: inner.some((line) => {
-        const rect = line.getBoundingClientRect();
-        return rect.bottom > shape.top && rect.bottom < centerY;
-      }),
-      bottom: inner.some((line) => {
-        const rect = line.getBoundingClientRect();
-        return rect.top > centerY && rect.top < shape.bottom;
-      }),
-    };
   });
-  expect(gaps).toEqual({ top: true, bottom: true });
+  expect(besideHead).toBe(true);
+  const duck = flow.locator('[data-slot="shape-flow-duck"]');
+  await expect(duck).toHaveCSS("animation-name", "a1ui-shape-flow-float");
+  await expectReadableFlow(flow);
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await expect(duck).toHaveCSS("animation-name", "none");
   await expectReadableFlow(flow);
 });
 
-test("dragging reflows every word around the X and releases pointer capture", async ({ page }) => {
+test("dragging reflows every word around the duck and releases pointer capture", async ({ page }) => {
   await page.goto("/blocks/shape-flow");
   const flow = page.locator('[data-slot="shape-flow"]');
   await expect(flow).toHaveAttribute("data-state", "ready");
   await expectReadableFlow(flow);
-  const handle = flow.getByRole("button", { name: "Move X" });
+  const handle = flow.getByRole("button", { name: "Move duck" });
+  await handle.scrollIntoViewIfNeeded();
   const before = await handle.boundingBox();
   const initialLines = await flow.locator('[data-slot="shape-flow-line"]').allTextContents();
-  // Grab an arm; the reference shape has an open cross at its center.
   await page.mouse.move(before!.x + before!.width / 4, before!.y + before!.height / 4);
   await page.mouse.down();
   await page.mouse.move(before!.x + before!.width / 4 - 90, before!.y + before!.height / 4 + 70, {
     steps: 12,
   });
   await expect(handle).toHaveAttribute("data-dragging", "true");
+  await expect(handle.locator('[data-slot="shape-flow-duck"]')).toHaveCSS("animation-play-state", "paused");
   await page.mouse.up();
   await expect(handle).toHaveAttribute("data-dragging", "false");
+  await expect(handle).toHaveCSS("outline-style", "none");
   expect((await handle.boundingBox())!.x).toBeLessThan(before!.x - 60);
   expect(await flow.locator('[data-slot="shape-flow-line"]').allTextContents()).not.toEqual(initialLines);
   await expectReadableFlow(flow);
@@ -96,13 +90,14 @@ test("keyboard movement, reset and responsive layout preserve readable text", as
   await page.goto("/blocks/shape-flow");
   const flow = page.locator('[data-slot="shape-flow"]');
   await expect(flow).toHaveAttribute("data-state", "ready");
-  const handle = flow.getByRole("button", { name: "Move X" });
+  const handle = flow.getByRole("button", { name: "Move duck" });
   await handle.focus();
   const initial = await handle.boundingBox();
   const area = await flow.boundingBox();
   expect(initial!.x + initial!.width / 2).toBeCloseTo(area!.x + area!.width / 2, 0);
   expect(initial!.y + initial!.height / 2).toBeCloseTo(area!.y + area!.height / 2, 0);
   await page.keyboard.press("Shift+ArrowRight");
+  await expect(handle).toHaveCSS("outline-style", "solid");
   expect((await handle.boundingBox())!.x - initial!.x).toBeCloseTo(32, 0);
   await page.keyboard.press("Home");
   expect((await handle.boundingBox())!.x).toBeCloseTo(initial!.x, 0);
@@ -112,16 +107,16 @@ test("keyboard movement, reset and responsive layout preserve readable text", as
     await expect(async () => {
       await expectReadableFlow(flow);
     }).toPass();
-    const circle = await handle.boundingBox();
+    const duck = await handle.boundingBox();
     const bounds = await flow.boundingBox();
-    expect(circle!.x).toBeGreaterThanOrEqual(bounds!.x);
-    expect(circle!.x + circle!.width).toBeLessThanOrEqual(bounds!.x + bounds!.width + 1);
-    expect(circle!.x + circle!.width / 2).toBeCloseTo(bounds!.x + bounds!.width / 2, 0);
-    expect(circle!.y + circle!.height / 2).toBeCloseTo(bounds!.y + bounds!.height / 2, 0);
+    expect(duck!.x).toBeGreaterThanOrEqual(bounds!.x);
+    expect(duck!.x + duck!.width).toBeLessThanOrEqual(bounds!.x + bounds!.width + 1);
+    expect(duck!.x + duck!.width / 2).toBeCloseTo(bounds!.x + bounds!.width / 2, 0);
+    expect(duck!.y + duck!.height / 2).toBeCloseTo(bounds!.y + bounds!.height / 2, 0);
   }
 });
 
-test("catalog preview fits its card and centers the X on desktop and mobile", async ({ page }) => {
+test("catalog preview fits its card and centers the duck on desktop and mobile", async ({ page }) => {
   for (const width of [1440, 390, 320]) {
     await page.setViewportSize({ width, height: 900 });
     await page.goto("/");
@@ -157,7 +152,7 @@ test("server-rendered text remains readable without JavaScript", async ({ browse
   await context.close();
 });
 
-test("touch dragging and cancellation release the X", async ({ browser }) => {
+test("touch dragging and cancellation release the duck", async ({ browser }) => {
   const context = await browser.newContext({
     viewport: { width: 390, height: 844 },
     hasTouch: true,
@@ -167,7 +162,7 @@ test("touch dragging and cancellation release the X", async ({ browser }) => {
   await page.goto("/blocks/shape-flow");
   const flow = page.locator('[data-slot="shape-flow"]');
   await expect(flow).toHaveAttribute("data-state", "ready");
-  const handle = flow.getByRole("button", { name: "Move X" });
+  const handle = flow.getByRole("button", { name: "Move duck" });
   await handle.scrollIntoViewIfNeeded();
   const before = await handle.boundingBox();
   const x = before!.x + before!.width / 4;
@@ -179,6 +174,7 @@ test("touch dragging and cancellation release the X", async ({ browser }) => {
     touchPoints: [{ x: x - 30, y: y + 35 }],
   });
   await expect(handle).toHaveAttribute("data-dragging", "true");
+  await expect(handle.locator('[data-slot="shape-flow-duck"]')).toHaveCSS("animation-play-state", "paused");
   expect((await handle.boundingBox())!.x).toBeLessThan(before!.x - 20);
   await session.send("Input.dispatchTouchEvent", { type: "touchCancel", touchPoints: [] });
   await expect(handle).toHaveAttribute("data-dragging", "false");

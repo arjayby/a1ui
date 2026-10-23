@@ -546,17 +546,6 @@ h6 {
   line-height: 1;
 }
 
-.shape-flow-demo-footer {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 0.75rem;
-  border-top: 1px solid var(--border);
-  padding-top: 1rem;
-  color: var(--muted-foreground);
-  font-size: 0.625rem;
-}
-
 .shape-flow-preview {
   padding: 1.5rem;
 }

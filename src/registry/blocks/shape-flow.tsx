@@ -22,21 +22,66 @@ export type ShapeFlowProps = {
 };
 
 const initialPosition = { x: 0.5, y: 0.5 };
-const upperLeftArm = [
-  [0, 0],
-  [16, 0],
-  [47, 31],
-  [47, 47],
-  [31, 47],
-  [0, 16],
+const duckArt = [
+  "              _yyqqpyy_",
+  "            _y@@@@@@@@@y_",
+  "           ,@@@@@@@@@@@@@,",
+  "          ;@@@@@@@@@@@@@@@y",
+  "         ,@@@@@Q@@@@@@@@@@@y",
+  "         @@@@@OOq@@@@@@@@@@@L",
+  "  __     @@@@@OOq@@@@@@@@@@@L",
+  " <==,   _y@@@@@@q@@@@@@@@@@@L",
+  "  <===yy@@@@@@@@@@@@@@@@@@@L",
+  "   <====Q@@@@@@@@@@@@@@@@@@L",
+  "    !===Q@@@@@@@@@@@@@@@@@$'",
+  "     '!!yQQ@@@@@@@@@@@@@@Q$",
+  "       'QQQQ@@@@@@@@@@@Q$'",
+  "         'sQQQQQQQQQQQs'",
+  "           '?SSSSSSSS?'",
+  "            _p555555y_             ,yqp",
+  "          _y@@@@@@@@@gyyy_       _y@@@@y",
+  "        _y@@@@@@@@@@@@@@@@yyyyy@@@@@@@@L",
+  "       y@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@L",
+  "      @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@,",
+  "     @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@L",
+  "    @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@L",
+  "    @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@L",
+  "    @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@L",
+  "    @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@'",
+  "    4@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@P",
+  "     'Q@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@Q'",
+  "      ?Q@@@@@@@@@@@@@@@@@@@@@@@@@@@@Q?",
+  "       '4QQ@@@@@@@@@@@@@@@@@@@@@@QQ4'",
+  "         '4QQQQQ@@@@@@@@@@@@@QQQQ4'",
+  "           '^^?YQQQQQQQQQQQQY?^^'",
+  "                '''^^^^'''",
 ];
-const xArms = [
-  upperLeftArm,
-  upperLeftArm.map(([x, y]) => [100 - x, y]),
-  upperLeftArm.map(([x, y]) => [x, 100 - y]),
-  upperLeftArm.map(([x, y]) => [100 - x, 100 - y]),
-];
-const xPoints = xArms.map((arm) => arm.map((point) => point.join(",")).join(" "));
+const cellWidth = 92 / Math.max(...duckArt.map((row) => row.length));
+const cellHeight = 92 / duckArt.length;
+const duckRows = duckArt.map((row, index) => ({
+  text: row.trim(),
+  x: 4 + row.search(/\S/) * cellWidth,
+  y: 4 + index * cellHeight,
+  width: row.trim().length * cellWidth,
+}));
+// Reserve the full bob and tilt so moving glyphs never touch the paragraph.
+const floatPadding = 3;
+const duckStyles = `
+  [data-slot="shape-flow-duck"] {
+    transform-origin: 50% 50%;
+    animation: a1ui-shape-flow-float 4s ease-in-out infinite;
+  }
+  [data-slot="shape-flow-handle"][data-dragging="true"] [data-slot="shape-flow-duck"] {
+    animation-play-state: paused;
+  }
+  @keyframes a1ui-shape-flow-float {
+    0%, 100% { transform: translateY(1px) rotate(-1deg); }
+    50% { transform: translateY(-1px) rotate(1deg); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    [data-slot="shape-flow-duck"] { animation: none; }
+  }
+`;
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 const positive = (value: number, fallback: number) =>
   Number.isFinite(value) && value > 0 ? value : fallback;
@@ -54,6 +99,7 @@ export function ShapeFlow({
   const containerRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<{ id: number; x: number; y: number; left: number; top: number } | null>(null);
   const instructionsId = useId();
+  const duckGradientId = useId();
   const [width, setWidth] = useState(0);
   const [position, setPosition] = useState(initialPosition);
   const [dragging, setDragging] = useState(false);
@@ -107,37 +153,16 @@ export function ShapeFlow({
       let cursor: LayoutCursor = { segmentIndex: 0, graphemeIndex: 0 };
       let y = 0;
       while (true) {
-        // Project each convex arm across the full line box separately. Combining
-        // their outer bounds would incorrectly block the gaps above and below the X.
         const scale = (halfExtent * 2) / 100;
         const bandTop = (y - spacing - (centerY - halfExtent)) / scale;
         const bandBottom = (y + leading + spacing - (centerY - halfExtent)) / scale;
         const blocked: [number, number][] = [];
-        for (const arm of xArms) {
-          let left = Infinity;
-          let right = -Infinity;
-          for (let index = 0; index < arm.length; index++) {
-            const [x1, y1] = arm[index];
-            const [x2, y2] = arm[(index + 1) % arm.length];
-            const top = Math.max(bandTop, Math.min(y1, y2));
-            const bottom = Math.min(bandBottom, Math.max(y1, y2));
-            if (top > bottom) continue;
-            if (y1 === y2) {
-              left = Math.min(left, x1, x2);
-              right = Math.max(right, x1, x2);
-              continue;
-            }
-            for (const edgeY of [top, bottom]) {
-              const edgeX = x1 + ((edgeY - y1) / (y2 - y1)) * (x2 - x1);
-              left = Math.min(left, edgeX);
-              right = Math.max(right, edgeX);
-            }
-          }
-          if (left <= right)
-            blocked.push([
-              clamp(centerX - halfExtent + left * scale - spacing, 0, width),
-              clamp(centerX - halfExtent + right * scale + spacing, 0, width),
-            ]);
+        for (const row of duckRows) {
+          if (row.y + cellHeight + floatPadding < bandTop || row.y - floatPadding > bandBottom) continue;
+          blocked.push([
+            clamp(centerX - halfExtent + (row.x - floatPadding) * scale - spacing, 0, width),
+            clamp(centerX - halfExtent + (row.x + row.width + floatPadding) * scale + spacing, 0, width),
+          ]);
         }
         blocked.sort((a, b) => a[0] - b[0]);
         const intervals: [number, number][] = [];
@@ -182,8 +207,6 @@ export function ShapeFlow({
     if (!event.isPrimary || event.button !== 0 || dragRef.current) return;
     const bounds = containerRef.current?.getBoundingClientRect();
     if (!bounds) return;
-    event.preventDefault();
-    event.currentTarget.focus({ preventScroll: true });
     event.currentTarget.setPointerCapture(event.pointerId);
     dragRef.current = {
       id: event.pointerId,
@@ -269,15 +292,15 @@ export function ShapeFlow({
             ))}
           </div>
           <span id={instructionsId} className="sr-only">
-            Drag to move the X. Or use arrow keys, hold Shift for larger steps, and press Home to reset.
+            Drag to move the duck. Or use arrow keys, hold Shift for larger steps, and press Home to reset.
           </span>
           <button
             type="button"
-            aria-label="Move X"
+            aria-label="Move duck"
             aria-describedby={instructionsId}
             data-slot="shape-flow-handle"
             data-dragging={dragging}
-            className="text-foreground focus-visible:outline-ring pointer-events-none absolute flex touch-none items-center justify-center border-0 bg-transparent p-0 select-none focus-visible:outline-2 focus-visible:outline-offset-4"
+            className="text-foreground focus-visible:outline-ring absolute flex touch-none items-center justify-center border-0 bg-transparent p-0 outline-none select-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-solid"
             style={{
               left: centerX - halfExtent,
               top: centerY - halfExtent,
@@ -292,11 +315,52 @@ export function ShapeFlow({
             onLostPointerCapture={endDrag}
             onKeyDown={moveWithKeyboard}
           >
-            <svg aria-hidden="true" viewBox="0 0 100 100" className="absolute size-full" fill="currentColor">
-              {xPoints.map((points) => (
-                <polygon key={points} points={points} className="pointer-events-auto" />
-              ))}
+            <svg aria-hidden="true" viewBox="0 0 100 100" className="absolute size-full">
+              <defs>
+                <linearGradient
+                  id={duckGradientId}
+                  gradientUnits="userSpaceOnUse"
+                  x1="15"
+                  y1="0"
+                  x2="75"
+                  y2="100"
+                >
+                  <stop offset="0%" stopColor="#fff58a" />
+                  <stop offset="45%" stopColor="#eee34e" />
+                  <stop offset="100%" stopColor="#b4a22d" />
+                </linearGradient>
+              </defs>
+              <g
+                data-slot="shape-flow-duck"
+                fill={`url(#${duckGradientId})`}
+                fontFamily="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
+                fontSize="3.8"
+                fontWeight="600"
+                style={{ fontKerning: "none", fontVariantLigatures: "none" }}
+              >
+                {duckRows.map((row, index) => (
+                  <text
+                    key={index}
+                    data-slot="shape-flow-duck-row"
+                    x={row.x}
+                    y={row.y + cellHeight * 0.82}
+                    textLength={row.width}
+                    lengthAdjust="spacingAndGlyphs"
+                    xmlSpace="preserve"
+                  >
+                    {row.text.split(/([<>=!;:]+|OO)/).map((part, partIndex) => (
+                      <tspan
+                        key={partIndex}
+                        fill={part === "OO" ? "#302b23" : /^[<>=!;:]+$/.test(part) ? "#d07935" : undefined}
+                      >
+                        {part}
+                      </tspan>
+                    ))}
+                  </text>
+                ))}
+              </g>
             </svg>
+            <style>{duckStyles}</style>
           </button>
         </>
       ) : null}
