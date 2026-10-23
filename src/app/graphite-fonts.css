@@ -1,0 +1,49 @@
+@font-face {
+  font-family: "DM Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(/fonts/graphite/dm-mono-400.ttf) format("truetype");
+}
+@font-face {
+  font-family: "DM Mono";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(/fonts/graphite/dm-mono-500.ttf) format("truetype");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(/fonts/graphite/inter-400.ttf) format("truetype");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(/fonts/graphite/inter-500.ttf) format("truetype");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(/fonts/graphite/inter-600.ttf) format("truetype");
+}
+@font-face {
+  font-family: "Stack Sans Notch";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(/fonts/graphite/stack-sans-notch-400.ttf) format("truetype");
+}
+@font-face {
+  font-family: "Stack Sans Notch";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(/fonts/graphite/stack-sans-notch-500.ttf) format("truetype");
+}

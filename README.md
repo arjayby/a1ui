@@ -1,6 +1,6 @@
 # a1ui
 
-Editable React components and blocks inspired by designs found online. The site has previews, documentation, and a shadcn registry. The current catalog is in Blocks; Components is reserved for reusable UI components.
+Editable React components and blocks inspired by designs found online. The site has previews, documentation, and a shadcn registry. Blocks contains the installable catalog. Components contains the local Graphite design-system review with Kousa analytics examples. See the [Graphite integration reference](./docs/graphite/README.md) for source status, component APIs, and verification.
 
 Blocks use React 19, TypeScript, and Tailwind CSS 4.
 
@@ -44,4 +44,4 @@ Before deploying, set `NEXT_PUBLIC_SITE_URL` to the site's public origin and run
 
 ## License
 
-The project source is MIT licensed. Commit Mono uses the SIL Open Font License 1.1. See [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md).
+The project source is MIT licensed. Bundled fonts use the SIL Open Font License 1.1. See [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md).

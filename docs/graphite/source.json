@@ -1,0 +1,368 @@
+{
+  "source": {
+    "fileId": "01M4QXGJ7XQN84CH7BW3PF4GMX",
+    "pageId": "p-1-0",
+    "url": "https://app.paper.design/file/01M4QXGJ7XQN84CH7BW3PF4GMX/p-1-0",
+    "name": "Kousa — Graphite Design System"
+  },
+  "retrievedOn": "2026-10-23",
+  "startingRevision": "1792e28bfc9b44ce9d24883df0342c7bd4fbe80e",
+  "startingWorktree": "clean",
+  "tokenContentHash": "ec211c92",
+  "status": "partial: overview confirmed; detailed exports blocked by weekly quota",
+  "tokens": [
+    {
+      "name": "--color-canvas",
+      "value": "#101010"
+    },
+    {
+      "name": "--color-surface",
+      "value": "#191919"
+    },
+    {
+      "name": "--color-surface-hover",
+      "value": "#242424"
+    },
+    {
+      "name": "--color-border",
+      "value": "#303030"
+    },
+    {
+      "name": "--color-border-strong",
+      "value": "#62625E"
+    },
+    {
+      "name": "--color-text",
+      "value": "#F2F2EE"
+    },
+    {
+      "name": "--color-text-muted",
+      "value": "#A3A39E"
+    },
+    {
+      "name": "--color-text-subtle",
+      "value": "#7C7C76"
+    },
+    {
+      "name": "--color-primary",
+      "value": "#F2F2EE"
+    },
+    {
+      "name": "--color-on-primary",
+      "value": "#101010"
+    },
+    {
+      "name": "--color-accent",
+      "value": "#8E9480"
+    },
+    {
+      "name": "--color-success",
+      "value": "#A6B98B"
+    },
+    {
+      "name": "--color-warning",
+      "value": "#D7B77A"
+    },
+    {
+      "name": "--color-danger",
+      "value": "#D58A80"
+    },
+    {
+      "name": "--color-syntax-keyword",
+      "value": "#D19480"
+    },
+    {
+      "name": "--color-syntax-string",
+      "value": "#ABC19A"
+    },
+    {
+      "name": "--color-syntax-function",
+      "value": "#9BAEC5"
+    },
+    {
+      "name": "--font-sans",
+      "value": "Inter"
+    },
+    {
+      "name": "--font-mono",
+      "value": "DM Mono"
+    },
+    {
+      "name": "--font-heading",
+      "value": "Stack Sans Notch"
+    },
+    {
+      "name": "--font-button",
+      "value": "DM Mono"
+    },
+    {
+      "name": "--spacing-4",
+      "value": "4px"
+    },
+    {
+      "name": "--spacing-8",
+      "value": "8px"
+    },
+    {
+      "name": "--spacing-12",
+      "value": "12px"
+    },
+    {
+      "name": "--spacing-16",
+      "value": "16px"
+    },
+    {
+      "name": "--spacing-24",
+      "value": "24px"
+    },
+    {
+      "name": "--spacing-32",
+      "value": "32px"
+    },
+    {
+      "name": "--spacing-48",
+      "value": "48px"
+    },
+    {
+      "name": "--spacing-64",
+      "value": "64px"
+    },
+    {
+      "name": "--spacing-96",
+      "value": "96px"
+    },
+    {
+      "name": "--spacing-160",
+      "value": "160px"
+    },
+    {
+      "name": "--radius-0",
+      "value": "0px"
+    },
+    {
+      "name": "--radius-2",
+      "value": "2px"
+    },
+    {
+      "name": "--radius-4",
+      "value": "4px"
+    },
+    {
+      "name": "--breakpoint-sm",
+      "value": "640px"
+    },
+    {
+      "name": "--breakpoint-md",
+      "value": "768px"
+    },
+    {
+      "name": "--breakpoint-lg",
+      "value": "1024px"
+    },
+    {
+      "name": "--breakpoint-xl",
+      "value": "1440px"
+    },
+    {
+      "name": "--container-reading",
+      "value": "640px"
+    },
+    {
+      "name": "--container-content",
+      "value": "1120px"
+    },
+    {
+      "name": "--container-wide",
+      "value": "1280px"
+    },
+    {
+      "name": "--font-weight-400",
+      "value": "400"
+    },
+    {
+      "name": "--font-weight-500",
+      "value": "500"
+    },
+    {
+      "name": "--font-weight-600",
+      "value": "600"
+    },
+    {
+      "name": "--text-xs",
+      "value": "12px"
+    },
+    {
+      "name": "--text-sm",
+      "value": "14px"
+    },
+    {
+      "name": "--text-base",
+      "value": "16px"
+    },
+    {
+      "name": "--text-lg",
+      "value": "18px"
+    },
+    {
+      "name": "--text-xl",
+      "value": "24px"
+    },
+    {
+      "name": "--text-2xl",
+      "value": "32px"
+    },
+    {
+      "name": "--text-3xl",
+      "value": "48px"
+    },
+    {
+      "name": "--text-4xl",
+      "value": "64px"
+    },
+    {
+      "name": "--tracking-tight",
+      "value": "-0.04em"
+    },
+    {
+      "name": "--tracking-normal",
+      "value": "0em"
+    },
+    {
+      "name": "--tracking-wide",
+      "value": "0.08em"
+    },
+    {
+      "name": "--leading-16",
+      "value": "16px"
+    },
+    {
+      "name": "--leading-20",
+      "value": "20px"
+    },
+    {
+      "name": "--leading-24",
+      "value": "24px"
+    },
+    {
+      "name": "--leading-28",
+      "value": "28px"
+    },
+    {
+      "name": "--leading-32",
+      "value": "32px"
+    },
+    {
+      "name": "--leading-40",
+      "value": "40px"
+    },
+    {
+      "name": "--leading-52",
+      "value": "52px"
+    },
+    {
+      "name": "--leading-68",
+      "value": "68px"
+    },
+    {
+      "name": "--opacity-disabled",
+      "value": "40%"
+    },
+    {
+      "name": "--opacity-muted",
+      "value": "64%"
+    },
+    {
+      "name": "--opacity-full",
+      "value": "100%"
+    }
+  ],
+  "artboards": [
+    {
+      "id": "1-0",
+      "name": "Foundations",
+      "width": 1440,
+      "height": 968
+    },
+    {
+      "id": "29-0",
+      "name": "Typography & Layout",
+      "width": 1440,
+      "height": 1400
+    },
+    {
+      "id": "5L-0",
+      "name": "Actions & Forms",
+      "width": 1440,
+      "height": 1703
+    },
+    {
+      "id": "8W-0",
+      "name": "Content Patterns",
+      "width": 1440,
+      "height": 998
+    },
+    {
+      "id": "D7-0",
+      "name": "Form Controls",
+      "width": 1440,
+      "height": 997
+    },
+    {
+      "id": "GB-0",
+      "name": "Overlays",
+      "width": 1440,
+      "height": 1161
+    },
+    {
+      "id": "IU-0",
+      "name": "Navigation",
+      "width": 1440,
+      "height": 652
+    },
+    {
+      "id": "KP-0",
+      "name": "Feedback",
+      "width": 1440,
+      "height": 928
+    }
+  ],
+  "verified": [
+    "Overview returned all 66 tokens, matching the October 17 snapshot.",
+    "Overview returned eight artboards and three font families.",
+    "Source title is now Kousa."
+  ],
+  "unverified": [
+    "Exact component JSX, measurements, variants, states, and local overrides.",
+    "Additional theme definitions beyond the dark tokens returned by the overview.",
+    "Whether source example content has all been translated to Kousa."
+  ],
+  "detailedReadAttempts": {
+    "get_tokens": {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\n  \"file\": {\n    \"id\": \"01M4QXGJ7XQN84CH7BW3PF4GMX\",\n    \"name\": \"Kousa — Graphite Design System\"\n  },\n  \"contentHash\": {\n    \"tokens\": \"ec211c92\"\n  }\n}"
+        },
+        {
+          "type": "text",
+          "text": "Weekly MCP limit reached. It resets in 10 hours. Upgrade to Paper Pro to continue. You can upgrade in Paper or visit https://paper.design/pricing. If you just upgraded and still see this, try closing and reopening Paper."
+        }
+      ],
+      "isError": true
+    },
+    "get_jsx": {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\n  \"file\": {\n    \"id\": \"01M4QXGJ7XQN84CH7BW3PF4GMX\",\n    \"name\": \"Kousa — Graphite Design System\"\n  },\n  \"contentHash\": {\n    \"tokens\": \"ec211c92\"\n  }\n}"
+        },
+        {
+          "type": "text",
+          "text": "Weekly MCP limit reached. It resets in 10 hours. Upgrade to Paper Pro to continue. You can upgrade in Paper or visit https://paper.design/pricing. If you just upgraded and still see this, try closing and reopening Paper."
+        }
+      ],
+      "isError": true
+    }
+  },
+  "implementationBasis": "Overview tokens and user-supplied conventions. Component styles are adaptations, not fresh exact exports."
+}

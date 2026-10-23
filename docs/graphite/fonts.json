@@ -1,0 +1,51 @@
+[
+  {
+    "family": "DM Mono",
+    "weight": "400",
+    "url": "https://fonts.gstatic.com/s/dmmono/v16/aFTU7PB1QTsUX8KYhh0.ttf",
+    "file": "dm-mono-400.ttf",
+    "sha256": "c97fcd822f825e9e731867b650a39ee678b609bead29385e320171b573ec0910"
+  },
+  {
+    "family": "DM Mono",
+    "weight": "500",
+    "url": "https://fonts.gstatic.com/s/dmmono/v16/aFTR7PB1QTsUX8KYvumzIYQ.ttf",
+    "file": "dm-mono-500.ttf",
+    "sha256": "dd60d0861a3efd540efc3f2f85e7a7fd69a7ece7eadf44aaffa5fc5c86adda0e"
+  },
+  {
+    "family": "Inter",
+    "weight": "400",
+    "url": "https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuLyfMZg.ttf",
+    "file": "inter-400.ttf",
+    "sha256": "1b08e7fc267a5c7e1d614100f604b83e7e8a0be241f0f288faa2b3ac93a683ba"
+  },
+  {
+    "family": "Inter",
+    "weight": "500",
+    "url": "https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuI6fMZg.ttf",
+    "file": "inter-500.ttf",
+    "sha256": "8c883f63b2c4157d997319f2c8bc6995ed4357ef371940d31ca159004a4aae63"
+  },
+  {
+    "family": "Inter",
+    "weight": "600",
+    "url": "https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuGKYMZg.ttf",
+    "file": "inter-600.ttf",
+    "sha256": "e7a1aaf7eda9f2fad4131725fa556265ec75ca7b2d756260173a040363e8d4f7"
+  },
+  {
+    "family": "Stack Sans Notch",
+    "weight": "400",
+    "url": "https://fonts.gstatic.com/s/stacksansnotch/v5/TwMY-JcVXlQd3ooGEx9EbUzgioTr5BY5lEpidqlSR8fiuR2Z.ttf",
+    "file": "stack-sans-notch-400.ttf",
+    "sha256": "785fd383c1e73f34e3bafe8a22bc2c200f1481ceaea9faf47d505b4617ec99ad"
+  },
+  {
+    "family": "Stack Sans Notch",
+    "weight": "500",
+    "url": "https://fonts.gstatic.com/s/stacksansnotch/v5/TwMY-JcVXlQd3ooGEx9EbUzgioTr5BY5lEpidqlSR8fQuR2Z.ttf",
+    "file": "stack-sans-notch-500.ttf",
+    "sha256": "4dd66c8d7e9f7a72b6bb21ebb0805d819f1aba5d0228f6df284fcfcafa16659e"
+  }
+]

@@ -20,7 +20,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html lang="en" data-scroll-behavior="smooth" suppressHydrationWarning>
       <body>
         <RootProvider
-          theme={{ defaultTheme: "light", enableSystem: false, hotKey: false }}
+          theme={{ defaultTheme: "dark", enableSystem: false, hotKey: false }}
           search={{ enabled: true, options: { api: "/api/search" } }}
         >
           {children}

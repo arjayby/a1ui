@@ -11,14 +11,14 @@ test("blocks and reusable components have separate catalogs on desktop and mobil
   await page.getByRole("navigation", { name: "Components", exact: true }).getByRole("link").click();
   await expect(page).toHaveURL(/\/components$/);
   await expect(page.getByRole("heading", { name: "Components", exact: true })).toBeVisible();
-  await expect(page.getByText("No components published yet.")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "01 / Foundations" })).toBeVisible();
   await expect(page.locator(".catalog-card")).toHaveCount(0);
 
   await page.setViewportSize({ width: 390, height: 844 });
   await page.getByLabel("Choose documentation").selectOption("/blocks");
   await expect(page.getByRole("heading", { name: "Blocks", exact: true })).toBeVisible();
   await page.getByLabel("Choose documentation").selectOption("/components");
-  await expect(page.getByText("No components published yet.")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "01 / Foundations" })).toBeVisible();
 });
 
 test("existing page and Markdown links redirect to the migrated blocks", async ({ request }) => {

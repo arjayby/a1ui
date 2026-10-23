@@ -1,27 +1,15 @@
 @import "tailwindcss";
 @import "fumadocs-ui/css/neutral.css";
 @import "fumadocs-ui/css/preset.css";
-
-@font-face {
-  font-family: "Commit Mono";
-  src: url("/fonts/CommitMono-Regular.woff2") format("woff2");
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Commit Mono";
-  src: url("/fonts/CommitMono-Bold.woff2") format("woff2");
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-}
+@import "./graphite-fonts.css";
+@import "./graphite-tokens.css";
+@import "./graphite-components.css";
 
 @theme inline {
-  --font-heading: var(--font-mono);
-  --font-mono: "Commit Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
-  --font-sans: var(--font-mono);
+  --font-heading: "Stack Sans Notch", sans-serif;
+  --font-mono: "DM Mono", monospace;
+  --font-button: "DM Mono", monospace;
+  --font-sans: "Inter", sans-serif;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -30,17 +18,36 @@
   --color-muted-foreground: var(--muted-foreground);
   --color-border: var(--border);
   --color-ring: var(--ring);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--on-primary);
+  --color-secondary: var(--muted);
+  --color-secondary-foreground: var(--foreground);
+  --color-popover: var(--card);
+  --color-popover-foreground: var(--foreground);
+  --color-destructive: var(--color-danger);
+  --color-success: #a6b98b;
+  --color-warning: #d7b77a;
+  --color-danger: #d58a80;
 }
 
 :root {
-  --background: oklch(0.9694 0.0011 197.14);
-  --foreground: oklch(0.19 0.004 95);
-  --card: var(--background);
-  --muted: oklch(0.925 0.006 95);
-  --muted-foreground: oklch(0.48 0.008 95);
-  --border: oklch(0.84 0.008 95);
-  --ring: oklch(0.48 0.008 95);
-  --radius: 0.25rem;
+  /* Light mode is an application adaptation; Paper's confirmed palette is dark. */
+  --background: #f2f2ee;
+  --foreground: #101010;
+  --card: #ffffff;
+  --muted: #e5e5df;
+  --muted-foreground: #62625e;
+  --border: #c9c9c2;
+  --ring: #62625e;
+  --primary: #101010;
+  --on-primary: #f2f2ee;
+  --status-success: #45602e;
+  --status-warning: #795a22;
+  --status-danger: #983e34;
+  --syntax-keyword: #983e34;
+  --syntax-string: #45602e;
+  --syntax-function: #3c587b;
+  --radius: var(--radius-2);
 }
 
 :root,
@@ -49,29 +56,37 @@
   --color-fd-foreground: var(--foreground);
   --color-fd-muted: var(--muted);
   --color-fd-muted-foreground: var(--muted-foreground);
-  --color-fd-popover: var(--background);
+  --color-fd-popover: var(--card);
   --color-fd-popover-foreground: var(--foreground);
   --color-fd-card: var(--card);
   --color-fd-card-foreground: var(--foreground);
   --color-fd-border: var(--border);
-  --color-fd-primary: var(--foreground);
-  --color-fd-primary-foreground: var(--background);
+  --color-fd-primary: var(--primary);
+  --color-fd-primary-foreground: var(--on-primary);
   --color-fd-secondary: var(--muted);
   --color-fd-secondary-foreground: var(--foreground);
   --color-fd-accent: var(--muted);
   --color-fd-accent-foreground: var(--foreground);
   --color-fd-ring: var(--ring);
-  --color-fd-overlay: color-mix(in oklab, var(--foreground) 18%, transparent);
+  --color-fd-overlay: #00000080;
 }
 
 .dark {
-  --background: oklch(0.19 0.004 95);
-  --foreground: oklch(0.94 0.006 95);
-  --card: var(--background);
-  --muted: oklch(0.26 0.006 95);
-  --muted-foreground: oklch(0.7 0.008 95);
-  --border: oklch(0.36 0.008 95);
-  --ring: oklch(0.7 0.008 95);
+  --background: var(--color-canvas);
+  --foreground: var(--color-text);
+  --card: var(--color-surface);
+  --muted: var(--color-surface-hover);
+  --muted-foreground: var(--color-text-muted);
+  --border: var(--color-border);
+  --ring: var(--color-border-strong);
+  --primary: var(--color-text);
+  --on-primary: var(--color-on-primary);
+  --status-success: var(--color-success);
+  --status-warning: var(--color-warning);
+  --status-danger: var(--color-danger);
+  --syntax-keyword: var(--color-syntax-keyword);
+  --syntax-string: var(--color-syntax-string);
+  --syntax-function: var(--color-syntax-function);
 }
 
 @layer base {
@@ -101,20 +116,33 @@ body {
   margin: 0;
   background: var(--background);
   color: var(--foreground);
-  font-family: "Commit Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
-  font-size: 0.75rem;
+  font-family: var(--font-sans), sans-serif;
+  font-size: var(--text-sm);
   font-weight: 400;
-  letter-spacing: -0.02rem;
-  line-height: 1.2;
+  letter-spacing: var(--tracking-normal);
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-button,
-select,
+button {
+  font-family: var(--font-button), monospace;
+}
+
 code,
 pre {
-  font: inherit;
+  font-family: var(--font-mono), monospace;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-heading), sans-serif;
+  font-weight: 500;
+  letter-spacing: -0.025em;
 }
 
 ::selection {
@@ -146,10 +174,9 @@ pre {
 
 .page-heading {
   margin: 0;
-  font-size: inherit;
-  font-weight: 700;
-  line-height: inherit;
-  text-transform: uppercase;
+  font-size: var(--text-2xl);
+  font-weight: 500;
+  line-height: var(--leading-40);
 }
 
 .page-description {
@@ -227,7 +254,7 @@ pre {
   justify-content: space-between;
   padding: 0.8rem 0.9rem;
   border-top: 1px solid var(--border);
-  font-weight: 700;
+  font-weight: 600;
   text-decoration: none;
 }
 
@@ -243,11 +270,10 @@ pre {
 
 .docs-article h1 {
   margin: 0;
-  font-size: inherit;
-  font-weight: 700;
-  line-height: inherit;
-  letter-spacing: inherit;
-  text-transform: uppercase;
+  font-size: var(--text-2xl);
+  font-weight: 500;
+  line-height: var(--leading-40);
+  letter-spacing: -0.025em;
 }
 
 .docs-article > header p {
@@ -266,13 +292,14 @@ pre {
   line-height: 1.6;
 }
 
-.docs-article-body :where(strong, h5, h6):not(:where(.not-prose, .not-prose *)) {
-  font-weight: 700;
+.docs-article-body :where(strong):not(:where(.not-prose, .not-prose *)) {
+  font-weight: 600;
 }
 
 .docs-article-body :where(h5, h6):not(:where(.not-prose, .not-prose *)) {
   margin: 1.5rem 0 0.5rem;
   scroll-margin-top: 5rem;
+  font-weight: 500;
 }
 
 .docs-article-body :where(code):not(:where(.not-prose, .not-prose *, pre *)) {
@@ -291,10 +318,9 @@ pre {
 .docs-article-body h2 {
   margin: 4rem 0 1.2rem;
   scroll-margin-top: 5rem;
-  font-size: inherit;
-  font-weight: 700;
-  line-height: inherit;
-  text-transform: uppercase;
+  font-size: var(--text-xl);
+  font-weight: 500;
+  line-height: var(--leading-32);
 }
 
 .docs-article-body h2:first-child {
@@ -321,7 +347,7 @@ pre {
 }
 
 .docs-article-body th {
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .docs-article-body :where(figure, [role="tablist"]),
@@ -401,7 +427,7 @@ pre {
 
 .shape-flow-demo-heading h3 {
   margin: 0;
-  font-family: Georgia, serif;
+  font-family: var(--font-heading), sans-serif;
   font-size: clamp(2.5rem, 6vw, 4rem);
   font-weight: 400;
   letter-spacing: -0.05em;
@@ -640,7 +666,7 @@ pre {
 .section-rail-demo-copy h3 {
   margin: 0 0 0.5rem;
   font-size: inherit;
-  font-weight: 700;
+  font-weight: 500;
 }
 
 .section-rail-demo-copy p {
@@ -784,7 +810,7 @@ pre {
 
 .text-scramble-demo-text {
   font-size: clamp(1.125rem, 3.5vw, 2.5rem);
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: -0.06em;
 }
 
@@ -816,7 +842,7 @@ pre {
 
 .text-scramble-preview-text {
   font-size: 1.25rem;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: -0.06em;
 }
 

@@ -8,7 +8,7 @@ test("MDX prose distinguishes inline code, links, and lists", async ({ page }) =
   await expect(code).not.toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
   await expect(code).not.toHaveCSS("padding-left", "0px");
   await expect(body.locator("p a").first()).toHaveCSS("text-decoration-line", "underline");
-  await expect(body.locator("p strong").first()).toHaveCSS("font-weight", "700");
+  await expect(body.locator("p strong").first()).toHaveCSS("font-weight", "600");
   await expect(body.locator(":scope > ul")).toHaveCSS("list-style-type", "disc");
   await expect(body.locator(":scope > ul")).not.toHaveCSS("padding-left", "0px");
 
