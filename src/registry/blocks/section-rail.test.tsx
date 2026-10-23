@@ -248,6 +248,39 @@ describe("SectionRail", () => {
     );
   });
 
+  it.each([false, true])("confines link jumps to the scroll panel with reduced motion %s", (reduced) => {
+    vi.stubGlobal(
+      "matchMedia",
+      vi.fn(() => ({ matches: reduced })),
+    );
+    const panel = document.createElement("div");
+    const reactRoot = document.createElement("div");
+    panel.style.overflowY = "auto";
+    Object.defineProperties(panel, {
+      clientHeight: { value: 200 },
+      scrollHeight: { value: 600 },
+      clientTop: { value: 2 },
+    });
+    panel.getBoundingClientRect = () => new DOMRect(0, 100, 100, 200);
+    const scroll = vi.fn();
+    panel.scrollTo = scroll;
+    panel.append(reactRoot);
+    document.body.append(panel);
+    addTrackedSection("details", 220, panel);
+    const windowScroll = vi.spyOn(window, "scrollTo").mockImplementation(() => {});
+    const history = vi.spyOn(window.history, "replaceState").mockImplementation(() => {});
+    render(<SectionRail sections={sections} />, { container: reactRoot });
+    const link = screen.getByRole("link", { name: "Details" });
+
+    expect(fireEvent.click(link)).toBe(false);
+    expect(scroll).toHaveBeenCalledWith({ top: 118, behavior: reduced ? "instant" : "smooth" });
+    expect(windowScroll).not.toHaveBeenCalled();
+    expect(history).toHaveBeenCalledWith(window.history.state, "", expect.stringMatching(/#details$/));
+
+    expect(fireEvent.click(link, { ctrlKey: true })).toBe(true);
+    expect(scroll).toHaveBeenCalledTimes(1);
+  });
+
   it("activates the last section when a scroll container reaches the bottom", async () => {
     const scrollContainer = document.createElement("div");
     const reactRoot = document.createElement("div");

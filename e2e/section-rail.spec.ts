@@ -5,7 +5,7 @@ test.beforeEach(async ({ page }) => {
   await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
 });
 
-test("section rail demo is compact, scrollable, and has more markers", async ({ page }) => {
+test("section rail demo has a large viewport and a full sample document", async ({ page }) => {
   const demo = page.getByRole("region", { name: "Scrollable Section Rail demo" });
   const rail = demo.getByRole("navigation", { name: "Demo sections" });
   const layout = await demo.evaluate((element) => {
@@ -24,8 +24,9 @@ test("section rail demo is compact, scrollable, and has more markers", async ({ 
   });
 
   await expect(rail.getByRole("link")).toHaveCount(12);
-  expect(layout.clientHeight).toBeLessThanOrEqual(320);
-  expect(layout.scrollHeight).toBeGreaterThan(layout.clientHeight);
+  expect(layout.clientHeight).toBeGreaterThanOrEqual(480);
+  expect(layout.scrollHeight).toBeGreaterThan(layout.clientHeight * 3);
+  await expect(demo.locator("section p")).toHaveCount(24);
   expect(layout.centerDelta).toBeLessThanOrEqual(2);
 
   await demo.evaluate((element) => element.scrollTo({ top: element.scrollHeight }));
@@ -39,13 +40,16 @@ for (const activation of ["click", "keyboard"] as const) {
     const target = rail.getByRole("link", { name: "Motion", exact: true });
     await demo.scrollIntoViewIfNeeded();
     const initialScrollTop = await demo.evaluate((element) => element.scrollTop);
+    let outerScrollTop: number;
 
     if (activation === "click") {
+      outerScrollTop = await page.evaluate(() => window.scrollY);
       await target.click();
     } else {
       await demo.focus();
       for (let index = 0; index < 8; index += 1) await page.keyboard.press("Tab");
       await expect(target).toBeFocused();
+      outerScrollTop = await page.evaluate(() => window.scrollY);
       await page.keyboard.press("Enter");
     }
 
@@ -63,5 +67,21 @@ for (const activation of ["click", "keyboard"] as const) {
         }),
       )
       .toBe(true);
+    expect(await page.evaluate(() => window.scrollY)).toBe(outerScrollTop);
   });
 }
+
+test("mobile rail jumps stay inside the panel and respect reduced motion", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  const demo = page.getByRole("region", { name: "Scrollable Section Rail demo" });
+  await demo.scrollIntoViewIfNeeded();
+  const outerScrollTop = await page.evaluate(() => window.scrollY);
+  await demo.getByRole("link", { name: "Motion", exact: true }).click();
+  await expect(demo.getByRole("link", { name: "Motion", exact: true })).toHaveAttribute(
+    "aria-current",
+    "location",
+  );
+  expect(await demo.evaluate((element) => element.scrollTop)).toBeGreaterThan(1000);
+  expect(await page.evaluate(() => window.scrollY)).toBe(outerScrollTop);
+});

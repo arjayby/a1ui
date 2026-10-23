@@ -139,6 +139,35 @@ export function SectionRail({
                 aria-label={label}
                 data-state={state}
                 className="group relative -mx-3 flex min-h-3 min-w-14 items-center px-3 no-underline"
+                onClick={(event) => {
+                  if (
+                    event.defaultPrevented ||
+                    event.button !== 0 ||
+                    event.altKey ||
+                    event.ctrlKey ||
+                    event.metaKey ||
+                    event.shiftKey
+                  )
+                    return;
+                  const nav = navRef.current;
+                  const target = event.currentTarget.ownerDocument.getElementById(id);
+                  if (!nav || !target) return;
+                  const container = getScrollContainer(nav);
+                  if (!(container instanceof HTMLElement) || !container.contains(target)) return;
+
+                  event.preventDefault();
+                  container.scrollTo({
+                    top:
+                      container.scrollTop +
+                      target.getBoundingClientRect().top -
+                      container.getBoundingClientRect().top -
+                      container.clientTop,
+                    behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+                      ? "instant"
+                      : "smooth",
+                  });
+                  window.history.replaceState(window.history.state, "", event.currentTarget.href);
+                }}
                 onPointerEnter={() => setHoveredIndex(index)}
                 onFocus={() => {
                   setHoveredIndex(null);

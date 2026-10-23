@@ -81,6 +81,8 @@ export function ArticlePage() {
 
 
 
+Inside a scroll panel, marker activation scrolls only the nearest scrollable ancestor containing the target section. The outer document stays in place. The URL hash is updated without triggering native anchor scrolling. Modified clicks retain normal link behavior, and rails that track the main document use native anchor navigation. Reduced motion switches panel jumps to instant scrolling.
+
 The active link receives `aria-current="location"`. Use `activeMarkerLength="short"` to keep it at the base width or `"long"` to extend it. Both options retain the full-opacity active color. Every link also exposes `data-state="pending"`, `active`, or `complete` for styling. Hovering or focusing a link expands the nearby markers into a tapered group.
 
 ## Verification

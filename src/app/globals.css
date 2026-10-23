@@ -687,7 +687,7 @@ h6 {
   display: grid;
   grid-template-columns: 6rem minmax(0, 1fr);
   gap: 1.5rem;
-  height: 18rem;
+  height: min(32rem, 70svh);
   padding: 1.5rem;
   overflow-y: auto;
   overscroll-behavior: contain;
@@ -704,13 +704,12 @@ h6 {
 }
 
 .section-rail-demo-copy section {
-  min-height: 7rem;
-  padding-bottom: 1rem;
+  padding-bottom: 1.5rem;
   border-bottom: 1px solid var(--border);
 }
 
 .section-rail-demo-copy section + section {
-  padding-top: 1rem;
+  padding-top: 1.5rem;
 }
 
 .section-rail-demo-copy section:last-child {
@@ -719,7 +718,7 @@ h6 {
 
 .section-rail-demo-copy h3 {
   margin: 0 0 0.5rem;
-  font-size: inherit;
+  font-size: var(--text-base);
   font-weight: 500;
 }
 
@@ -727,6 +726,11 @@ h6 {
   max-width: 34rem;
   margin: 0;
   color: var(--muted-foreground);
+  line-height: 1.7;
+}
+
+.section-rail-demo-copy p + p {
+  margin-top: 0.75rem;
 }
 
 .spiral-demo {
@@ -975,7 +979,7 @@ h6 {
   .section-rail-demo {
     grid-template-columns: 4rem minmax(0, 1fr);
     gap: 1rem;
-    height: 16rem;
+    height: min(26rem, 65svh);
     padding: 1rem;
   }
 }
