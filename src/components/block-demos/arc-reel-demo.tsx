@@ -55,7 +55,7 @@ export function ArcReelDemo() {
       <div className="not-prose demo-frame">
         <ArcReel items={providers} initialIndex={3} ariaLabel="AI provider arc reel" />
       </div>
-      <p className="demo-caption">
+      <p className="demo-caption text-center">
         Drag left or right. Use the arrows or scrub the line below to move through the providers.
       </p>
     </>
