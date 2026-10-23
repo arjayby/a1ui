@@ -23,7 +23,7 @@ export function ParticleMenuDemo() {
       <div className="not-prose demo-frame particle-menu-demo">
         <ParticleMenu ariaLabel="Particle menu demo" items={demoItems} />
       </div>
-      <p className="demo-caption">
+      <p className="demo-caption text-center">
         Move through a symbol. Its particles scatter, then settle back into place.
       </p>
     </>

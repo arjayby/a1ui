@@ -22,8 +22,6 @@ Import paths in examples assume the @/components/blocks path. Adapt them to the 
 
 [Interactive preview](http://localhost:3000/blocks/particle-menu)
 
-Four sigils inspired by Elden Ring mark Grace, Runes, Ashes, and Oaths. Each symbol breaks into particles around the pointer and returns to its original shape when you leave.
-
 ## Installation
 
 Choose the command for the target project's package manager. Run it from that project's directory.
@@ -75,6 +73,8 @@ export function SiteNavigation() {
 | `className` | `string`             | None              | Layout classes for the navigation container.                             |
 
 
+
+Four sigils inspired by Elden Ring mark Grace, Runes, Ashes, and Oaths. Each symbol breaks into particles around the pointer and returns to its original shape when you leave.
 
 Each item accepts `shape: "grace" | "runes" | "ashes" | "oaths"`. Labels and destinations are independent of the symbols, so you can use your own site structure. Provide `href` to render a link, or omit it and provide `onSelect` to render a button. Callbacks must be passed from a Client Component.
 
