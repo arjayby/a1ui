@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     default: "a1ui",
     template: "%s | a1ui",
   },
-  description: "A collection of React components inspired by designs found online.",
+  description: "React components and ready-made blocks inspired by designs found online.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

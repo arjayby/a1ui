@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 test.beforeEach(async ({ page }) => {
-  await page.goto("/components/text-scramble");
+  await page.goto("/blocks/text-scramble");
   await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
 });
 

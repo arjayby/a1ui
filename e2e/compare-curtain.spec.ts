@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 test.beforeEach(async ({ page }) => {
-  await page.goto("/components/compare-curtain");
+  await page.goto("/blocks/compare-curtain");
   await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
   await expect(page).toHaveTitle("Compare Curtain | a1ui");
 });

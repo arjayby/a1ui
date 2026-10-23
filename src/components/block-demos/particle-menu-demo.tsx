@@ -1,0 +1,31 @@
+"use client";
+
+import { ParticleMenu, type ParticleMenuItem } from "@/registry/blocks/particle-menu";
+
+const demoItems: ParticleMenuItem[] = [
+  { id: "grace", label: "Grace", shape: "grace" },
+  { id: "runes", label: "Runes", shape: "runes" },
+  { id: "ashes", label: "Ashes", shape: "ashes" },
+  { id: "oaths", label: "Oaths", shape: "oaths" },
+];
+
+export function ParticleMenuPreview() {
+  return (
+    <div className="not-prose demo-frame particle-menu-preview">
+      <ParticleMenu items={demoItems} />
+    </div>
+  );
+}
+
+export function ParticleMenuDemo() {
+  return (
+    <>
+      <div className="not-prose demo-frame particle-menu-demo">
+        <ParticleMenu ariaLabel="Particle menu demo" items={demoItems} />
+      </div>
+      <p className="demo-caption">
+        Move through a symbol. Its particles scatter, then settle back into place.
+      </p>
+    </>
+  );
+}

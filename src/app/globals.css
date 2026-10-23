@@ -231,17 +231,17 @@ pre {
   text-decoration: none;
 }
 
-.component-doc {
+.docs-article {
   width: min(100%, 62rem);
   margin-inline: auto;
   padding: 4rem 3.5rem 8rem;
 }
 
-.component-doc > header {
+.docs-article > header {
   margin-bottom: 4rem;
 }
 
-.component-doc h1 {
+.docs-article h1 {
   margin: 0;
   font-size: inherit;
   font-weight: 700;
@@ -250,13 +250,13 @@ pre {
   text-transform: uppercase;
 }
 
-.component-doc > header p {
+.docs-article > header p {
   max-width: 48rem;
   margin: 0.25rem 0 0;
   color: var(--muted-foreground);
 }
 
-.component-doc-body {
+.docs-article-body {
   display: flex;
   min-width: 0;
   flex-direction: column;
@@ -266,29 +266,29 @@ pre {
   line-height: 1.6;
 }
 
-.component-doc-body :where(strong, h5, h6):not(:where(.not-prose, .not-prose *)) {
+.docs-article-body :where(strong, h5, h6):not(:where(.not-prose, .not-prose *)) {
   font-weight: 700;
 }
 
-.component-doc-body :where(h5, h6):not(:where(.not-prose, .not-prose *)) {
+.docs-article-body :where(h5, h6):not(:where(.not-prose, .not-prose *)) {
   margin: 1.5rem 0 0.5rem;
   scroll-margin-top: 5rem;
 }
 
-.component-doc-body :where(code):not(:where(.not-prose, .not-prose *, pre *)) {
+.docs-article-body :where(code):not(:where(.not-prose, .not-prose *, pre *)) {
   overflow-wrap: anywhere;
   border-radius: var(--radius);
 }
 
-.component-doc-body :where(th, td) code {
+.docs-article-body :where(th, td) code {
   white-space: nowrap;
 }
 
-.component-doc-body .not-prose {
+.docs-article-body .not-prose {
   line-height: 1.2;
 }
 
-.component-doc-body h2 {
+.docs-article-body h2 {
   margin: 4rem 0 1.2rem;
   scroll-margin-top: 5rem;
   font-size: inherit;
@@ -297,35 +297,35 @@ pre {
   text-transform: uppercase;
 }
 
-.component-doc-body h2:first-child {
+.docs-article-body h2:first-child {
   margin-top: 0;
 }
 
-.component-doc-body p {
+.docs-article-body p {
   margin: 0.8rem 0;
 }
 
-.component-doc-body table {
+.docs-article-body table {
   width: 100%;
   min-width: 40rem;
   border-collapse: collapse;
   font-size: 0.75rem;
 }
 
-.component-doc-body th,
-.component-doc-body td {
+.docs-article-body th,
+.docs-article-body td {
   padding: 0.7rem 0.8rem;
   border-bottom: 1px solid var(--border);
   text-align: left;
   vertical-align: top;
 }
 
-.component-doc-body th {
+.docs-article-body th {
   font-weight: 700;
 }
 
-.component-doc-body :where(figure, [role="tablist"]),
-.component-doc-body [role="tabpanel"] > figure {
+.docs-article-body :where(figure, [role="tablist"]),
+.docs-article-body [role="tabpanel"] > figure {
   border-color: var(--border);
   border-radius: var(--radius);
 }
@@ -589,91 +589,6 @@ pre {
   position: absolute;
   inset: 0;
   pointer-events: none;
-}
-
-.multichain-swap-demo,
-.crypto-wallet-demo {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1.5rem;
-  padding: clamp(0.75rem, 3vw, 3rem);
-  background-image: radial-gradient(var(--border) 0.65px, transparent 0.65px);
-  background-size: 16px 16px;
-}
-
-.select-menu-demo {
-  display: grid;
-  min-height: 24rem;
-  place-items: center;
-  padding: 1.5rem;
-}
-
-.select-menu-preview {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 0.75rem;
-}
-
-.multichain-swap-demo-note,
-.crypto-wallet-demo-note {
-  font-size: 0.625rem;
-  text-align: center;
-  color: var(--muted-foreground);
-}
-
-.catalog-preview .multichain-swap-preview {
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  padding: 1rem 0 0;
-}
-
-.multichain-swap-preview > form {
-  width: 26rem;
-  flex-shrink: 0;
-  transform: scale(0.45);
-  transform-origin: top center;
-}
-
-.multichain-swap-preview > form > div {
-  display: none;
-}
-
-.catalog-preview .crypto-wallet-preview {
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  padding-top: 1rem;
-}
-
-.crypto-wallet-preview > section {
-  width: 25rem;
-  flex-shrink: 0;
-  transform: scale(0.45);
-  transform-origin: top center;
-}
-
-.multichain-swap-review,
-.crypto-wallet-dialog {
-  position: fixed;
-  inset: 0;
-  width: min(26rem, calc(100vw - 2rem));
-  max-height: calc(100dvh - 2rem);
-  margin: auto;
-  padding: 1.5rem;
-  overflow-y: auto;
-  border: 1px solid var(--border);
-  border-radius: 1rem;
-  background: var(--background);
-  color: var(--foreground);
-}
-
-.multichain-swap-review::backdrop,
-.crypto-wallet-dialog::backdrop {
-  background: color-mix(in oklab, var(--foreground) 30%, transparent);
-  backdrop-filter: blur(4px);
 }
 
 .arc-reel-artwork::after {
@@ -969,7 +884,7 @@ pre {
 
 @media (max-width: 47.999rem) {
   .page-frame,
-  .component-doc {
+  .docs-article {
     padding: 2.25rem 1rem 5rem;
   }
 
@@ -981,7 +896,7 @@ pre {
     margin-top: 2rem;
   }
 
-  .component-doc > header {
+  .docs-article > header {
     margin-bottom: 3rem;
   }
 

@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 
 test("MDX prose distinguishes inline code, links, and lists", async ({ page }) => {
   await page.goto("/agents");
-  const body = page.locator(".component-doc-body");
+  const body = page.locator(".docs-article-body");
   const code = body.locator("p code").first();
 
   await expect(code).not.toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
@@ -18,8 +18,8 @@ test("MDX prose distinguishes inline code, links, and lists", async ({ page }) =
 });
 
 test("MDX formats table code without adding prose styles to component demos", async ({ page }) => {
-  await page.goto("/components/particle-menu");
-  await expect(page.locator(".component-doc-body td code").first()).not.toHaveCSS(
+  await page.goto("/blocks/particle-menu");
+  await expect(page.locator(".docs-article-body td code").first()).not.toHaveCSS(
     "background-color",
     "rgba(0, 0, 0, 0)",
   );
@@ -29,7 +29,7 @@ test("MDX formats table code without adding prose styles to component demos", as
   await expect(menu.locator("li").first()).toHaveCSS("margin-top", "0px");
 
   await page.setViewportSize({ width: 390, height: 844 });
-  await expect(page.locator(".component-doc-body td code").first()).toHaveCSS("white-space", "nowrap");
+  await expect(page.locator(".docs-article-body td code").first()).toHaveCSS("white-space", "nowrap");
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
   expect(overflow).toBe(false);
 });

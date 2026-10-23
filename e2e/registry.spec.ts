@@ -1,13 +1,8 @@
 import { expect, test } from "@playwright/test";
 
 for (const [name, exportedComponent] of [
-  ["toast-queue", "ToastQueue"],
-  ["status-capsule", "StatusCapsule"],
-  ["orbit-dial", "OrbitDial"],
   ["peel-stack", "PeelStack"],
   ["ascii-morph", "AsciiMorph"],
-  ["ascii-signal", "AsciiSignal"],
-  ["ascii-cloth", "AsciiCloth"],
   ["ascii-lens", "AsciiLens"],
   ["integration-hub", "IntegrationHub"],
   ["ascii-terrain", "AsciiTerrain"],
@@ -25,6 +20,11 @@ for (const [name, exportedComponent] of [
 
     const item = await response.json();
     expect(item.name).toBe(name);
+    expect(item.type).toBe("registry:block");
+    expect(item.files[0]).toMatchObject({
+      type: "registry:component",
+      target: `components/blocks/${name}.tsx`,
+    });
     expect(item.files).toEqual(
       expect.arrayContaining([
         expect.objectContaining({

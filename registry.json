@@ -4,38 +4,16 @@
   "homepage": "http://localhost:3000",
   "items": [
     {
-      "name": "command-deck",
-      "type": "registry:ui",
-      "title": "Command Deck",
-      "description": "A keyboard-first action picker with search, shortcut hints, and an inline result.",
-      "dependencies": ["clsx", "lucide-react"],
-      "files": [
-        {
-          "path": "src/registry/command-deck.tsx",
-          "type": "registry:ui"
-        }
-      ],
-      "categories": ["navigation", "search", "interactive"],
-      "meta": {
-        "a1ui": {
-          "useCases": ["In-page command menus and searchable action lists."],
-          "limitations": ["The deck is inline. Shortcut hints do not register application shortcuts."],
-          "requirements": [
-            "Supply actions with unique IDs and connect action callbacks. Enable Command/Ctrl+K on at most one deck per page."
-          ]
-        }
-      }
-    },
-    {
       "name": "compare-curtain",
-      "type": "registry:ui",
+      "type": "registry:block",
       "title": "Compare Curtain",
       "description": "A draggable divider that reveals two aligned images or design states.",
       "dependencies": ["clsx"],
       "files": [
         {
-          "path": "src/registry/compare-curtain.tsx",
-          "type": "registry:ui"
+          "path": "src/registry/blocks/compare-curtain.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/compare-curtain.tsx"
         }
       ],
       "categories": ["media", "comparison", "interactive"],
@@ -52,90 +30,16 @@
       }
     },
     {
-      "name": "toast-queue",
-      "type": "registry:ui",
-      "title": "Toast Queue",
-      "description": "Compact event notifications with animated entry, dismissal, and queue limits.",
-      "dependencies": ["clsx", "lucide-react"],
-      "files": [
-        {
-          "path": "src/registry/toast-queue.tsx",
-          "type": "registry:ui"
-        }
-      ],
-      "categories": ["feedback", "notification", "animation"],
-      "meta": {
-        "a1ui": {
-          "useCases": ["Event confirmations, publishing feedback, and small app notifications."],
-          "limitations": [
-            "The queue lives in the component that calls the hook; it is not a global provider."
-          ],
-          "requirements": [
-            "Render ToastQueue with a useToastQueue controller. Requires React, Tailwind CSS 4, and theme tokens. Reduced motion disables entry and exit animation."
-          ]
-        }
-      }
-    },
-    {
-      "name": "status-capsule",
-      "type": "registry:ui",
-      "title": "Status Capsule",
-      "description": "A collapsible task summary with a progress ring, file details, and retry states.",
-      "dependencies": ["clsx", "lucide-react"],
-      "files": [
-        {
-          "path": "src/registry/status-capsule.tsx",
-          "type": "registry:ui"
-        }
-      ],
-      "categories": ["feedback", "progress", "interactive"],
-      "meta": {
-        "a1ui": {
-          "useCases": ["Collapsible upload, export, and background-job summaries with per-task state."],
-          "limitations": [
-            "Presentation only. The caller owns jobs, retries, downloads, and consistency between task status and progress."
-          ],
-          "requirements": [
-            "Requires React 19 and Tailwind CSS 4. Supply tasks with unique IDs, job state, and action callbacks. Reduced motion disables transitions and spinner rotation."
-          ]
-        }
-      }
-    },
-    {
-      "name": "orbit-dial",
-      "type": "registry:ui",
-      "title": "Orbit Dial",
-      "description": "A circular control with radial ticks, a numeric readout, and a native range slider.",
-      "dependencies": ["clsx"],
-      "files": [
-        {
-          "path": "src/registry/orbit-dial.tsx",
-          "type": "registry:ui"
-        }
-      ],
-      "categories": ["form", "slider", "interactive"],
-      "meta": {
-        "a1ui": {
-          "useCases": ["Numeric adjustments in creative tools, audio interfaces, and settings panels."],
-          "limitations": [
-            "One numeric value with a linear scale. Values snap to complete steps from the minimum. Long formatted values are truncated."
-          ],
-          "requirements": [
-            "Supply a label and connect onValueChange for controlled use. Requires React, Tailwind CSS 4, and the background, foreground, border, and muted text theme tokens."
-          ]
-        }
-      }
-    },
-    {
       "name": "peel-stack",
-      "type": "registry:ui",
+      "type": "registry:block",
       "title": "Peel Stack",
       "description": "A layered paper stack that rotates through collections with buttons, arrow keys, or a swipe.",
       "dependencies": ["clsx"],
       "files": [
         {
-          "path": "src/registry/peel-stack.tsx",
-          "type": "registry:ui"
+          "path": "src/registry/blocks/peel-stack.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/peel-stack.tsx"
         }
       ],
       "categories": ["cards", "carousel", "interactive", "animation"],
@@ -155,14 +59,15 @@
     },
     {
       "name": "ascii-morph",
-      "type": "registry:ui",
+      "type": "registry:block",
       "title": "ASCII Morph",
       "description": "A cloud of characters that morphs into a globe, a flower, and an A1 monogram.",
       "dependencies": ["clsx"],
       "files": [
         {
-          "path": "src/registry/ascii-morph.tsx",
-          "type": "registry:ui"
+          "path": "src/registry/blocks/ascii-morph.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/ascii-morph.tsx"
         }
       ],
       "categories": ["ascii", "animation", "interactive", "typography"],
@@ -181,61 +86,16 @@
       }
     },
     {
-      "name": "ascii-signal",
-      "type": "registry:ui",
-      "title": "ASCII Signal",
-      "description": "A small ASCII waveform that changes with an idle, processing, or complete state.",
-      "dependencies": ["clsx"],
-      "files": [
-        {
-          "path": "src/registry/ascii-signal.tsx",
-          "type": "registry:ui"
-        }
-      ],
-      "categories": ["ascii", "status", "animation"],
-      "meta": {
-        "a1ui": {
-          "useCases": ["Compact status displays for uploads, generation, and background tasks."],
-          "limitations": ["The signal has three fixed states and does not report numeric progress."],
-          "requirements": [
-            "Supply a status and a distinct label for each state. Reduced motion shows static frames."
-          ]
-        }
-      }
-    },
-    {
-      "name": "ascii-cloth",
-      "type": "registry:ui",
-      "title": "ASCII Cloth",
-      "description": "A hanging sheet of characters that stretches when dragged, with a word woven into the fabric.",
-      "dependencies": ["clsx"],
-      "files": [
-        {
-          "path": "src/registry/ascii-cloth.tsx",
-          "type": "registry:ui"
-        }
-      ],
-      "categories": ["ascii", "animation", "interactive", "typography"],
-      "meta": {
-        "a1ui": {
-          "useCases": ["Interactive fabric illustrations for identity, portfolio, and hero sections."],
-          "limitations": ["The woven word is limited to 24 printable ASCII characters on one row."],
-          "requirements": [
-            "Requires Canvas 2D, ResizeObserver, and IntersectionObserver. Supply a pause control for motion; reduced motion shows static cloth."
-          ]
-        }
-      }
-    },
-    {
       "name": "ascii-lens",
-      "type": "registry:ui",
+      "type": "registry:block",
       "title": "ASCII Lens",
       "description": "An image rendered as ASCII, with a circular lens that reveals the original.",
       "dependencies": ["clsx"],
       "files": [
         {
-          "path": "src/registry/ascii-lens.tsx",
-          "type": "registry:ui"
+          "path": "src/registry/blocks/ascii-lens.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/ascii-lens.tsx"
         }
       ],
       "categories": ["ascii", "images", "interactive", "animation"],
@@ -253,14 +113,15 @@
     },
     {
       "name": "integration-hub",
-      "type": "registry:ui",
+      "type": "registry:block",
       "title": "Integration Hub",
       "description": "A connected workspace with six tools and animated pulses flowing into a central product.",
       "dependencies": ["clsx", "lucide-react"],
       "files": [
         {
-          "path": "src/registry/integration-hub.tsx",
-          "type": "registry:ui"
+          "path": "src/registry/blocks/integration-hub.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/integration-hub.tsx"
         }
       ],
       "categories": ["integrations", "animation", "diagram"],
@@ -280,14 +141,15 @@
     },
     {
       "name": "ascii-terrain",
-      "type": "registry:ui",
+      "type": "registry:block",
       "title": "ASCII Terrain",
       "description": "A landscape made of characters, with rolling hills, pointer sculpting, and click ripples.",
       "dependencies": ["clsx"],
       "files": [
         {
-          "path": "src/registry/ascii-terrain.tsx",
-          "type": "registry:ui"
+          "path": "src/registry/blocks/ascii-terrain.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/ascii-terrain.tsx"
         }
       ],
       "categories": ["ascii", "animation", "interactive", "background"],
@@ -305,14 +167,15 @@
     },
     {
       "name": "text-banner",
-      "type": "registry:ui",
+      "type": "registry:block",
       "title": "Text Banner",
       "description": "Bold text and staggered pixel separators in a seamless, infinitely scrolling banner.",
       "dependencies": ["clsx"],
       "files": [
         {
-          "path": "src/registry/text-banner.tsx",
-          "type": "registry:ui"
+          "path": "src/registry/blocks/text-banner.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/text-banner.tsx"
         }
       ],
       "categories": ["typography", "animation", "marquee", "banner"],
@@ -330,14 +193,15 @@
     },
     {
       "name": "confirmation-button",
-      "type": "registry:ui",
+      "type": "registry:block",
       "title": "Confirmation Button",
       "description": "A drag-to-confirm button with a dotted arrow, pending feedback, and a confirmed state.",
       "dependencies": ["clsx", "lucide-react"],
       "files": [
         {
-          "path": "src/registry/confirmation-button.tsx",
-          "type": "registry:ui"
+          "path": "src/registry/blocks/confirmation-button.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/confirmation-button.tsx"
         }
       ],
       "categories": ["button", "confirmation", "interactive"],
@@ -355,14 +219,15 @@
     },
     {
       "name": "shape-flow",
-      "type": "registry:ui",
+      "type": "registry:block",
       "title": "Shape Flow",
       "description": "Text that reflows around a draggable X, powered by Pretext.",
       "dependencies": ["@chenglou/pretext@^0.0.8", "clsx"],
       "files": [
         {
-          "path": "src/registry/shape-flow.tsx",
-          "type": "registry:ui"
+          "path": "src/registry/blocks/shape-flow.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/shape-flow.tsx"
         }
       ],
       "categories": ["typography", "interactive"],
@@ -379,58 +244,15 @@
       }
     },
     {
-      "name": "crypto-wallet",
-      "type": "registry:ui",
-      "title": "Crypto Wallet",
-      "description": "A wallet overview with token balances, recent activity, and send, receive, and swap actions.",
-      "dependencies": ["@base-ui/react@^1.8.0", "clsx", "lucide-react"],
-      "files": [
-        {
-          "path": "src/registry/crypto-wallet.tsx",
-          "type": "registry:ui"
-        }
-      ],
-      "categories": ["wallet", "web3"],
-      "meta": {
-        "a1ui": {
-          "useCases": ["Wallet account overview, token holdings, and transaction activity."],
-          "limitations": [
-            "Presentation only. No wallet SDK, balance fetching, signing, or transaction submission is included."
-          ],
-          "requirements": ["Supply account data and callbacks from the app wallet integration."]
-        }
-      }
-    },
-    {
-      "name": "select-menu",
-      "type": "registry:ui",
-      "title": "Select Menu",
-      "description": "A dropdown selector with icons, descriptions, and keyboard navigation.",
-      "dependencies": ["@base-ui/react@^1.8.0", "clsx", "lucide-react"],
-      "files": [
-        {
-          "path": "src/registry/select-menu.tsx",
-          "type": "registry:ui"
-        }
-      ],
-      "categories": ["form", "select", "dropdown"],
-      "meta": {
-        "a1ui": {
-          "useCases": ["Single-choice dropdowns with icons, descriptions, and keyboard navigation."],
-          "limitations": ["Single selection only; search and multi-select are not provided."],
-          "requirements": ["Supply options, a controlled value, onValueChange, and an accessible ariaLabel."]
-        }
-      }
-    },
-    {
       "name": "text-scramble",
-      "type": "registry:ui",
+      "type": "registry:block",
       "title": "Text Scramble",
       "description": "Reveals new text from left to right through a scramble of random characters.",
       "files": [
         {
-          "path": "src/registry/text-scramble.tsx",
-          "type": "registry:ui"
+          "path": "src/registry/blocks/text-scramble.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/text-scramble.tsx"
         }
       ],
       "categories": ["typography", "animation", "text"],
@@ -443,43 +265,15 @@
       }
     },
     {
-      "name": "multichain-swap",
-      "type": "registry:ui",
-      "title": "Multichain Swap",
-      "description": "A crypto swap form with network selection, token balances, and cross-chain quote details.",
-      "dependencies": ["@base-ui/react@^1.8.0", "clsx", "lucide-react"],
-      "files": [
-        {
-          "path": "src/registry/multichain-swap.tsx",
-          "type": "registry:ui"
-        },
-        {
-          "path": "src/registry/select-menu.tsx",
-          "type": "registry:ui"
-        }
-      ],
-      "categories": ["form", "web3", "swap"],
-      "meta": {
-        "a1ui": {
-          "useCases": ["Token swap forms with network selection, balances, slippage, and quote review."],
-          "limitations": [
-            "No live quotes, wallet connection, bridge execution, or transaction submission is included."
-          ],
-          "requirements": [
-            "Control the form value and supply wallet and quote callbacks. Select Menu is included in this item."
-          ]
-        }
-      }
-    },
-    {
       "name": "section-rail",
-      "type": "registry:ui",
+      "type": "registry:block",
       "title": "Section Rail",
       "description": "A compact reading rail that tracks progress through page sections.",
       "files": [
         {
-          "path": "src/registry/section-rail.tsx",
-          "type": "registry:ui"
+          "path": "src/registry/blocks/section-rail.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/section-rail.tsx"
         }
       ],
       "categories": ["navigation", "reading-progress"],
@@ -493,13 +287,14 @@
     },
     {
       "name": "spiral-text",
-      "type": "registry:ui",
+      "type": "registry:block",
       "title": "Spiral Text",
       "description": "Text set on a responsive spiral that tightens under pressure and ripples on release.",
       "files": [
         {
-          "path": "src/registry/spiral-text.tsx",
-          "type": "registry:ui"
+          "path": "src/registry/blocks/spiral-text.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/spiral-text.tsx"
         }
       ],
       "categories": ["typography", "animation"],
@@ -513,13 +308,14 @@
     },
     {
       "name": "particle-menu",
-      "type": "registry:ui",
+      "type": "registry:block",
       "title": "Particle Menu",
       "description": "Grainy symbols that scatter around your pointer and spring back into place.",
       "files": [
         {
-          "path": "src/registry/particle-menu.tsx",
-          "type": "registry:ui"
+          "path": "src/registry/blocks/particle-menu.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/particle-menu.tsx"
         }
       ],
       "categories": ["navigation", "particles", "animation"],
@@ -533,14 +329,15 @@
     },
     {
       "name": "arc-reel",
-      "type": "registry:ui",
+      "type": "registry:block",
       "title": "Arc Reel",
       "description": "An infinitely looping reel with curved provider cards and synchronized scroll controls.",
       "dependencies": ["embla-carousel-react@^8.6.0"],
       "files": [
         {
-          "path": "src/registry/arc-reel.tsx",
-          "type": "registry:ui"
+          "path": "src/registry/blocks/arc-reel.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/arc-reel.tsx"
         }
       ],
       "categories": ["carousel", "gallery"],

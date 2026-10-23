@@ -2,30 +2,21 @@ import defaultMdxComponents from "fumadocs-ui/mdx";
 import { Tab, Tabs } from "fumadocs-ui/components/tabs";
 import type { MDXComponents } from "mdx/types";
 
-import { ArcReelDemo } from "@/components/arc-reel-demo";
-import { AsciiTerrainDemo } from "@/components/ascii-terrain-demo";
-import { AsciiMorphDemo } from "@/components/ascii-morph-demo";
-import { AsciiSignalDemo } from "@/components/ascii-signal-demo";
-import { AsciiClothDemo } from "@/components/ascii-cloth-demo";
-import { AsciiLensDemo } from "@/components/ascii-lens-demo";
+import { ArcReelDemo } from "@/components/block-demos/arc-reel-demo";
+import { AsciiTerrainDemo } from "@/components/block-demos/ascii-terrain-demo";
+import { AsciiMorphDemo } from "@/components/block-demos/ascii-morph-demo";
+import { AsciiLensDemo } from "@/components/block-demos/ascii-lens-demo";
 import { AgentInstall, AgentRegistryConfiguration } from "@/components/agent-install";
-import { CryptoWalletDemo } from "@/components/crypto-wallet-demo";
-import { ConfirmationButtonDemo } from "@/components/confirmation-button-demo";
-import { CommandDeckDemo } from "@/components/command-deck-demo";
-import { CompareCurtainDemo } from "@/components/compare-curtain-demo";
-import { SectionRailDemo, SpiralTextDemo } from "@/components/component-demos";
-import { ComponentSource, Installation } from "@/components/component-docs";
-import { ParticleMenuDemo } from "@/components/particle-menu-demo";
-import { MultichainSwapDemo } from "@/components/multichain-swap-demo";
-import { TextScrambleDemo } from "@/components/text-scramble-demo";
-import { TextBannerDemo } from "@/components/text-banner-demo";
-import { SelectMenuDemo } from "@/components/select-menu-demo";
-import { ShapeFlowDemo } from "@/components/shape-flow-demo";
-import { IntegrationHubDemo } from "@/components/integration-hub-demo";
-import { PeelStackDemo } from "@/components/peel-stack-demo";
-import { OrbitDialDemo } from "@/components/orbit-dial-demo";
-import { StatusCapsuleDemo } from "@/components/status-capsule-demo";
-import { ToastQueueDemo } from "@/components/toast-queue-demo";
+import { ConfirmationButtonDemo } from "@/components/block-demos/confirmation-button-demo";
+import { CompareCurtainDemo } from "@/components/block-demos/compare-curtain-demo";
+import { SectionRailDemo, SpiralTextDemo } from "@/components/block-demos";
+import { BlockSource, Installation } from "@/components/block-docs";
+import { ParticleMenuDemo } from "@/components/block-demos/particle-menu-demo";
+import { TextScrambleDemo } from "@/components/block-demos/text-scramble-demo";
+import { TextBannerDemo } from "@/components/block-demos/text-banner-demo";
+import { ShapeFlowDemo } from "@/components/block-demos/shape-flow-demo";
+import { IntegrationHubDemo } from "@/components/block-demos/integration-hub-demo";
+import { PeelStackDemo } from "@/components/block-demos/peel-stack-demo";
 
 export function getMDXComponents(components?: MDXComponents) {
   return {
@@ -35,24 +26,15 @@ export function getMDXComponents(components?: MDXComponents) {
     ArcReelDemo,
     AsciiTerrainDemo,
     AsciiMorphDemo,
-    AsciiSignalDemo,
-    AsciiClothDemo,
     AsciiLensDemo,
-    ComponentSource,
+    BlockSource,
     ConfirmationButtonDemo,
-    CommandDeckDemo,
     CompareCurtainDemo,
-    CryptoWalletDemo,
     Installation,
     IntegrationHubDemo,
-    MultichainSwapDemo,
     ParticleMenuDemo,
     PeelStackDemo,
-    OrbitDialDemo,
-    StatusCapsuleDemo,
-    ToastQueueDemo,
     SectionRailDemo,
-    SelectMenuDemo,
     ShapeFlowDemo,
     SpiralTextDemo,
     TextScrambleDemo,

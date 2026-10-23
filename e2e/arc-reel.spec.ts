@@ -11,7 +11,7 @@ async function expectCentered(viewport: Locator, name: string) {
 }
 
 test.beforeEach(async ({ page }) => {
-  await page.goto("/components/arc-reel");
+  await page.goto("/blocks/arc-reel");
   await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
   await expect(page).toHaveTitle("Arc Reel | a1ui");
   await expect(page.getByRole("heading", { name: "Arc Reel", exact: true })).toBeVisible();
@@ -216,7 +216,7 @@ test("scrubbing animates through intermediate positions and preserves repeated k
 test("touch swipes work on narrow screens without overflowing the page", async ({ browser }) => {
   const context = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true });
   const page = await context.newPage();
-  await page.goto("/components/arc-reel");
+  await page.goto("/blocks/arc-reel");
   const slider = page.getByRole("slider", { name: "Choose provider" });
   await expect(slider).toHaveValue("3");
   const viewport = page.getByRole("group", { name: "Reel cards.", exact: false });
@@ -248,7 +248,7 @@ test("the registry includes installable source and its carousel dependency", asy
   const item = await response.json();
   expect(item.name).toBe("arc-reel");
   expect(item.title).toBe("Arc Reel");
-  expect(item.files[0].path).toBe("src/registry/arc-reel.tsx");
+  expect(item.files[0].path).toBe("src/registry/blocks/arc-reel.tsx");
   expect(item.dependencies).toContain("embla-carousel-react@^8.6.0");
   expect(item.files[0].content).toContain("export function ArcReel");
 });

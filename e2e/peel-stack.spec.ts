@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 test.beforeEach(async ({ page }) => {
-  await page.goto("/components/peel-stack");
+  await page.goto("/blocks/peel-stack");
   await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
 });
 
@@ -73,7 +73,7 @@ test("touch swipes cycle cards and canceled touches preserve selection", async (
     isMobile: true,
   });
   const page = await context.newPage();
-  await page.goto("/components/peel-stack");
+  await page.goto("/blocks/peel-stack");
   await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
   const stack = page.getByRole("region", { name: "Design studies" });
   const stage = stack.locator('[data-slot="peel-stack-viewport"]');
@@ -108,5 +108,5 @@ test("the catalog preview fits its card and links to the documentation", async (
   expect(active.x + active.width).toBeLessThan(preview.x + preview.width);
   expect(active.y + active.height).toBeLessThan(preview.y + preview.height);
   await card.getByRole("link").click();
-  await expect(page).toHaveURL(/\/components\/peel-stack$/);
+  await expect(page).toHaveURL(/\/blocks\/peel-stack$/);
 });

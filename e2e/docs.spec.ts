@@ -1,10 +1,10 @@
 import { expect, test } from "@playwright/test";
 
-test("catalog opens component documentation in the agreed order", async ({ page }) => {
+test("catalog opens block documentation in the agreed order", async ({ page }) => {
   await page.goto("/");
   await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
 
-  await expect(page.getByRole("heading", { name: "Components", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Blocks", exact: true })).toBeVisible();
   await expect(page.getByRole("link", { name: /Section Rail/ }).first()).toBeVisible();
   await expect(page.getByRole("link", { name: /Spiral Text/ }).first()).toBeVisible();
 
@@ -12,8 +12,8 @@ test("catalog opens component documentation in the agreed order", async ({ page 
     .getByRole("link", { name: /Section Rail/ })
     .last()
     .click();
-  await expect(page).toHaveURL(/\/components\/section-rail$/);
-  await expect(page.locator(".component-doc-body h2")).toHaveText([
+  await expect(page).toHaveURL(/\/blocks\/section-rail$/);
+  await expect(page.locator(".docs-article-body h2")).toHaveText([
     "Demo",
     "Installation",
     "Code",
@@ -21,10 +21,10 @@ test("catalog opens component documentation in the agreed order", async ({ page 
   ]);
 });
 
-test("selected component navigation keeps its label visible", async ({ page }) => {
-  await page.goto("/components/section-rail");
+test("selected block navigation keeps its label visible", async ({ page }) => {
+  await page.goto("/blocks/section-rail");
   const activeLink = page
-    .getByRole("navigation", { name: "Components" })
+    .getByRole("navigation", { name: "Blocks" })
     .getByRole("link", { name: "Section Rail" });
 
   const colors = await activeLink.evaluate((element) => {
@@ -45,12 +45,12 @@ test("selected component navigation keeps its label visible", async ({ page }) =
   });
 });
 
-test("desktop sidebar can scroll to its final component", async ({ page }) => {
+test("desktop sidebar can scroll to its final block", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.goto("/");
 
   const sidebar = page.locator(".docs-shell > aside");
-  const finalLink = page.getByRole("navigation", { name: "Components" }).getByRole("link").last();
+  const finalLink = page.getByRole("navigation", { name: "Blocks" }).getByRole("link").last();
 
   await sidebar.evaluate((element) => {
     element.scrollTop = element.scrollHeight;
@@ -61,7 +61,7 @@ test("desktop sidebar can scroll to its final component", async ({ page }) => {
     .toBeLessThanOrEqual(800);
 });
 
-test("search finds component documentation", async ({ page }) => {
+test("search finds block documentation", async ({ page }) => {
   await page.goto("/");
   await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
   await page.getByRole("button", { name: /Search/ }).click();
@@ -71,13 +71,13 @@ test("search finds component documentation", async ({ page }) => {
   await expect(page.getByRole("dialog").getByText("Spiral Text", { exact: true })).toBeVisible();
 });
 
-test("mobile navigation exposes the component selector and search", async ({ page }) => {
+test("mobile navigation exposes the block selector and search", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
   await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
 
   await expect(page.getByLabel("Choose documentation")).toBeVisible();
   await expect(page.getByRole("button", { name: "Search documentation" })).toBeVisible();
-  await page.getByLabel("Choose documentation").selectOption("/components/spiral-text");
-  await expect(page).toHaveURL(/\/components\/spiral-text$/);
+  await page.getByLabel("Choose documentation").selectOption("/blocks/spiral-text");
+  await expect(page).toHaveURL(/\/blocks\/spiral-text$/);
 });

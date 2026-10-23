@@ -6,7 +6,7 @@ import { source } from "@/lib/source";
 
 export const metadata: Metadata = {
   title: "Install with an agent",
-  description: "Let your coding agent choose, install, and integrate an a1ui component.",
+  description: "Let your coding agent choose, install, and integrate an a1ui block.",
 };
 
 export default function AgentsPage() {
@@ -15,12 +15,12 @@ export default function AgentsPage() {
   const MDX = page.data.body;
 
   return (
-    <article className="component-doc">
+    <article className="docs-article">
       <header>
         <h1>{page.data.title}</h1>
         <p>{page.data.description}</p>
       </header>
-      <div className="component-doc-body prose">
+      <div className="docs-article-body prose">
         <MDX components={getMDXComponents()} />
       </div>
     </article>

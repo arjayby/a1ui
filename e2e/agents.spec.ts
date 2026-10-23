@@ -24,7 +24,7 @@ test("the agent entry point leads to every installable item and Markdown guide",
   }
 });
 
-test("copy prompts support both discovery and a chosen component", async ({ page, context }) => {
+test("copy prompts support both discovery and a chosen block", async ({ page, context }) => {
   await context.grantPermissions(["clipboard-read", "clipboard-write"]);
   await page.goto("/");
   await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
@@ -33,12 +33,12 @@ test("copy prompts support both discovery and a chosen component", async ({ page
   const discovery = await page.evaluate(() => navigator.clipboard.readText());
   expect(discovery).toContain("/llms.txt");
   expect(discovery).toContain("[describe what you want]");
-  await page.goto("/components/select-menu");
+  await page.goto("/blocks/section-rail");
   await page.getByRole("button", { name: "Copy prompt for agent" }).click();
   await expect(page.getByRole("status").filter({ hasText: "Prompt copied" })).toBeAttached();
   const selected = await page.evaluate(() => navigator.clipboard.readText());
-  expect(selected).toContain("Install and integrate the a1ui select-menu component");
-  expect(selected).toContain("/docs/components/select-menu.md");
+  expect(selected).toContain("Install and integrate the a1ui section-rail block");
+  expect(selected).toContain("/docs/blocks/section-rail.md");
   expect(selected).not.toContain("[describe what you want]");
 });
 
@@ -49,7 +49,7 @@ test("a blocked clipboard provides a selectable prompt on mobile", async ({ page
       value: { writeText: () => Promise.reject(new Error("Denied")) },
     });
   });
-  await page.goto("/components/section-rail");
+  await page.goto("/blocks/section-rail");
   await page.getByRole("button", { name: "Copy prompt for agent" }).click();
   const prompt = page.getByLabel("Copy this prompt into your agent");
   await expect(prompt).toBeVisible();

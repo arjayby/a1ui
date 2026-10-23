@@ -143,7 +143,7 @@ body { margin: 0; padding: 32px; background: var(--background); color: var(--for
         );
       }
     }
-    const guide = await readFile(`public/docs/components/${item.name}.md`, "utf8");
+    const guide = await readFile(`public/docs/blocks/${item.name}.md`, "utf8");
     const example = guide.match(/```tsx\n([\s\S]*?)```/)?.[1];
     assert(example, `${item.name} has no executable example`);
     const exportName = example.match(/export function (\w+)/)?.[1];
@@ -152,11 +152,6 @@ body { margin: 0; padding: 32px; background: var(--background); color: var(--for
     examples.push({ name: item.name, exportName });
   }
 
-  const props = {
-    "crypto-wallet": "account={null} onConnect={() => {}}",
-    "multichain-swap":
-      'connected={false} quote={null} quoteStatus="idle" connectWallet={() => {}} requestQuote={() => {}} reviewSwap={() => {}}',
-  };
   const imports = examples
     .map(
       ({ name, exportName }, index) =>
@@ -166,7 +161,7 @@ body { margin: 0; padding: 32px; background: var(--background); color: var(--for
   const sections = examples
     .map(
       ({ name }, index) =>
-        `<section data-component="${name}" style={{ marginBottom: 80 }}><h1>${name}</h1><div data-example><Example${index} ${props[name] ?? ""} /></div></section>`,
+        `<section data-block="${name}" style={{ marginBottom: 80 }}><h1>${name}</h1><div data-example><Example${index}  /></div></section>`,
     )
     .join("\n");
   await writeFile(
@@ -225,37 +220,21 @@ body { margin: 0; padding: 32px; background: var(--background); color: var(--for
   });
   await page.goto(appUrl, { waitUntil: "networkidle" });
   for (const { name } of examples) {
-    const rendered = page.locator(`[data-component="${name}"] [data-example]`);
+    const rendered = page.locator(`[data-block="${name}"] [data-example]`);
     assert(await rendered.evaluate((element) => element.children.length > 0), `${name} did not render`);
   }
-  await page.getByRole("combobox", { name: "Environment", exact: true }).click();
-  await page.getByRole("option", { name: /Staging/ }).click();
-  assert.match(await page.getByRole("combobox", { name: "Environment", exact: true }).innerText(), /Staging/);
   await page.getByRole("button", { name: "Randomize phrase" }).click();
-  const confirmation = page.locator('[data-component="confirmation-button"]');
+  const confirmation = page.locator('[data-block="confirmation-button"]');
   await confirmation.getByRole("button", { name: "Slide to confirm" }).focus();
   await page.keyboard.press("Enter");
   await confirmation.locator('[data-state="confirmed"]').waitFor();
   assert.match(await confirmation.innerText(), /Action confirmed\./);
-  const peelStack = page.locator('[data-component="peel-stack"]');
+  const peelStack = page.locator('[data-block="peel-stack"]');
   await peelStack.getByRole("button", { name: "Next card" }).click();
   assert.match(await peelStack.getByRole("status").innerText(), /Material notes/);
-  const orbitDial = page.locator('[data-component="orbit-dial"]');
-  const intensity = orbitDial.getByRole("slider", { name: "Intensity", exact: true });
-  await intensity.press("ArrowRight");
-  assert.equal(await intensity.inputValue(), "65");
-  await intensity.press("End");
-  assert.equal(await intensity.inputValue(), "100");
-  const statusCapsule = page.locator('[data-component="status-capsule"]');
-  const statusTrigger = statusCapsule.getByRole("button", { name: /Exporting files/ });
-  await statusTrigger.click();
-  assert.equal(await statusTrigger.getAttribute("aria-expanded"), "false");
-  assert.equal(await statusCapsule.getByRole("progressbar").getAttribute("aria-valuenow"), "48");
-  await statusTrigger.press("Enter");
-  assert.equal(await statusCapsule.getByRole("listitem").count(), 3);
   assert.deepEqual(errors, [], "Consumer browser emitted errors");
   console.log(
-    `Verified ${catalog.items.length} installed components and their published examples in a clean Next.js production app.`,
+    `Verified ${catalog.items.length} installed blocks and their published examples in a clean Next.js production app.`,
   );
 } finally {
   await browser?.close();

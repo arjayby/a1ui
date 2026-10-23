@@ -8,7 +8,7 @@ const coordinates = (art: Locator) =>
     );
 
 test.beforeEach(async ({ page }) => {
-  await page.goto("/components/ascii-morph");
+  await page.goto("/blocks/ascii-morph");
   await expect(page.locator('[data-slot="ascii-morph"]')).toHaveAttribute("data-motion", "enabled");
 });
 

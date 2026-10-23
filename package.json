@@ -19,7 +19,6 @@
     "registry:validate": "pnpm dlx shadcn@latest registry validate ./registry.json"
   },
   "dependencies": {
-    "@base-ui/react": "^1.8.0",
     "@chenglou/pretext": "^0.0.8",
     "@types/mdx": "^2.0.14",
     "@vercel/analytics": "^2.0.1",

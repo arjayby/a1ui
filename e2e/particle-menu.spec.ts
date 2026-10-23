@@ -31,7 +31,7 @@ for (const width of [1440, 390, 320]) {
     }
 
     await card.getByRole("link", { name: "Particle Menu", exact: true }).click();
-    await expect(page).toHaveURL(/\/components\/particle-menu$/);
+    await expect(page).toHaveURL(/\/blocks\/particle-menu$/);
     await expect(page.getByRole("navigation", { name: "Particle menu demo" }).getByRole("button")).toHaveText(
       labels,
     );
@@ -41,7 +41,7 @@ for (const width of [1440, 390, 320]) {
 test.describe("particle menu demo", () => {
   test.beforeEach(async ({ page }) => {
     await page.clock.install({ time: new Date("2026-01-01T00:00:00Z") });
-    await page.goto("/components/particle-menu");
+    await page.goto("/blocks/particle-menu");
     await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
     await page.getByRole("navigation", { name: "Particle menu demo" }).scrollIntoViewIfNeeded();
     await page.clock.pauseAt(new Date("2026-01-01T00:01:00Z"));

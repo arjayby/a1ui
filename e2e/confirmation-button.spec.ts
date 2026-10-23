@@ -17,7 +17,7 @@ async function startDrag(page: Page, fraction: number) {
 }
 
 test.beforeEach(async ({ page }) => {
-  await page.goto("/components/confirmation-button");
+  await page.goto("/blocks/confirmation-button");
   await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
 });
 
@@ -95,7 +95,7 @@ test("touch cancellation returns the handle and a touch drag confirms", async ({
     isMobile: true,
   });
   const page = await context.newPage();
-  await page.goto("/components/confirmation-button");
+  await page.goto("/blocks/confirmation-button");
   await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
   const handle = page.locator(handleSelector);
   const control = page.locator(controlSelector);
@@ -130,5 +130,5 @@ test("the catalog links to the new component and keeps its preview inside the ca
   expect(control.x).toBeGreaterThan(preview.x);
   expect(control.x + control.width).toBeLessThan(preview.x + preview.width);
   await card.getByRole("link").click();
-  await expect(page).toHaveURL(/\/components\/confirmation-button$/);
+  await expect(page).toHaveURL(/\/blocks\/confirmation-button$/);
 });

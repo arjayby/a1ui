@@ -1,10 +1,10 @@
 ---
 title: Install with an agent
-description: Let your coding agent choose, install, and integrate an a1ui component.
+description: Let your coding agent choose, install, and integrate an a1ui block.
 ---
 
 Give your coding agent a description of what you want to build. It can browse the
-a1ui catalog, choose a component, install its source, and adapt it to your project.
+a1ui catalog, choose a block, install its source, and adapt it to your project.
 
 ## Get started
 
@@ -16,21 +16,20 @@ below, replace `[describe what you want]` with your request, and send it to the 
 For example:
 
 ```text
-Add a dropdown for switching environments, with an icon and description for each option.
+Add a reading progress rail for the sections on this page.
 ```
 
-The agent reads the catalog and component guide before installing. It checks your
+The agent reads the catalog and block guide before installing. It checks your
 project's framework, package manager, import aliases, and styles, then integrates
-the component and verifies the result.
+the block and verifies the result.
 
-## Choose a specific component
+## Choose a specific block
 
-If you already know which component you want, open its page and use **Copy prompt
-for agent** there. That prompt selects the component and links directly to its
+If you already know which block you want, open its page and use **Copy prompt
+for agent** there. That prompt selects the block and links directly to its
 integration guide.
 
-For example, open [Select Menu](/components/select-menu) to install a dropdown, or
-[Section Rail](/components/section-rail) to add reading progress to a long page.
+For example, open [Section Rail](/blocks/section-rail) to add reading progress to a long page.
 
 If your browser blocks clipboard access, the button displays a selectable prompt
 that you can copy manually.
@@ -41,7 +40,7 @@ a1ui uses React 19, TypeScript, and Tailwind CSS 4. Installation and the publish
 examples are verified in a clean Next.js App Router project. Other React setups,
 including Vite, need their configuration checked by the agent.
 
-Components install as editable source through the shadcn CLI. The agent uses your
+Blocks install as editable source through the shadcn CLI. The agent uses your
 project's package manager and existing `components.json` configuration. If that
 configuration is missing, it can initialize shadcn in a compatible project.
 
@@ -51,16 +50,14 @@ Use the public site URL for an agent running elsewhere.
 
 ## What the agent handles
 
-- Chooses a component using its description, use cases, and limitations.
+- Chooses a block using its description, use cases, and limitations.
 - Reads its props, examples, dependencies, and integration requirements.
 - Checks existing files before installing or merging changes.
-- Connects the component to your page, state, and app data.
+- Connects the block to your page, state, and app data.
 - Runs available project checks and inspects the result in the browser.
 
-Some components need services your app provides. [Crypto Wallet](/components/crypto-wallet)
-does not include a wallet SDK or fetch balances. [Multichain Swap](/components/multichain-swap)
-needs your wallet and quote integrations. Demo data and artwork are not a live
-integration. The agent should report anything that still needs connecting.
+Blocks use the data and callbacks you supply. Demo data and artwork are not a live
+integration. The agent reports anything that still needs connecting.
 
 ## Optional shadcn MCP setup
 
@@ -73,9 +70,9 @@ Merge this entry with your existing registries:
 Your agent can then search `@a1ui`, inspect an item, and install it by name:
 
 ```bash
-pnpm dlx shadcn@latest search @a1ui -q "dropdown"
-pnpm dlx shadcn@latest view @a1ui/select-menu
-pnpm dlx shadcn@latest add @a1ui/select-menu --yes
+pnpm dlx shadcn@latest search @a1ui -q "reading progress"
+pnpm dlx shadcn@latest view @a1ui/section-rail
+pnpm dlx shadcn@latest add @a1ui/section-rail --yes
 ```
 
 Use your project's package runner if it uses npm, Yarn, or Bun. Follow the
@@ -86,5 +83,5 @@ agent's MCP client.
 
 The [agent entry point](/llms.txt) contains the discovery, installation, and
 verification instructions. The [registry catalog](/r/registry.json) lists the
-available components. Each component page also links to a plain Markdown guide
+available blocks. Each block page also links to a plain Markdown guide
 with usage examples, API details, and limitations.

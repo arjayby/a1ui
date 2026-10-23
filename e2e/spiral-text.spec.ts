@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 test.beforeEach(async ({ page }) => {
-  await page.goto("/components/spiral-text");
+  await page.goto("/blocks/spiral-text");
   await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
 });
 

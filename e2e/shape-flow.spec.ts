@@ -36,7 +36,7 @@ async function expectReadableFlow(flow: Locator) {
 }
 
 test("text fills the gaps between the X arms", async ({ page }) => {
-  await page.goto("/components/shape-flow");
+  await page.goto("/blocks/shape-flow");
   const flow = page.locator('[data-slot="shape-flow"]');
   await expect(flow).toHaveAttribute("data-state", "ready");
   const gaps = await flow.evaluate((element) => {
@@ -70,7 +70,7 @@ test("text fills the gaps between the X arms", async ({ page }) => {
 });
 
 test("dragging reflows every word around the X and releases pointer capture", async ({ page }) => {
-  await page.goto("/components/shape-flow");
+  await page.goto("/blocks/shape-flow");
   const flow = page.locator('[data-slot="shape-flow"]');
   await expect(flow).toHaveAttribute("data-state", "ready");
   await expectReadableFlow(flow);
@@ -93,7 +93,7 @@ test("dragging reflows every word around the X and releases pointer capture", as
 
 test("keyboard movement, reset and responsive layout preserve readable text", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.goto("/components/shape-flow");
+  await page.goto("/blocks/shape-flow");
   const flow = page.locator('[data-slot="shape-flow"]');
   await expect(flow).toHaveAttribute("data-state", "ready");
   const handle = flow.getByRole("button", { name: "Move X" });
@@ -149,7 +149,7 @@ test("catalog preview fits its card and centers the X on desktop and mobile", as
 test("server-rendered text remains readable without JavaScript", async ({ browser }) => {
   const context = await browser.newContext({ javaScriptEnabled: false });
   const page = await context.newPage();
-  await page.goto("/components/shape-flow");
+  await page.goto("/blocks/shape-flow");
   const flow = page.locator('[data-slot="shape-flow"]');
   await expect(flow).toHaveAttribute("data-state", "fallback");
   await expect(flow.locator("p")).toBeVisible();
@@ -164,7 +164,7 @@ test("touch dragging and cancellation release the X", async ({ browser }) => {
     isMobile: true,
   });
   const page = await context.newPage();
-  await page.goto("/components/shape-flow");
+  await page.goto("/blocks/shape-flow");
   const flow = page.locator('[data-slot="shape-flow"]');
   await expect(flow).toHaveAttribute("data-state", "ready");
   const handle = flow.getByRole("button", { name: "Move X" });

@@ -1,9 +1,9 @@
 import { spawnSync } from "node:child_process";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import nextEnv from "@next/env";
 
 import { getSiteUrl } from "../src/lib/site-url.mjs";
-import { renderAgentIndex, renderComponentGuide } from "./lib/agent-docs.mjs";
+import { renderAgentIndex, renderBlockGuide } from "./lib/agent-docs.mjs";
 
 nextEnv.loadEnvConfig(process.cwd(), !process.argv.includes("--production"));
 const siteUrl = getSiteUrl();
@@ -18,11 +18,15 @@ const guides = await Promise.all(
       if (!item.meta?.a1ui?.[key]?.length) throw new Error(`${item.name} needs meta.a1ui.${key}`);
     }
     if (!item.categories?.length) throw new Error(`${item.name} needs categories`);
-    const mdx = await readFile(`content/docs/components/${item.name}.mdx`, "utf8");
-    return { name: item.name, content: renderComponentGuide(item, mdx, siteUrl) };
+    const mdx = await readFile(`content/docs/blocks/${item.name}.mdx`, "utf8");
+    return { name: item.name, content: renderBlockGuide(item, mdx, siteUrl) };
   }),
 );
 
+// This directory contains only generated registry items. Rebuild it so retired
+// items cannot remain installable after being removed from the catalog.
+await rm("public/r", { recursive: true, force: true });
+await rm("public/docs/blocks", { recursive: true, force: true });
 const build = spawnSync("pnpm", ["dlx", "shadcn@latest", "build", "registry.json", "--output", "public/r"], {
   stdio: "inherit",
 });
@@ -30,9 +34,9 @@ if (build.error) throw build.error;
 if (build.status !== 0) process.exit(build.status ?? 1);
 
 registry.homepage = siteUrl;
-await mkdir("public/docs/components", { recursive: true });
+await mkdir("public/docs/blocks", { recursive: true });
 for (const item of registry.items) {
-  const guideUrl = `${siteUrl}/docs/components/${item.name}.md`;
+  const guideUrl = `${siteUrl}/docs/blocks/${item.name}.md`;
   item.docs = `Read ${guideUrl} for usage, required props, and integration instructions.`;
   item.meta.a1ui.docsUrl = guideUrl;
   item.meta.a1ui.registryUrl = `${siteUrl}/r/${item.name}.json`;
@@ -43,6 +47,6 @@ for (const item of registry.items) {
 await Promise.all([
   writeFile("public/r/registry.json", JSON.stringify(registry, null, 2) + "\n"),
   writeFile("public/llms.txt", renderAgentIndex(registry, siteUrl)),
-  ...guides.map(({ name, content }) => writeFile(`public/docs/components/${name}.md`, content)),
+  ...guides.map(({ name, content }) => writeFile(`public/docs/blocks/${name}.md`, content)),
 ]);
 console.log(`Built ${guides.length} registry items and agent guides for ${siteUrl}`);

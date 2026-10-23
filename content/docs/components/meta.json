@@ -1,28 +1,4 @@
 {
   "title": "Components",
-  "pages": [
-    "command-deck",
-    "compare-curtain",
-    "toast-queue",
-    "status-capsule",
-    "orbit-dial",
-    "peel-stack",
-    "ascii-morph",
-    "ascii-signal",
-    "ascii-cloth",
-    "ascii-lens",
-    "integration-hub",
-    "ascii-terrain",
-    "confirmation-button",
-    "section-rail",
-    "spiral-text",
-    "particle-menu",
-    "arc-reel",
-    "multichain-swap",
-    "text-scramble",
-    "text-banner",
-    "select-menu",
-    "crypto-wallet",
-    "shape-flow"
-  ]
+  "pages": ["index"]
 }

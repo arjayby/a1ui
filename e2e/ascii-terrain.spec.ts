@@ -8,7 +8,7 @@ const sampleAfter = (canvas: Locator, delay = 180) =>
   }, delay);
 
 test.beforeEach(async ({ page }) => {
-  await page.goto("/components/ascii-terrain");
+  await page.goto("/blocks/ascii-terrain");
   await expect(page.locator("canvas")).toHaveAttribute("data-ready", "true");
   await page.evaluate(() => document.fonts.ready);
 });
