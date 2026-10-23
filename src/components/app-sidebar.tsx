@@ -5,7 +5,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 
-import { SearchButton } from "@/components/site-navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -63,7 +62,6 @@ export function AppSidebar() {
             <XIcon aria-hidden="true" />
           </Button>
         </div>
-        <SearchButton />
       </SidebarHeader>
       <SidebarContent className="gap-1">
         <nav aria-label="Guides">

@@ -18,7 +18,6 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 import { getBlock } from "@/lib/block-catalog";
-import { cn } from "@/lib/utils";
 
 function GitHubLink() {
   return (
@@ -54,16 +53,15 @@ function ThemeButton() {
   );
 }
 
-export function SearchButton({ compact = false }: { compact?: boolean }) {
+function SearchButton() {
   const { setOpenSearch } = useSearchContext();
   const { setOpenMobile } = useSidebar();
 
   return (
     <Button
-      variant={compact ? "ghost" : "secondary"}
-      size={compact ? "icon" : "default"}
+      variant="secondary"
       aria-label="Search documentation"
-      className={cn(!compact && "text-muted-foreground w-full justify-between")}
+      className="text-muted-foreground w-9 justify-center px-0 sm:w-56 sm:justify-between sm:px-3"
       onClick={() => {
         setOpenMobile(false);
         setOpenSearch(true);
@@ -71,9 +69,9 @@ export function SearchButton({ compact = false }: { compact?: boolean }) {
     >
       <span className="flex items-center gap-2">
         <MagnifyingGlassIcon aria-hidden="true" className="size-4" />
-        <span className={cn(compact && "sr-only")}>Search...</span>
+        <span className="hidden sm:inline">Search...</span>
       </span>
-      {!compact ? <kbd className="text-xs">⌘ K</kbd> : null}
+      <kbd className="hidden text-xs sm:inline">⌘ K</kbd>
     </Button>
   );
 }
@@ -109,7 +107,7 @@ export function DocsHeader() {
         </BreadcrumbList>
       </Breadcrumb>
       <div className="flex shrink-0 items-center gap-1">
-        <SearchButton compact />
+        <SearchButton />
         <GitHubLink />
         <ThemeButton />
       </div>

@@ -64,7 +64,8 @@ test("desktop sidebar can scroll to its final block", async ({ page }) => {
 test("search finds block documentation", async ({ page }) => {
   await page.goto("/");
   await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
-  await page.getByRole("button", { name: "Search documentation" }).first().click();
+  await expect(page.getByRole("button", { name: "Search documentation" })).toHaveCount(1);
+  await page.locator("header").getByRole("button", { name: "Search documentation" }).click();
 
   const search = page.getByRole("dialog").getByRole("textbox");
   await search.fill("Spiral Text");
@@ -110,15 +111,15 @@ test("desktop sidebar and block group support collapsing", async ({ page }) => {
 });
 
 for (const method of ["button", "shortcut"]) {
-  test(`mobile sidebar search via ${method} leaves the selected page visible`, async ({ page }) => {
+  test(`mobile search via ${method} leaves the selected page visible`, async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/blocks");
     await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
-    await page.getByRole("button", { name: "Toggle Sidebar", exact: true }).click();
     const sidebar = page.getByRole("dialog", { name: "Documentation", exact: true });
     if (method === "button") {
-      await sidebar.getByRole("button", { name: "Search documentation" }).click();
+      await page.locator("header").getByRole("button", { name: "Search documentation" }).click();
     } else {
+      await page.getByRole("button", { name: "Toggle Sidebar", exact: true }).click();
       await page.keyboard.press("Control+k");
     }
     await expect(sidebar).not.toBeVisible();
