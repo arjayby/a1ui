@@ -43,10 +43,7 @@ export function AppSidebar() {
     <Sidebar variant="inset" className="docs-sidebar">
       <SidebarHeader className="gap-4 px-3 py-4">
         <div className="flex items-center justify-between px-2">
-          <Link href="/" onClick={closeMobile} className="flex min-h-11 items-center gap-3 no-underline">
-            <span className="bg-sidebar-primary text-sidebar-primary-foreground flex size-8 items-center justify-center rounded-xl">
-              <BookOpenIcon aria-hidden="true" className="size-4" />
-            </span>
+          <Link href="/" onClick={closeMobile} className="flex min-h-11 items-center no-underline">
             <span className="flex flex-col">
               <span className="font-heading text-lg leading-6 font-medium">a1ui</span>
               <span className="text-muted-foreground text-xs">Documentation</span>
@@ -174,7 +171,7 @@ export function AppSidebar() {
         </nav>
       </SidebarContent>
       <SidebarFooter className="text-muted-foreground px-5 py-4 text-xs">
-        React components & ready-made blocks
+        React components and ready-made blocks
       </SidebarFooter>
     </Sidebar>
   );
