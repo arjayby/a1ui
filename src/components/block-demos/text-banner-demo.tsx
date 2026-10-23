@@ -20,11 +20,13 @@ export function TextBannerDemo() {
   const [direction, setDirection] = useState<"left" | "right">("right");
 
   return (
-    <div className="not-prose demo-frame text-banner-demo">
-      <div className="text-banner-demo-stage">
-        <TextBanner items={items} direction={direction} paused={paused} />
+    <>
+      <div className="not-prose demo-frame text-banner-demo">
+        <div className="text-banner-demo-stage">
+          <TextBanner items={items} direction={direction} paused={paused} />
+        </div>
       </div>
-      <div className="text-banner-demo-controls">
+      <div className="not-prose demo-caption text-banner-demo-controls">
         <button
           type="button"
           onClick={() => setDirection((current) => (current === "right" ? "left" : "right"))}
@@ -38,6 +40,6 @@ export function TextBannerDemo() {
           {paused ? "Resume" : "Pause"}
         </button>
       </div>
-    </div>
+    </>
   );
 }
