@@ -3,7 +3,8 @@ import { GraphiteShowcase } from "@/components/graphite-showcase";
 
 export const metadata: Metadata = {
   title: "Components",
-  description: "Graphite tokens, typography, and 21 reusable components with Kousa analytics examples.",
+  description:
+    "21 reusable Luma components with Phosphor icons, a Graphite palette, and Kousa analytics examples.",
 };
 
 export default function ComponentsPage() {

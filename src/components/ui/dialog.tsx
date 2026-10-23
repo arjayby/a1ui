@@ -1,7 +1,7 @@
 "use client";
 
 import * as Primitive from "@radix-ui/react-dialog";
-import { X } from "lucide-react";
+import { XIcon } from "@phosphor-icons/react";
 import type { ComponentProps } from "react";
 import { cn } from "@/lib/utils";
 
@@ -16,7 +16,7 @@ export function DialogContent({ className, children, ...props }: ComponentProps<
       <Primitive.Content data-slot="dialog-content" className={cn("ui-dialog", className)} {...props}>
         {children}
         <Primitive.Close className="ui-icon-button ui-dialog-close" aria-label="Close">
-          <X aria-hidden="true" />
+          <XIcon aria-hidden="true" />
         </Primitive.Close>
       </Primitive.Content>
     </Primitive.Portal>

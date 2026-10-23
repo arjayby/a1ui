@@ -6,7 +6,7 @@ test.beforeEach(async ({ page }) => {
   await expect(page.getByRole("heading", { name: "Components", exact: true })).toBeVisible();
 });
 
-test("source tokens, fonts, and semantic roles reach the running application", async ({ page }) => {
+test("source tokens and fonts support Luma component styles", async ({ page }) => {
   await expect(page.locator("html")).toHaveClass(/dark/);
   const actual = await page.evaluate((tokens) => {
     const style = getComputedStyle(document.documentElement);
@@ -18,9 +18,15 @@ test("source tokens, fonts, and semantic roles reach the running application", a
   await expect(page.locator("h1")).toHaveCSS("font-family", '"Stack Sans Notch", sans-serif');
   await expect(page.getByRole("button", { name: "Create report", exact: true })).toHaveCSS(
     "font-family",
-    '"DM Mono", monospace',
+    "Inter, sans-serif",
   );
   await expect(page.getByLabel("Website domain")).toHaveCSS("font-family", "Inter, sans-serif");
+  await expect(page.getByRole("button", { name: "Create report", exact: true })).toHaveCSS(
+    "border-radius",
+    "32px",
+  );
+  await expect(page.getByLabel("Website domain")).toHaveCSS("border-radius", "24px");
+  await expect(page.locator('[data-slot="card"]').first()).toHaveCSS("border-radius", "32px");
   expect(
     await page.evaluate(async () => {
       const faces = [

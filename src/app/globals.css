@@ -125,7 +125,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-button {
+button:where(:not([data-slot="button"], [data-slot="tabs-trigger"])) {
   font-family: var(--font-button), monospace;
 }
 

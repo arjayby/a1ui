@@ -1,7 +1,14 @@
 "use client";
 
 import { Fragment, useState, type ReactNode } from "react";
-import { ArrowUpRight, Check, Download, Filter, MoreHorizontal, Plus } from "lucide-react";
+import {
+  ArrowUpRightIcon,
+  CheckIcon,
+  DownloadSimpleIcon,
+  FunnelIcon,
+  DotsThreeIcon,
+  PlusIcon,
+} from "@phosphor-icons/react";
 import source from "../../docs/graphite/source.json";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -121,7 +128,7 @@ export function GraphiteShowcase() {
       <TooltipProvider delayDuration={200}>
         <div className="graphite-showcase">
           <header>
-            <p className="graphite-eyebrow">Kousa / Graphite design system</p>
+            <p className="graphite-eyebrow">Kousa / Luma components</p>
             <h1>Components</h1>
             <p className="graphite-intro">
               A quiet foundation for understanding your audience. Explore traffic, visitor journeys, funnels,
@@ -135,9 +142,8 @@ export function GraphiteShowcase() {
               ))}
             </nav>
             <p className="graphite-notice">
-              All 66 tokens were confirmed against Paper on October 23, 2026. Component styles use the
-              verified snapshot and supplied conventions. Exact JSX and component styles remain unverified
-              because Paper weekly export quota is exhausted. Interactions here are implemented locally.
+              Rounded controls, soft surfaces, and Phosphor icons. Luma components use the Graphite palette in
+              both light and dark themes.
             </p>
           </header>
 
@@ -175,7 +181,7 @@ export function GraphiteShowcase() {
           <Section
             id="typography"
             title="02 / Typography & layout"
-            description="Stack Sans Notch for headings. Inter for content and form labels. DM Mono for buttons, code, and commands."
+            description="Stack Sans Notch for headings. Inter for content, buttons, and form labels. DM Mono for code and commands."
           >
             <div className="graphite-grid">
               <Specimen title="Heading scale / 400 and 500">
@@ -224,28 +230,28 @@ export function GraphiteShowcase() {
               </Specimen>
             </div>
             <p className="graphite-caption mt-8">
-              4px spacing base · 0 / 2 / 4px radii · 640 / 1120 / 1280px containers · 640 / 768 / 1024 /
-              1440px breakpoints
+              4px spacing base · 16 / 24 / 32px component radii · 640 / 1120 / 1280px containers · 640 / 768 /
+              1024 / 1440px breakpoints
             </p>
           </Section>
 
           <Section
             id="actions"
             title="03 / Actions & forms"
-            description="44px controls. Clear labels, visible focus, and useful validation. Buttons use DM Mono 12px labels."
+            description="Rounded controls with clear labels, visible focus, and useful validation. Buttons use Inter 14px labels, with 44px touch targets on mobile."
           >
             <div className="graphite-stack">
               <Specimen title="Button / variants">
                 <div className="graphite-row">
                   <Button onClick={() => notify("Demo report created.")}>
-                    <Plus aria-hidden="true" />
+                    <PlusIcon aria-hidden="true" />
                     Create report
                   </Button>
                   <Button variant="secondary" onClick={() => notify("Demo report saved.")}>
                     Save report
                   </Button>
                   <Button variant="outline" onClick={() => notify("Demo export prepared.")}>
-                    <Download aria-hidden="true" />
+                    <DownloadSimpleIcon aria-hidden="true" />
                     Export
                   </Button>
                   <Button variant="ghost" onClick={() => notify("Demo action cancelled.")}>
@@ -260,7 +266,7 @@ export function GraphiteShowcase() {
                     aria-label="Add demo segment"
                     onClick={() => notify("Demo segment added.")}
                   >
-                    <Plus aria-hidden="true" />
+                    <PlusIcon aria-hidden="true" />
                   </Button>
                 </div>
               </Specimen>
@@ -353,7 +359,7 @@ export function GraphiteShowcase() {
                   <CardFooter>
                     <Button variant="outline" onClick={() => notify("Traffic report selected in this demo.")}>
                       View traffic
-                      <ArrowUpRight aria-hidden="true" />
+                      <ArrowUpRightIcon aria-hidden="true" />
                     </Button>
                   </CardFooter>
                 </Card>
@@ -391,7 +397,7 @@ export function GraphiteShowcase() {
           <Section
             id="controls"
             title="05 / Form controls"
-            description="20px checkbox and radio glyphs, a 40 × 24px switch, and interaction targets of at least 44px."
+            description="16px checkbox and radio glyphs, a 44 × 20px switch, and interaction targets of at least 44px."
           >
             <div className="graphite-grid">
               <Specimen title="Checkbox">
@@ -504,7 +510,7 @@ export function GraphiteShowcase() {
                 <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
                   <DialogTrigger asChild>
                     <Button variant="outline">
-                      <Plus aria-hidden="true" />
+                      <PlusIcon aria-hidden="true" />
                       Create funnel
                     </Button>
                   </DialogTrigger>
@@ -559,7 +565,7 @@ export function GraphiteShowcase() {
                 >
                   <SheetTrigger asChild>
                     <Button variant="outline">
-                      <Filter aria-hidden="true" />
+                      <FunnelIcon aria-hidden="true" />
                       Journey filters
                     </Button>
                   </SheetTrigger>
@@ -673,17 +679,17 @@ export function GraphiteShowcase() {
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline">
                       Report actions
-                      <MoreHorizontal aria-hidden="true" />
+                      <DotsThreeIcon aria-hidden="true" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="start">
                     <DropdownMenuLabel>Kousa / Traffic overview</DropdownMenuLabel>
                     <DropdownMenuItem onSelect={() => notify("Report duplicated in this demo.")}>
-                      <Plus aria-hidden="true" />
+                      <PlusIcon aria-hidden="true" />
                       Duplicate report
                     </DropdownMenuItem>
                     <DropdownMenuItem onSelect={() => notify("CSV export prepared in this demo.")}>
-                      <Download aria-hidden="true" />
+                      <DownloadSimpleIcon aria-hidden="true" />
                       Export CSV
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
@@ -737,7 +743,7 @@ export function GraphiteShowcase() {
                 </Specimen>
                 <Specimen title="Toast">
                   <Button variant="outline" onClick={() => notify("Your traffic report is ready to share.")}>
-                    <Check aria-hidden="true" />
+                    <CheckIcon aria-hidden="true" />
                     Show notification
                   </Button>
                   <span className="graphite-caption">
@@ -749,7 +755,7 @@ export function GraphiteShowcase() {
             </div>
           </Section>
           <footer className="graphite-caption">
-            Graphite for Kousa · Local component review · Sample analytics data
+            Luma for Kousa · Graphite palette · Sample analytics data
           </footer>
         </div>
       </TooltipProvider>

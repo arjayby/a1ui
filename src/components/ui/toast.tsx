@@ -1,7 +1,7 @@
 "use client";
 
 import * as Primitive from "@radix-ui/react-toast";
-import { X } from "lucide-react";
+import { XIcon } from "@phosphor-icons/react";
 import type { ComponentProps } from "react";
 import { cn } from "@/lib/utils";
 
@@ -22,7 +22,7 @@ export function ToastClose({ className, ...props }: ComponentProps<typeof Primit
       className={cn("ui-icon-button ui-toast-close", className)}
       {...props}
     >
-      <X aria-hidden="true" />
+      <XIcon aria-hidden="true" />
     </Primitive.Close>
   );
 }

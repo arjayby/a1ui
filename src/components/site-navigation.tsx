@@ -2,7 +2,7 @@
 
 import { useSearchContext } from "fumadocs-ui/contexts/search";
 import { useTheme } from "fumadocs-ui/provider/base";
-import { Moon, Search, Sun } from "lucide-react";
+import { GithubLogoIcon, MoonIcon, MagnifyingGlassIcon, SunIcon } from "@phosphor-icons/react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
@@ -20,9 +20,7 @@ function GitHubLink() {
       title="View on GitHub"
       className="hover:bg-muted flex size-11 shrink-0 items-center justify-center rounded-sm"
     >
-      <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor" className="size-4">
-        <path d="M12 .297C5.37.297 0 5.67 0 12.297c0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.043-1.61-4.043-1.61-.546-1.387-1.333-1.756-1.333-1.756-1.087-.744.083-.729.083-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.418-1.305.762-1.605-2.665-.3-5.466-1.334-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23a11.52 11.52 0 0 1 3-.404c1.02.005 2.045.138 3 .404 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
-      </svg>
+      <GithubLogoIcon aria-hidden="true" className="size-4" weight="fill" />
     </a>
   );
 }
@@ -38,8 +36,8 @@ function ThemeButton() {
       className="hover:bg-muted flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-sm"
       onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
     >
-      <Moon aria-hidden="true" className="size-4 dark:hidden" strokeWidth={1.5} />
-      <Sun aria-hidden="true" className="hidden size-4 dark:block" strokeWidth={1.5} />
+      <MoonIcon aria-hidden="true" className="size-4 dark:hidden" />
+      <SunIcon aria-hidden="true" className="hidden size-4 dark:block" />
     </button>
   );
 }
@@ -60,7 +58,7 @@ function SearchButton({ compact = false }: { compact?: boolean }) {
     >
       <span className={cn(compact && "sr-only")}>Search...</span>
       {compact ? (
-        <Search aria-hidden="true" className="size-4" strokeWidth={1.5} />
+        <MagnifyingGlassIcon aria-hidden="true" className="size-4" />
       ) : (
         <kbd className="text-muted-foreground">⌘ K</kbd>
       )}

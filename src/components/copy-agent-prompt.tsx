@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Copy } from "lucide-react";
+import { CheckIcon, CopyIcon } from "@phosphor-icons/react";
 import { useId, useState } from "react";
 
 export function CopyAgentPrompt({ prompt }: { prompt: string }) {
@@ -24,9 +24,9 @@ export function CopyAgentPrompt({ prompt }: { prompt: string }) {
         className="border-border hover:bg-muted inline-flex min-h-10 cursor-pointer items-center gap-2 rounded-sm border px-3 py-2 text-xs"
       >
         {status === "copied" ? (
-          <Check aria-hidden="true" className="size-3.5" />
+          <CheckIcon aria-hidden="true" className="size-3.5" />
         ) : (
-          <Copy aria-hidden="true" className="size-3.5" />
+          <CopyIcon aria-hidden="true" className="size-3.5" />
         )}
         Copy prompt for agent
       </button>

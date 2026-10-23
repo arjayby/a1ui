@@ -10,7 +10,7 @@ On October 23, 2026, Paper's read-only file overview returned eight artboards, t
 
 This is a partial source import with locally implemented component adaptations. Exact component JSX, computed styles, state variations, and any additional themes remain unverified. No measurements were taken from screenshots. The source overview now has a Kousa title, but its example text could not be checked.
 
-The confirmed values, artboard metadata, provenance, and quota responses are cached in [source.json](./source.json). The component dimensions come from the user's verified conventions: 44px buttons and inputs, 112px minimum textareas, 20px control glyphs, 40 × 24px switches, 24px card padding, and 16px icons with 1.5px strokes. Unspecified details are application adaptations.
+The confirmed values, artboard metadata, provenance, and quota responses are cached in [source.json](./source.json). The original component dimensions followed the supplied Graphite conventions. The current UI uses [shadcn Luma](https://ui.shadcn.com/docs/changelog/2026-03-luma) geometry with the Graphite palette and existing component APIs. Buttons and inputs are 36px high on desktop, with 44px touch targets on mobile. Cards and dialogs use 32px radii, inputs and menus use 24px radii, and textareas use 16px radii. UI icons use `@phosphor-icons/react`. Block implementations and demos retain their existing styles and icons.
 
 ## Theme and typography
 
@@ -18,7 +18,7 @@ All 11 source token namespaces are in `src/app/graphite-tokens.css`. The existin
 
 Source spacing names retain their literal pixel values. They are CSS variables, rather than replacements for Tailwind's numeric spacing scale: `var(--spacing-4)` is 4px, while Tailwind `p-4` retains its existing meaning. This preserves the block catalog's layout. Source colors stay constant across themes.
 
-Headings use Stack Sans Notch 400 and 500. Body text and form labels use Inter 400, 500, and 600. Buttons and code use DM Mono 400 and 500. Fonts are served locally from `public/fonts/graphite`. [fonts.json](./fonts.json) records download URLs and SHA-256 hashes. Each family has its SIL Open Font License beside its files.
+Headings use Stack Sans Notch 400 and 500. Body text, UI buttons, and form labels use Inter 400, 500, and 600. Code uses DM Mono 400 and 500. Fonts are served locally from `public/fonts/graphite`. [fonts.json](./fonts.json) records download URLs and SHA-256 hashes. Each family has its SIL Open Font License beside its files.
 
 Headings use the supplied local `-0.025em` override. The source `--tracking-tight` token remains `-0.04em`.
 
@@ -49,4 +49,4 @@ The integration adds browser coverage in `e2e/graphite.spec.ts` and updates the 
 
 Run the project checks with `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm test:e2e`, and `pnpm build`.
 
-When the Paper quota resets, the remaining source work is to retrieve JSX and computed styles for all eight artboards, cache those exports here, and reconcile each adapter's visual states. A fresh complete import cannot be claimed until that comparison is done.
+The cached Paper data records the original Graphite import. Current component styling follows Luma and does not claim to reproduce the Paper component exports.

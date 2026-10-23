@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRightIcon } from "@phosphor-icons/react/ssr";
 import Link from "next/link";
 import type { ComponentType } from "react";
 
@@ -69,7 +69,7 @@ export default function BlocksPage() {
                 {block.isNew ? (
                   <Badge variant="dot" className="absolute top-3 right-3" aria-hidden="true" />
                 ) : null}
-                <ArrowUpRight aria-hidden="true" className="shrink-0" />
+                <ArrowUpRightIcon aria-hidden="true" className="size-6 shrink-0" />
               </Link>
             </article>
           );

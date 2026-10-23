@@ -1,6 +1,7 @@
 "use client";
 
 import type { ComponentProps } from "react";
+import { CheckIcon } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 
 export function Checkbox({
@@ -20,7 +21,9 @@ export function Checkbox({
         }}
         {...props}
       />
-      <span className="ui-check-glyph" aria-hidden="true" />
+      <span className="ui-check-glyph" aria-hidden="true">
+        <CheckIcon weight="bold" />
+      </span>
     </span>
   );
 }
