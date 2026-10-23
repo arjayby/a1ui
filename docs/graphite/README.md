@@ -10,7 +10,7 @@ On October 23, 2026, Paper's read-only file overview returned eight artboards, t
 
 This is a partial source import with locally implemented component adaptations. Exact component JSX, computed styles, state variations, and any additional themes remain unverified. No measurements were taken from screenshots. The source overview now has a Kousa title, but its example text could not be checked.
 
-The confirmed values, artboard metadata, provenance, and quota responses are cached in [source.json](./source.json). The original component dimensions followed the supplied Graphite conventions. The current UI uses [shadcn Luma](https://ui.shadcn.com/docs/changelog/2026-03-luma) geometry with the Graphite palette and existing component APIs. Buttons and inputs are 36px high on desktop, with 44px touch targets on mobile. Cards and dialogs use 32px radii, inputs and menus use 24px radii, and textareas use 16px radii. UI icons use `@phosphor-icons/react`. Block implementations and demos retain their existing styles and icons.
+The confirmed values, artboard metadata, provenance, and quota responses are cached in [source.json](./source.json). The original component dimensions followed the supplied Graphite conventions. The current UI uses shadcn's `base-vega` style with the Graphite palette and Phosphor icons. Buttons and inputs are 36px high on desktop, with 44px touch targets on mobile. Cards and dialogs use 12px radii. Buttons, inputs, textareas, and menus use 6px radii. Enabled buttons use pointer cursors. Block implementations and demos retain their existing styles and icons.
 
 ## Theme and typography
 
@@ -39,7 +39,7 @@ Button supports `default`, `secondary`, `outline`, `ghost`, and `destructive` va
 
 Input, Textarea, Select, Checkbox, RadioGroupItem, and Switch use native form elements. RadioGroup is a fieldset: include a legend and give its RadioGroupItem inputs a shared `name`. Checkbox and Switch also accept `onCheckedChange(boolean)`. Their visible glyphs sit inside 44px targets. Select accepts native option children and `onChange`.
 
-Dialog, Sheet, Popover, Tabs, DropdownMenu, Tooltip, and Toast use Radix, as Fumadocs does. The related exports follow the usual compound-component pattern: Root, Trigger, Content, and relevant title, description, close, list, or item components. Tooltip needs TooltipProvider. Toast needs ToastProvider and ToastViewport. Sheet reuses Dialog's focus and dismissal behavior.
+Button, Dialog, Sheet, Popover, Tabs, DropdownMenu, Tooltip, Toast, and Collapsible use Base UI. Sidebar and Breadcrumb use Base UI's `useRender` for composition. Triggers and links accept `render` instead of `asChild`. Menu items use `onClick`. TooltipProvider accepts `delay`. Sheet reuses Dialog's focus and dismissal behavior, with `finalFocus` for the mobile sidebar's trigger. ToastViewport renders notifications added with `useToastManager().add()` inside ToastProvider.
 
 The showcase uses local state for funnel names, filters, reporting periods, and notifications. Its analytics numbers are sample data. These components are available in this repository; no new registry entries were published.
 
@@ -49,4 +49,4 @@ The integration adds browser coverage in `e2e/graphite.spec.ts` and updates the 
 
 Run the project checks with `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm test:e2e`, and `pnpm build`.
 
-The cached Paper data records the original Graphite import. Current component styling follows Luma and does not claim to reproduce the Paper component exports.
+The cached Paper data records the original Graphite import. Current component styling follows Vega and does not claim to reproduce the Paper component exports.

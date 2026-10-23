@@ -30,6 +30,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuGroup,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -54,14 +55,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Toast,
-  ToastClose,
-  ToastDescription,
-  ToastProvider,
-  ToastTitle,
-  ToastViewport,
-} from "@/components/ui/toast";
+import { ToastProvider, ToastViewport, useToastManager } from "@/components/ui/toast";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const sections = [
@@ -105,8 +99,16 @@ function Specimen({ title, children }: { title: string; children: ReactNode }) {
 }
 
 export function GraphiteShowcase() {
-  const [notification, setNotification] = useState({ id: 0, message: "" });
-  const [toastOpen, setToastOpen] = useState(false);
+  return (
+    <ToastProvider timeout={5000} limit={1}>
+      <ComponentExamples />
+      <ToastViewport />
+    </ToastProvider>
+  );
+}
+
+function ComponentExamples() {
+  const toastManager = useToastManager();
   const [attribution, setAttribution] = useState("last");
   const [funnelName, setFunnelName] = useState("Website conversion");
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -119,16 +121,15 @@ export function GraphiteShowcase() {
   const [popoverOpen, setPopoverOpen] = useState(false);
 
   function notify(message: string) {
-    setNotification((current) => ({ id: current.id + 1, message }));
-    setToastOpen(true);
+    toastManager.add({ id: "demo-notification", title: "Demo updated", description: message });
   }
 
   return (
     <>
-      <TooltipProvider delayDuration={200}>
+      <TooltipProvider delay={200}>
         <div className="graphite-showcase">
           <header>
-            <p className="graphite-eyebrow">Kousa / Luma components</p>
+            <p className="graphite-eyebrow">Kousa / Vega components</p>
             <h1>Components</h1>
             <p className="graphite-intro">
               A quiet foundation for understanding your audience. Explore traffic, visitor journeys, funnels,
@@ -142,8 +143,8 @@ export function GraphiteShowcase() {
               ))}
             </nav>
             <p className="graphite-notice">
-              Rounded controls, soft surfaces, and Phosphor icons. Luma components use the Graphite palette in
-              both light and dark themes.
+              Base UI interactions, compact controls, and Phosphor icons. Vega components use the Graphite
+              palette in both light and dark themes.
             </p>
           </header>
 
@@ -230,7 +231,7 @@ export function GraphiteShowcase() {
               </Specimen>
             </div>
             <p className="graphite-caption mt-8">
-              4px spacing base · 16 / 24 / 32px component radii · 640 / 1120 / 1280px containers · 640 / 768 /
+              4px spacing base · 4 / 6 / 12px component radii · 640 / 1120 / 1280px containers · 640 / 768 /
               1024 / 1440px breakpoints
             </p>
           </Section>
@@ -397,7 +398,7 @@ export function GraphiteShowcase() {
           <Section
             id="controls"
             title="05 / Form controls"
-            description="16px checkbox and radio glyphs, a 44 × 20px switch, and interaction targets of at least 44px."
+            description="16px checkbox and radio glyphs, a 32 × 18.4px switch, and interaction targets of at least 44px."
           >
             <div className="graphite-grid">
               <Specimen title="Checkbox">
@@ -508,11 +509,9 @@ export function GraphiteShowcase() {
             <div className="graphite-grid">
               <Specimen title="Dialog">
                 <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button variant="outline">
-                      <PlusIcon aria-hidden="true" />
-                      Create funnel
-                    </Button>
+                  <DialogTrigger render={<Button variant="outline" />}>
+                    <PlusIcon aria-hidden="true" />
+                    Create funnel
                   </DialogTrigger>
                   <DialogContent>
                     <DialogHeader>
@@ -543,9 +542,7 @@ export function GraphiteShowcase() {
                         />
                       </div>
                       <DialogFooter>
-                        <DialogClose asChild>
-                          <Button variant="ghost">Cancel</Button>
-                        </DialogClose>
+                        <DialogClose render={<Button variant="ghost" />}>Cancel</DialogClose>
                         <Button type="submit">Create funnel</Button>
                       </DialogFooter>
                     </form>
@@ -563,11 +560,9 @@ export function GraphiteShowcase() {
                     setSheetOpen(open);
                   }}
                 >
-                  <SheetTrigger asChild>
-                    <Button variant="outline">
-                      <FunnelIcon aria-hidden="true" />
-                      Journey filters
-                    </Button>
+                  <SheetTrigger render={<Button variant="outline" />}>
+                    <FunnelIcon aria-hidden="true" />
+                    Journey filters
                   </SheetTrigger>
                   <SheetContent>
                     <SheetHeader>
@@ -581,9 +576,7 @@ export function GraphiteShowcase() {
                       Exclude internal traffic
                     </Label>
                     <SheetFooter>
-                      <SheetClose asChild>
-                        <Button variant="ghost">Cancel</Button>
-                      </SheetClose>
+                      <SheetClose render={<Button variant="ghost" />}>Cancel</SheetClose>
                       <Button
                         onClick={() => {
                           setExcludeInternal(draftExcludeInternal);
@@ -608,9 +601,7 @@ export function GraphiteShowcase() {
                     setPopoverOpen(open);
                   }}
                 >
-                  <PopoverTrigger asChild>
-                    <Button variant="outline">Last {period} days</Button>
-                  </PopoverTrigger>
+                  <PopoverTrigger render={<Button variant="outline" />}>Last {period} days</PopoverTrigger>
                   <PopoverContent aria-label="Choose reporting period">
                     <div className="graphite-stack">
                       <div className="graphite-field">
@@ -625,8 +616,8 @@ export function GraphiteShowcase() {
                           <option value="90">Last 90 days</option>
                         </Select>
                       </div>
-                      <PopoverClose asChild>
-                        <Button onClick={() => setPeriod(draftPeriod)}>Apply period</Button>
+                      <PopoverClose render={<Button onClick={() => setPeriod(draftPeriod)} />}>
+                        Apply period
                       </PopoverClose>
                     </div>
                   </PopoverContent>
@@ -634,9 +625,7 @@ export function GraphiteShowcase() {
               </Specimen>
               <Specimen title="Tooltip">
                 <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button variant="outline">About unique visitors</Button>
-                  </TooltipTrigger>
+                  <TooltipTrigger render={<Button variant="outline" />}>About unique visitors</TooltipTrigger>
                   <TooltipContent>Distinct visitors during the selected reporting period.</TooltipContent>
                 </Tooltip>
                 <span className="graphite-caption">Hover or focus the button to reveal the explanation.</span>
@@ -676,22 +665,22 @@ export function GraphiteShowcase() {
               </Specimen>
               <Specimen title="Dropdown Menu">
                 <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline">
-                      Report actions
-                      <DotsThreeIcon aria-hidden="true" />
-                    </Button>
+                  <DropdownMenuTrigger render={<Button variant="outline" />}>
+                    Report actions
+                    <DotsThreeIcon aria-hidden="true" />
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="start">
-                    <DropdownMenuLabel>Kousa / Traffic overview</DropdownMenuLabel>
-                    <DropdownMenuItem onSelect={() => notify("Report duplicated in this demo.")}>
-                      <PlusIcon aria-hidden="true" />
-                      Duplicate report
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onSelect={() => notify("CSV export prepared in this demo.")}>
-                      <DownloadSimpleIcon aria-hidden="true" />
-                      Export CSV
-                    </DropdownMenuItem>
+                    <DropdownMenuGroup>
+                      <DropdownMenuLabel>Kousa / Traffic overview</DropdownMenuLabel>
+                      <DropdownMenuItem onClick={() => notify("Report duplicated in this demo.")}>
+                        <PlusIcon aria-hidden="true" />
+                        Duplicate report
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => notify("CSV export prepared in this demo.")}>
+                        <DownloadSimpleIcon aria-hidden="true" />
+                        Export CSV
+                      </DropdownMenuItem>
+                    </DropdownMenuGroup>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem disabled>Archive report / unavailable</DropdownMenuItem>
                   </DropdownMenuContent>
@@ -755,19 +744,10 @@ export function GraphiteShowcase() {
             </div>
           </Section>
           <footer className="graphite-caption">
-            Luma for Kousa · Graphite palette · Sample analytics data
+            Vega for Kousa · Graphite palette · Sample analytics data
           </footer>
         </div>
       </TooltipProvider>
-      {/* Each notification gets a fresh timer, announcement, and pause state. */}
-      <ToastProvider key={notification.id} duration={5000} swipeDirection="right">
-        <Toast open={toastOpen} onOpenChange={setToastOpen}>
-          <ToastTitle>Demo updated</ToastTitle>
-          <ToastDescription>{notification.message}</ToastDescription>
-          <ToastClose />
-        </Toast>
-        <ToastViewport />
-      </ToastProvider>
     </>
   );
 }

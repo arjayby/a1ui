@@ -6,7 +6,7 @@ test.beforeEach(async ({ page }) => {
   await expect(page.getByRole("heading", { name: "Components", exact: true })).toBeVisible();
 });
 
-test("source tokens and fonts support Luma component styles", async ({ page }) => {
+test("source tokens and fonts support Vega component styles", async ({ page }) => {
   await expect(page.locator("html")).toHaveClass(/dark/);
   const actual = await page.evaluate((tokens) => {
     const style = getComputedStyle(document.documentElement);
@@ -23,10 +23,22 @@ test("source tokens and fonts support Luma component styles", async ({ page }) =
   await expect(page.getByLabel("Website domain")).toHaveCSS("font-family", "Inter, sans-serif");
   await expect(page.getByRole("button", { name: "Create report", exact: true })).toHaveCSS(
     "border-radius",
-    "32px",
+    "6px",
   );
-  await expect(page.getByLabel("Website domain")).toHaveCSS("border-radius", "24px");
-  await expect(page.locator('[data-slot="card"]').first()).toHaveCSS("border-radius", "32px");
+  await expect(page.getByRole("button", { name: "Create report", exact: true })).toHaveCSS(
+    "cursor",
+    "pointer",
+  );
+  await expect(page.getByRole("button", { name: "Toggle Sidebar", exact: true })).toHaveCSS(
+    "cursor",
+    "pointer",
+  );
+  await expect(page.getByRole("button", { name: "Toggle block navigation", exact: true })).toHaveCSS(
+    "cursor",
+    "pointer",
+  );
+  await expect(page.getByLabel("Website domain")).toHaveCSS("border-radius", "6px");
+  await expect(page.locator('[data-slot="card"]').first()).toHaveCSS("border-radius", "12px");
   expect(
     await page.evaluate(async () => {
       const faces = [
@@ -142,8 +154,13 @@ test("tabs, menu, tooltip, and toast support keyboard use", async ({ page }) => 
   await expect(page.locator('[data-slot="toast"]')).toContainText("CSV export prepared");
   await page.getByRole("button", { name: "Dismiss notification" }).click();
   await expect(page.locator('[data-slot="toast"]')).not.toBeVisible();
-  await page.getByRole("button", { name: "About unique visitors", exact: true }).focus();
+  await page.getByRole("button", { name: "Last 30 days", exact: true }).focus();
+  await page.keyboard.press("Tab");
+  await expect(page.getByRole("button", { name: "About unique visitors", exact: true })).toBeFocused();
   await expect(page.getByRole("tooltip")).toContainText("Distinct visitors");
+  await expect(
+    page.getByRole("button", { name: "About unique visitors", exact: true }),
+  ).toHaveAccessibleDescription("Distinct visitors during the selected reporting period.");
   await page.keyboard.press("Escape");
   await expect(page.getByRole("tooltip")).not.toBeVisible();
   await page.getByRole("button", { name: "Show notification" }).click();

@@ -1,5 +1,5 @@
-/* Luma geometry and surfaces adapted to the existing component APIs and Graphite palette.
-   Reference: https://ui.shadcn.com/r/styles/radix-luma/{component}.json */
+/* Vega geometry and surfaces adapted to the existing component APIs and Graphite palette.
+   Reference: https://ui.shadcn.com/r/styles/base-vega/{component}.json */
 
 @layer components {
   .ui-button,
@@ -10,8 +10,8 @@
     justify-content: center;
     gap: 6px;
     border: 1px solid transparent;
-    border-radius: 32px;
-    padding: 0 12px;
+    border-radius: 6px;
+    padding: 0 10px;
     background: var(--primary);
     color: var(--on-primary);
     font-family: var(--font-sans), sans-serif;
@@ -57,7 +57,7 @@
   .ui-button[data-size="sm"] {
     min-height: 32px;
     gap: 4px;
-    padding-inline: var(--spacing-12);
+    padding-inline: 10px;
   }
   .ui-button[data-size="icon"],
   .ui-icon-button {
@@ -97,10 +97,10 @@
     width: 100%;
     min-width: 0;
     height: 36px;
-    border: 1px solid transparent;
-    border-radius: 24px;
-    padding: 4px 12px;
-    background: color-mix(in oklab, var(--muted) 50%, transparent);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 4px 10px;
+    background: transparent;
     color: var(--foreground);
     font-family: var(--font-sans), sans-serif;
     font-size: var(--text-sm);
@@ -109,6 +109,10 @@
       border-color 120ms ease,
       box-shadow 120ms ease,
       background-color 120ms ease;
+  }
+  .dark .ui-input,
+  .dark .ui-check-glyph {
+    background: color-mix(in oklab, var(--border) 30%, transparent);
   }
   .ui-input::placeholder {
     color: var(--muted-foreground);
@@ -124,8 +128,8 @@
   .ui-textarea {
     min-height: 64px;
     height: auto;
-    border-radius: 16px;
-    padding: 12px;
+    border-radius: 6px;
+    padding: 8px 10px;
     resize: vertical;
   }
   .ui-select {
@@ -167,9 +171,9 @@
     width: 16px;
     height: 16px;
     place-items: center;
-    border: 1px solid transparent;
-    border-radius: 5px;
-    background: color-mix(in oklab, var(--muted) 90%, transparent);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: transparent;
     pointer-events: none;
   }
   .ui-check-target:has(input:checked) .ui-check-glyph {
@@ -219,16 +223,16 @@
   }
   .ui-switch-track {
     display: flex;
-    width: 44px;
-    height: 20px;
+    width: 32px;
+    height: 18.4px;
     align-items: center;
-    border: 2px solid transparent;
+    border: 1px solid transparent;
     border-radius: 9999px;
-    background: color-mix(in oklab, var(--muted) 90%, transparent);
+    background: var(--border);
     pointer-events: none;
   }
   .ui-switch-track > span {
-    width: 24px;
+    width: 16px;
     height: 16px;
     border-radius: 9999px;
     background: var(--background);
@@ -243,18 +247,17 @@
     border-color: var(--primary);
   }
   .ui-switch-target:has(input:checked) .ui-switch-track > span {
-    transform: translateX(16px);
+    transform: translateX(14px);
     background: var(--on-primary);
   }
   .ui-card {
     min-width: 0;
-    border-radius: 32px;
+    border-radius: 12px;
     padding: var(--spacing-24);
     background: var(--card);
     box-shadow:
-      0 4px 6px -1px #0000001a,
-      0 2px 4px -2px #0000001a,
-      0 0 0 1px color-mix(in oklab, var(--foreground) 5%, transparent);
+      0 1px 2px #0000000d,
+      0 0 0 1px color-mix(in oklab, var(--foreground) 10%, transparent);
   }
   .ui-card-header {
     display: grid;
@@ -288,7 +291,7 @@
     justify-content: center;
     border: 1px solid transparent;
     min-height: 20px;
-    border-radius: 24px;
+    border-radius: 32px;
     padding: 2px 8px;
     background: var(--primary);
     color: var(--on-primary);
@@ -363,14 +366,11 @@
     max-height: calc(100dvh - 32px);
     overflow-y: auto;
     transform: translate(-50%, -50%);
-    border-radius: 32px;
+    border-radius: 12px;
     padding: var(--spacing-24);
     background: var(--card);
     color: var(--foreground);
-    box-shadow:
-      0 20px 25px -5px #0000001a,
-      0 8px 10px -6px #0000001a,
-      0 0 0 1px color-mix(in oklab, var(--foreground) 5%, transparent);
+    box-shadow: 0 0 0 1px color-mix(in oklab, var(--foreground) 5%, transparent);
   }
   .ui-dialog.ui-sheet {
     top: 0;
@@ -403,7 +403,7 @@
     width: 24px;
     min-height: 24px;
     border: 0;
-    background: var(--muted);
+    background: transparent;
   }
   .ui-dialog-footer {
     display: flex;
@@ -416,20 +416,20 @@
   .ui-menu {
     z-index: 60;
     max-width: calc(100vw - 32px);
-    border-radius: 24px;
+    border-radius: 6px;
     background: var(--card);
     color: var(--foreground);
     box-shadow:
-      0 10px 15px -3px #0000001a,
-      0 4px 6px -4px #0000001a,
-      0 0 0 1px color-mix(in oklab, var(--foreground) 5%, transparent);
+      0 4px 6px -1px #0000001a,
+      0 2px 4px -2px #0000001a,
+      0 0 0 1px color-mix(in oklab, var(--foreground) 10%, transparent);
   }
   .ui-popover {
     width: 288px;
     padding: var(--spacing-16);
   }
   .ui-tooltip {
-    border-radius: 12px;
+    border-radius: 6px;
     padding: 6px 12px;
     background: var(--foreground);
     color: var(--background);
@@ -439,18 +439,18 @@
     line-height: var(--leading-20);
   }
   .ui-menu {
-    min-width: 192px;
-    padding: 6px;
-    max-height: var(--radix-dropdown-menu-content-available-height);
+    min-width: 128px;
+    padding: 4px;
+    max-height: var(--available-height);
     overflow-y: auto;
   }
   .ui-menu-item {
     display: flex;
-    min-height: 36px;
+    min-height: 32px;
     align-items: center;
-    gap: 10px;
-    border-radius: 16px;
-    padding: var(--spacing-8) var(--spacing-12);
+    gap: 8px;
+    border-radius: 4px;
+    padding: 6px 8px;
     font-size: var(--text-sm);
     font-weight: 500;
     cursor: pointer;
@@ -473,22 +473,22 @@
     flex-wrap: wrap;
     width: fit-content;
     gap: 0;
-    border-radius: 9999px;
-    padding: 4px;
+    border-radius: 8px;
+    padding: 3px;
     background: var(--muted);
   }
   .ui-tabs-trigger {
     min-height: 28px;
     border: 1px solid transparent;
-    border-radius: 9999px;
-    padding: 4px 12px;
+    border-radius: 6px;
+    padding: 4px 8px;
     color: var(--muted-foreground);
     font-family: var(--font-sans), sans-serif;
     font-size: var(--text-sm);
     font-weight: 500;
     cursor: pointer;
   }
-  .ui-tabs-trigger[data-state="active"] {
+  .ui-tabs-trigger[data-active] {
     background: var(--background);
     color: var(--foreground);
     box-shadow: 0 1px 3px #0000001a;
@@ -504,7 +504,7 @@
     display: grid;
     gap: 2px;
     border: 1px solid var(--border);
-    border-radius: 16px;
+    border-radius: 8px;
     padding: 12px 16px;
     color: var(--foreground);
     background: var(--card);
@@ -517,7 +517,7 @@
   }
   .ui-skeleton {
     min-height: 16px;
-    border-radius: 16px;
+    border-radius: 8px;
     background: var(--muted);
     animation: ui-pulse 2s ease-in-out infinite;
   }
@@ -548,14 +548,14 @@
   }
   .ui-toast {
     position: relative;
-    border-radius: 24px;
+    border-radius: 6px;
     padding: var(--spacing-16);
     padding-right: 56px;
     background: var(--card);
     color: var(--foreground);
     box-shadow:
-      0 10px 15px -3px #0000001a,
-      0 4px 6px -4px #0000001a,
+      0 4px 6px -1px #0000001a,
+      0 2px 4px -2px #0000001a,
       0 0 0 1px color-mix(in oklab, var(--foreground) 5%, transparent);
   }
   .ui-toast-title {
@@ -570,15 +570,18 @@
     border: 0;
     background: transparent;
   }
-  .ui-toast[data-swipe="move"] {
-    transform: translateX(var(--radix-toast-swipe-move-x));
+  .ui-toast[data-swiping] {
+    transform: translateX(var(--toast-swipe-movement-x));
   }
-  .ui-toast[data-swipe="end"] {
-    transform: translateX(calc(100% + 16px));
+  .ui-toast[data-ending-style] {
+    opacity: 0;
+  }
+  .ui-toast[data-limited] {
+    display: none;
   }
 }
 
-/* Keep touch targets comfortable without changing the desktop Luma density. */
+/* Keep touch targets comfortable without changing the desktop Vega density. */
 @media (pointer: coarse), (max-width: 47.999rem) {
   .ui-button,
   .ui-button[data-size="sm"],

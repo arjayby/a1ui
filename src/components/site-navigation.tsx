@@ -92,17 +92,13 @@ export function DocsHeader() {
       <Breadcrumb className="min-w-0 flex-1">
         <BreadcrumbList className="flex-nowrap gap-2 text-xs">
           <BreadcrumbItem className="hidden md:inline-flex">
-            <BreadcrumbLink asChild>
-              <Link href="/">Documentation</Link>
-            </BreadcrumbLink>
+            <BreadcrumbLink render={<Link href="/" />}>Documentation</BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator className="hidden md:block" />
           {block ? (
             <>
               <BreadcrumbItem className="hidden sm:inline-flex">
-                <BreadcrumbLink asChild>
-                  <Link href="/blocks">Blocks</Link>
-                </BreadcrumbLink>
+                <BreadcrumbLink render={<Link href="/blocks" />}>Blocks</BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator className="hidden sm:block" />
             </>

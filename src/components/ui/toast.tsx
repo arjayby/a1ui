@@ -1,31 +1,46 @@
 "use client";
 
-import * as Primitive from "@radix-ui/react-toast";
+import { Toast as Primitive } from "@base-ui/react/toast";
 import { XIcon } from "@phosphor-icons/react";
 import type { ComponentProps } from "react";
 import { cn } from "@/lib/utils";
 
 export const ToastProvider = Primitive.Provider;
-export function Toast({ className, ...props }: ComponentProps<typeof Primitive.Root>) {
-  return <Primitive.Root data-slot="toast" className={cn("ui-toast", className)} {...props} />;
-}
-export function ToastTitle({ className, ...props }: ComponentProps<typeof Primitive.Title>) {
-  return <Primitive.Title className={cn("ui-toast-title", className)} {...props} />;
-}
-export function ToastDescription({ className, ...props }: ComponentProps<typeof Primitive.Description>) {
-  return <Primitive.Description className={cn("ui-description", className)} {...props} />;
-}
-export function ToastClose({ className, ...props }: ComponentProps<typeof Primitive.Close>) {
-  return (
-    <Primitive.Close
-      aria-label="Dismiss notification"
-      className={cn("ui-icon-button ui-toast-close", className)}
-      {...props}
-    >
-      <XIcon aria-hidden="true" />
-    </Primitive.Close>
-  );
-}
+export const useToastManager = Primitive.useToastManager;
+
 export function ToastViewport({ className, ...props }: ComponentProps<typeof Primitive.Viewport>) {
-  return <Primitive.Viewport className={cn("ui-toast-viewport", className)} {...props} />;
+  const { toasts } = useToastManager();
+
+  return (
+    <Primitive.Portal>
+      <Primitive.Viewport
+        className={(state) =>
+          cn("ui-toast-viewport", typeof className === "function" ? className(state) : className)
+        }
+        {...props}
+      >
+        {toasts.map((toast) => (
+          <Primitive.Root
+            key={toast.id}
+            toast={toast}
+            data-slot="toast"
+            className="ui-toast"
+            swipeDirection="right"
+          >
+            <Primitive.Content>
+              <Primitive.Title className="ui-toast-title">{toast.title}</Primitive.Title>
+              <Primitive.Description className="ui-description">{toast.description}</Primitive.Description>
+              <Primitive.Close
+                aria-label="Dismiss notification"
+                aria-hidden={false}
+                className="ui-icon-button ui-toast-close"
+              >
+                <XIcon aria-hidden="true" />
+              </Primitive.Close>
+            </Primitive.Content>
+          </Primitive.Root>
+        ))}
+      </Primitive.Viewport>
+    </Primitive.Portal>
+  );
 }

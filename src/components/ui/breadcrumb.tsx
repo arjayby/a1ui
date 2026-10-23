@@ -1,6 +1,9 @@
+"use client";
+
 import * as React from "react";
 import { cn } from "@/lib/utils";
-import { Slot } from "@radix-ui/react-slot";
+import { mergeProps } from "@base-ui/react/merge-props";
+import { useRender } from "@base-ui/react/use-render";
 import { CaretRightIcon, DotsThreeIcon } from "@phosphor-icons/react";
 
 function Breadcrumb({ className, ...props }: React.ComponentProps<"nav">) {
@@ -30,22 +33,13 @@ function BreadcrumbItem({ className, ...props }: React.ComponentProps<"li">) {
   );
 }
 
-function BreadcrumbLink({
-  asChild,
-  className,
-  ...props
-}: React.ComponentProps<"a"> & {
-  asChild?: boolean;
-}) {
-  const Comp = asChild ? Slot : "a";
-
-  return (
-    <Comp
-      data-slot="breadcrumb-link"
-      className={cn("hover:text-foreground transition-colors", className)}
-      {...props}
-    />
-  );
+function BreadcrumbLink({ render, className, ...props }: useRender.ComponentProps<"a">) {
+  return useRender({
+    defaultTagName: "a",
+    render,
+    props: mergeProps<"a">({ className: cn("hover:text-foreground transition-colors", className) }, props),
+    state: { slot: "breadcrumb-link" },
+  });
 }
 
 function BreadcrumbPage({ className, ...props }: React.ComponentProps<"span">) {

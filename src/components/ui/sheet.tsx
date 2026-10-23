@@ -19,5 +19,11 @@ export function SheetContent({
   side = "right",
   ...props
 }: ComponentProps<typeof DialogContent> & { side?: "left" | "right" }) {
-  return <DialogContent data-side={side} className={cn("ui-sheet", className)} {...props} />;
+  return (
+    <DialogContent
+      data-side={side}
+      className={(state) => cn("ui-sheet", typeof className === "function" ? className(state) : className)}
+      {...props}
+    />
+  );
 }

@@ -1,3 +1,6 @@
+"use client";
+
+import { Button as ButtonPrimitive } from "@base-ui/react/button";
 import type { ComponentProps } from "react";
 import { cn } from "@/lib/utils";
 
@@ -7,17 +10,17 @@ export function Button({
   size = "default",
   type = "button",
   ...props
-}: ComponentProps<"button"> & {
+}: ComponentProps<typeof ButtonPrimitive> & {
   variant?: "default" | "secondary" | "outline" | "ghost" | "destructive";
   size?: "default" | "sm" | "icon";
 }) {
   return (
-    <button
+    <ButtonPrimitive
       type={type}
       data-slot="button"
       data-variant={variant}
       data-size={size}
-      className={cn("ui-button", className)}
+      className={(state) => cn("ui-button", typeof className === "function" ? className(state) : className)}
       {...props}
     />
   );

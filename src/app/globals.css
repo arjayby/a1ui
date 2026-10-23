@@ -134,6 +134,11 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+button:where(:not(:disabled, [aria-disabled="true"], [data-disabled])),
+[role="button"]:where(:not([aria-disabled="true"], [data-disabled])) {
+  cursor: pointer;
+}
+
 button:where(:not([data-slot="button"], [data-slot="tabs-trigger"])) {
   font-family: var(--font-button), monospace;
 }
@@ -169,7 +174,7 @@ h6 {
 
 [data-sidebar="sidebar"] :is([data-sidebar="menu-button"], [data-sidebar="menu-sub-button"]) {
   height: 32px;
-  border-radius: 16px;
+  border-radius: 6px;
   color: var(--muted-foreground);
   font-family: var(--font-sans), sans-serif;
   font-size: var(--text-xs);
@@ -180,8 +185,7 @@ h6 {
   color: var(--foreground);
 }
 
-[data-sidebar="sidebar"]
-  :is([data-sidebar="menu-button"], [data-sidebar="menu-sub-button"])[data-active="true"] {
+[data-sidebar="sidebar"] :is([data-sidebar="menu-button"], [data-sidebar="menu-sub-button"])[data-active] {
   background: var(--primary);
   color: var(--on-primary);
 }
