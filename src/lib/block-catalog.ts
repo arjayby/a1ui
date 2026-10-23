@@ -1,6 +1,6 @@
 import registry from "../../registry.json";
 
-const newlyShippedSlugs = new Set(["compare-curtain", "ascii-lens"]);
+const newlyShippedSlugs = new Set<string>();
 
 // The website and agent catalog share the registry's names and descriptions.
 export const blocks = registry.items
