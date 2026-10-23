@@ -2,7 +2,7 @@ import type { CSSProperties } from "react";
 
 import { PeelStack, type PeelStackItem } from "@/registry/blocks/peel-stack";
 
-function PaperArtwork({ variant }: { variant: "form" | "material" | "sound" }) {
+function PaperArtwork({ variant }: { variant: "form" | "material" | "sound" | "light" | "motion" }) {
   return (
     <svg
       viewBox="0 0 220 180"
@@ -10,9 +10,17 @@ function PaperArtwork({ variant }: { variant: "form" | "material" | "sound" }) {
       stroke="currentColor"
       strokeWidth="0.85"
       aria-hidden="true"
-      className="absolute top-7 -right-6 h-[78%] w-[78%] text-[var(--peel-stack-foreground)] opacity-55"
+      className="absolute top-7 -right-6 h-[78%] w-[78%] text-[var(--peel-stack-foreground)] opacity-35"
     >
       {Array.from({ length: 11 }, (_, index) => {
+        if (variant === "light") {
+          return <path key={index} d={`M110 150 ${30 + index * 16} 30`} />;
+        }
+        if (variant === "motion") {
+          return (
+            <path key={index} d={`M20 ${40 + index * 9} Q110 ${-20 + index * 14} 200 ${40 + index * 9}`} />
+          );
+        }
         if (variant === "material") {
           const size = 35 + index * 9;
           return (
@@ -46,23 +54,37 @@ const studies: PeelStackItem[] = [
   {
     id: "form",
     title: "Form studies",
-    description: "12 experiments / 2026",
-    label: "A1 / Studies",
+    description: "Explorations in shape and balance",
+    label: "Studies",
     artwork: <PaperArtwork variant="form" />,
   },
   {
     id: "material",
     title: "Material notes",
-    description: "08 textures / 2026",
-    label: "A1 / Archive",
+    description: "A collection of surfaces and textures",
+    label: "Archive",
     artwork: <PaperArtwork variant="material" />,
   },
   {
     id: "sound",
     title: "Field recordings",
-    description: "24 moments / 2026",
-    label: "A1 / Sound",
+    description: "Sounds gathered from everyday places",
+    label: "Sound",
     artwork: <PaperArtwork variant="sound" />,
+  },
+  {
+    id: "light",
+    title: "Light studies",
+    description: "Patterns of shadow and reflection",
+    label: "Light",
+    artwork: <PaperArtwork variant="light" />,
+  },
+  {
+    id: "motion",
+    title: "Motion sketches",
+    description: "Small experiments in rhythm and movement",
+    label: "Motion",
+    artwork: <PaperArtwork variant="motion" />,
   },
 ];
 
@@ -71,6 +93,7 @@ export function PeelStackPreview() {
     <div aria-hidden="true" inert className="h-full">
       <PeelStack
         items={studies}
+        showControls={false}
         className="h-full"
         style={
           {
@@ -90,10 +113,10 @@ export function PeelStackDemo() {
   return (
     <>
       <div className="not-prose demo-frame">
-        <PeelStack items={studies} ariaLabel="Design studies" />
+        <PeelStack items={studies} ariaLabel="Design studies" showControls={false} />
       </div>
-      <p className="demo-caption">
-        Swipe a card or use the arrows to cycle the stack. Focus the stack and use Left, Right, Home, or End.
+      <p className="demo-caption text-center">
+        Swipe a card to cycle the stack. Focus the stack and use Left, Right, Home, or End.
       </p>
     </>
   );

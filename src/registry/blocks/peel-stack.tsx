@@ -1,7 +1,7 @@
 "use client";
 
 import { clsx as cn } from "clsx";
-import { useEffect, useId, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { useCallback, useEffect, useId, useRef, useState, type CSSProperties, type ReactNode } from "react";
 
 export interface PeelStackItem {
   /** Stable, unique identifier. */
@@ -23,6 +23,7 @@ export interface PeelStackProps {
   ariaLabel?: string;
   previousLabel?: string;
   nextLabel?: string;
+  showControls?: boolean;
   className?: string;
   style?: CSSProperties;
 }
@@ -47,12 +48,18 @@ export function PeelStack({
   ariaLabel = "Peel Stack",
   previousLabel = "Previous card",
   nextLabel = "Next card",
+  showControls = true,
   className,
   style,
 }: PeelStackProps) {
   const viewportId = useId();
   const viewportRef = useRef<HTMLDivElement>(null);
-  const gestureRef = useRef<{ pointerId: number; x: number; y: number } | null>(null);
+  const gestureRef = useRef<{
+    kind: "pending" | "swiping";
+    pointerId: number;
+    x: number;
+    y: number;
+  } | null>(null);
   const [selectedId, setSelectedId] = useState(defaultActiveId ?? items[0]?.id);
   const controlled = activeId !== undefined;
   const currentIndex = Math.max(
@@ -60,6 +67,10 @@ export function PeelStack({
     items.findIndex((item) => item.id === (activeId ?? selectedId)),
   );
   const current = items[currentIndex];
+  const resetGesture = useCallback(() => {
+    gestureRef.current = null;
+    viewportRef.current?.removeAttribute("data-swiping");
+  }, []);
 
   // Keep the selection attached to its item when the list is reordered. Once
   // an uncontrolled selection is removed, start from the new first item.
@@ -74,8 +85,8 @@ export function PeelStack({
     ) {
       viewportRef.current.focus({ preventScroll: true });
     }
-    gestureRef.current = null;
-  }, [current?.id]);
+    resetGesture();
+  }, [current?.id, resetGesture]);
 
   function select(index: number) {
     if (items.length < 2) return;
@@ -93,7 +104,7 @@ export function PeelStack({
       aria-label={ariaLabel}
       aria-roledescription="carousel"
       className={cn(
-        "[container-type:inline-size] relative isolate w-full overflow-hidden bg-[var(--peel-stack-background)] font-mono text-[var(--peel-stack-foreground)]",
+        "[container-type:inline-size] relative isolate w-full overflow-hidden bg-[var(--peel-stack-background)] font-sans text-[var(--peel-stack-foreground)]",
         className,
       )}
       style={{ ...theme, ...style }}
@@ -105,7 +116,7 @@ export function PeelStack({
         aria-label="Stack cards. Use the left and right arrow keys to browse."
         tabIndex={0}
         data-slot="peel-stack-viewport"
-        className="relative grid h-[var(--peel-stack-stage-height,21rem)] touch-pan-y place-items-center outline-none focus-visible:ring-1 focus-visible:ring-[var(--peel-stack-foreground)] focus-visible:ring-inset"
+        className="relative grid h-[var(--peel-stack-stage-height,21rem)] touch-pan-y place-items-center outline-none focus-visible:ring-1 focus-visible:ring-[var(--peel-stack-foreground)] focus-visible:ring-inset data-[swiping=true]:cursor-grabbing data-[swiping=true]:select-none"
         onKeyDown={(event) => {
           if (event.target !== event.currentTarget || event.altKey || event.ctrlKey || event.metaKey) return;
           const destinations: Record<string, number> = {
@@ -126,13 +137,38 @@ export function PeelStack({
             (event.target instanceof Element && event.target.closest(interactiveSelector))
           )
             return;
-          gestureRef.current = { pointerId: event.pointerId, x: event.clientX, y: event.clientY };
-          event.currentTarget.setPointerCapture(event.pointerId);
+          gestureRef.current = {
+            kind: "pending",
+            pointerId: event.pointerId,
+            x: event.clientX,
+            y: event.clientY,
+          };
+        }}
+        onPointerMove={(event) => {
+          const gesture = gestureRef.current;
+          if (!gesture || event.pointerId !== gesture.pointerId) return;
+          const x = Math.abs(event.clientX - gesture.x);
+          const y = Math.abs(event.clientY - gesture.y);
+          if (gesture.kind === "pending") {
+            if (y >= 8 && y > x * 1.25) {
+              resetGesture();
+              return;
+            }
+            if (x < 8 || x <= y * 1.25) return;
+            gesture.kind = "swiping";
+            event.currentTarget.dataset.swiping = "true";
+            event.currentTarget.setPointerCapture(event.pointerId);
+          }
+          event.preventDefault();
+          const selection = event.currentTarget.ownerDocument.getSelection();
+          if (selection?.anchorNode && event.currentTarget.contains(selection.anchorNode)) {
+            selection.removeAllRanges();
+          }
         }}
         onPointerUp={(event) => {
           const gesture = gestureRef.current;
           if (!gesture || event.pointerId !== gesture.pointerId) return;
-          gestureRef.current = null;
+          resetGesture();
           if (event.currentTarget.hasPointerCapture(event.pointerId)) {
             event.currentTarget.releasePointerCapture(event.pointerId);
           }
@@ -142,11 +178,9 @@ export function PeelStack({
             select(currentIndex + (x < 0 ? 1 : -1));
           }
         }}
-        onPointerCancel={() => {
-          gestureRef.current = null;
-        }}
-        onLostPointerCapture={() => {
-          gestureRef.current = null;
+        onPointerCancel={resetGesture}
+        onLostPointerCapture={(event) => {
+          if (event.target === event.currentTarget) resetGesture();
         }}
         onDragStart={(event) => {
           if (!(event.target instanceof Element && event.target.closest(interactiveSelector))) {
@@ -161,11 +195,11 @@ export function PeelStack({
         {items.map((item, index) => {
           const order = (index - currentIndex + items.length) % items.length;
           const active = order === 0;
+          const layer = Math.min(2, Math.ceil(order / 2));
+          const side = order % 2 === 1 ? 1 : -1;
           const transform = active
             ? "translate(0, -6px) rotate(-2deg)"
-            : order === 1
-              ? "translate(7%, 10px) rotate(var(--peel-stack-spread, 8deg))"
-              : "translate(-7%, 16px) rotate(calc(var(--peel-stack-spread, 8deg) * -1))";
+            : `translate(${side * (3 + layer * 2)}%, ${layer * 10 + side * -2}px) rotate(calc(var(--peel-stack-spread, 8deg) * ${side * (0.5 + layer * 0.5)})) scale(${1.1 - layer * 0.1})`;
 
           return (
             <div
@@ -178,16 +212,13 @@ export function PeelStack({
               data-peel-stack-card={item.id}
               data-active={active}
               className={cn(
-                "absolute flex h-[var(--peel-stack-card-height,13.5rem)] w-[min(70%,var(--peel-stack-card-width,20rem))] origin-[50%_90%] flex-col overflow-hidden rounded-[var(--peel-stack-radius,var(--radius,0.25rem))] border border-[var(--peel-stack-border)] p-[clamp(0.875rem,4cqw,1.25rem)] shadow-[0_5px_16px_color-mix(in_oklab,var(--peel-stack-foreground)_8%,transparent)] transition-[transform,opacity,background-color] duration-500 ease-[cubic-bezier(0.22,0.8,0.22,1)] motion-reduce:transition-none",
+                "absolute flex h-[var(--peel-stack-card-height,13.5rem)] w-[min(70%,var(--peel-stack-card-width,20rem))] origin-[50%_90%] flex-col overflow-hidden rounded-[var(--peel-stack-radius,12px)] border border-[var(--peel-stack-border)] p-[clamp(0.875rem,4cqw,1.25rem)] shadow-[0_5px_16px_color-mix(in_oklab,var(--peel-stack-foreground)_8%,transparent)] transition-[transform,opacity,background-color] duration-500 ease-[cubic-bezier(0.22,0.8,0.22,1)] motion-reduce:transition-none",
                 active ? "bg-[var(--peel-stack-paper)]" : "pointer-events-none bg-[var(--peel-stack-shade)]",
               )}
-              style={{ transform, zIndex: items.length - order, opacity: order < 3 ? 1 : 0 }}
+              style={{ transform, zIndex: items.length - order, opacity: order < 5 ? 1 : 0 }}
             >
-              <div className="relative z-10 flex items-start justify-between gap-3 text-[length:var(--peel-stack-label-size,0.625rem)] leading-tight text-[var(--peel-stack-muted)]">
-                <span className="min-w-0 truncate uppercase">{item.label ?? "Collection"}</span>
-                <span aria-hidden="true" className="shrink-0 tabular-nums">
-                  {String(index + 1).padStart(2, "0")}
-                </span>
+              <div className="relative z-10 font-mono text-[length:var(--peel-stack-label-size,0.75rem)] leading-4 tracking-[0.08em] text-[var(--peel-stack-muted)]">
+                <span className="block truncate uppercase">{item.label ?? "Collection"}</span>
               </div>
               {item.artwork ? (
                 <div
@@ -204,11 +235,11 @@ export function PeelStack({
                   active ? "bg-[var(--peel-stack-paper)]" : "bg-[var(--peel-stack-shade)]",
                 )}
               >
-                <span className="text-[length:var(--peel-stack-title-size,clamp(0.9375rem,3.5cqw,1.1875rem))] leading-tight tracking-tight [overflow-wrap:anywhere]">
+                <span className="font-[family-name:var(--font-heading,inherit)] text-[length:var(--peel-stack-title-size,clamp(1.25rem,3.5cqw,1.5rem))] leading-tight font-normal tracking-[-0.025em] [overflow-wrap:anywhere]">
                   {item.title}
                 </span>
                 {item.description ? (
-                  <span className="text-[length:var(--peel-stack-label-size,0.625rem)] leading-relaxed [overflow-wrap:anywhere] text-[var(--peel-stack-muted)]">
+                  <span className="text-[length:var(--peel-stack-label-size,0.75rem)] leading-relaxed [overflow-wrap:anywhere] text-[var(--peel-stack-muted)]">
                     {item.description}
                   </span>
                 ) : null}
@@ -219,18 +250,11 @@ export function PeelStack({
         })}
       </div>
 
-      <div className="relative flex min-h-16 items-center justify-between gap-2 border-t border-[var(--peel-stack-border)] px-[clamp(0.75rem,4cqw,1.25rem)]">
-        <div
-          role="status"
-          aria-atomic="true"
-          className="flex min-w-0 flex-col gap-1 py-3 text-[length:var(--peel-stack-label-size,0.625rem)] leading-snug text-[var(--peel-stack-muted)]"
-        >
-          <span className="tabular-nums">
-            {String(currentIndex + 1).padStart(2, "0")} / {String(items.length).padStart(2, "0")}
-          </span>
-          <span className="truncate">{current.title}</span>
-        </div>
-        <div className="flex shrink-0 gap-1">
+      <div role="status" aria-atomic="true" className="sr-only">
+        {current.title}, {currentIndex + 1} of {items.length}
+      </div>
+      {showControls ? (
+        <div className="relative flex min-h-16 items-center justify-end gap-1 border-t border-[var(--peel-stack-border)] px-[clamp(0.75rem,4cqw,1.25rem)]">
           {([-1, 1] as const).map((direction) => (
             <button
               key={direction}
@@ -239,7 +263,7 @@ export function PeelStack({
               aria-controls={viewportId}
               disabled={items.length < 2}
               onClick={() => select(currentIndex + direction)}
-              className="grid size-11 cursor-pointer place-items-center rounded-sm border border-[var(--peel-stack-border)] bg-[var(--peel-stack-paper)] transition-colors hover:bg-[var(--peel-stack-shade)] focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-[var(--peel-stack-foreground)] disabled:cursor-default disabled:opacity-30 motion-reduce:transition-none"
+              className="grid size-11 cursor-pointer place-items-center rounded-md border border-[var(--peel-stack-border)] bg-[var(--peel-stack-paper)] transition-colors hover:bg-[var(--peel-stack-shade)] focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-[var(--peel-stack-foreground)] disabled:cursor-default disabled:opacity-30 motion-reduce:transition-none"
             >
               <svg
                 aria-hidden="true"
@@ -254,7 +278,7 @@ export function PeelStack({
             </button>
           ))}
         </div>
-      </div>
+      ) : null}
     </section>
   );
 }

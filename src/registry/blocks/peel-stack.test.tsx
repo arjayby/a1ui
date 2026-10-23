@@ -17,7 +17,7 @@ function viewport() {
 
 function pointer(
   target: HTMLElement,
-  type: "pointerdown" | "pointerup" | "pointercancel" | "lostpointercapture",
+  type: "pointerdown" | "pointermove" | "pointerup" | "pointercancel" | "lostpointercapture",
   x: number,
   y = 50,
   pointerId = 1,
@@ -39,11 +39,11 @@ describe("PeelStack", () => {
   it("loops forward and backward, announces the card, and calls back once per change", () => {
     const onActiveChange = vi.fn();
     render(<PeelStack items={items} onActiveChange={onActiveChange} />);
-    expect(screen.getByRole("status")).toHaveTextContent("01 / 03Form studies");
+    expect(screen.getByRole("status")).toHaveTextContent("Form studies, 1 of 3");
     fireEvent.click(screen.getByRole("button", { name: "Previous card" }));
-    expect(screen.getByRole("status")).toHaveTextContent("03 / 03Field recordings");
+    expect(screen.getByRole("status")).toHaveTextContent("Field recordings, 3 of 3");
     fireEvent.click(screen.getByRole("button", { name: "Next card" }));
-    expect(screen.getByRole("status")).toHaveTextContent("01 / 03Form studies");
+    expect(screen.getByRole("status")).toHaveTextContent("Form studies, 1 of 3");
     expect(onActiveChange.mock.calls).toEqual([["sound"], ["form"]]);
   });
 
@@ -66,11 +66,11 @@ describe("PeelStack", () => {
       <PeelStack items={items} defaultActiveId="material" onActiveChange={onActiveChange} />,
     );
     rerender(<PeelStack items={[items[1], items[2], items[0]]} onActiveChange={onActiveChange} />);
-    expect(screen.getByRole("status")).toHaveTextContent("01 / 03Material notes");
+    expect(screen.getByRole("status")).toHaveTextContent("Material notes, 1 of 3");
     rerender(<PeelStack items={[items[2], items[0]]} onActiveChange={onActiveChange} />);
-    expect(screen.getByRole("status")).toHaveTextContent("01 / 02Field recordings");
+    expect(screen.getByRole("status")).toHaveTextContent("Field recordings, 1 of 2");
     rerender(<PeelStack items={items} onActiveChange={onActiveChange} />);
-    expect(screen.getByRole("status")).toHaveTextContent("03 / 03Field recordings");
+    expect(screen.getByRole("status")).toHaveTextContent("Field recordings, 3 of 3");
     expect(onActiveChange).not.toHaveBeenCalled();
   });
 
@@ -83,12 +83,12 @@ describe("PeelStack", () => {
     rerender(<PeelStack items={[]} onActiveChange={onActiveChange} />);
     expect(container).toBeEmptyDOMElement();
     rerender(<PeelStack items={[items[2]]} onActiveChange={onActiveChange} />);
-    expect(screen.getByRole("status")).toHaveTextContent("01 / 01Field recordings");
+    expect(screen.getByRole("status")).toHaveTextContent("Field recordings, 1 of 1");
     for (const button of screen.getAllByRole("button")) expect(button).toBeDisabled();
     fireEvent.keyDown(viewport(), { key: "ArrowRight" });
     expect(onActiveChange).not.toHaveBeenCalled();
     rerender(<PeelStack items={items} onActiveChange={onActiveChange} />);
-    expect(screen.getByRole("status")).toHaveTextContent("03 / 03Field recordings");
+    expect(screen.getByRole("status")).toHaveTextContent("Field recordings, 3 of 3");
   });
 
   it("supports keyboard navigation without taking arrow keys from content controls", () => {
@@ -132,6 +132,34 @@ describe("PeelStack", () => {
     pointer(stage, "pointerdown", 90);
     pointer(stage, "pointerup", 160);
     expect(screen.getByRole("status")).toHaveTextContent("Form studies");
+  });
+
+  it("clears selection only during a swipe and restores it after release or cancellation", () => {
+    render(<PeelStack items={items} showControls={false} />);
+    const stage = enablePointerCapture();
+    const selection = document.getSelection();
+    const range = document.createRange();
+    range.selectNodeContents(screen.getByText("Form studies", { selector: "span" }));
+    selection?.removeAllRanges();
+    selection?.addRange(range);
+    expect(selection?.toString()).toBe("Form studies");
+    pointer(stage, "pointerdown", 160);
+    pointer(stage, "pointermove", 157);
+    expect(stage).not.toHaveAttribute("data-swiping");
+    expect(selection?.toString()).toBe("Form studies");
+    pointer(stage, "pointermove", 140);
+    expect(stage).toHaveAttribute("data-swiping", "true");
+    expect(selection?.toString()).toBe("");
+    pointer(stage, "pointerup", 90);
+    expect(stage).not.toHaveAttribute("data-swiping");
+    expect(screen.getByRole("status")).toHaveTextContent("Material notes");
+
+    pointer(stage, "pointerdown", 160);
+    pointer(stage, "pointermove", 140);
+    pointer(stage, "pointercancel", 140);
+    expect(stage).not.toHaveAttribute("data-swiping");
+    expect(screen.getByRole("status")).toHaveTextContent("Material notes");
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
   });
 
   it("ignores taps, vertical gestures, interrupted gestures, and another pointer's release", () => {

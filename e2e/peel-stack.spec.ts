@@ -5,25 +5,30 @@ test.beforeEach(async ({ page }) => {
   await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
 });
 
-test("buttons and keyboard cycle the stack and expose only the selected card", async ({ page }) => {
+test("five cards support keyboard navigation without visible numbering or controls", async ({ page }) => {
   const stack = page.getByRole("region", { name: "Design studies" });
   const stage = stack.getByRole("group", { name: /^Stack cards/ });
-  await expect(stack.getByRole("status")).toHaveText("01 / 03Form studies");
-  await stack.getByRole("button", { name: "Previous card" }).click();
-  await expect(stack.getByRole("status")).toHaveText("03 / 03Field recordings");
-  await stack.getByRole("button", { name: "Next card" }).click();
-  await expect(stack.getByRole("status")).toHaveText("01 / 03Form studies");
+  await expect(stack.locator("[data-peel-stack-card]")).toHaveCount(5);
+  for (const card of await stack.locator("[data-peel-stack-card]").all()) {
+    await expect(card).toHaveCSS("opacity", "1");
+  }
+  await expect(stack.getByRole("button")).toHaveCount(0);
+  await expect(stack.getByRole("status")).toHaveClass("sr-only");
+  await expect(stack.getByRole("status")).toHaveText("Form studies, 1 of 5");
   await stage.focus();
+  await stage.press("ArrowLeft");
+  await expect(stack.getByRole("status")).toHaveText("Motion sketches, 5 of 5");
   await stage.press("ArrowRight");
-  await expect(stack.getByRole("status")).toHaveText("02 / 03Material notes");
-  await expect(stack.getByRole("group", { name: "Material notes, 2 of 3", exact: true })).toBeVisible();
-  await expect(stack.getByRole("group", { name: "Form studies, 1 of 3", exact: true })).toHaveCount(0);
+  await expect(stack.getByRole("status")).toHaveText("Form studies, 1 of 5");
+  await stage.press("ArrowRight");
+  await expect(stack.getByRole("status")).toHaveText("Material notes, 2 of 5");
+  await expect(stack.getByRole("group", { name: "Material notes, 2 of 5", exact: true })).toBeVisible();
+  await expect(stack.getByRole("group", { name: "Form studies, 1 of 5", exact: true })).toHaveCount(0);
   await stage.press("End");
-  await expect(stack.getByRole("status")).toHaveText("03 / 03Field recordings");
+  await expect(stack.getByRole("status")).toHaveText("Motion sketches, 5 of 5");
   await stage.press("Home");
-  await expect(stack.getByRole("status")).toHaveText("01 / 03Form studies");
-  await stage.press("Tab");
-  await expect(stack.getByRole("button", { name: "Previous card" })).toBeFocused();
+  await expect(stack.getByRole("status")).toHaveText("Form studies, 1 of 5");
+  await expect(page.locator(".demo-caption")).toHaveCSS("text-align", "center");
 });
 
 test("a horizontal drag cycles on release while taps keep the current card", async ({ page }) => {
@@ -34,13 +39,35 @@ test("a horizontal drag cycles on release while taps keep the current card", asy
   const x = bounds.x + bounds.width / 2;
   const y = bounds.y + bounds.height / 2;
   await page.mouse.click(x, y);
-  await expect(stack.getByRole("status")).toHaveText("01 / 03Form studies");
+  await expect(stack.getByRole("status")).toHaveText("Form studies, 1 of 5");
   await page.mouse.move(x, y);
   await page.mouse.down();
   await page.mouse.move(x - 80, y, { steps: 8 });
-  await expect(stack.getByRole("status")).toHaveText("01 / 03Form studies");
+  await expect(stack.getByRole("status")).toHaveText("Form studies, 1 of 5");
   await page.mouse.up();
-  await expect(stack.getByRole("status")).toHaveText("02 / 03Material notes");
+  await expect(stack.getByRole("status")).toHaveText("Material notes, 2 of 5");
+});
+
+test("swiping over text clears highlights and ordinary text selection still works", async ({ page }) => {
+  const stack = page.getByRole("region", { name: "Design studies" });
+  const stage = stack.locator('[data-slot="peel-stack-viewport"]');
+  const title = stack.locator('[data-active="true"]').getByText("Form studies", { exact: true });
+  await title.dblclick();
+  await expect.poll(() => page.evaluate(() => window.getSelection()?.toString())).not.toBe("");
+  const bounds = (await title.boundingBox())!;
+  const x = bounds.x + bounds.width / 2;
+  const y = bounds.y + bounds.height / 2;
+  await page.mouse.move(x, y);
+  await page.mouse.down();
+  await page.mouse.move(x - 80, y, { steps: 12 });
+  await expect(stage).toHaveCSS("user-select", "none");
+  await expect.poll(() => page.evaluate(() => window.getSelection()?.toString())).toBe("");
+  await page.mouse.up();
+  await expect(stage).not.toHaveAttribute("data-swiping");
+  await expect(stage).toHaveCSS("user-select", "auto");
+  await expect(stack.getByRole("status")).toHaveText("Material notes, 2 of 5");
+  await stack.locator('[data-active="true"]').getByText("Material notes", { exact: true }).dblclick();
+  await expect.poll(() => page.evaluate(() => window.getSelection()?.toString())).not.toBe("");
 });
 
 test("cards fit a narrow screen in both themes and respect reduced motion", async ({ page }) => {
@@ -62,7 +89,7 @@ test("cards fit a narrow screen in both themes and respect reduced motion", asyn
     }
     const active = stack.locator('[data-active="true"]');
     expect(await active.evaluate((element) => element.scrollHeight <= element.clientHeight)).toBe(true);
-    await stack.getByRole("button", { name: "Next card" }).click();
+    await stack.getByRole("group", { name: /^Stack cards/ }).press("ArrowRight");
   }
 });
 
@@ -90,7 +117,7 @@ test("touch swipes cycle cards and canceled touches preserve selection", async (
       touchPoints: [],
     });
     await expect(stack.getByRole("status")).toHaveText(
-      cancel ? "01 / 03Form studies" : "02 / 03Material notes",
+      cancel ? "Form studies, 1 of 5" : "Material notes, 2 of 5",
     );
   }
   await context.close();

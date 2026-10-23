@@ -25,25 +25,37 @@ const collections = [
   {
     id: "form",
     title: "Form studies",
-    description: "12 experiments / 2026",
-    label: "A1 / Studies",
+    description: "Explorations in shape and balance",
+    label: "Studies",
   },
   {
     id: "material",
     title: "Material notes",
-    description: "08 textures / 2026",
-    label: "A1 / Archive",
+    description: "A collection of surfaces and textures",
+    label: "Archive",
   },
   {
     id: "sound",
     title: "Field recordings",
-    description: "24 moments / 2026",
-    label: "A1 / Sound",
+    description: "Sounds gathered from everyday places",
+    label: "Sound",
+  },
+  {
+    id: "light",
+    title: "Light studies",
+    description: "Patterns of shadow and reflection",
+    label: "Light",
+  },
+  {
+    id: "motion",
+    title: "Motion sketches",
+    description: "Small experiments in rhythm and movement",
+    label: "Motion",
   },
 ];
 
 export function Collections() {
-  return <PeelStack items={collections} ariaLabel="Design collections" />;
+  return <PeelStack items={collections} ariaLabel="Design collections" showControls={false} />;
 }
 ```
 
@@ -64,6 +76,7 @@ export function Collections() {
 | `ariaLabel`       | `string`               | `"Peel Stack"`    | Accessible name for the carousel.                       |
 | `previousLabel`   | `string`               | `"Previous card"` | Accessible name for the previous button.                |
 | `nextLabel`       | `string`               | `"Next card"`     | Accessible name for the next button.                    |
+| `showControls`    | `boolean`              | `true`            | Shows the optional previous and next buttons.           |
 | `className`       | `string`               | None              | Outer layout classes.                                   |
 | `style`           | `CSSProperties`        | None              | Inline styles and component theme tokens.               |
 
@@ -71,11 +84,11 @@ export function Collections() {
 
 Each item needs a stable, unique `id` and a `title`. Optional `label` text appears at the top of the card and defaults to `"Collection"`. `description` appears below the title. `artwork` accepts decorative React content behind the text; its contents are hidden from assistive technology and cannot receive focus. Use `content` for links or other interactive content below the description. The demo's line drawings are separate from the installable component.
 
-The stack shows up to three layers and loops in both directions. A single card disables both navigation buttons. Selection follows the item's ID when the list is reordered. If the selected ID no longer exists, the first card is shown. An uncontrolled stack keeps that fallback selection even if the removed card is later restored. Prop changes do not fire `onActiveChange`.
+The stack shows up to five layers and loops in both directions. Cards fan out on both sides so each layer remains visible. A single card disables both navigation buttons. Selection follows the item's ID when the list is reordered. If the selected ID no longer exists, the first card is shown. An uncontrolled stack keeps that fallback selection even if the removed card is later restored. Prop changes do not fire `onActiveChange`.
 
-Focus the stack to use Left and Right, or Home and End to select the first and last cards. Arrow keys inside your own controls keep their usual behavior. Horizontal swipes move one card on release; taps, vertical gestures, and canceled gestures keep the selection. Links and controls inside a card do not start a swipe. Only the active card is exposed to assistive technology and keyboard focus. The counter announces selection changes. Reduced motion disables the card transitions.
+Focus the stack to use Left and Right, or Home and End to select the first and last cards. Arrow keys inside your own controls keep their usual behavior. Horizontal swipes move one card on release. Taps, vertical gestures, and canceled gestures keep the selection. Text selection is suppressed during horizontal swipes and restored afterward. Normal text selection and double-click selection remain available when not swiping. Links and controls inside a card do not start a swipe. Only the active card is exposed to assistive technology and keyboard focus. A screen-reader status announces the selected card and its position. Set `showControls={false}` to hide the navigation buttons, as in the five-card demo. Reduced motion disables the card transitions.
 
-The component inherits the background, foreground, card, border, and muted text theme tokens. Override `--peel-stack-background`, `--peel-stack-paper`, `--peel-stack-foreground`, `--peel-stack-muted`, `--peel-stack-border`, or `--peel-stack-shade` through `style` to adjust the palette.
+The component inherits the background, foreground, card, border, and muted text theme tokens. Cards use 12px corners. Body text uses the sans-serif theme font, headings use `--font-heading` when available, and category labels use the monospace theme font. Visible numbering is omitted. Override `--peel-stack-background`, `--peel-stack-paper`, `--peel-stack-foreground`, `--peel-stack-muted`, `--peel-stack-border`, or `--peel-stack-shade` through `style` to adjust the palette.
 
 Use `--peel-stack-card-width`, `--peel-stack-card-height`, and `--peel-stack-stage-height` to change the card and stage dimensions. Cards use a fixed height, so increase the card and stage heights for longer descriptions or additional content. `--peel-stack-spread` accepts an angle such as `6deg`; `--peel-stack-radius`, `--peel-stack-title-size`, and `--peel-stack-label-size` adjust the remaining details.
 
