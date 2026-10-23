@@ -116,7 +116,7 @@ export function PeelStack({
         aria-label="Stack cards. Use the left and right arrow keys to browse."
         tabIndex={0}
         data-slot="peel-stack-viewport"
-        className="relative grid h-[var(--peel-stack-stage-height,21rem)] touch-pan-y place-items-center outline-none focus-visible:ring-1 focus-visible:ring-[var(--peel-stack-foreground)] focus-visible:ring-inset data-[swiping=true]:cursor-grabbing data-[swiping=true]:select-none"
+        className="relative grid h-[var(--peel-stack-stage-height,22rem)] touch-pan-y place-items-center outline-none focus-visible:ring-1 focus-visible:ring-[var(--peel-stack-foreground)] focus-visible:ring-inset data-[swiping=true]:cursor-grabbing data-[swiping=true]:select-none"
         onKeyDown={(event) => {
           if (event.target !== event.currentTarget || event.altKey || event.ctrlKey || event.metaKey) return;
           const destinations: Record<string, number> = {
@@ -199,7 +199,7 @@ export function PeelStack({
           const side = order % 2 === 1 ? 1 : -1;
           const transform = active
             ? "translate(0, -6px) rotate(-2deg)"
-            : `translate(${side * (3 + layer * 2)}%, ${layer * 10 + side * -2}px) rotate(calc(var(--peel-stack-spread, 8deg) * ${side * (0.5 + layer * 0.5)})) scale(${1.1 - layer * 0.1})`;
+            : `translate(${side * layer * 5}%, ${layer * 10 + side * -2}px) rotate(calc(var(--peel-stack-spread, var(--peel-stack-default-spread, 8deg)) * ${side * layer}))`;
 
           return (
             <div
@@ -212,7 +212,7 @@ export function PeelStack({
               data-peel-stack-card={item.id}
               data-active={active}
               className={cn(
-                "absolute flex h-[var(--peel-stack-card-height,13.5rem)] w-[min(70%,var(--peel-stack-card-width,20rem))] origin-[50%_90%] flex-col overflow-hidden rounded-[var(--peel-stack-radius,12px)] border border-[var(--peel-stack-border)] p-[clamp(0.875rem,4cqw,1.25rem)] shadow-[0_5px_16px_color-mix(in_oklab,var(--peel-stack-foreground)_8%,transparent)] transition-[transform,opacity,background-color] duration-500 ease-[cubic-bezier(0.22,0.8,0.22,1)] motion-reduce:transition-none",
+                "absolute flex h-[var(--peel-stack-card-height,13.5rem)] w-[min(70%,var(--peel-stack-card-width,20rem))] origin-[50%_90%] flex-col overflow-hidden rounded-[var(--peel-stack-radius,12px)] border border-[var(--peel-stack-border)] p-[clamp(0.875rem,4cqw,1.25rem)] shadow-[0_5px_16px_color-mix(in_oklab,var(--peel-stack-foreground)_8%,transparent)] transition-[transform,opacity,background-color] duration-500 ease-[cubic-bezier(0.22,0.8,0.22,1)] motion-reduce:transition-none @max-[32rem]:[--peel-stack-default-spread:3deg]",
                 active ? "bg-[var(--peel-stack-paper)]" : "pointer-events-none bg-[var(--peel-stack-shade)]",
               )}
               style={{ transform, zIndex: items.length - order, opacity: order < 5 ? 1 : 0 }}
