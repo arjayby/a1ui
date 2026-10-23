@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { getMDXComponents } from "@/components/mdx";
 import { AgentInstall } from "@/components/agent-install";
+import { Badge } from "@/components/ui/badge";
 import { blocks, getBlock } from "@/lib/block-catalog";
 import { source } from "@/lib/source";
 
@@ -18,10 +19,23 @@ export default async function BlockPage({ params }: PageProps<"/blocks/[slug]">)
   return (
     <article className="docs-article">
       <header>
+        <div className="docs-page-meta">
+          <span className="graphite-eyebrow">Blocks / Documentation</span>
+          <Badge variant="outline">React</Badge>
+        </div>
         <h1>{block.title}</h1>
         <p>{block.description}</p>
         <AgentInstall name={block.slug} />
       </header>
+      <nav aria-label="On this page" className="docs-section-nav">
+        {page.data.toc
+          .filter((item) => item.depth === 2)
+          .map((item) => (
+            <a key={item.url} href={item.url}>
+              {item.title}
+            </a>
+          ))}
+      </nav>
       <div className="docs-article-body prose">
         <MDX components={getMDXComponents()} />
       </div>

@@ -2,7 +2,8 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 
 import { DynamicCodeBlock } from "fumadocs-ui/components/dynamic-codeblock";
-import { Tab, Tabs } from "fumadocs-ui/components/tabs";
+
+import { DocsTab, InstallationTabs } from "@/components/docs-tabs";
 
 import type { BlockSlug } from "@/lib/block-catalog";
 import { getSiteUrl } from "@/lib/site-url.mjs";
@@ -19,18 +20,13 @@ export function Installation({ name }: { name: BlockSlug }) {
   const registryUrl = `${siteUrl}/r/${name}.json`;
 
   return (
-    <Tabs
-      items={packageCommands.map(({ name: packageName }) => packageName)}
-      defaultIndex={1}
-      groupId="package-manager"
-      persist
-    >
+    <InstallationTabs>
       {packageCommands.map(({ name: packageName, command }) => (
-        <Tab key={packageName} value={packageName}>
+        <DocsTab key={packageName} value={packageName}>
           <DynamicCodeBlock lang="bash" code={command(registryUrl)} />
-        </Tab>
+        </DocsTab>
       ))}
-    </Tabs>
+    </InstallationTabs>
   );
 }
 

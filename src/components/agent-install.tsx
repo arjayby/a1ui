@@ -26,7 +26,9 @@ export function AgentInstall({ name }: { name?: string }) {
       <CopyAgentPrompt key={prompt} prompt={prompt} />
       <a
         href={name ? `/docs/blocks/${name}.md` : "/llms.txt"}
-        className="text-muted-foreground hover:text-foreground text-xs underline underline-offset-4"
+        className="ui-button text-muted-foreground text-xs"
+        data-variant="ghost"
+        data-size="sm"
       >
         Read agent guide
       </a>

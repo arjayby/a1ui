@@ -3,6 +3,10 @@
 import { CheckIcon, CopyIcon } from "@phosphor-icons/react";
 import { useId, useState } from "react";
 
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+
 export function CopyAgentPrompt({ prompt }: { prompt: string }) {
   const [status, setStatus] = useState<"idle" | "copied" | "error">("idle");
   const id = useId();
@@ -18,18 +22,14 @@ export function CopyAgentPrompt({ prompt }: { prompt: string }) {
 
   return (
     <div className="max-w-full">
-      <button
-        type="button"
-        onClick={copy}
-        className="border-border hover:bg-muted inline-flex min-h-10 cursor-pointer items-center gap-2 rounded-sm border px-3 py-2 text-xs"
-      >
+      <Button variant="outline" size="sm" onClick={copy}>
         {status === "copied" ? (
           <CheckIcon aria-hidden="true" className="size-3.5" />
         ) : (
           <CopyIcon aria-hidden="true" className="size-3.5" />
         )}
         Copy prompt for agent
-      </button>
+      </Button>
       <span role="status" className="sr-only">
         {status === "copied"
           ? "Prompt copied. Paste it into your coding agent."
@@ -39,16 +39,14 @@ export function CopyAgentPrompt({ prompt }: { prompt: string }) {
       </span>
       {status === "error" ? (
         <div className="mt-3 flex flex-col gap-2">
-          <label htmlFor={id} className="text-xs">
-            Copy this prompt into your agent
-          </label>
-          <textarea
+          <Label htmlFor={id}>Copy this prompt into your agent</Label>
+          <Textarea
             id={id}
             readOnly
             value={prompt}
             rows={7}
             onFocus={(event) => event.currentTarget.select()}
-            className="border-border bg-background w-full max-w-xl rounded-sm border p-3 text-xs"
+            className="max-w-xl font-mono text-xs"
           />
         </div>
       ) : null}

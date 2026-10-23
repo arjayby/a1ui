@@ -1,6 +1,9 @@
 import defaultMdxComponents from "fumadocs-ui/mdx";
-import { Tab, Tabs } from "fumadocs-ui/components/tabs";
 import type { MDXComponents } from "mdx/types";
+import type { ComponentProps } from "react";
+
+import { DocsTab, DocsTabs } from "@/components/docs-tabs";
+import { Card } from "@/components/ui/card";
 
 import { ArcReelDemo } from "@/components/block-demos/arc-reel-demo";
 import { AsciiTerrainDemo } from "@/components/block-demos/ascii-terrain-demo";
@@ -39,8 +42,13 @@ export function getMDXComponents(components?: MDXComponents) {
     SpiralTextDemo,
     TextScrambleDemo,
     TextBannerDemo,
-    Tab,
-    Tabs,
+    Tab: DocsTab,
+    Tabs: DocsTabs,
+    table: (props: ComponentProps<"table">) => (
+      <Card className="docs-table" role="region" aria-label="Reference table" tabIndex={0}>
+        <table {...props} />
+      </Card>
+    ),
     ...components,
   } satisfies MDXComponents;
 }
