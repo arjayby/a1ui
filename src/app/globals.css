@@ -570,14 +570,16 @@ h6 {
 }
 
 .ascii-terrain-controls,
-.text-banner-demo-controls {
+.text-banner-demo-controls,
+.text-scramble-demo-controls {
   display: flex;
   align-items: center;
   gap: 1.25rem;
 }
 
 .ascii-terrain-controls button,
-.text-banner-demo-controls button {
+.text-banner-demo-controls button,
+.text-scramble-demo-controls button {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -587,7 +589,8 @@ h6 {
 }
 
 .ascii-terrain-controls svg,
-.text-banner-demo-controls svg {
+.text-banner-demo-controls svg,
+.text-scramble-demo-controls svg {
   width: 0.75rem;
   height: 0.75rem;
 }
@@ -850,25 +853,8 @@ h6 {
   letter-spacing: -0.06em;
 }
 
-.text-scramble-demo-button {
-  display: inline-flex;
-  align-items: center;
-  align-self: flex-end;
-  gap: 0.75rem;
-  padding: 0.65rem 0.85rem;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--background);
-  cursor: pointer;
-}
-
-.text-scramble-demo-button:hover {
-  background: var(--muted);
-}
-
-.text-scramble-demo-button svg {
-  width: 0.875rem;
-  height: 0.875rem;
+.text-scramble-demo-controls {
+  justify-content: center;
 }
 
 .text-scramble-preview {

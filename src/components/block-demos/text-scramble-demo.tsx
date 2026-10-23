@@ -24,20 +24,24 @@ export function TextScrambleDemo() {
   };
 
   return (
-    <div className="not-prose demo-frame text-scramble-demo">
-      <div className="text-scramble-demo-stage">
-        <TextScramble
-          text={phrases[index]}
-          duration={1000}
-          aria-live="polite"
-          aria-atomic="true"
-          className="text-scramble-demo-text"
-        />
+    <>
+      <div className="not-prose demo-frame text-scramble-demo">
+        <div className="text-scramble-demo-stage">
+          <TextScramble
+            text={phrases[index]}
+            duration={1000}
+            aria-live="polite"
+            aria-atomic="true"
+            className="text-scramble-demo-text"
+          />
+        </div>
       </div>
-      <button type="button" className="text-scramble-demo-button" onClick={randomizePhrase}>
-        <Shuffle aria-hidden="true" />
-        Randomize phrase
-      </button>
-    </div>
+      <div className="not-prose demo-caption text-scramble-demo-controls">
+        <button type="button" onClick={randomizePhrase}>
+          <Shuffle aria-hidden="true" />
+          Randomize phrase
+        </button>
+      </div>
+    </>
   );
 }
