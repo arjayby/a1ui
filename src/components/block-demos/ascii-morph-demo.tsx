@@ -1,12 +1,11 @@
 "use client";
 
-import { ArrowRight } from "lucide-react";
 import { useState } from "react";
 
 import { AsciiMorph, type AsciiMorphShape } from "@/registry/blocks/ascii-morph";
 
 const labels = { globe: "Globe", flower: "Flower", a1: "A1 monogram" };
-const numbers = { globe: "01", flower: "02", a1: "03" };
+const numbers = { globe: 1, flower: 2, a1: 3 };
 
 export function AsciiMorphPreview() {
   return (
@@ -20,17 +19,13 @@ export function AsciiMorphDemo() {
   const [shape, setShape] = useState<AsciiMorphShape>("globe");
 
   return (
-    <div className="not-prose demo-frame ascii-morph-demo">
-      <AsciiMorph onShapeChange={setShape} />
-      <div className="ascii-morph-footer" aria-hidden="true">
-        <span className="ascii-morph-caption">
-          <span>{numbers[shape]} / 03</span>
-          {labels[shape]}
-        </span>
-        <span className="ascii-morph-hint">
-          Click to morph <ArrowRight />
-        </span>
+    <>
+      <div className="not-prose demo-frame ascii-morph-demo">
+        <AsciiMorph onShapeChange={setShape} />
       </div>
-    </div>
+      <p className="demo-caption text-center" aria-hidden="true">
+        Click to morph · {numbers[shape]}/3 {labels[shape]}
+      </p>
+    </>
   );
 }
