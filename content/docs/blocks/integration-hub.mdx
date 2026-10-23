@@ -80,7 +80,7 @@ Pulses travel from every tool toward the product, including the right column. Th
 
 The component inherits the page font and the `--background`, `--foreground`, `--border`, and `--muted-foreground` theme tokens. Override `--integration-hub-surface`, `--integration-hub-foreground`, `--integration-hub-border`, `--integration-hub-product-background`, `--integration-hub-product-foreground`, and `--integration-hub-accent` on a parent to customize it.
 
-The product tile uses the surface color as its background, the foreground color for text and its icon, and the theme border color. It follows `--radius` for corners and `--font-mono` for typography, falling back to the inherited font. These defaults adapt to light and dark themes. The product name is bold and uppercase. The documentation demo uses Commit Mono throughout.
+The tool cards and product tile use the theme's card surface and borders with 12px corners. Text inherits the page font. The product name uses `--font-heading` when available. The documentation demo uses Inter for labels and descriptions and Stack Sans Notch for the product name. These defaults adapt to light and dark themes. On narrow containers, secondary descriptions and product status are hidden while tool names remain visible.
 
 Provide a pause control for continuous motion, as in the example. Reduced motion hides the traveling pulses and retains the static connections. Tool selection still works. Without `onToolSelect`, the tool cards render as plain content with no extra tab stops.
 

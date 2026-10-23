@@ -104,7 +104,8 @@ test("reduced motion retains the diagram and tool selection without moving pulse
   await expect(hub.locator(".a1ui-hub-pulse").first()).toHaveCSS("animation-name", "none");
   await expect(hub.locator(".a1ui-hub-pulse").first()).toHaveCSS("opacity", "0");
   await expect(hub.locator(".a1ui-hub-wire")).toHaveCount(6);
-  await expect(page.getByText("Motion reduced", { exact: true })).toBeVisible();
+  await expect(page.getByText("Select a tool to explore", { exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Pause pulses" })).not.toBeVisible();
   await hub.getByRole("button", { name: "Figma", exact: true }).click();
   await expect(hub.getByRole("button", { name: "Figma", exact: true })).toHaveAttribute(
     "aria-pressed",

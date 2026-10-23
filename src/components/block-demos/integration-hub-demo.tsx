@@ -1,9 +1,10 @@
 "use client";
 
-import { Pause, Play } from "lucide-react";
+import { PauseIcon, PlayIcon } from "@phosphor-icons/react";
 import Image from "next/image";
 import { useState } from "react";
 
+import { Button } from "@/components/ui/button";
 import { IntegrationHub, type IntegrationHubTool } from "@/registry/blocks/integration-hub";
 
 function RelayMark() {
@@ -100,30 +101,29 @@ export function IntegrationHubDemo() {
   const activeTool = tools.find((tool) => tool.id === activeToolId);
 
   return (
-    <div className="not-prose demo-frame integration-hub-demo">
-      <IntegrationHub
-        tools={tools}
-        product={{ ...product, status: activeTool ? `From ${activeTool.name}` : product.status }}
-        activeToolId={activeToolId}
-        onToolSelect={(tool) => setActiveToolId((current) => (current === tool.id ? null : tool.id))}
-        paused={paused}
-      />
-      <div className="integration-hub-demo-footer">
-        <span className="integration-hub-demo-count">
-          <span aria-hidden="true" />6 integrations{" "}
-          <span className="integration-hub-demo-hint">· Select a tool to explore</span>
-        </span>
-        <button
-          type="button"
+    <>
+      <div className="not-prose demo-frame integration-hub-demo">
+        <IntegrationHub
+          tools={tools}
+          product={{ ...product, status: activeTool ? `From ${activeTool.name}` : product.status }}
+          activeToolId={activeToolId}
+          onToolSelect={(tool) => setActiveToolId((current) => (current === tool.id ? null : tool.id))}
+          paused={paused}
+        />
+      </div>
+      <div className="not-prose demo-caption integration-hub-demo-footer">
+        <span>Select a tool to explore</span>
+        <Button
+          variant="ghost"
+          size="sm"
           onClick={() => setPaused((current) => !current)}
           aria-pressed={paused}
-          className="integration-hub-demo-pause"
+          className="integration-hub-demo-pause min-h-7 gap-2 px-0 text-[0.6875rem] font-normal [&_svg]:size-3"
         >
-          {paused ? <Play aria-hidden="true" /> : <Pause aria-hidden="true" />}
+          {paused ? <PlayIcon aria-hidden="true" /> : <PauseIcon aria-hidden="true" />}
           {paused ? "Resume pulses" : "Pause pulses"}
-        </button>
-        <span className="integration-hub-demo-reduced">Motion reduced</span>
+        </Button>
       </div>
-    </div>
+    </>
   );
 }

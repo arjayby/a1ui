@@ -25,7 +25,7 @@ export interface IntegrationHubProps extends Omit<
 
 const styles = `
   [data-slot="integration-hub"] {
-    --hub-surface: var(--integration-hub-surface, var(--background, #faf9f6));
+    --hub-surface: var(--integration-hub-surface, var(--card, var(--background, #ffffff)));
     --hub-ink: var(--integration-hub-foreground, var(--foreground, #242522));
     --hub-line: var(--integration-hub-border, var(--border, #dedfd8));
     --hub-muted: var(--muted-foreground, #777970);
@@ -109,12 +109,12 @@ const styles = `
     min-height: 78px;
     padding: 16px;
     border: 1px solid var(--hub-line);
-    border-radius: 15px;
+    border-radius: 12px;
     background: var(--hub-surface);
     color: inherit;
     text-align: start;
     font: inherit;
-    box-shadow: 0 2px 3px #00000003, 0 5px 16px #00000003;
+    box-shadow: 0 1px 2px #0000000d;
     transition: border-color 180ms ease, box-shadow 180ms ease, opacity 180ms ease;
   }
   [data-slot="integration-hub"] button.a1ui-hub-card {
@@ -152,15 +152,14 @@ const styles = `
   }
   [data-slot="integration-hub"] .a1ui-hub-name {
     font-size: 14px;
-    line-height: 1.25;
-    font-weight: 600;
-    letter-spacing: -0.02em;
+    line-height: 20px;
+    font-weight: 500;
     overflow-wrap: anywhere;
   }
   [data-slot="integration-hub"] .a1ui-hub-description {
     color: var(--hub-muted);
-    font-size: 10px;
-    line-height: 1.4;
+    font-size: 12px;
+    line-height: 16px;
   }
   [data-slot="integration-hub"] .a1ui-hub-port {
     position: absolute;
@@ -187,15 +186,15 @@ const styles = `
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 10px;
-    padding: 20px 8px 16px;
+    gap: 8px;
+    padding: 16px 8px;
     transform: translate(-50%, -50%);
     border: 1px solid var(--hub-line);
-    border-radius: var(--radius, 0.25rem);
+    border-radius: 12px;
     background: var(--integration-hub-product-background, var(--hub-surface));
     color: var(--integration-hub-product-foreground, var(--hub-ink));
     box-shadow: 0 0 0 6px var(--hub-surface);
-    font-family: var(--font-mono, inherit);
+    font-family: inherit;
     text-align: center;
   }
   [data-slot="integration-hub"] .a1ui-hub-product-icon {
@@ -210,18 +209,18 @@ const styles = `
     height: 100%;
   }
   [data-slot="integration-hub"] .a1ui-hub-product-name {
-    font-size: 22px;
-    line-height: 1;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    text-transform: uppercase;
+    font-family: var(--font-heading, inherit);
+    font-size: 24px;
+    line-height: 1.1;
+    font-weight: 400;
+    letter-spacing: -0.025em;
     overflow-wrap: anywhere;
     max-width: 100%;
   }
   [data-slot="integration-hub"] .a1ui-hub-product-description {
-    opacity: 0.7;
-    font-size: 10px;
-    line-height: 1.4;
+    color: var(--hub-muted);
+    font-size: 12px;
+    line-height: 16px;
   }
   [data-slot="integration-hub"] .a1ui-hub-product-status {
     display: flex;
@@ -229,9 +228,11 @@ const styles = `
     justify-content: center;
     gap: 5px;
     margin-top: 3px;
-    font-size: 8px;
-    line-height: 1.4;
-    color: var(--integration-hub-accent, currentColor);
+    font-size: 12px;
+    line-height: 16px;
+    color: var(--integration-hub-accent, var(--hub-muted));
+    overflow-wrap: anywhere;
+    max-width: 100%;
   }
   [data-slot="integration-hub"] .a1ui-hub-product-status::before {
     width: 4px;
@@ -258,7 +259,7 @@ const styles = `
       text-align: center;
     }
     [data-slot="integration-hub"] .a1ui-hub-copy { gap: 0; }
-    [data-slot="integration-hub"] .a1ui-hub-name { font-size: 11px; }
+    [data-slot="integration-hub"] .a1ui-hub-name { font-size: 12px; }
     [data-slot="integration-hub"] .a1ui-hub-description { display: none; }
     [data-slot="integration-hub"] .a1ui-hub-icon { width: 28px; height: 28px; }
     [data-slot="integration-hub"] .a1ui-hub-icon svg { width: 24px; height: 24px; }
@@ -268,9 +269,9 @@ const styles = `
       padding: 14px 5px;
     }
     [data-slot="integration-hub"] .a1ui-hub-product-icon { width: 26px; height: 26px; }
-    [data-slot="integration-hub"] .a1ui-hub-product-name { font-size: clamp(12px, 4.2cqi, 16px); }
-    [data-slot="integration-hub"] .a1ui-hub-product-description { font-size: 8px; }
-    [data-slot="integration-hub"] .a1ui-hub-product-status { font-size: 7px; }
+    [data-slot="integration-hub"] .a1ui-hub-product-name { font-size: clamp(14px, 4.2cqi, 18px); }
+    [data-slot="integration-hub"] .a1ui-hub-product-description,
+    [data-slot="integration-hub"] .a1ui-hub-product-status { display: none; }
   }
   @media (prefers-reduced-motion: reduce) {
     [data-slot="integration-hub"] .a1ui-hub-pulse { animation: none; opacity: 0; }
