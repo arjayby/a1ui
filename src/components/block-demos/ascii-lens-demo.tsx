@@ -13,12 +13,11 @@ export function AsciiLensPreview() {
 
 export function AsciiLensDemo() {
   return (
-    <div className="not-prose demo-frame mx-auto max-w-3xl overflow-hidden">
-      <AsciiLens src={src} alt={alt} cellSize={9} radius={104} />
-      <div className="text-muted-foreground flex items-center justify-between gap-4 px-4 py-3 text-xs">
-        <span>01 / CITY AT DUSK</span>
-        <span>Move to reveal. Use arrow keys when focused.</span>
+    <>
+      <div className="not-prose demo-frame mx-auto max-w-3xl overflow-hidden">
+        <AsciiLens src={src} alt={alt} cellSize={9} radius={104} />
       </div>
-    </div>
+      <p className="demo-caption text-center">Move to reveal. Use arrow keys when focused.</p>
+    </>
   );
 }
