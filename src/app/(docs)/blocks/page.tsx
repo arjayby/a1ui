@@ -19,6 +19,7 @@ import { ShapeFlowPreview } from "@/components/block-demos/shape-flow-demo";
 import { IntegrationHubPreview } from "@/components/block-demos/integration-hub-demo";
 import { PeelStackPreview } from "@/components/block-demos/peel-stack-demo";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardDescription } from "@/components/ui/card";
 import { blocks } from "@/lib/block-catalog";
 
 export const metadata: Metadata = {
@@ -47,6 +48,7 @@ export default function BlocksPage() {
   return (
     <div className="page-frame">
       <header>
+        <p className="graphite-eyebrow">a1ui / Block library</p>
         <h1 className="page-heading">Blocks</h1>
         <p className="page-description">Ready-made React compositions inspired by designs found online.</p>
         <AgentInstall />
@@ -56,22 +58,27 @@ export default function BlocksPage() {
         {blocks.map((block) => {
           const Preview = previews[block.slug];
           return (
-            <article key={block.slug} className="catalog-card">
+            <Card key={block.slug} role="article" className="catalog-card">
               <div inert aria-hidden="true" className="catalog-preview">
                 <Preview />
               </div>
-              <Link
-                href={`/blocks/${block.slug}`}
-                aria-description={block.isNew ? "New block shipped" : undefined}
-                className="catalog-card-link gap-2"
-              >
-                {block.title}
-                {block.isNew ? (
-                  <Badge variant="dot" className="absolute top-3 right-3" aria-hidden="true" />
-                ) : null}
-                <ArrowUpRightIcon aria-hidden="true" className="size-6 shrink-0" />
-              </Link>
-            </article>
+              <CardContent className="catalog-card-content">
+                <h2 className="ui-card-title">
+                  <Link
+                    href={`/blocks/${block.slug}`}
+                    aria-description={block.isNew ? "New block shipped" : undefined}
+                    className="catalog-card-link"
+                  >
+                    {block.title}
+                    {block.isNew ? (
+                      <Badge variant="dot" className="absolute top-3 right-3" aria-hidden="true" />
+                    ) : null}
+                    <ArrowUpRightIcon aria-hidden="true" className="size-4 shrink-0" />
+                  </Link>
+                </h2>
+                <CardDescription>{block.description}</CardDescription>
+              </CardContent>
+            </Card>
           );
         })}
       </div>
