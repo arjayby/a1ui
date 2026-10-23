@@ -33,25 +33,24 @@ export function ConfirmationButtonDemo() {
             }}
           />
         </div>
-        <div className="confirmation-button-demo-footer">
-          <span>Drag right to confirm</span>
-          <button
-            type="button"
-            disabled={status !== "confirmed"}
-            onClick={() => {
-              setStatus("idle");
-              setAttempt((value) => value + 1);
-            }}
-          >
-            <RotateCcw aria-hidden="true" />
-            Reset demo
-          </button>
-        </div>
       </div>
-      <p className="demo-caption">
-        Release at the end to confirm. Let go early to return. You can also focus the arrow and press Enter or
-        Space.
-      </p>
+      <div className="not-prose demo-caption confirmation-button-demo-footer">
+        <span>
+          Release at the end to confirm. Let go early to return. You can also focus the arrow and press Enter
+          or Space.
+        </span>
+        <button
+          type="button"
+          disabled={status !== "confirmed"}
+          onClick={() => {
+            setStatus("idle");
+            setAttempt((value) => value + 1);
+          }}
+        >
+          <RotateCcw aria-hidden="true" />
+          Reset demo
+        </button>
+      </div>
     </>
   );
 }

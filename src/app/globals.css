@@ -816,8 +816,6 @@ h6 {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  color: var(--muted-foreground);
-  font-size: 0.625rem;
 }
 
 .confirmation-button-demo-stage {
@@ -831,6 +829,7 @@ h6 {
 
 .confirmation-button-demo-footer button {
   display: inline-flex;
+  flex-shrink: 0;
   align-items: center;
   gap: 0.4rem;
   padding-block: 0.4rem;
