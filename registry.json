@@ -377,6 +377,35 @@
         }
       },
       "registryDependencies": ["button"]
+    },
+    {
+      "name": "loading-button",
+      "type": "registry:component",
+      "title": "Loading Button",
+      "description": "A loading button with animated icon and label transitions for async actions and network requests.",
+      "dependencies": ["motion", "@phosphor-icons/react"],
+      "registryDependencies": ["button"],
+      "files": [
+        {
+          "path": "src/registry/components/loading-button.tsx",
+          "type": "registry:component",
+          "target": "components/animated/loading-button.tsx"
+        }
+      ],
+      "categories": ["button", "loading", "async", "animation"],
+      "meta": {
+        "a1ui": {
+          "useCases": [
+            "Submitting data, saving changes, and running network requests with loading, success, and retry feedback."
+          ],
+          "limitations": [
+            "Runs the supplied action on click. Does not submit forms automatically or cancel requests. Success resets after two seconds."
+          ],
+          "requirements": [
+            "React 19, Tailwind CSS 4, Motion for React, and Phosphor icons. Supply onClick and return its promise. Throw or reject on failure, including non-OK fetch responses. Reduced motion skips transitions and spinner rotation."
+          ]
+        }
+      }
     }
   ]
 }

@@ -4,6 +4,7 @@ import Link from "next/link";
 
 import { Card, CardContent, CardDescription } from "@/components/ui/card";
 import { CopyButton } from "@/registry/components/copy-button";
+import { LoadingButtonPreview } from "@/components/component-demos/loading-button-demo";
 
 export const metadata: Metadata = {
   title: "Components",
@@ -21,6 +22,22 @@ export default function ComponentsPage() {
         </p>
       </header>
       <div className="catalog-grid">
+        <Card role="article" className="catalog-card">
+          <div inert aria-hidden="true" className="catalog-preview flex items-center justify-center">
+            <LoadingButtonPreview />
+          </div>
+          <CardContent className="catalog-card-content">
+            <h2 className="ui-card-title">
+              <Link href="/components/loading-button" className="catalog-card-link">
+                Loading Button
+                <ArrowUpRightIcon aria-hidden="true" className="size-4 shrink-0" />
+              </Link>
+            </h2>
+            <CardDescription>
+              Animated loading and success feedback for async actions and network requests.
+            </CardDescription>
+          </CardContent>
+        </Card>
         <Card role="article" className="catalog-card">
           <div inert aria-hidden="true" className="catalog-preview flex items-center justify-center">
             <CopyButton value="hello@a1ui.dev" />

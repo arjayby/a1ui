@@ -15,6 +15,7 @@ import { CompareCurtainDemo } from "@/components/block-demos/compare-curtain-dem
 import { SectionRailDemo, SpiralTextDemo } from "@/components/block-demos";
 import { BlockSource, ComponentSource, Installation } from "@/components/block-docs";
 import { CopyButtonDemo } from "@/components/component-demos/copy-button-demo";
+import { LoadingButtonDemo } from "@/components/component-demos/loading-button-demo";
 import { ParticleMenuDemo } from "@/components/block-demos/particle-menu-demo";
 import { TextScrambleDemo } from "@/components/block-demos/text-scramble-demo";
 import { TextBannerDemo } from "@/components/block-demos/text-banner-demo";
@@ -35,6 +36,7 @@ export function getMDXComponents(components?: MDXComponents) {
     BlockSource,
     ComponentSource,
     CopyButtonDemo,
+    LoadingButtonDemo,
     ConfirmationButtonDemo,
     CompareCurtainDemo,
     Installation,
