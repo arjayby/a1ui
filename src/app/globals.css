@@ -194,7 +194,8 @@ h6 {
   background: transparent;
 }
 
-[data-sidebar="sidebar"] [data-menu-item][data-highlighted] {
+[data-sidebar="sidebar"] [data-menu-item][data-highlighted],
+[data-sidebar="sidebar"] [data-menu-item][data-highlighted] ~ [data-sidebar="menu-action"]:not(:hover) {
   color: var(--on-primary);
 }
 
