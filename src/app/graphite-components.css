@@ -442,13 +442,14 @@
   }
   .ui-menu-item {
     display: flex;
-    min-height: 32px;
+    min-height: 28px;
     align-items: center;
     gap: 8px;
     border-radius: 4px;
-    padding: 6px 8px;
-    font-size: var(--text-sm);
+    padding: 4px 8px;
+    font-size: var(--text-xs);
     font-weight: 500;
+    text-align: left;
     cursor: pointer;
   }
   .ui-menu-item[data-highlighted] {
@@ -460,9 +461,10 @@
     cursor: default;
   }
   .ui-menu-label {
-    padding: var(--spacing-8) var(--spacing-12);
+    padding: 6px var(--spacing-8);
     color: var(--muted-foreground);
     font-size: var(--text-xs);
+    text-align: left;
   }
   .ui-tabs-list {
     display: flex;

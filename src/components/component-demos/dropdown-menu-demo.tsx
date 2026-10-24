@@ -42,7 +42,7 @@ export function DropdownMenuPreview() {
     <div className="flex flex-col items-center gap-4">
       <DropdownMenu>
         <DropdownMenuTrigger render={<Button variant="outline" />}>Workspace</DropdownMenuTrigger>
-        <DropdownMenuContent className="w-64" aria-label="Workspace actions">
+        <DropdownMenuContent className="w-52" aria-label="Workspace actions">
           {groups.map((group, index) => (
             <DropdownMenuGroup key={group.label}>
               {index > 0 && <DropdownMenuSeparator />}
@@ -57,7 +57,7 @@ export function DropdownMenuPreview() {
                   <span>{item.label}</span>
                   <kbd
                     aria-hidden="true"
-                    className="text-muted-foreground ml-auto pl-6 font-sans text-xs tracking-widest"
+                    className="text-muted-foreground ml-auto pl-3 font-sans text-xs tracking-widest"
                   >
                     {item.shortcut}
                   </kbd>
@@ -66,7 +66,7 @@ export function DropdownMenuPreview() {
               {group.label === "Workspace" && (
                 <DropdownMenuSub>
                   <DropdownMenuSubTrigger>Switch workspace</DropdownMenuSubTrigger>
-                  <DropdownMenuSubContent className="w-52" aria-label="Switch workspace">
+                  <DropdownMenuSubContent className="w-44" aria-label="Switch workspace">
                     {["Personal workspace", "Design team", "Engineering"].map((workspace) => (
                       <DropdownMenuItem key={workspace} onClick={() => setAction(workspace)}>
                         {workspace}
