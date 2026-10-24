@@ -46,9 +46,15 @@ test("dragging updates the cards and marker together in both directions", async 
   await slider.press("End");
   await expect(slider).toHaveValue("8");
   await expectCentered(viewport, "xAI, 9 of 9");
-  await page.mouse.move(center.x - 100, center.y);
+  // Focusing the scrubber scrolls the page, so measure the drag target again.
+  const returnBounds = (await viewport.boundingBox())!;
+  const returnCenter = {
+    x: returnBounds.x + returnBounds.width / 2,
+    y: returnBounds.y + returnBounds.height / 2,
+  };
+  await page.mouse.move(returnCenter.x - 100, returnCenter.y);
   await page.mouse.down();
-  await page.mouse.move(center.x + 160, center.y, { steps: 18 });
+  await page.mouse.move(returnCenter.x + 160, returnCenter.y, { steps: 18 });
   await expect.poll(async () => Number(await slider.inputValue())).toBeLessThan(8);
   await page.mouse.up();
 });

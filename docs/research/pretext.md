@@ -6,13 +6,13 @@ Pretext measures and lays out multiline text in JavaScript/TypeScript. `prepare(
 
 Proposed components, ordered by fit for this gallery:
 
-| Idea | Visible interaction | Pretext's role |
-| --- | --- | --- |
-| Shape Flow | Drag a circle or image through a paragraph; text wraps around it live. | Lay out each line against the space remaining beside the shape. |
-| Editorial Card | Resize a magazine card; headline and body flow around a portrait or pull quote. | Compute line placement and continue text between columns. |
-| Fitted Chat Bubble | Edit messages or resize the panel; bubbles tighten around their longest line. | Calculate wrapped line widths and compare candidate bubble widths. |
-| Quote Frame | Resize a quote card; the text keeps deliberate breaks and balanced whitespace. | Evaluate widths and line counts before rendering the chosen arrangement. |
-| Text Masonry | Change card width or content; testimonials settle into correctly sized columns. | Predict each paragraph's height before placing the card. |
+| Idea               | Visible interaction                                                             | Pretext's role                                                           |
+| ------------------ | ------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| Shape Flow         | Drag a circle or image through a paragraph; text wraps around it live.          | Lay out each line against the space remaining beside the shape.          |
+| Editorial Card     | Resize a magazine card; headline and body flow around a portrait or pull quote. | Compute line placement and continue text between columns.                |
+| Fitted Chat Bubble | Edit messages or resize the panel; bubbles tighten around their longest line.   | Calculate wrapped line widths and compare candidate bubble widths.       |
+| Quote Frame        | Resize a quote card; the text keeps deliberate breaks and balanced whitespace.  | Evaluate widths and line counts before rendering the chosen arrangement. |
+| Text Masonry       | Change card width or content; testimonials settle into correctly sized columns. | Predict each paragraph's height before placing the card.                 |
 
 These are component proposals. The official gallery already demonstrates obstacle-aware editorial layouts, tight bubbles, rich inline text, and text-card masonry. [Official demos](https://chenglou.me/pretext/)
 

@@ -76,7 +76,7 @@ test("resizes without overflow and repaints inherited colors while paused", asyn
 test("catalog includes a painted static preview and a working component link", async ({ page }) => {
   await page.goto("/");
   const link = page.getByRole("link", { name: "ASCII Terrain", exact: true });
-  const card = page.locator("article").filter({ has: link });
+  const card = page.getByRole("article").filter({ has: link });
   const canvas = card.locator("canvas");
   await expect(canvas).toHaveAttribute("data-ready", "true");
   const before = await pixels(canvas);

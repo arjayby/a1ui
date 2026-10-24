@@ -8,8 +8,8 @@ test.beforeEach(async ({ page }) => {
 test("randomizes the phrase and scrambles every character while keeping the final phrase accessible", async ({
   page,
 }) => {
-  await page.clock.install();
-  await page.clock.pauseAt(new Date());
+  await page.clock.install({ time: new Date("2026-01-01T00:00:00Z") });
+  await page.clock.pauseAt(new Date("2026-01-01T00:01:00Z"));
   const scramble = page.locator('.text-scramble-demo [data-slot="text-scramble"]');
   const visual = scramble.locator('[aria-hidden="true"]');
   const change = page.getByRole("button", { name: "Randomize phrase", exact: true });

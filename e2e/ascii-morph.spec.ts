@@ -136,7 +136,7 @@ test("honors live reduced motion and keeps both theme and responsive geometry", 
 test("catalog contains a static preview and links to the demo", async ({ page }) => {
   await page.goto("/");
   const card = page
-    .locator("article")
+    .getByRole("article")
     .filter({ has: page.getByRole("link", { name: "ASCII Morph", exact: true }) });
   const root = card.locator('[data-slot="ascii-morph"]');
   await expect(root).toHaveAttribute("data-motion", "static");

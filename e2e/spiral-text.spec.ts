@@ -300,7 +300,13 @@ test("re-grabbing catches the moving rings without snapping or ending the new ho
   const before = await scale();
   expect(before).toBeGreaterThan(1);
   await page.mouse.down();
-  expect(Math.abs((await scale()) - before)).toBeLessThan(0.05);
+  // Read the starting keyframe before elapsed animation time can affect the comparison.
+  const start = await inner.evaluate((element) => {
+    const effect = element.getAnimations()[0]?.effect;
+    if (!(effect instanceof KeyframeEffect)) throw new Error("Missing tightening keyframes");
+    return new DOMMatrix(String(effect.getKeyframes()[0].transform)).a;
+  });
+  expect(Math.abs(start - before)).toBeLessThan(0.001);
   await page.waitForTimeout(1900);
   await expect(spiral).toHaveAttribute("data-interaction", "tightening");
   expect(await scale()).toBeCloseTo(0.86);

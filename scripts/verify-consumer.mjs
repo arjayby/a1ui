@@ -109,6 +109,7 @@ try {
     path.join(directory, "postcss.config.mjs"),
     'export default { plugins: { "@tailwindcss/postcss": {} } };\n',
   );
+  await writeFile(path.join(directory, "next.config.mjs"), "export default {};\n");
   await writeFile(
     path.join(directory, "src/app/globals.css"),
     `@import "tailwindcss";
@@ -181,6 +182,18 @@ body { margin: 0; padding: 32px; background: var(--background); color: var(--for
   await run("pnpm", [
     "dlx",
     "shadcn@latest",
+    "init",
+    "--base",
+    "base",
+    "--preset",
+    config.style.replace(/^base-/, ""),
+    "--yes",
+    "--force",
+    "--no-reinstall",
+  ]);
+  await run("pnpm", [
+    "dlx",
+    "shadcn@latest",
     "add",
     ...catalog.items.map((item) => `${origin}/r/${item.name}.json`),
     "--yes",
@@ -238,7 +251,7 @@ body { margin: 0; padding: 32px; background: var(--background); color: var(--for
   await confirmation.locator('[data-state="confirmed"]').waitFor();
   assert.match(await confirmation.innerText(), /Action confirmed\./);
   const peelStack = page.locator('[data-block="peel-stack"]');
-  await peelStack.getByRole("button", { name: "Next card" }).click();
+  await peelStack.getByRole("group", { name: /^Stack cards/ }).press("ArrowRight");
   assert.match(await peelStack.getByRole("status").innerText(), /Material notes/);
   assert.deepEqual(errors, [], "Consumer browser emitted errors");
   console.log(
