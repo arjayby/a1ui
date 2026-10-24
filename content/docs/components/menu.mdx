@@ -43,12 +43,6 @@ export function MenuExample() {
 }
 ```
 
-The highlight follows focus without changing the selected value. When focus leaves the menu, the highlight returns to `value`. Updating `value` moves the highlight to the new selection. Each menu has its own animation scope.
-
-For navigation, pass `render={<a href="/projects" />}` or a router link to `MenuItem`. Set `aria-current="page"` on the selected link and pass the current route as the menu's `value`. Buttons use `aria-pressed` when they select a view. Items keep native Tab and activation behavior.
-
-Keep the menu mounted between route changes so Motion can animate from the previous selection. Item backgrounds must be transparent, and item overflow must remain visible. The highlight uses `--muted` with a neutral fallback. Style `[data-slot="menu-highlight"]` to change its color. Use `data-highlighted` to style the text above the moving highlight.
-
   </Tab>
   <Tab value="Source">
     <ComponentSource name="menu" />
@@ -68,6 +62,12 @@ The highlight travels with a spring transition of approximately 350 ms. Reduced 
 | `MenuItem` | Other props | Base UI button props             | Item classes, children, native button attributes, and event handlers.                            |
 
 <AgentOnly>
+
+The highlight follows focus without changing the selected value. When focus leaves the menu, the highlight returns to `value`. Updating `value` moves the highlight to the new selection. Each menu has its own animation scope.
+
+For navigation, pass `render={<a href="/projects" />}` or a router link to `MenuItem`. Set `aria-current="page"` on the selected link and pass the current route as the menu's `value`. Buttons use `aria-pressed` when they select a view. Items keep native Tab and activation behavior.
+
+Keep the menu mounted between route changes so Motion can animate from the previous selection. Item backgrounds must be transparent, and item overflow must remain visible. The highlight uses `--muted` with a neutral fallback. Style `[data-slot="menu-highlight"]` to change its color. Use `data-highlighted` to style the text above the moving highlight.
 
 Menu and MenuItem are exported from the same file. Menu uses a scoped Motion LayoutGroup and a scroll-aware container. MenuItem renders a native button by default and supports Base UI's render prop for anchors and router links. The shared decorative span follows focused items, returns to the controlled selection on blur outside the container, and follows external selection changes even while an old item retains focus. Focus does not activate an item. Supply unique values, transparent item backgrounds, visible item overflow, and caller-owned aria-current or aria-pressed attributes. The component preserves native keyboard behavior and does not add ARIA menu roles or arrow-key navigation. Reduced motion switches the highlight instantly. The documentation sidebar uses this same component across its guide, component, and block links.
 

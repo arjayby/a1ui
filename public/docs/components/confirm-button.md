@@ -58,12 +58,6 @@ export function ConfirmButtonExample() {
 }
 ```
 
-The fill and hold use the same duration. `onConfirm` fires when the fill reaches the end, while the button is still held. It fires once per hold. On success, the fill clears and a check icon appears beside the confirmed label. Both use the success text color. After release, the confirmed label remains visible for two seconds before the button resets. New holds are blocked during this confirmation.
-
-Releasing early, moving the pointer outside the button, pressing Escape, losing focus, or hiding the tab cancels the hold and clears the fill. A new hold always starts from zero. Changing `disabled`, `duration`, or `direction` also cancels an active hold.
-
-Keyboard users hold Space or Enter for the same duration. A click alone does not confirm. The button uses `type="button"` and does not submit forms automatically. The caller handles asynchronous work, loading, and errors through `onConfirm` and `disabled`.
-
 
 ### Source
 [Complete source and dependencies](http://localhost:3000/r/confirm-button.json). Each file's content is embedded in the registry JSON.
@@ -88,6 +82,12 @@ Keyboard users hold Space or Enter for the same duration. A click alone does not
 The fill uses the neutral text color at 20% opacity by default and disappears on success. The confirmed label and check icon use the success color, using `--status-success` with a green fallback. For a custom fill color, set `className="[--confirm-fill:#64748b]"`. Reduced motion skips text and icon transitions while preserving the linear fill because it communicates the required hold time.
 
 
+
+The fill and hold use the same duration. `onConfirm` fires when the fill reaches the end, while the button is still held. It fires once per hold. On success, the fill clears and a check icon appears beside the confirmed label. Both use the success text color. After release, the confirmed label remains visible for two seconds before the button resets. New holds are blocked during this confirmation.
+
+Releasing early, moving the pointer outside the button, pressing Escape, losing focus, or hiding the tab cancels the hold and clears the fill. A new hold always starts from zero. Changing `disabled`, `duration`, or `direction` also cancels an active hold.
+
+Keyboard users hold Space or Enter for the same duration. A click alone does not confirm. The button uses `type="button"` and does not submit forms automatically. The caller handles asynchronous work, loading, and errors through `onConfirm` and `disabled`.
 
 ConfirmButton is a separate component from the slide-to-confirm ConfirmationButton block. It uses the shared UI Button with the outline variant. Pointer input includes mouse, touch, and pen. Only the primary pointer and primary button start a hold. Pointer release, cancellation, lost capture, movement outside the button, keyboard release, Escape, button or window blur, and document visibility changes cancel unfinished holds. Unmounting cancels the animation frame. The fill uses requestAnimationFrame and elapsed time without rendering React on every frame. It reaches full progress, hides the fill, animates a check icon and the confirmed label using the Copy Button presets, and calls onConfirm once, with no additional calls from key repeat or native clicks. Releasing after completion starts a two-second confirmation before restoring idle. Unmounting clears the confirmation timer. The demo shows four buttons with direction labels above them in right, up, left, down order and does not save data.
 

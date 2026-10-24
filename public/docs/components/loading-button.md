@@ -67,10 +67,6 @@ export function LoadingButtonExample() {
 }
 ```
 
-The button stays busy until `onClick` resolves, then shows a checkmark for two seconds before resetting. A thrown error or rejected promise displays `errorLabel` inside the button and allows another attempt.
-
-The example expects your app to provide `/api/settings`. A `fetch` response with an HTTP error still resolves, so the callback checks `response.ok` and throws on failure.
-
 
 ### Source
 [Complete source and dependencies](http://localhost:3000/r/loading-button.json). Each file's content is embedded in the registry JSON.
@@ -93,6 +89,10 @@ The example expects your app to provide `/api/settings`. A `fetch` response with
 | `className`    | `string`                         | None           | Additional classes for the button. Override `w-32` to change its fixed width.                                             |
 
 
+
+The button stays busy until `onClick` resolves, then shows a checkmark for two seconds before resetting. A thrown error or rejected promise displays `errorLabel` inside the button and allows another attempt.
+
+The example expects your app to provide `/api/settings`. A `fetch` response with an HTTP error still resolves, so the callback checks `response.ok` and throws on failure.
 
 The component uses the shared UI Button at its default size and outline variant. Its blur, slide, and flip presets animate the icon and label. The button has a fixed width of 8rem and no layout or width animation. Use className to set a different fixed width when custom labels need more space. Reduced motion skips all transitions and spinner rotation. The live demo simulates 1.5-second requests and includes a failing-request example with red error text inside the button. It does not save data.
 
