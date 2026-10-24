@@ -21,6 +21,7 @@ export default function ConfirmButtonPage() {
       <header>
         <div className="docs-page-meta">
           <Badge variant="outline">React</Badge>
+          <Badge variant="outline">Motion</Badge>
         </div>
         <h1>{page.data.title}</h1>
         <p>{page.data.description}</p>

@@ -601,6 +601,10 @@
       "type": "registry:component",
       "title": "Confirm Button",
       "description": "A hold-to-confirm button with a directional color fill and configurable hold duration.",
+      "dependencies": [
+        "motion",
+        "@phosphor-icons/react"
+      ],
       "registryDependencies": [
         "button"
       ],
@@ -625,7 +629,7 @@
             "onConfirm fires once per completed hold. The caller handles asynchronous work and errors. Confirmation stays visible for two seconds after release before resetting. Click-only activation does not confirm."
           ],
           "requirements": [
-            "React 19.2 or later, Tailwind CSS 4, and the shared UI Button. Supply onConfirm in a client component. duration is in seconds; direction is right, left, up, or down."
+            "React 19.2 or later, Tailwind CSS 4, Motion for React, Phosphor icons, and the shared UI Button. Supply onConfirm in a client component. duration is in seconds; direction is right, left, up, or down."
           ],
           "docsUrl": "http://localhost:3000/docs/components/confirm-button.md",
           "registryUrl": "http://localhost:3000/r/confirm-button.json"

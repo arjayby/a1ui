@@ -3,10 +3,14 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ConfirmButton } from "./confirm-button";
 
-beforeEach(() => vi.useFakeTimers());
+beforeEach(() => {
+  vi.useFakeTimers();
+  vi.stubGlobal("matchMedia", () => Object.assign(new EventTarget(), { matches: false }));
+});
 afterEach(() => {
   cleanup();
   vi.restoreAllMocks();
+  vi.unstubAllGlobals();
   vi.useRealTimers();
 });
 
@@ -15,6 +19,17 @@ function advance(milliseconds: number) {
 }
 
 describe("ConfirmButton", () => {
+  it.each(["blur", "slide", "flip"] as const)("shows a success check for the %s preset", (animation) => {
+    render(<ConfirmButton onConfirm={() => {}} animation={animation} transitionDuration={0} />);
+    const button = screen.getByRole("button");
+    expect(button).toHaveAttribute("data-animation", animation);
+    expect(button.querySelector("svg")).toBeNull();
+    fireEvent.keyDown(button, { key: "Enter" });
+    advance(1600);
+    expect(button).toHaveAccessibleName("Confirmed");
+    expect(button.querySelector('[data-slot="confirm-button-icon"] svg')).not.toBeNull();
+  });
+
   it.each([" ", "Enter"])("requires a full %s hold and fires once until release", (key) => {
     const onConfirm = vi.fn();
     render(<ConfirmButton onConfirm={onConfirm} duration={1} />);

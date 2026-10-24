@@ -1,5 +1,67 @@
 import { expect, test } from "@playwright/test";
 
+test("reset keeps the outgoing and incoming labels steady while the check exits", async ({ page }) => {
+  await page.goto("/components/confirm-button");
+  await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
+  const button = page.locator('.demo-frame [data-direction="right"]');
+  await button.focus();
+  await page.keyboard.down("Enter");
+  await expect(button).toHaveText("Confirmed");
+  await page.keyboard.up("Enter");
+  const positions = await button.evaluate(async (element) => {
+    const confirmed: number[] = [];
+    const idle: number[] = [];
+    const started = performance.now();
+    while (performance.now() - started < 2500) {
+      for (const label of element.querySelectorAll('[data-slot="confirm-button-label"] > span')) {
+        if (Number(getComputedStyle(label).opacity) <= 0) continue;
+        const x = label.getBoundingClientRect().x;
+        if (label.textContent === "Confirmed") confirmed.push(x);
+        if (label.textContent === "Hold to confirm") idle.push(x);
+      }
+      await new Promise(requestAnimationFrame);
+    }
+    return { confirmed, idle };
+  });
+  for (const samples of [positions.confirmed, positions.idle]) {
+    expect(samples.length).toBeGreaterThan(3);
+    expect(Math.max(...samples) - Math.min(...samples)).toBeLessThan(0.5);
+  }
+});
+
+test("the label and success check animate with blur without resizing the button", async ({ page }) => {
+  await page.goto("/components/confirm-button");
+  await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
+  const button = page.locator('.demo-frame [data-direction="right"]');
+  await expect(button.locator("svg")).toHaveCount(0);
+  await button.focus();
+  await page.keyboard.down("Enter");
+  const samples = await button.evaluate(async (element) => {
+    const initialWidth = element.getBoundingClientRect().width;
+    let stableWidth = true;
+    let labelAnimated = false;
+    let iconAnimated = false;
+    const started = performance.now();
+    while (performance.now() - started < 1800) {
+      stableWidth &&= Math.abs(element.getBoundingClientRect().width - initialWidth) < 0.1;
+      for (const label of element.querySelectorAll('[data-slot="confirm-button-label"] > span')) {
+        labelAnimated ||= !["none", "blur(0px)"].includes(getComputedStyle(label).filter);
+      }
+      const icon = element.querySelector('[data-slot="confirm-button-icon"]');
+      iconAnimated ||= Boolean(icon && !["none", "blur(0px)"].includes(getComputedStyle(icon).filter));
+      await new Promise(requestAnimationFrame);
+    }
+    return { stableWidth, labelAnimated, iconAnimated };
+  });
+  await page.keyboard.up("Enter");
+  expect(samples).toEqual({ stableWidth: true, labelAnimated: true, iconAnimated: true });
+  await expect(button).toHaveText("Confirmed");
+  await expect(button.locator('[data-slot="confirm-button-icon"] svg')).toHaveCount(1);
+  await expect(button.locator('[data-slot="confirm-button-icon"]')).toHaveCSS("color", "rgb(166, 185, 139)");
+  await expect(button).toHaveText("Hold to confirm");
+  await expect(button.locator("svg")).toHaveCount(0);
+});
+
 for (const direction of ["right", "up", "left", "down"]) {
   test(`${direction} fills during a hold, cancels early, and confirms once at the end`, async ({ page }) => {
     await page.goto("/components/confirm-button");
@@ -7,7 +69,7 @@ for (const direction of ["right", "up", "left", "down"]) {
     await page.clock.install();
     const button = page.locator(`.demo-frame [data-direction="${direction}"]`);
     const fill = button.locator('[data-slot="confirm-button-fill"]');
-    const label = button.locator('[data-slot="confirm-button-label"]');
+    const label = button.locator('[data-slot="confirm-button-label"]').last();
     await button.hover();
     const idleStyles = await button.evaluate((element) => ({
       color: getComputedStyle(element).color,
@@ -42,7 +104,7 @@ for (const direction of ["right", "up", "left", "down"]) {
     );
     await expect(button).toHaveAttribute("data-state", "idle");
     await page.mouse.down();
-    await page.clock.runFor(1600);
+    await page.clock.runFor(1850);
     await expect(button).toHaveText("Confirmed");
     await expect(fill).toBeHidden();
     await expect(label).toHaveCSS("color", "rgb(166, 185, 139)");
@@ -55,7 +117,7 @@ for (const direction of ["right", "up", "left", "down"]) {
     await page.clock.runFor(1900);
     await expect(button).toHaveText("Confirmed");
     await page.clock.runFor(100);
-    await expect(button).toHaveText("Hold to confirm");
+    await expect(button).toHaveAccessibleName("Hold to confirm");
     await expect(label).toHaveCSS("color", idleStyles.color);
   });
 }
@@ -94,13 +156,15 @@ test("keyboard holds work with reduced motion on mobile", async ({ page }) => {
   await page.keyboard.down("Space");
   await page.clock.runFor(700);
   await page.keyboard.up("Space");
-  await page.clock.runFor(1600);
+  await page.clock.runFor(1850);
   await expect(button).toHaveAttribute("data-state", "idle");
   await page.keyboard.down("Enter");
-  await page.clock.runFor(1600);
+  await page.clock.runFor(1850);
   await expect(button).toHaveText("Confirmed");
   await page.keyboard.up("Enter");
   await expect(button).toHaveText("Confirmed");
+  await expect(button.locator('[data-slot="confirm-button-icon"]')).toHaveCSS("filter", "blur(0px)");
+  await expect(button.locator('[data-slot="confirm-button-icon"]')).toHaveCSS("transform", "none");
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
 
@@ -127,6 +191,7 @@ test("the library links to an installable component and its API reference", asyn
   await expect(reference).toContainText("duration");
   const item = await (await request.get("/r/confirm-button.json")).json();
   expect(item.registryDependencies).toContain("button");
+  expect(item.dependencies).toEqual(expect.arrayContaining(["motion", "@phosphor-icons/react"]));
   expect(item.files[0].target).toBe("components/animated/confirm-button.tsx");
   const guide = await request.get("/docs/components/confirm-button.md");
   expect(guide.ok()).toBe(true);
@@ -152,7 +217,7 @@ test("touch holds cancel on release and confirm only after the full duration", a
     await page.clock.runFor(2000);
     await expect(button).toHaveAttribute("data-state", "idle");
     await client.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints });
-    await page.clock.runFor(1600);
+    await page.clock.runFor(1850);
     await expect(button).toHaveText("Confirmed");
     await client.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
     await expect(button).toHaveText("Confirmed");

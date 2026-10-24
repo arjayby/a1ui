@@ -1,8 +1,30 @@
 "use client";
 
+import { CheckIcon } from "@phosphor-icons/react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useEffect, useEffectEvent, useId, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+
+const animations = {
+  slide: {
+    icon: {
+      initial: { opacity: 0, scale: 0.5, rotate: -45 },
+      exit: { opacity: 0, scale: 0.5, rotate: 45 },
+    },
+    label: { initial: { opacity: 0, y: 12 }, exit: { opacity: 0, y: -12 } },
+  },
+  blur: {
+    icon: { initial: { opacity: 0, filter: "blur(4px)" }, exit: { opacity: 0, filter: "blur(4px)" } },
+    label: { initial: { opacity: 0, filter: "blur(4px)" }, exit: { opacity: 0, filter: "blur(4px)" } },
+  },
+  flip: {
+    icon: { initial: { opacity: 0, rotateX: -90 }, exit: { opacity: 0, rotateX: 90 } },
+    label: { initial: { opacity: 0, rotateX: -90 }, exit: { opacity: 0, rotateX: 90 } },
+  },
+};
+
+const visible = { opacity: 1, scale: 1, rotate: 0, rotateX: 0, y: 0, filter: "blur(0px)" };
 
 export interface ConfirmButtonProps {
   onConfirm: () => void;
@@ -13,6 +35,9 @@ export interface ConfirmButtonProps {
   direction?: "right" | "left" | "up" | "down";
   /** Required hold time in seconds. Invalid or non-positive values use 1.5. */
   duration?: number;
+  animation?: keyof typeof animations;
+  /** Text and icon transition time in seconds, independent of the hold duration. */
+  transitionDuration?: number;
   disabled?: boolean;
   className?: string;
 }
@@ -28,6 +53,8 @@ export function ConfirmButton({
   confirmedLabel = "Confirmed",
   direction = "right",
   duration = 1.5,
+  animation = "blur",
+  transitionDuration = 0.2,
   disabled = false,
   className,
 }: ConfirmButtonProps) {
@@ -39,6 +66,13 @@ export function ConfirmButton({
   const resetTimeoutRef = useRef(0);
   const [state, setState] = useState<"idle" | "holding" | "confirmed">("idle");
   const id = useId();
+  const reducedMotion = useReducedMotion();
+  const preset = animations[animation];
+  const contentDuration = reducedMotion
+    ? 0
+    : Number.isFinite(transitionDuration)
+      ? Math.max(0, transitionDuration)
+      : 0.2;
   const vertical = direction === "up" || direction === "down";
   const holdDuration = Number.isFinite(duration) && duration > 0 ? duration : 1.5;
 
@@ -122,6 +156,7 @@ export function ConfirmButton({
         data-slot="confirm-button"
         data-state={state}
         data-direction={direction}
+        data-animation={animation}
         aria-label={currentLabel}
         aria-describedby={`${id}-instructions`}
         disabled={disabled}
@@ -176,12 +211,41 @@ export function ConfirmButton({
           className="pointer-events-none absolute inset-0 -z-10 bg-[var(--confirm-fill,currentColor)] opacity-20"
           style={{ transform: `${vertical ? "scaleY" : "scaleX"}(0)`, transformOrigin: origins[direction] }}
         />
-        <span
-          aria-hidden="true"
-          data-slot="confirm-button-label"
-          className={state === "confirmed" ? "text-[var(--status-success,#15803d)]" : undefined}
-        >
-          {currentLabel}
+        <span aria-hidden="true" className="relative grid h-5 w-full overflow-hidden">
+          <AnimatePresence initial={false}>
+            <motion.span
+              key={state}
+              data-slot="confirm-button-content"
+              data-state={state}
+              className="col-start-1 row-start-1 inline-flex w-full items-center justify-center gap-1.5"
+              initial={reducedMotion ? false : "hidden"}
+              animate="visible"
+              exit={reducedMotion ? "visible" : "exit"}
+            >
+              {state === "confirmed" && (
+                <motion.span
+                  data-slot="confirm-button-icon"
+                  className="inline-flex size-4 shrink-0 items-center justify-center text-[var(--status-success,#15803d)]"
+                  variants={{ hidden: preset.icon.initial, visible, exit: preset.icon.exit }}
+                  transition={{ type: "tween", duration: contentDuration }}
+                >
+                  <CheckIcon size={14} className="size-3.5" weight="bold" />
+                </motion.span>
+              )}
+              <span
+                data-slot="confirm-button-label"
+                className={`grid h-5 text-center ${state === "confirmed" ? "text-[var(--status-success,#15803d)]" : ""}`}
+              >
+                <motion.span
+                  className="col-start-1 row-start-1 whitespace-nowrap"
+                  variants={{ hidden: preset.label.initial, visible, exit: preset.label.exit }}
+                  transition={{ type: "tween", duration: contentDuration }}
+                >
+                  {currentLabel}
+                </motion.span>
+              </span>
+            </motion.span>
+          </AnimatePresence>
         </span>
       </Button>
       <span id={`${id}-instructions`} className="sr-only">
