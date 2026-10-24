@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-test("button width expands and contracts smoothly", async ({ page, context }) => {
+test("button width and position stay fixed while copying and resetting", async ({ page, context }) => {
   await context.grantPermissions(["clipboard-read", "clipboard-write"]);
   await page.goto("/components/copy-button");
   const button = page.locator('[data-slot="copy-button"][data-animation="blur"]');
@@ -9,26 +9,26 @@ test("button width expands and contracts smoothly", async ({ page, context }) =>
     const widths = [];
     const started = performance.now();
     let copied = false;
-    const initialWidth = element.getBoundingClientRect().width;
     element.click();
     while (performance.now() - started < 5000) {
       const state = element.dataset.state;
-      const width = element.getBoundingClientRect().width;
-      widths.push({ state, width });
+      const { x, y, width, height } = element.getBoundingClientRect();
+      widths.push({ state, x, y, width, height });
       if (state === "copied") copied = true;
-      if (copied && state === "idle" && Math.abs(width - initialWidth) < 0.1) break;
+      if (copied && state === "idle" && performance.now() - started > 2600) break;
       await new Promise(requestAnimationFrame);
     }
     return widths;
   });
-  const initialWidth = samples[0].width;
-  const finalWidth = Math.max(...samples.map(({ width }) => width));
-  const intermediate = ({ width }: { width: number }) => width > initialWidth + 1 && width < finalWidth - 1;
-  expect(finalWidth).toBeGreaterThan(initialWidth + 10);
-  expect(samples.some((sample) => sample.state === "copied" && intermediate(sample))).toBe(true);
-  const afterCopy = samples.slice(samples.findIndex(({ state }) => state === "copied"));
-  expect(afterCopy.some((sample) => sample.state === "idle" && intermediate(sample))).toBe(true);
-  expect(samples.at(-1)?.width).toBeCloseTo(initialWidth, 0);
+  const initial = samples[0];
+  expect(samples.some(({ state }) => state === "copied")).toBe(true);
+  expect(samples.at(-1)?.state).toBe("idle");
+  for (const sample of samples) {
+    expect(sample.width).toBeCloseTo(initial.width, 1);
+    expect(sample.height).toBeCloseTo(initial.height, 1);
+    expect(sample.x).toBeCloseTo(initial.x, 1);
+    expect(sample.y).toBeCloseTo(initial.y, 1);
+  }
 });
 
 for (const animation of ["blur", "slide", "flip"]) {
@@ -44,7 +44,7 @@ for (const animation of ["blur", "slide", "flip"]) {
     await expect(button).toHaveAttribute("data-size", "default");
     await expect(button).toHaveClass(/ui-button/);
     const width = (await button.boundingBox())?.width;
-    expect(width).toBeLessThan(90);
+    expect(width).toBeLessThan(100);
     const neighbors = page.locator(`[data-slot="copy-button"]:not([data-animation="${animation}"])`);
     const positions = await neighbors.evaluateAll((buttons) =>
       buttons.map((button) => {
@@ -74,7 +74,7 @@ for (const animation of ["blur", "slide", "flip"]) {
         .getByText("Copied", { exact: true })
         .evaluate((label) => label.scrollWidth <= label.clientWidth),
     ).toBe(true);
-    expect((await button.boundingBox())?.width).toBeLessThan(100);
+    expect((await button.boundingBox())?.width).toBe(width);
     await expect(button).toHaveAttribute("data-state", "idle", { timeout: 4000 });
     await expect(button).toHaveAccessibleName("Copy");
     await expect(button).toBeEnabled();

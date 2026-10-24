@@ -69,13 +69,6 @@ export function CopyButton({
     <span className="inline-flex flex-col items-start gap-2">
       <Button
         variant="outline"
-        render={
-          <motion.button
-            layout={!reducedMotion}
-            transition={{ layout: { type: "tween", duration: transitionDuration } }}
-            style={{ transitionProperty: "background-color, border-color, box-shadow" }}
-          />
-        }
         data-slot="copy-button"
         data-state={state}
         data-animation={animation}
@@ -85,12 +78,7 @@ export function CopyButton({
         onClick={copy}
         className={className}
       >
-        <motion.span
-          layout={reducedMotion ? false : "position"}
-          transition={{ layout: { type: "tween", duration: transitionDuration } }}
-          aria-hidden="true"
-          className="relative grid size-4 shrink-0 place-items-center"
-        >
+        <span aria-hidden="true" className="relative grid size-4 shrink-0 place-items-center">
           <AnimatePresence initial={false}>
             <motion.span
               key={copied ? "check" : "copy"}
@@ -107,14 +95,12 @@ export function CopyButton({
               )}
             </motion.span>
           </AnimatePresence>
-        </motion.span>
-        <motion.span
-          layout={reducedMotion ? false : "position"}
-          transition={{ layout: { type: "tween", duration: transitionDuration } }}
+        </span>
+        <span
           aria-hidden="true"
-          className="relative grid h-5 overflow-hidden text-center"
+          className="relative grid h-5 overflow-hidden text-center after:invisible after:col-start-1 after:row-start-1 after:content-['Copied']"
         >
-          <AnimatePresence initial={false} mode="popLayout">
+          <AnimatePresence initial={false}>
             <motion.span
               key={label}
               className="col-start-1 row-start-1 whitespace-nowrap"
@@ -126,7 +112,7 @@ export function CopyButton({
               {label}
             </motion.span>
           </AnimatePresence>
-        </motion.span>
+        </span>
       </Button>
       <span
         role="status"
