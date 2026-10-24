@@ -69,6 +69,13 @@ export function CopyButton({
     <span className="inline-flex flex-col items-start gap-2">
       <Button
         variant="outline"
+        render={
+          <motion.button
+            layout={!reducedMotion}
+            transition={{ layout: { type: "tween", duration: transitionDuration } }}
+            style={{ transitionProperty: "background-color, border-color, box-shadow" }}
+          />
+        }
         data-slot="copy-button"
         data-state={state}
         data-animation={animation}
@@ -78,7 +85,12 @@ export function CopyButton({
         onClick={copy}
         className={className}
       >
-        <span aria-hidden="true" className="relative grid size-4 shrink-0 place-items-center">
+        <motion.span
+          layout={reducedMotion ? false : "position"}
+          transition={{ layout: { type: "tween", duration: transitionDuration } }}
+          aria-hidden="true"
+          className="relative grid size-4 shrink-0 place-items-center"
+        >
           <AnimatePresence initial={false}>
             <motion.span
               key={copied ? "check" : "copy"}
@@ -91,8 +103,13 @@ export function CopyButton({
               {copied ? <CheckIcon size={16} weight="bold" /> : <CopyIcon size={16} />}
             </motion.span>
           </AnimatePresence>
-        </span>
-        <span aria-hidden="true" className="relative grid h-5 overflow-hidden text-center">
+        </motion.span>
+        <motion.span
+          layout={reducedMotion ? false : "position"}
+          transition={{ layout: { type: "tween", duration: transitionDuration } }}
+          aria-hidden="true"
+          className="relative grid h-5 overflow-hidden text-center"
+        >
           <AnimatePresence initial={false} mode="popLayout">
             <motion.span
               key={label}
@@ -105,7 +122,7 @@ export function CopyButton({
               {label}
             </motion.span>
           </AnimatePresence>
-        </span>
+        </motion.span>
       </Button>
       <span
         role="status"

@@ -1,5 +1,36 @@
 import { expect, test } from "@playwright/test";
 
+test("button width expands and contracts smoothly", async ({ page, context }) => {
+  await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+  await page.goto("/components/copy-button");
+  const button = page.locator('[data-slot="copy-button"][data-animation="blur"]');
+  const samples = await button.evaluate(async (element) => {
+    if (!(element instanceof HTMLButtonElement)) throw new Error("Expected a button");
+    const widths = [];
+    const started = performance.now();
+    let copied = false;
+    const initialWidth = element.getBoundingClientRect().width;
+    element.click();
+    while (performance.now() - started < 5000) {
+      const state = element.dataset.state;
+      const width = element.getBoundingClientRect().width;
+      widths.push({ state, width });
+      if (state === "copied") copied = true;
+      if (copied && state === "idle" && Math.abs(width - initialWidth) < 0.1) break;
+      await new Promise(requestAnimationFrame);
+    }
+    return widths;
+  });
+  const initialWidth = samples[0].width;
+  const finalWidth = Math.max(...samples.map(({ width }) => width));
+  const intermediate = ({ width }: { width: number }) => width > initialWidth + 1 && width < finalWidth - 1;
+  expect(finalWidth).toBeGreaterThan(initialWidth + 10);
+  expect(samples.some((sample) => sample.state === "copied" && intermediate(sample))).toBe(true);
+  const afterCopy = samples.slice(samples.findIndex(({ state }) => state === "copied"));
+  expect(afterCopy.some((sample) => sample.state === "idle" && intermediate(sample))).toBe(true);
+  expect(samples.at(-1)?.width).toBeCloseTo(initialWidth, 0);
+});
+
 for (const animation of ["blur", "slide", "flip"]) {
   test(`${animation} copies with the keyboard, animates both slots, and resets`, async ({
     page,
