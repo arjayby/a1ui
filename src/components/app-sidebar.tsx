@@ -118,6 +118,21 @@ export function AppSidebar() {
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton
                         size="sm"
+                        isActive={pathname === "/components/confirm-button"}
+                        render={
+                          <Link
+                            href="/components/confirm-button"
+                            onClick={closeMobile}
+                            aria-current={pathname === "/components/confirm-button" ? "page" : undefined}
+                          />
+                        }
+                      >
+                        <span>Confirm Button</span>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton
+                        size="sm"
                         isActive={pathname === "/components/loading-button"}
                         render={
                           <Link

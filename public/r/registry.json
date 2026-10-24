@@ -595,6 +595,43 @@
         }
       },
       "docs": "Read http://localhost:3000/docs/components/loading-button.md for usage, required props, and integration instructions."
+    },
+    {
+      "name": "confirm-button",
+      "type": "registry:component",
+      "title": "Confirm Button",
+      "description": "A hold-to-confirm button with a directional color fill and configurable hold duration.",
+      "registryDependencies": [
+        "button"
+      ],
+      "files": [
+        {
+          "path": "src/registry/components/confirm-button.tsx",
+          "type": "registry:component",
+          "target": "components/animated/confirm-button.tsx"
+        }
+      ],
+      "categories": [
+        "button",
+        "confirmation",
+        "interactive"
+      ],
+      "meta": {
+        "a1ui": {
+          "useCases": [
+            "Deliberate confirmation actions that require an uninterrupted pointer or keyboard hold."
+          ],
+          "limitations": [
+            "onConfirm fires once per completed hold. The caller handles asynchronous work and errors. Confirmation stays visible for two seconds after release before resetting. Click-only activation does not confirm."
+          ],
+          "requirements": [
+            "React 19.2 or later, Tailwind CSS 4, and the shared UI Button. Supply onConfirm in a client component. duration is in seconds; direction is right, left, up, or down."
+          ],
+          "docsUrl": "http://localhost:3000/docs/components/confirm-button.md",
+          "registryUrl": "http://localhost:3000/r/confirm-button.json"
+        }
+      },
+      "docs": "Read http://localhost:3000/docs/components/confirm-button.md for usage, required props, and integration instructions."
     }
   ]
 }

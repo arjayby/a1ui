@@ -36,7 +36,11 @@ export async function BlockSource({ name }: { name: BlockSlug }) {
   return <DynamicCodeBlock lang="tsx" code={source} />;
 }
 
-export async function ComponentSource({ name }: { name: "copy-button" | "loading-button" }) {
+export async function ComponentSource({
+  name,
+}: {
+  name: "copy-button" | "loading-button" | "confirm-button";
+}) {
   const source = await readFile(
     path.join(process.cwd(), "src", "registry", "components", `${name}.tsx`),
     "utf8",

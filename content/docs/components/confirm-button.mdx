@@ -1,0 +1,70 @@
+---
+title: Confirm Button
+description: Hold to confirm with a directional color fill and configurable hold duration.
+---
+
+## Demo
+
+<ConfirmButtonDemo />
+
+## Installation
+
+<Installation name="confirm-button" />
+
+## Code
+
+<Tabs items={["Usage", "Source"]}>
+  <Tab value="Usage">
+
+```tsx
+"use client";
+
+import { useState } from "react";
+import { ConfirmButton } from "@/components/animated/confirm-button";
+
+export function ConfirmButtonExample() {
+  const [confirmed, setConfirmed] = useState(false);
+
+  return (
+    <ConfirmButton
+      onConfirm={() => setConfirmed(true)}
+      label={confirmed ? "Hold to confirm again" : "Hold to confirm"}
+      direction="right"
+      duration={2}
+    />
+  );
+}
+```
+
+The fill and hold use the same duration. `onConfirm` fires when the fill reaches the end, while the button is still held. It fires once per hold. On success, the fill clears and the confirmed label uses the success text color. After release, the confirmed label remains visible for two seconds before the button resets. New holds are blocked during this confirmation.
+
+Releasing early, moving the pointer outside the button, pressing Escape, losing focus, or hiding the tab cancels the hold and clears the fill. A new hold always starts from zero. Changing `disabled`, `duration`, or `direction` also cancels an active hold.
+
+Keyboard users hold Space or Enter for the same duration. A click alone does not confirm. The button uses `type="button"` and does not submit forms automatically. The caller handles asynchronous work, loading, and errors through `onConfirm` and `disabled`.
+
+  </Tab>
+  <Tab value="Source">
+    <ComponentSource name="confirm-button" />
+  </Tab>
+</Tabs>
+
+## API reference
+
+| Prop             | Type                                  | Default             | Purpose                                                                                                                                          |
+| ---------------- | ------------------------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `onConfirm`      | `() => void`                          | Required            | Action called once when an uninterrupted hold completes.                                                                                         |
+| `label`          | `string`                              | `"Hold to confirm"` | Idle label and accessible name.                                                                                                                  |
+| `holdingLabel`   | `string`                              | `"Keep holding"`    | Label while the fill progresses.                                                                                                                 |
+| `confirmedLabel` | `string`                              | `"Confirmed"`       | Label and live announcement when the hold completes. Remains visible while held and for two seconds after release.                               |
+| `direction`      | `"right" \| "left" \| "up" \| "down"` | `"right"`           | Direction the color travels toward. Right fills from left to right, left from right to left, up from bottom to top, and down from top to bottom. |
+| `duration`       | `number`                              | `1.5`               | Required hold time and fill duration in seconds. Non-positive or non-finite values use `1.5`.                                                    |
+| `disabled`       | `boolean`                             | `false`             | Prevents starting a hold and cancels an active hold.                                                                                             |
+| `className`      | `string`                              | None                | Additional button classes. Overrides the default `w-40` width and can set `--confirm-fill` to customize the fill color.                          |
+
+The fill uses the neutral text color at 20% opacity by default and disappears on success. Only the confirmed label changes to the success color, using `--status-success` with a green fallback. For a custom fill color, set `className="[--confirm-fill:#64748b]"`. Reduced motion preserves the linear fill because it communicates the required hold time.
+
+<AgentOnly>
+
+ConfirmButton is a separate component from the slide-to-confirm ConfirmationButton block. It uses the shared UI Button with the outline variant. Pointer input includes mouse, touch, and pen. Only the primary pointer and primary button start a hold. Pointer release, cancellation, lost capture, movement outside the button, keyboard release, Escape, button or window blur, and document visibility changes cancel unfinished holds. Unmounting cancels the animation frame. The fill uses requestAnimationFrame and elapsed time without rendering React on every frame. It reaches full progress, hides the fill, colors the confirmed label, and calls onConfirm once, with no additional calls from key repeat or native clicks. Releasing after completion starts a two-second confirmation before restoring idle. Unmounting clears the confirmation timer. The demo shows four buttons with direction labels above them in right, up, left, down order and does not save data.
+
+</AgentOnly>

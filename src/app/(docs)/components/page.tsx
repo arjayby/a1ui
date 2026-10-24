@@ -3,6 +3,7 @@ import { ArrowUpRightIcon } from "@phosphor-icons/react/ssr";
 import Link from "next/link";
 
 import { Card, CardContent, CardDescription } from "@/components/ui/card";
+import { ConfirmButtonPreview } from "@/components/component-demos/confirm-button-demo";
 import { CopyButton } from "@/registry/components/copy-button";
 import { LoadingButtonPreview } from "@/components/component-demos/loading-button-demo";
 
@@ -22,6 +23,22 @@ export default function ComponentsPage() {
         </p>
       </header>
       <div className="catalog-grid">
+        <Card role="article" className="catalog-card">
+          <div inert aria-hidden="true" className="catalog-preview flex items-center justify-center">
+            <ConfirmButtonPreview />
+          </div>
+          <CardContent className="catalog-card-content">
+            <h2 className="ui-card-title">
+              <Link href="/components/confirm-button" className="catalog-card-link">
+                Confirm Button
+                <ArrowUpRightIcon aria-hidden="true" className="size-4 shrink-0" />
+              </Link>
+            </h2>
+            <CardDescription>
+              Hold to confirm with a directional color fill and configurable duration.
+            </CardDescription>
+          </CardContent>
+        </Card>
         <Card role="article" className="catalog-card">
           <div inert aria-hidden="true" className="catalog-preview flex items-center justify-center">
             <LoadingButtonPreview />
