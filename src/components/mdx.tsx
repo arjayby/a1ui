@@ -19,6 +19,7 @@ import { DropdownMenuDemo } from "@/components/component-demos/dropdown-menu-dem
 import { ConfirmButtonDemo } from "@/components/component-demos/confirm-button-demo";
 import { CopyButtonDemo } from "@/components/component-demos/copy-button-demo";
 import { LoadingButtonDemo } from "@/components/component-demos/loading-button-demo";
+import { IconToggleDemo } from "@/components/component-demos/icon-toggle-demo";
 import { ParticleMenuDemo } from "@/components/block-demos/particle-menu-demo";
 import { TextScrambleDemo } from "@/components/block-demos/text-scramble-demo";
 import { TextBannerDemo } from "@/components/block-demos/text-banner-demo";
@@ -43,6 +44,7 @@ export function getMDXComponents(components?: MDXComponents) {
     ConfirmButtonDemo,
     CopyButtonDemo,
     LoadingButtonDemo,
+    IconToggleDemo,
     ConfirmationButtonDemo,
     CompareCurtainDemo,
     Installation,

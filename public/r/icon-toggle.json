@@ -1,0 +1,42 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "icon-toggle",
+  "title": "Icon Toggle",
+  "description": "A two-state icon button that morphs its SVG paths on every click.",
+  "dependencies": [
+    "motion"
+  ],
+  "registryDependencies": [
+    "button"
+  ],
+  "files": [
+    {
+      "path": "src/registry/components/icon-toggle.tsx",
+      "content": "\"use client\";\n\nimport { motion, useReducedMotion } from \"motion/react\";\nimport { useState } from \"react\";\n\nimport { Button } from \"@/components/ui/button\";\n\n// Phosphor SunIcon and MoonIcon contours, normalized to matching cubic commands.\nconst sunMoonPaths: NonNullable<IconToggleProps[\"paths\"]> = [\n  [\n    \"M17.25 12 C17.25 14.8995 14.8995 17.25 12 17.25 C9.1005 17.25 6.75 14.8995 6.75 12 C6.75 9.1005 9.1005 6.75 12 6.75 C13.3924 6.75 14.7277 7.3031 15.7123 8.2877 C16.6969 9.2723 17.25 10.6076 17.25 12 Z\",\n    \"M21.3647 13.8647 C20.1151 17.9721 16.14 20.6277 11.8674 20.2066 C7.5948 19.7856 4.2144 16.4052 3.7934 12.1326 C3.3723 7.86 6.0279 3.8849 10.1361 2.6379 C9.1733 5.8143 10.0375 9.2654 12.386 11.614 C14.7346 13.9625 18.1857 14.8267 21.3639 13.8621 Z\",\n  ],\n  [\"M12 1.5 L12 3.75\", \"M10.1361 2.6379 L10.1361 2.6379\"],\n  [\"M18 6 L19.5 4.5\", \"M10.1361 2.6379 L10.1361 2.6379\"],\n  [\"M20.25 12 L22.5 12\", \"M21.3621 13.8639 L21.3621 13.8639\"],\n  [\"M18 18 L19.5 19.5\", \"M19.114 17.614 L19.114 17.614\"],\n  [\"M12 20.25 L12 22.5\", \"M12.75 20.25 L12.75 20.25\"],\n  [\"M6 18 L4.5 19.5\", \"M6.386 17.614 L6.386 17.614\"],\n  [\"M3.75 12 L1.5 12\", \"M3.75 11.25 L3.75 11.25\"],\n  [\"M6 6 L4.5 4.5\", \"M6.386 4.886 L6.386 4.886\"],\n];\n\nexport interface IconToggleProps {\n  /** A stable accessible name for the toggle, such as \"Dark mode\". */\n  label: string;\n  /** Each pair contains the unpressed and pressed SVG path in a 24 × 24 viewBox.\n   * Both paths must use the same commands in the same order. */\n  paths?: readonly (readonly [string, string])[];\n  pressed?: boolean;\n  defaultPressed?: boolean;\n  onPressedChange?: (pressed: boolean) => void;\n  /** Transition duration in seconds. */\n  duration?: number;\n  disabled?: boolean;\n  className?: string;\n}\n\nexport function IconToggle({\n  label,\n  paths = sunMoonPaths,\n  pressed,\n  defaultPressed = false,\n  onPressedChange,\n  duration = 0.3,\n  disabled = false,\n  className,\n}: IconToggleProps) {\n  const [internalPressed, setInternalPressed] = useState(defaultPressed);\n  const active = pressed ?? internalPressed;\n  const reducedMotion = useReducedMotion();\n  const transitionDuration = reducedMotion ? 0 : Number.isFinite(duration) ? Math.max(0, duration) : 0.3;\n\n  return (\n    <Button\n      variant=\"outline\"\n      size=\"icon\"\n      data-slot=\"icon-toggle\"\n      data-state={active ? \"on\" : \"off\"}\n      aria-label={label}\n      aria-pressed={active}\n      disabled={disabled}\n      className={className}\n      onClick={() => {\n        const next = !active;\n        if (pressed === undefined) setInternalPressed(next);\n        onPressedChange?.(next);\n      }}\n    >\n      <svg\n        aria-hidden=\"true\"\n        viewBox=\"0 0 24 24\"\n        fill=\"none\"\n        stroke=\"currentColor\"\n        strokeWidth={1.75}\n        strokeLinecap=\"round\"\n        strokeLinejoin=\"round\"\n        className=\"size-5\"\n      >\n        {paths.map(([off, on], index) => (\n          <motion.path\n            key={index}\n            initial={false}\n            animate={{ d: active ? on : off }}\n            transition={{ type: \"tween\", duration: transitionDuration, ease: [0.4, 0, 0.2, 1] }}\n          />\n        ))}\n      </svg>\n    </Button>\n  );\n}\n",
+      "type": "registry:component",
+      "target": "components/animated/icon-toggle.tsx"
+    }
+  ],
+  "meta": {
+    "a1ui": {
+      "useCases": [
+        "Icon toggles with a reversible morph between two states, such as menu and close or play and pause."
+      ],
+      "limitations": [
+        "Custom path pairs must use matching SVG commands and coordinate counts in a 24 by 24 viewBox. Uses rounded strokes with no fill. Does not morph arbitrary React icon components."
+      ],
+      "requirements": [
+        "React 19, Tailwind CSS 4, Motion for React, and the shared UI Button. Supply a stable accessible label. Controlled usage requires updating pressed in onPressedChange. Reduced motion switches paths instantly."
+      ],
+      "docsUrl": "http://localhost:3000/docs/components/icon-toggle.md",
+      "registryUrl": "http://localhost:3000/r/icon-toggle.json"
+    }
+  },
+  "categories": [
+    "button",
+    "animation",
+    "interactive"
+  ],
+  "type": "registry:component",
+  "docs": "Read http://localhost:3000/docs/components/icon-toggle.md for usage, required props, and integration instructions."
+}

@@ -492,6 +492,35 @@
           ]
         }
       }
+    },
+    {
+      "name": "icon-toggle",
+      "type": "registry:component",
+      "title": "Icon Toggle",
+      "description": "A two-state icon button that morphs its SVG paths on every click.",
+      "dependencies": ["motion"],
+      "registryDependencies": ["button"],
+      "files": [
+        {
+          "path": "src/registry/components/icon-toggle.tsx",
+          "type": "registry:component",
+          "target": "components/animated/icon-toggle.tsx"
+        }
+      ],
+      "categories": ["button", "animation", "interactive"],
+      "meta": {
+        "a1ui": {
+          "useCases": [
+            "Icon toggles with a reversible morph between two states, such as menu and close or play and pause."
+          ],
+          "limitations": [
+            "Custom path pairs must use matching SVG commands and coordinate counts in a 24 by 24 viewBox. Uses rounded strokes with no fill. Does not morph arbitrary React icon components."
+          ],
+          "requirements": [
+            "React 19, Tailwind CSS 4, Motion for React, and the shared UI Button. Supply a stable accessible label. Controlled usage requires updating pressed in onPressedChange. Reduced motion switches paths instantly."
+          ]
+        }
+      }
     }
   ]
 }
