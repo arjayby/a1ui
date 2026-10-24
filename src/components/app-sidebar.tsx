@@ -44,7 +44,8 @@ export function AppSidebar() {
     <Sidebar variant="inset" className="docs-sidebar">
       <SidebarHeader className="gap-4 px-3 py-4">
         <div className="flex items-center justify-between px-2">
-          <Link href="/" onClick={closeMobile} className="flex min-h-11 items-center no-underline">
+          <Link href="/" onClick={closeMobile} className="flex min-h-11 items-center gap-2 no-underline">
+            <span className="brand-mark" aria-hidden="true" />
             <span className="flex flex-col">
               <span className="font-heading text-lg leading-6 font-medium">a1ui</span>
               <span className="text-muted-foreground text-xs">Documentation</span>

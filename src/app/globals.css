@@ -168,6 +168,21 @@ h6 {
   color: var(--background);
 }
 
+.brand-mark {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  background: currentColor;
+  mask: url("/icon.svg") center / contain no-repeat;
+  mask-mode: alpha;
+}
+
+[data-sidebar="sidebar"] .brand-mark {
+  width: 32px;
+  height: 32px;
+}
+
 .docs-shell {
   min-height: 100dvh;
 }

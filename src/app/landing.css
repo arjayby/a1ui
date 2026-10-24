@@ -37,20 +37,6 @@
   font-family: var(--font-heading), sans-serif;
   font-size: 24px;
 }
-.landing-mark {
-  display: grid;
-  width: 18px;
-  height: 18px;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 3px;
-}
-.landing-mark i {
-  background: currentColor;
-  border-radius: 1px;
-}
-.landing-mark i:last-child {
-  opacity: 0.35;
-}
 .landing-brand-divider {
   margin-inline: 10px;
   color: var(--border);
@@ -362,6 +348,9 @@
   font-size: 11px;
 }
 .landing-footer > a:first-child {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   color: var(--foreground);
 }
 .landing-footer > a:last-child {
@@ -395,9 +384,6 @@
   }
   .landing-brand {
     font-size: 22px;
-  }
-  .landing-mark {
-    display: none;
   }
   .landing-header nav {
     gap: 16px;

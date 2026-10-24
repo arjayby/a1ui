@@ -39,12 +39,7 @@ export default function HomePage() {
       </a>
       <header className="landing-header landing-width">
         <Link href="/" className="landing-brand" aria-label="a1ui home">
-          <span className="landing-mark" aria-hidden="true">
-            <i />
-            <i />
-            <i />
-            <i />
-          </span>
+          <span className="brand-mark" aria-hidden="true" />
           a1ui
           <span className="landing-brand-divider" aria-hidden="true">
             /
@@ -224,6 +219,7 @@ export default function HomePage() {
 
       <footer className="landing-footer landing-width">
         <Link href="/" className="font-heading text-lg">
+          <span className="brand-mark" aria-hidden="true" />
           a1ui
         </Link>
         <p>A collection worth making your own.</p>

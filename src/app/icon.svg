@@ -1,12 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" fill="#f3f2ed" />
-  <text
-    x="32"
-    y="41"
-    fill="#242320"
-    font-family="monospace"
-    font-size="28"
-    font-weight="700"
-    text-anchor="middle"
-  >a1</text>
+<!-- Shape 33 by Monika Michalczyk, https://www.shapes.gallery/ -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="#242421">
+  <style>
+    @media (prefers-color-scheme: dark) {
+      svg { fill: #f2f2ee; }
+    }
+  </style>
+  <path d="M 256 256 L 178 256 C 150.386 256 128 233.614 128 206 L 128 256 L 0 256 L 0 192 C 0 156.654 28.654 128 64 128 C 99.346 128 128 156.654 128 192 L 128 128 L 256 128 Z M 78 0 C 105.614 0 128 22.386 128 50 L 128 0 L 256 0 L 256 64 C 256 99.346 227.346 128 192 128 C 156.654 128 128 99.346 128 64 L 128 128 L 0 128 L 0 0 Z" />
 </svg>
