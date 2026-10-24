@@ -103,8 +103,8 @@ test("theme changes recolor cached text without rasterizing the glyphs again", a
   }
 });
 
-test("the homepage spiral stays static without allocating canvas caches", async ({ page }) => {
-  await page.goto("/");
+test("the catalog spiral stays static without allocating canvas caches", async ({ page }) => {
+  await page.goto("/blocks");
   await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
   const rotation = page.locator("[data-spiral-rotation]");
   await expect(rotation).toHaveCSS("animation-play-state", "paused");

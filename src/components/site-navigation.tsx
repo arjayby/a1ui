@@ -19,7 +19,7 @@ import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 import registry from "../../registry.json";
 
-function GitHubLink() {
+export function GitHubLink() {
   return (
     <a
       href="https://github.com/arjayby/a1ui"
@@ -36,7 +36,7 @@ function GitHubLink() {
   );
 }
 
-function ThemeButton() {
+export function ThemeButton() {
   const { resolvedTheme, setTheme } = useTheme();
 
   return (

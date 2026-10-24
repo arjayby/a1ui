@@ -134,7 +134,7 @@ test("honors live reduced motion and keeps both theme and responsive geometry", 
 });
 
 test("catalog contains a static preview and links to the demo", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/blocks");
   const card = page
     .getByRole("article")
     .filter({ has: page.getByRole("link", { name: "ASCII Morph", exact: true }) });

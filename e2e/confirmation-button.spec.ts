@@ -122,7 +122,7 @@ test("touch cancellation returns the handle and a touch drag confirms", async ({
 });
 
 test("the catalog links to the new component and keeps its preview inside the card", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/blocks");
   const card = page
     .locator(".catalog-card")
     .filter({ has: page.getByRole("link", { name: "Confirmation Button", exact: true }) });

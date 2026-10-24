@@ -124,7 +124,7 @@ test("touch swipes cycle cards and canceled touches preserve selection", async (
 });
 
 test("the catalog preview fits its card and links to the documentation", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/blocks");
   const card = page
     .locator(".catalog-card")
     .filter({ has: page.getByRole("link", { name: "Peel Stack", exact: true }) });

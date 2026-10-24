@@ -9,7 +9,7 @@ test.afterEach(async ({ page }) => {
 for (const width of [1440, 390, 320]) {
   test(`showcase fits all four sigils and opens the demo at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });
-    await page.goto("/");
+    await page.goto("/blocks");
     await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
 
     const card = page.locator(".catalog-card").filter({

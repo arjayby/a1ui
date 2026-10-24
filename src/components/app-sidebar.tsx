@@ -62,7 +62,7 @@ export function AppSidebar() {
         </div>
       </SidebarHeader>
       <Menu
-        value={pathname === "/" ? "/blocks" : pathname}
+        value={pathname}
         data-slot="sidebar-content"
         data-sidebar="content"
         className="flex min-h-0 flex-1 flex-col gap-1 overflow-auto"
@@ -163,7 +163,7 @@ export function AppSidebar() {
               <Collapsible defaultOpen render={<SidebarMenuItem />}>
                 <SidebarMenuButton
                   size="sm"
-                  isActive={pathname === "/blocks" || pathname === "/"}
+                  isActive={pathname === "/blocks"}
                   render={
                     <MenuItem
                       value="/blocks"
@@ -171,7 +171,7 @@ export function AppSidebar() {
                         <Link
                           href="/blocks"
                           onClick={closeMobile}
-                          aria-current={pathname === "/blocks" || pathname === "/" ? "page" : undefined}
+                          aria-current={pathname === "/blocks" ? "page" : undefined}
                         />
                       }
                     />

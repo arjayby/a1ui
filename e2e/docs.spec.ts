@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 test("catalog opens block documentation in the agreed order", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/blocks");
   await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
 
   await expect(page.getByRole("heading", { name: "Blocks", exact: true })).toBeVisible();
@@ -49,7 +49,7 @@ test("selected block navigation keeps its label visible", async ({ page }) => {
 
 test("desktop sidebar can scroll to its final block", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 600 });
-  await page.goto("/");
+  await page.goto("/blocks");
 
   const sidebar = page.locator('[data-sidebar="content"]');
   const finalLink = page.getByRole("navigation", { name: "Library" }).getByRole("link").last();
@@ -64,7 +64,7 @@ test("desktop sidebar can scroll to its final block", async ({ page }) => {
 });
 
 test("search finds block documentation", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/blocks");
   await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
   await expect(page.getByRole("button", { name: "Search documentation" })).toHaveCount(1);
   await page.locator("header").getByRole("button", { name: "Search documentation" }).click();
@@ -76,7 +76,7 @@ test("search finds block documentation", async ({ page }) => {
 
 test("mobile sidebar opens, navigates, closes, and restores focus", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/");
+  await page.goto("/blocks");
   await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
 
   await expect(page.getByRole("button", { name: "Search documentation" })).toBeVisible();

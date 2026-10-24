@@ -119,7 +119,7 @@ test("keyboard movement, reset and responsive layout preserve readable text", as
 test("catalog preview fits its card and centers the duck on desktop and mobile", async ({ page }) => {
   for (const width of [1440, 390, 320]) {
     await page.setViewportSize({ width, height: 900 });
-    await page.goto("/");
+    await page.goto("/blocks");
     const card = page.locator(".catalog-card").filter({
       has: page.getByRole("link", { name: "Shape Flow", exact: true }),
     });
