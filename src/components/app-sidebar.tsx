@@ -25,6 +25,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { blocks } from "@/lib/block-catalog";
+import { components } from "@/lib/component-catalog";
 
 export function AppSidebar() {
   const pathname = usePathname();
@@ -115,51 +116,27 @@ export function AppSidebar() {
                 </CollapsibleTrigger>
                 <CollapsibleContent>
                   <SidebarMenuSub className="mr-0 pr-0">
-                    <SidebarMenuSubItem>
-                      <SidebarMenuSubButton
-                        size="sm"
-                        isActive={pathname === "/components/confirm-button"}
-                        render={
-                          <Link
-                            href="/components/confirm-button"
-                            onClick={closeMobile}
-                            aria-current={pathname === "/components/confirm-button" ? "page" : undefined}
-                          />
-                        }
-                      >
-                        <span>Confirm Button</span>
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                    <SidebarMenuSubItem>
-                      <SidebarMenuSubButton
-                        size="sm"
-                        isActive={pathname === "/components/loading-button"}
-                        render={
-                          <Link
-                            href="/components/loading-button"
-                            onClick={closeMobile}
-                            aria-current={pathname === "/components/loading-button" ? "page" : undefined}
-                          />
-                        }
-                      >
-                        <span>Loading Button</span>
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                    <SidebarMenuSubItem>
-                      <SidebarMenuSubButton
-                        size="sm"
-                        isActive={pathname === "/components/copy-button"}
-                        render={
-                          <Link
-                            href="/components/copy-button"
-                            onClick={closeMobile}
-                            aria-current={pathname === "/components/copy-button" ? "page" : undefined}
-                          />
-                        }
-                      >
-                        <span>Copy Button</span>
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
+                    {components.map((component) => {
+                      const href = `/components/${component.slug}`;
+                      const current = pathname === href;
+                      return (
+                        <SidebarMenuSubItem key={component.slug}>
+                          <SidebarMenuSubButton
+                            size="sm"
+                            isActive={current}
+                            render={
+                              <Link
+                                href={href}
+                                onClick={closeMobile}
+                                aria-current={current ? "page" : undefined}
+                              />
+                            }
+                          >
+                            <span>{component.title}</span>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      );
+                    })}
                   </SidebarMenuSub>
                 </CollapsibleContent>
               </Collapsible>

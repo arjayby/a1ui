@@ -21,12 +21,21 @@ test("blocks and reusable components have separate catalogs on desktop and mobil
     registry.items.filter((item) => item.type === "registry:component").length,
   );
   const library = page.getByRole("navigation", { name: "Library", exact: true });
+  const componentTitles = registry.items
+    .filter((item) => item.type === "registry:component")
+    .map((item) => item.title)
+    .sort((a, b) => a.localeCompare(b));
+  await expect(page.locator(".catalog-card-link")).toHaveText(componentTitles);
+  await expect(library.locator('a[href^="/components/"]')).toHaveText(componentTitles);
   const catalogLinks = library.getByRole("link").filter({ hasText: /^(Components|Blocks)$/ });
   await expect(catalogLinks).toHaveText(["Components", "Blocks"]);
   await expect(page.locator('a[href="/design-system"]')).toHaveCount(0);
 
   await page.setViewportSize({ width: 390, height: 844 });
   await page.getByRole("button", { name: "Toggle Sidebar", exact: true }).click();
+  await expect(
+    page.getByRole("dialog", { name: "Documentation", exact: true }).locator('a[href^="/components/"]'),
+  ).toHaveText(componentTitles);
   await page
     .getByRole("dialog", { name: "Documentation", exact: true })
     .getByRole("link", { name: "Blocks", exact: true })

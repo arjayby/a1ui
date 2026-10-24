@@ -1,15 +1,23 @@
 import type { Metadata } from "next";
 import { ArrowUpRightIcon } from "@phosphor-icons/react/ssr";
 import Link from "next/link";
+import type { ReactNode } from "react";
 
 import { Card, CardContent, CardDescription } from "@/components/ui/card";
 import { ConfirmButtonPreview } from "@/components/component-demos/confirm-button-demo";
 import { CopyButton } from "@/registry/components/copy-button";
 import { LoadingButtonPreview } from "@/components/component-demos/loading-button-demo";
+import { components } from "@/lib/component-catalog";
 
 export const metadata: Metadata = {
   title: "Components",
   description: "Animated components built with Motion, with live previews and editable source.",
+};
+
+const previews: Record<string, ReactNode> = {
+  "confirm-button": <ConfirmButtonPreview />,
+  "copy-button": <CopyButton value="hello@a1ui.dev" />,
+  "loading-button": <LoadingButtonPreview />,
 };
 
 export default function ComponentsPage() {
@@ -23,54 +31,22 @@ export default function ComponentsPage() {
         </p>
       </header>
       <div className="catalog-grid">
-        <Card role="article" className="catalog-card">
-          <div inert aria-hidden="true" className="catalog-preview flex items-center justify-center">
-            <ConfirmButtonPreview />
-          </div>
-          <CardContent className="catalog-card-content">
-            <h2 className="ui-card-title">
-              <Link href="/components/confirm-button" className="catalog-card-link">
-                Confirm Button
-                <ArrowUpRightIcon aria-hidden="true" className="size-4 shrink-0" />
-              </Link>
-            </h2>
-            <CardDescription>
-              Hold to confirm with a directional color fill and configurable duration.
-            </CardDescription>
-          </CardContent>
-        </Card>
-        <Card role="article" className="catalog-card">
-          <div inert aria-hidden="true" className="catalog-preview flex items-center justify-center">
-            <LoadingButtonPreview />
-          </div>
-          <CardContent className="catalog-card-content">
-            <h2 className="ui-card-title">
-              <Link href="/components/loading-button" className="catalog-card-link">
-                Loading Button
-                <ArrowUpRightIcon aria-hidden="true" className="size-4 shrink-0" />
-              </Link>
-            </h2>
-            <CardDescription>
-              Animated loading and success feedback for async actions and network requests.
-            </CardDescription>
-          </CardContent>
-        </Card>
-        <Card role="article" className="catalog-card">
-          <div inert aria-hidden="true" className="catalog-preview flex items-center justify-center">
-            <CopyButton value="hello@a1ui.dev" />
-          </div>
-          <CardContent className="catalog-card-content">
-            <h2 className="ui-card-title">
-              <Link href="/components/copy-button" className="catalog-card-link">
-                Copy Button
-                <ArrowUpRightIcon aria-hidden="true" className="size-4 shrink-0" />
-              </Link>
-            </h2>
-            <CardDescription>
-              A copy icon and label that animate into a checkmark and success message.
-            </CardDescription>
-          </CardContent>
-        </Card>
+        {components.map((component) => (
+          <Card key={component.slug} role="article" className="catalog-card">
+            <div inert aria-hidden="true" className="catalog-preview flex items-center justify-center">
+              {previews[component.slug]}
+            </div>
+            <CardContent className="catalog-card-content">
+              <h2 className="ui-card-title">
+                <Link href={`/components/${component.slug}`} className="catalog-card-link">
+                  {component.title}
+                  <ArrowUpRightIcon aria-hidden="true" className="size-4 shrink-0" />
+                </Link>
+              </h2>
+              <CardDescription>{component.description}</CardDescription>
+            </CardContent>
+          </Card>
+        ))}
       </div>
     </div>
   );
