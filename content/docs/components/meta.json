@@ -1,4 +1,4 @@
 {
   "title": "Components",
-  "pages": ["index", "menu", "confirm-button", "copy-button", "loading-button"]
+  "pages": ["index", "menu", "dropdown-menu", "confirm-button", "copy-button", "loading-button"]
 }

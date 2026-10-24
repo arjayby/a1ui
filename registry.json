@@ -463,6 +463,35 @@
           ]
         }
       }
+    },
+    {
+      "name": "dropdown-menu",
+      "type": "registry:component",
+      "title": "Dropdown Menu",
+      "description": "A shadcn dropdown with open and close transitions and a traveling highlight.",
+      "dependencies": ["motion", "@base-ui/react"],
+      "registryDependencies": ["dropdown-menu", "button"],
+      "files": [
+        {
+          "path": "src/registry/components/dropdown-menu.tsx",
+          "type": "registry:component",
+          "target": "components/animated/dropdown-menu.tsx"
+        }
+      ],
+      "categories": ["menu", "dropdown", "animation"],
+      "meta": {
+        "a1ui": {
+          "useCases": [
+            "Action menus with animated open and close transitions and a shared pointer and keyboard highlight."
+          ],
+          "limitations": [
+            "Uses the shadcn Base UI variant. Animated highlights cover regular action items and submenu triggers; checkbox items and radio items use the underlying shadcn components."
+          ],
+          "requirements": [
+            "React 19, Tailwind CSS 4, Motion for React, Base UI, and the shadcn Dropdown Menu. Reduced motion removes popup and highlight transitions."
+          ]
+        }
+      }
     }
   ]
 }

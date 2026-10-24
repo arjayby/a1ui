@@ -7,6 +7,27 @@ import { cn } from "@/lib/utils";
 export const DropdownMenu = Primitive.Root;
 export const DropdownMenuTrigger = Primitive.Trigger;
 export const DropdownMenuGroup = Primitive.Group;
+export const DropdownMenuSub = Primitive.SubmenuRoot;
+
+export function DropdownMenuSubTrigger({
+  className,
+  children,
+  ...props
+}: ComponentProps<typeof Primitive.SubmenuTrigger>) {
+  return (
+    <Primitive.SubmenuTrigger
+      className={(state) =>
+        cn("ui-menu-item", typeof className === "function" ? className(state) : className)
+      }
+      {...props}
+    >
+      {children}
+      <span aria-hidden="true" className="ml-auto">
+        ›
+      </span>
+    </Primitive.SubmenuTrigger>
+  );
+}
 
 export function DropdownMenuContent({
   className,

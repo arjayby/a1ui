@@ -9,7 +9,8 @@ test("focus travels between rows without selecting and returns on blur", async (
   const settings = menu.getByRole("button", { name: "Settings" });
   const start = await menu.locator(highlight).boundingBox();
   const destination = await settings.boundingBox();
-  if (!start || !destination) throw new Error("Expected visible menu geometry");
+  const menuBox = await menu.boundingBox();
+  if (!start || !destination || !menuBox) throw new Error("Expected visible menu geometry");
 
   const positions = await settings.evaluate(async (element) => {
     if (!(element instanceof HTMLButtonElement)) throw new Error("Expected a menu button");
@@ -20,12 +21,13 @@ test("focus travels between rows without selecting and returns on blur", async (
     while (performance.now() - started < 600) {
       await new Promise(requestAnimationFrame);
       const indicator = menu?.querySelector('[data-slot="menu-highlight"]');
-      if (indicator) positions.push(indicator.getBoundingClientRect().y);
+      if (indicator && menu)
+        positions.push(indicator.getBoundingClientRect().y - menu.getBoundingClientRect().y);
     }
     return positions;
   });
-  expect(positions.some((y) => y > start.y + 2 && y < destination.y - 2)).toBe(true);
-  expect(positions.at(-1)).toBeCloseTo(destination.y, 0);
+  expect(positions.some((y) => y > start.y - menuBox.y + 2 && y < destination.y - menuBox.y - 2)).toBe(true);
+  expect(positions.at(-1)).toBeCloseTo(destination.y - menuBox.y, 0);
   await expect(overview).toHaveAttribute("aria-pressed", "true");
   await expect(settings).toHaveAttribute("aria-pressed", "false");
   await expect(settings).toBeFocused();

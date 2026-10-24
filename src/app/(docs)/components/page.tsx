@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 
 import { Card, CardContent, CardDescription } from "@/components/ui/card";
 import { MenuPreview } from "@/components/component-demos/menu-demo";
+import { DropdownMenuPreview } from "@/components/component-demos/dropdown-menu-demo";
 import { ConfirmButtonPreview } from "@/components/component-demos/confirm-button-demo";
 import { CopyButton } from "@/registry/components/copy-button";
 import { LoadingButtonPreview } from "@/components/component-demos/loading-button-demo";
@@ -16,7 +17,8 @@ export const metadata: Metadata = {
 };
 
 const previews: Record<string, ReactNode> = {
-  "menu": <MenuPreview />,
+  "dropdown-menu": <DropdownMenuPreview />,
+  menu: <MenuPreview />,
   "confirm-button": <ConfirmButtonPreview />,
   "copy-button": <CopyButton value="hello@a1ui.dev" />,
   "loading-button": <LoadingButtonPreview />,
