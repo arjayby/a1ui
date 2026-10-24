@@ -48,7 +48,12 @@ export function MenuExample() {
   const [value, setValue] = useState("overview");
 
   return (
-    <Menu value={value} role="group" aria-label="Workspace views" className="flex w-56 flex-col gap-1">
+    <Menu
+      value={value}
+      role="group"
+      aria-label="Workspace views"
+      className="bg-popover text-popover-foreground flex w-56 flex-col gap-1 rounded-xl border p-1.5 shadow-sm"
+    >
       {["overview", "projects", "settings"].map((item) => (
         <MenuItem
           key={item}

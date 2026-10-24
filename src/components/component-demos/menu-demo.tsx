@@ -16,7 +16,12 @@ export function MenuPreview() {
   const [value, setValue] = useState("overview");
 
   return (
-    <Menu value={value} role="group" aria-label="Workspace views" className="flex w-56 flex-col gap-1">
+    <Menu
+      value={value}
+      role="group"
+      aria-label="Workspace views"
+      className="bg-popover text-popover-foreground flex w-56 flex-col gap-1 rounded-xl border p-1.5 shadow-sm"
+    >
       {items.map(({ value: itemValue, label, icon: Icon }) => (
         <MenuItem
           key={itemValue}
@@ -25,7 +30,7 @@ export function MenuPreview() {
           onClick={() => setValue(itemValue)}
           className="text-muted-foreground focus-visible:ring-ring data-highlighted:text-foreground flex h-10 items-center gap-3 px-3 text-sm outline-none focus-visible:ring-2"
         >
-          <Icon size={18} aria-hidden="true" />
+          <Icon size={16} aria-hidden="true" />
           <span>{label}</span>
         </MenuItem>
       ))}
