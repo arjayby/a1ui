@@ -17,6 +17,7 @@ export interface SliderProps {
   value?: number;
   defaultValue?: number;
   onValueChange?: (value: number) => void;
+  formatValue?: (value: number) => string;
   disabled?: boolean;
   name?: string;
   className?: string;
@@ -33,6 +34,7 @@ export function Slider({
   value,
   defaultValue = min,
   onValueChange,
+  formatValue,
   disabled = false,
   name,
   className,
@@ -78,10 +80,10 @@ export function Slider({
         onValueChange?.(next);
       }}
     >
-      <div className="mb-4 flex items-center justify-between gap-4 text-xs">
+      <div data-slot="slider-header" className="mb-4 flex items-center justify-between gap-4 text-xs">
         <span className="font-normal">{label}</span>
         <span aria-hidden="true" className="text-muted-foreground font-mono text-xs tabular-nums">
-          {position}
+          {formatValue?.(position) ?? position}
         </span>
       </div>
       <div className="px-3">
@@ -108,6 +110,7 @@ export function Slider({
           <SliderPrimitive.Thumb
             data-slot="slider-thumb"
             getAriaLabel={() => label}
+            getAriaValueText={formatValue ? (_, currentValue) => formatValue(currentValue) : undefined}
             className="relative flex size-11 cursor-grab items-center justify-center rounded-full outline-none data-disabled:cursor-not-allowed data-dragging:cursor-grabbing"
           >
             <motion.span

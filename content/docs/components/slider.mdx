@@ -44,21 +44,22 @@ Arrow keys change the value by `step` without magnetic snapping. Home and End se
 
 ## API reference
 
-| Prop             | Type                      | Default         | Purpose                                                                                                         |
-| ---------------- | ------------------------- | --------------- | --------------------------------------------------------------------------------------------------------------- |
-| `label`          | `string`                  | Required        | Visible label and accessible slider name.                                                                       |
-| `stops`          | `readonly number[]`       | `[]`            | Magnetic stops and their visible markers.                                                                       |
-| `showStopLabels` | `boolean`                 | `false`         | Displays numeric labels beneath the stop markers.                                                               |
-| `min`            | `number`                  | `0`             | Finite minimum value.                                                                                           |
-| `max`            | `number`                  | `100`           | Finite maximum, greater than `min`.                                                                             |
-| `step`           | `number`                  | `1`             | Positive finite value increment.                                                                                |
-| `snapDistance`   | `number`                  | 3% of the range | Non-negative finite distance in value units at which the thumb catches a stop. Zero catches only exact matches. |
-| `value`          | `number`                  | Uncontrolled    | Current value, clamped to the range. Non-finite values use `min`.                                               |
-| `defaultValue`   | `number`                  | `min`           | Initial uncontrolled value.                                                                                     |
-| `onValueChange`  | `(value: number) => void` | None            | Called with the selected value, including any magnetic snap. Controlled usage requires updating `value`.        |
-| `disabled`       | `boolean`                 | `false`         | Prevents pointer, touch, and keyboard changes.                                                                  |
-| `name`           | `string`                  | None            | Field name for native form submission.                                                                          |
-| `className`      | `string`                  | None            | Additional root classes.                                                                                        |
+| Prop             | Type                        | Default         | Purpose                                                                                                         |
+| ---------------- | --------------------------- | --------------- | --------------------------------------------------------------------------------------------------------------- |
+| `label`          | `string`                    | Required        | Visible label and accessible slider name.                                                                       |
+| `stops`          | `readonly number[]`         | `[]`            | Magnetic stops and their visible markers.                                                                       |
+| `showStopLabels` | `boolean`                   | `false`         | Displays numeric labels beneath the stop markers.                                                               |
+| `min`            | `number`                    | `0`             | Finite minimum value.                                                                                           |
+| `max`            | `number`                    | `100`           | Finite maximum, greater than `min`.                                                                             |
+| `step`           | `number`                    | `1`             | Positive finite value increment.                                                                                |
+| `snapDistance`   | `number`                    | 3% of the range | Non-negative finite distance in value units at which the thumb catches a stop. Zero catches only exact matches. |
+| `value`          | `number`                    | Uncontrolled    | Current value, clamped to the range. Non-finite values use `min`.                                               |
+| `defaultValue`   | `number`                    | `min`           | Initial uncontrolled value.                                                                                     |
+| `onValueChange`  | `(value: number) => void`   | None            | Called with the selected value, including any magnetic snap. Controlled usage requires updating `value`.        |
+| `formatValue`    | `(value: number) => string` | None            | Formats the value readout and accessible value text, such as `0.3 seconds`.                                     |
+| `disabled`       | `boolean`                   | `false`         | Prevents pointer, touch, and keyboard changes.                                                                  |
+| `name`           | `string`                    | None            | Field name for native form submission.                                                                          |
+| `className`      | `string`                    | None            | Additional root classes.                                                                                        |
 
 <AgentOnly>
 

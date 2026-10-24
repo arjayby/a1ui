@@ -1,7 +1,7 @@
 import { Check, ChevronDown } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Slider } from "@/registry/components/slider";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -70,23 +70,16 @@ export function DemoDuration({
   onChange: (value: number) => void;
 }) {
   return (
-    <label className="component-demo-control">
-      <span>{label}</span>
-      <span className="flex h-8 items-center gap-3">
-        <Input
-          type="range"
-          min={min}
-          max={max}
-          step={0.1}
-          value={value}
-          aria-valuetext={`${value.toFixed(1)} seconds`}
-          className="h-4 w-28 cursor-pointer border-0 p-0 shadow-none"
-          onChange={(event) => onChange(event.target.valueAsNumber)}
-        />
-        <span aria-hidden="true" className="w-8 tabular-nums">
-          {value.toFixed(1)}s
-        </span>
-      </span>
-    </label>
+    <Slider
+      label={label}
+      min={min}
+      max={max}
+      step={0.1}
+      stops={[min, 0.3, 0.5, 1, 1.5, 2, max]}
+      value={value}
+      onValueChange={onChange}
+      formatValue={(seconds) => `${seconds.toFixed(1)} seconds`}
+      className="max-w-52 [&_[data-slot=slider-control]]:h-9 [&_[data-slot=slider-header]]:mb-0 [&_[data-slot=slider-header]]:text-[11px]"
+    />
   );
 }

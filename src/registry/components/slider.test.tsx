@@ -57,6 +57,25 @@ describe("Slider", () => {
     expect(input).toBeDisabled();
   });
 
+  it("formats units in the readout and accessible value text", () => {
+    render(
+      <Slider
+        label="Animation duration"
+        min={0}
+        max={1}
+        step={0.1}
+        defaultValue={0.3}
+        formatValue={(seconds) => `${seconds.toFixed(1)} seconds`}
+      />,
+    );
+    const input = screen.getByRole("slider", { name: "Animation duration" });
+    expect(input).toHaveAttribute("aria-valuetext", "0.3 seconds");
+    expect(screen.getByText("0.3 seconds")).toBeVisible();
+    fireEvent.keyDown(input, { key: "Home" });
+    expect(input).toHaveAttribute("aria-valuetext", "0.0 seconds");
+    expect(screen.getByText("0.0 seconds")).toBeVisible();
+  });
+
   it("rejects invalid geometry before rendering", () => {
     expect(() => render(<Slider label="Intensity" min={10} max={10} />)).toThrow("max greater than min");
     expect(() => render(<Slider label="Intensity" step={0} />)).toThrow("positive finite step");

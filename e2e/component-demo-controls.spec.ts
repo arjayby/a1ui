@@ -51,10 +51,21 @@ for (const component of ["copy-button", "loading-button", "confirm-button"]) {
     await expect(button).toHaveAttribute("data-animation", "flip");
 
     const duration = page.getByRole("slider", { name: "Animation duration", exact: true });
+    const slider = page.locator('.component-demo-controls [data-slot="slider"]').filter({ has: duration });
+    await expect(slider.locator('[data-slot="slider-knob"]')).toBeVisible();
+    await expect(slider.locator('[data-slot="slider-stop-labels"]')).toHaveCount(0);
     await duration.focus();
     await page.keyboard.press("Home");
     await expect(duration).toHaveValue("0");
     await expect(duration).toHaveAttribute("aria-valuetext", "0.0 seconds");
+    const track = slider.locator('[data-slot="slider-control"]');
+    const trackBounds = await track.boundingBox();
+    if (!trackBounds) throw new Error("Expected a duration track");
+    await track.click({ position: { x: trackBounds.width / 2, y: trackBounds.height / 2 } });
+    await expect(duration).toHaveValue("0.5");
+    await expect(slider.getByText("0.5 seconds", { exact: true })).toBeVisible();
+    await duration.focus();
+    await page.keyboard.press("Home");
 
     if (component === "confirm-button") {
       const holdDuration = page.getByRole("slider", { name: "Hold duration", exact: true });
