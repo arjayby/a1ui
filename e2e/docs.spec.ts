@@ -24,7 +24,7 @@ test("catalog opens block documentation in the agreed order", async ({ page }) =
 test("selected block navigation keeps its label visible", async ({ page }) => {
   await page.goto("/blocks/section-rail");
   const activeLink = page
-    .getByRole("navigation", { name: "Blocks" })
+    .getByRole("navigation", { name: "Library" })
     .getByRole("link", { name: "Section Rail" });
 
   const colors = await activeLink.evaluate((element) => {
@@ -50,7 +50,7 @@ test("desktop sidebar can scroll to its final block", async ({ page }) => {
   await page.goto("/");
 
   const sidebar = page.locator('[data-sidebar="content"]');
-  const finalLink = page.getByRole("navigation", { name: "Blocks" }).getByRole("link").last();
+  const finalLink = page.getByRole("navigation", { name: "Library" }).getByRole("link").last();
 
   await sidebar.evaluate((element) => {
     element.scrollTop = element.scrollHeight;
@@ -98,7 +98,7 @@ test("desktop sidebar and block group support collapsing", async ({ page }) => {
   const sidebar = page.locator('[data-slot="sidebar-container"]');
   const blockToggle = page.getByRole("button", { name: "Toggle block navigation" });
   const activeBlock = page
-    .getByRole("navigation", { name: "Blocks", exact: true })
+    .getByRole("navigation", { name: "Library", exact: true })
     .getByRole("link", { name: "Section Rail", exact: true });
   await blockToggle.click();
   await expect(activeBlock).not.toBeVisible();

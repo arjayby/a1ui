@@ -84,7 +84,13 @@ export function DocsHeader() {
   const group = item?.type === "registry:component" ? "Components" : "Blocks";
   const title =
     item?.title ??
-    (pathname === "/agents" ? "Install with an agent" : pathname === "/components" ? "Components" : "Blocks");
+    (pathname === "/agents"
+      ? "Install with an agent"
+      : pathname === "/design-system"
+        ? "Design system"
+        : pathname === "/components"
+          ? "Components"
+          : "Blocks");
 
   return (
     <header className="bg-background border-border sticky top-0 z-20 flex min-h-14 shrink-0 items-center gap-2 border-b px-3 md:rounded-t-2xl md:px-4">

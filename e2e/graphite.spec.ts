@@ -2,8 +2,8 @@ import { expect, test } from "@playwright/test";
 import source from "../docs/graphite/source.json" with { type: "json" };
 
 test.beforeEach(async ({ page }) => {
-  await page.goto("/components");
-  await expect(page.getByRole("heading", { name: "Components", exact: true })).toBeVisible();
+  await page.goto("/design-system");
+  await expect(page.getByRole("heading", { name: "Design system", exact: true })).toBeVisible();
 });
 
 test("source tokens and fonts support Vega component styles", async ({ page }) => {

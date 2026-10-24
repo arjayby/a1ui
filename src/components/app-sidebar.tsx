@@ -84,11 +84,11 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroup>
         </nav>
-        <nav aria-label="Components">
+        <nav aria-label="Library">
           <SidebarGroup className="py-1">
-            <SidebarGroupLabel className="h-6">Design system</SidebarGroupLabel>
+            <SidebarGroupLabel className="h-6">Library</SidebarGroupLabel>
             <SidebarMenu>
-              <SidebarMenuItem>
+              <Collapsible defaultOpen render={<SidebarMenuItem />}>
                 <SidebarMenuButton
                   size="sm"
                   isActive={pathname === "/components"}
@@ -103,29 +103,36 @@ export function AppSidebar() {
                   <SquaresFourIcon aria-hidden="true" />
                   <span>Components</span>
                 </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  size="sm"
-                  isActive={pathname === "/components/copy-button"}
+                <CollapsibleTrigger
                   render={
-                    <Link
-                      href="/components/copy-button"
-                      onClick={closeMobile}
-                      aria-current={pathname === "/components/copy-button" ? "page" : undefined}
+                    <SidebarMenuAction
+                      aria-label="Toggle component navigation"
+                      className="data-panel-open:rotate-90"
                     />
                   }
                 >
-                  <span className="pl-6">Copy Button</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroup>
-        </nav>
-        <nav aria-label="Blocks">
-          <SidebarGroup className="py-1">
-            <SidebarGroupLabel className="h-6">Library</SidebarGroupLabel>
-            <SidebarMenu>
+                  <CaretRightIcon aria-hidden="true" />
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <SidebarMenuSub className="mr-0 pr-0">
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton
+                        size="sm"
+                        isActive={pathname === "/components/copy-button"}
+                        render={
+                          <Link
+                            href="/components/copy-button"
+                            onClick={closeMobile}
+                            aria-current={pathname === "/components/copy-button" ? "page" : undefined}
+                          />
+                        }
+                      >
+                        <span>Copy Button</span>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                  </SidebarMenuSub>
+                </CollapsibleContent>
+              </Collapsible>
               <Collapsible defaultOpen render={<SidebarMenuItem />}>
                 <SidebarMenuButton
                   size="sm"

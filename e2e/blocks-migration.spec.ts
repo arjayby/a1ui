@@ -11,13 +11,19 @@ test("blocks and reusable components have separate catalogs on desktop and mobil
   }
 
   await page
-    .getByRole("navigation", { name: "Components", exact: true })
+    .getByRole("navigation", { name: "Library", exact: true })
     .getByRole("link", { name: "Components", exact: true })
     .click();
   await expect(page).toHaveURL(/\/components$/);
   await expect(page.getByRole("heading", { name: "Components", exact: true })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "01 / Foundations" })).toBeVisible();
-  await expect(page.locator(".catalog-card")).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "01 / Foundations" })).toHaveCount(0);
+  await expect(page.locator(".catalog-card")).toHaveCount(
+    registry.items.filter((item) => item.type === "registry:component").length,
+  );
+  const library = page.getByRole("navigation", { name: "Library", exact: true });
+  const catalogLinks = library.getByRole("link").filter({ hasText: /^(Components|Blocks)$/ });
+  await expect(catalogLinks).toHaveText(["Components", "Blocks"]);
+  await expect(page.locator('a[href="/design-system"]')).toHaveCount(0);
 
   await page.setViewportSize({ width: 390, height: 844 });
   await page.getByRole("button", { name: "Toggle Sidebar", exact: true }).click();
@@ -31,7 +37,17 @@ test("blocks and reusable components have separate catalogs on desktop and mobil
     .getByRole("dialog", { name: "Documentation", exact: true })
     .getByRole("link", { name: "Components", exact: true })
     .click();
+  await expect(page.getByRole("heading", { name: "Components", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "01 / Foundations" })).toHaveCount(0);
+  await expect(page.locator('a[href="/design-system"]')).toHaveCount(0);
+});
+
+test("the design system is available by direct URL without a navigation link", async ({ page }) => {
+  await page.goto("/design-system");
+  await expect(page.getByRole("heading", { name: "Design system", exact: true })).toBeVisible();
+  await expect(page.locator('[data-slot="breadcrumb-page"]')).toHaveText("Design system");
   await expect(page.getByRole("heading", { name: "01 / Foundations" })).toBeVisible();
+  await expect(page.locator('a[href="/design-system"]')).toHaveCount(0);
 });
 
 test("existing page and Markdown links redirect to the migrated blocks", async ({ request }) => {
