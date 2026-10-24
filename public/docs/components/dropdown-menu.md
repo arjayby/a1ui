@@ -118,6 +118,8 @@ The highlight follows pointer hover and keyboard focus without activating an act
 
 Content uses CSS transitions with Base UI's starting and ending attributes so the popup remains mounted during its closing animation. Item highlights share a Motion layout ID scoped to their content. Keep item backgrounds transparent and item overflow visible so the highlight can travel between rows. The highlight uses `--muted` with a neutral fallback. Style `[data-slot="dropdown-menu-highlight"]` to change its appearance.
 
+Each popup isolates its highlight behind all item content. Keep items and wrappers inside the popup free of transforms, isolation, or z-index values that create separate stacking contexts.
+
 Compose a nested menu with `DropdownMenuSub`, `DropdownMenuSubTrigger`, and `DropdownMenuSubContent`. Each content has its own highlight scope. In left-to-right layouts, ArrowRight opens the submenu and ArrowLeft returns to its trigger. Base UI reverses these keys in right-to-left layouts. Selecting a nested action closes both menus and restores focus to the root trigger.
 
 The animated wrappers cover regular action items and submenu triggers. Checkbox items and radio items use the underlying shadcn components. Root, trigger, group, label, separator, and submenu root are re-exported without changes. Custom `render` elements must spread the supplied props, forward their ref, and render their children.

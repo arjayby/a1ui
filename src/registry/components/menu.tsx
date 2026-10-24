@@ -17,7 +17,7 @@ export type MenuProps = ComponentProps<typeof motion.div> & {
   value: string;
 };
 
-export function Menu({ value, children, onBlurCapture, ...props }: MenuProps) {
+export function Menu({ value, children, onBlurCapture, className = "", ...props }: MenuProps) {
   const id = useId();
   const [focused, setFocused] = useState<{ item: string | null; selection: string }>({
     item: null,
@@ -26,6 +26,7 @@ export function Menu({ value, children, onBlurCapture, ...props }: MenuProps) {
   if (focused.selection !== value) setFocused({ item: null, selection: value });
   const highlightedValue = focused.selection === value ? (focused.item ?? value) : value;
 
+  // Isolate the whole menu so the traveling background stays behind every row.
   return (
     <LayoutGroup id={id}>
       <MenuContext.Provider
@@ -33,6 +34,7 @@ export function Menu({ value, children, onBlurCapture, ...props }: MenuProps) {
       >
         <motion.div
           {...props}
+          className={`isolate ${className}`}
           layoutScroll
           data-menu=""
           onBlurCapture={(event) => {
@@ -64,7 +66,7 @@ export function MenuItem({ value, render, children, ...props }: MenuItemProps) {
     props: mergeProps<"button">(
       {
         type: render ? undefined : "button",
-        className: "relative isolate rounded-md",
+        className: "relative rounded-md",
         onFocus: () => menu.focusItem(value),
         children: (
           <>

@@ -27,11 +27,12 @@ export type DropdownMenuContentProps = Omit<ComponentProps<typeof BaseContent>, 
 export function DropdownMenuContent({ className = "", ...props }: DropdownMenuContentProps) {
   const id = useId();
 
+  // Isolate the whole popup so the traveling background stays behind every row.
   return (
     <LayoutGroup id={id}>
       <BaseContent
         {...props}
-        className={`origin-(--transform-origin) text-left transition-[opacity,scale] duration-150 ease-out data-closed:animate-none data-ending-style:scale-95 data-ending-style:opacity-0 data-open:animate-none data-starting-style:scale-95 data-starting-style:opacity-0 motion-reduce:transition-none motion-reduce:duration-0 ${className}`}
+        className={`isolate origin-(--transform-origin) text-left transition-[opacity,scale] duration-150 ease-out data-closed:animate-none data-ending-style:scale-95 data-ending-style:opacity-0 data-open:animate-none data-starting-style:scale-95 data-starting-style:opacity-0 motion-reduce:transition-none motion-reduce:duration-0 ${className}`}
       />
     </LayoutGroup>
   );
@@ -79,7 +80,7 @@ export function DropdownMenuItem({ className = "", render, ...props }: DropdownM
   return (
     <BaseItem
       {...props}
-      className={`relative isolate min-h-7 overflow-visible px-2 py-1 text-left text-xs focus:bg-transparent data-highlighted:bg-transparent ${className}`}
+      className={`relative min-h-7 overflow-visible px-2 py-1 text-left text-xs focus:bg-transparent data-highlighted:bg-transparent ${className}`}
       render={(itemProps, state) => <ItemElement {...itemProps} state={state} render={render} />}
     />
   );
@@ -93,7 +94,7 @@ export function DropdownMenuSubTrigger({ className = "", render, ...props }: Dro
   return (
     <BaseSubTrigger
       {...props}
-      className={`relative isolate min-h-7 overflow-visible px-2 py-1 text-left text-xs focus:bg-transparent data-highlighted:bg-transparent data-popup-open:bg-transparent ${className}`}
+      className={`relative min-h-7 overflow-visible px-2 py-1 text-left text-xs focus:bg-transparent data-highlighted:bg-transparent data-popup-open:bg-transparent ${className}`}
       render={(itemProps, state) => <ItemElement {...itemProps} state={state} render={render} />}
     />
   );
