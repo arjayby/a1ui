@@ -1,5 +1,8 @@
 "use client";
 
+import { useState } from "react";
+
+import { DemoDuration, DemoSelect } from "@/components/component-demos/demo-controls";
 import { LoadingButton, type LoadingButtonProps } from "@/registry/components/loading-button";
 
 const animations: NonNullable<LoadingButtonProps["animation"]>[] = ["blur", "slide", "flip"];
@@ -29,41 +32,30 @@ export function LoadingButtonPreview() {
 }
 
 export function LoadingButtonDemo() {
+  const [animation, setAnimation] = useState<NonNullable<LoadingButtonProps["animation"]>>("blur");
+  const [duration, setDuration] = useState(0.3);
+  const [outcome, setOutcome] = useState<"success" | "error">("success");
+
   return (
-    <div className="not-prose demo-frame flex min-h-64 flex-col items-center justify-center gap-6 px-6 py-10">
-      <div className="flex flex-wrap items-center justify-center gap-8">
-        {animations.map((animation) => (
-          <div
-            key={animation}
-            data-outcome="success"
-            className="flex w-36 shrink-0 flex-col items-center justify-center gap-4"
-          >
-            <span className="text-muted-foreground text-xs capitalize">{animation}</span>
-            <LoadingButton
-              onClick={simulateRequest}
-              label="Submit"
-              loadingLabel="Submitting"
-              successLabel="Submitted"
-              icon={null}
-              className={buttonClassName}
-              animation={animation}
-              duration={0.3}
-            />
-          </div>
-        ))}
-        <div data-outcome="error" className="flex w-36 shrink-0 flex-col items-center justify-center gap-4">
-          <span className="text-muted-foreground text-xs">Error</span>
-          <LoadingButton
-            onClick={simulateError}
-            label="Submit"
-            loadingLabel="Submitting"
-            errorLabel="Try again"
-            icon={null}
-            className={buttonClassName}
-            animation="blur"
-            duration={0.3}
-          />
-        </div>
+    <div className="not-prose demo-frame">
+      <div className="component-demo-stage" data-outcome={outcome}>
+        <LoadingButton
+          key={`${animation}-${duration}-${outcome}`}
+          onClick={outcome === "error" ? simulateError : simulateRequest}
+          label="Submit"
+          loadingLabel="Submitting"
+          successLabel="Submitted"
+          errorLabel="Try again"
+          icon={null}
+          className={buttonClassName}
+          animation={animation}
+          duration={duration}
+        />
+      </div>
+      <div className="component-demo-controls">
+        <DemoSelect label="Animation" value={animation} options={animations} onChange={setAnimation} />
+        <DemoSelect label="Outcome" value={outcome} options={["success", "error"]} onChange={setOutcome} />
+        <DemoDuration value={duration} onChange={setDuration} />
       </div>
     </div>
   );

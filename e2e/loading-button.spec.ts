@@ -6,6 +6,8 @@ for (const animation of ["blur", "slide", "flip"]) {
     page.on("pageerror", (error) => errors.push(error.message));
     await page.goto("/components/loading-button");
     await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
+    await page.getByRole("combobox", { name: "Animation", exact: true }).selectOption(animation);
+    await expect(page.locator('.demo-frame [data-slot="loading-button"]')).toHaveCount(1);
     const button = page.locator(
       `[data-outcome="success"] [data-slot="loading-button"][data-animation="${animation}"]`,
     );
@@ -45,6 +47,7 @@ test("the error example shows red feedback inside the button and allows retry wi
 }) => {
   await page.goto("/components/loading-button");
   await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
+  await page.getByRole("combobox", { name: "Outcome", exact: true }).selectOption("error");
   const example = page.locator('[data-outcome="error"]');
   const button = example.getByRole("button");
   const initial = await button.boundingBox();
@@ -101,6 +104,7 @@ test("reduced motion preserves loading feedback on mobile without spinning", asy
   await page.setViewportSize({ width: 390, height: 844 });
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/components/loading-button");
+  await page.getByRole("combobox", { name: "Animation", exact: true }).selectOption("flip");
   const button = page.locator('[data-slot="loading-button"][data-animation="flip"]');
   await button.click();
   await expect(button).toHaveText("Submitting");
@@ -121,7 +125,7 @@ test("the library links to an installable loading button with documentation", as
       .getByRole("navigation", { name: "Library" })
       .getByRole("link", { name: "Loading Button", exact: true }),
   ).toHaveAttribute("aria-current", "page");
-  await expect(page.locator('[data-slot="loading-button"]')).toHaveCount(4);
+  await expect(page.locator('[data-slot="loading-button"]')).toHaveCount(1);
   await expect(page.getByRole("region", { name: "Reference table" })).toContainText("onClick");
   const item = await (await request.get("/r/loading-button.json")).json();
   expect(item.type).toBe("registry:component");

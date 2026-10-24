@@ -66,6 +66,8 @@ for (const direction of ["right", "up", "left", "down"]) {
   test(`${direction} fills during a hold, cancels early, and confirms once at the end`, async ({ page }) => {
     await page.goto("/components/confirm-button");
     await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
+    await page.getByRole("combobox", { name: "Direction", exact: true }).selectOption(direction);
+    await expect(page.locator('.demo-frame [data-slot="confirm-button"]')).toHaveCount(1);
     await page.clock.install();
     const button = page.locator(`.demo-frame [data-direction="${direction}"]`);
     const fill = button.locator('[data-slot="confirm-button-fill"]');
@@ -178,14 +180,10 @@ test("the library links to an installable component and its API reference", asyn
       .getByRole("link", { name: "Confirm Button", exact: true }),
   ).toHaveAttribute("aria-current", "page");
   const buttons = page.locator(".demo-frame button");
-  await expect(buttons).toHaveText(Array(4).fill("Hold to confirm"));
-  expect(
-    await buttons.evaluateAll((elements) =>
-      elements.map((element) => element.getAttribute("data-direction")),
-    ),
-  ).toEqual(["right", "up", "left", "down"]);
-  await expect(page.locator(".demo-frame p")).toHaveCount(0);
-  await expect(page.locator('[data-slot="confirm-direction"]')).toHaveText(["right", "up", "left", "down"]);
+  await expect(buttons).toHaveCount(1);
+  await expect(buttons).toHaveText(["Hold to confirm"]);
+  await expect(page.getByRole("combobox", { name: "Direction", exact: true })).toHaveValue("right");
+  await expect(page.getByRole("combobox", { name: "Animation", exact: true })).toHaveValue("blur");
   const reference = page.getByRole("region", { name: "Reference table" });
   await expect(reference).toContainText("direction");
   await expect(reference).toContainText("duration");

@@ -68,7 +68,7 @@ export function CopyButtonExample() {
 
 
 
-The component uses the shared UI Button at its default size and outline variant. The label sits to the right of the icon, and an invisible sizing label reserves room for "Copied" in both states. The button keeps the same width and position without a hardcoded pixel width. AnimatePresence and motion from motion/react animate both the icon and label using the selected animation. Only the icon and label animate. The button has no width animation or layout transition. Reduced motion skips the icon and label transitions, including blur. The demo shows all three styles with duration set to 0.3 seconds.
+The component uses the shared UI Button at its default size and outline variant. The label sits to the right of the icon, and an invisible sizing label reserves room for "Copied" in both states. The button keeps the same width and position without a hardcoded pixel width. AnimatePresence and motion from motion/react animate both the icon and label using the selected animation. Only the icon and label animate. The button has no width animation or layout transition. Reduced motion skips the icon and label transitions, including blur. The demo shows one button with controls for animation and transition duration, initially set to blur and 0.3 seconds.
 
 Success appears only after navigator.clipboard.writeText resolves. The button prevents repeat clicks during the write and the two-second confirmation. A rejected or unavailable clipboard shows "Couldn't copy. Try again." in a live status region and allows another attempt. Clipboard writes require HTTPS or localhost and browser permission. The component copies plain text only.
 
