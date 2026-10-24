@@ -9,6 +9,7 @@ import { DropdownMenuPreview } from "@/components/component-demos/dropdown-menu-
 import { ConfirmButtonPreview } from "@/components/component-demos/confirm-button-demo";
 import { CopyButton } from "@/registry/components/copy-button";
 import { LoadingButtonPreview } from "@/components/component-demos/loading-button-demo";
+import { SliderPreview } from "@/components/component-demos/slider-demo";
 import { components } from "@/lib/component-catalog";
 
 export const metadata: Metadata = {
@@ -22,6 +23,7 @@ const previews: Record<string, ReactNode> = {
   "confirm-button": <ConfirmButtonPreview />,
   "copy-button": <CopyButton value="hello@a1ui.dev" />,
   "loading-button": <LoadingButtonPreview />,
+  slider: <SliderPreview />,
 };
 
 export default function ComponentsPage() {

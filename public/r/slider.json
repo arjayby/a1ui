@@ -1,0 +1,41 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "slider",
+  "title": "Slider",
+  "description": "A slider with magnetic stops that catch the thumb and pulse as you slide through them.",
+  "dependencies": [
+    "motion",
+    "@base-ui/react"
+  ],
+  "files": [
+    {
+      "path": "src/registry/components/slider.tsx",
+      "content": "\"use client\";\n\nimport { Slider as SliderPrimitive } from \"@base-ui/react/slider\";\nimport { motion, useReducedMotion } from \"motion/react\";\nimport { useState } from \"react\";\n\nexport interface SliderProps {\n  label: string;\n  /** Stop values must align with step, relative to min. */\n  stops?: readonly number[];\n  showStopLabels?: boolean;\n  min?: number;\n  max?: number;\n  step?: number;\n  /** Distance in value units within which the thumb catches a stop. */\n  snapDistance?: number;\n  value?: number;\n  defaultValue?: number;\n  onValueChange?: (value: number) => void;\n  disabled?: boolean;\n  name?: string;\n  className?: string;\n}\n\nexport function Slider({\n  label,\n  stops = [],\n  showStopLabels = false,\n  min = 0,\n  max = 100,\n  step = 1,\n  snapDistance = (max - min) * 0.03,\n  value,\n  defaultValue = min,\n  onValueChange,\n  disabled = false,\n  name,\n  className,\n}: SliderProps) {\n  const [internalValue, setInternalValue] = useState(defaultValue);\n  const reducedMotion = useReducedMotion();\n  if (!Number.isFinite(min) || !Number.isFinite(max) || max <= min) {\n    throw new Error(\"Slider requires finite min and max values with max greater than min.\");\n  }\n  if (!Number.isFinite(step) || step <= 0 || !Number.isFinite(snapDistance) || snapDistance < 0) {\n    throw new Error(\"Slider requires a positive finite step and a non-negative finite snapDistance.\");\n  }\n  const current = value ?? internalValue;\n  const position = Number.isFinite(current) ? Math.min(max, Math.max(min, current)) : min;\n  const markers = [...new Set(stops)]\n    .filter((stop) => Number.isFinite(stop) && stop >= min && stop <= max)\n    .sort((a, b) => a - b);\n  const activeStop = markers.find((stop) => stop === position);\n\n  return (\n    <SliderPrimitive.Root\n      data-slot=\"slider\"\n      data-at-stop={activeStop !== undefined || undefined}\n      value={position}\n      min={min}\n      max={max}\n      step={step}\n      disabled={disabled}\n      name={name}\n      className={`text-foreground w-full min-w-0 data-disabled:opacity-40 ${className ?? \"\"}`}\n      onValueChange={(next, details) => {\n        // Keyboard increments stay precise instead of getting caught by the same stop.\n        if (details.reason === \"drag\" || details.reason === \"track-press\") {\n          const nearest = markers.reduce<number | undefined>(\n            (closest, stop) =>\n              closest === undefined || Math.abs(stop - next) < Math.abs(closest - next) ? stop : closest,\n            undefined,\n          );\n          if (nearest !== undefined && Math.abs(nearest - next) <= snapDistance) next = nearest;\n        }\n        if (next === position) return;\n        if (value === undefined) setInternalValue(next);\n        onValueChange?.(next);\n      }}\n    >\n      <div className=\"mb-4 flex items-center justify-between gap-4 text-xs\">\n        <span className=\"font-normal\">{label}</span>\n        <span aria-hidden=\"true\" className=\"text-muted-foreground font-mono text-xs tabular-nums\">\n          {position}\n        </span>\n      </div>\n      <div className=\"px-3\">\n        <SliderPrimitive.Control\n          data-slot=\"slider-control\"\n          className=\"relative flex h-11 w-full touch-pan-y items-center select-none data-disabled:cursor-not-allowed\"\n        >\n          <SliderPrimitive.Track className=\"bg-muted relative h-1.5 w-full rounded-full\">\n            <SliderPrimitive.Indicator className=\"bg-foreground rounded-full\" />\n            <div aria-hidden=\"true\" className=\"pointer-events-none absolute inset-0\">\n              {markers.map((stop) => (\n                <motion.span\n                  key={stop}\n                  data-slot=\"slider-stop\"\n                  data-active={stop === activeStop || undefined}\n                  className=\"bg-muted-foreground/60 data-active:bg-foreground absolute top-[calc(100%+10px)] h-1 w-px origin-top -translate-x-1/2\"\n                  style={{ left: `${((stop - min) / (max - min)) * 100}%` }}\n                  animate={{ scaleY: stop === activeStop ? 1.5 : 1 }}\n                  transition={{ duration: reducedMotion ? 0 : 0.12 }}\n                />\n              ))}\n            </div>\n          </SliderPrimitive.Track>\n          <SliderPrimitive.Thumb\n            data-slot=\"slider-thumb\"\n            getAriaLabel={() => label}\n            className=\"relative flex size-11 cursor-grab items-center justify-center rounded-full outline-none data-disabled:cursor-not-allowed data-dragging:cursor-grabbing\"\n          >\n            <motion.span\n              key={activeStop ?? \"free\"}\n              aria-hidden=\"true\"\n              data-slot=\"slider-knob\"\n              className=\"border-border bg-background dark:bg-foreground relative grid size-5 place-items-center rounded-full border shadow-sm\"\n              animate={{ scale: activeStop !== undefined && !reducedMotion ? [1, 1.22, 0.96, 1] : 1 }}\n              transition={{ duration: reducedMotion ? 0 : 0.24 }}\n            >\n              <span className=\"bg-foreground dark:bg-background h-2 w-0.5 rounded-full opacity-60\" />\n            </motion.span>\n          </SliderPrimitive.Thumb>\n        </SliderPrimitive.Control>\n        {showStopLabels && (\n          <div\n            data-slot=\"slider-stop-labels\"\n            aria-hidden=\"true\"\n            className=\"text-muted-foreground relative mt-1 h-4 font-mono text-[10px] tabular-nums\"\n          >\n            {markers.map((stop) => (\n              <span\n                key={stop}\n                data-active={stop === activeStop || undefined}\n                className=\"data-active:text-foreground absolute -translate-x-1/2\"\n                style={{ left: `${((stop - min) / (max - min)) * 100}%` }}\n              >\n                {stop}\n              </span>\n            ))}\n          </div>\n        )}\n      </div>\n    </SliderPrimitive.Root>\n  );\n}\n",
+      "type": "registry:component",
+      "target": "components/animated/slider.tsx"
+    }
+  ],
+  "meta": {
+    "a1ui": {
+      "useCases": [
+        "Adjusting values with magnetic catches at meaningful presets or unevenly spaced stops."
+      ],
+      "limitations": [
+        "Horizontal single-thumb slider. Feedback is visual and does not vibrate the device. Dense stop labels can overlap."
+      ],
+      "requirements": [
+        "React 19, Tailwind CSS 4, Motion, Base UI, and theme colors. Supply label and stops. Keyboard input bypasses magnetic snapping. Reduced motion removes animation and preserves snapping."
+      ],
+      "docsUrl": "http://localhost:3000/docs/components/slider.md",
+      "registryUrl": "http://localhost:3000/r/slider.json"
+    }
+  },
+  "categories": [
+    "input",
+    "slider",
+    "interactive",
+    "animation"
+  ],
+  "type": "registry:component",
+  "docs": "Read http://localhost:3000/docs/components/slider.md for usage, required props, and integration instructions."
+}

@@ -755,6 +755,45 @@
         }
       },
       "docs": "Read http://localhost:3000/docs/components/icon-toggle.md for usage, required props, and integration instructions."
+    },
+    {
+      "name": "slider",
+      "type": "registry:component",
+      "title": "Slider",
+      "description": "A slider with magnetic stops that catch the thumb and pulse as you slide through them.",
+      "dependencies": [
+        "motion",
+        "@base-ui/react"
+      ],
+      "files": [
+        {
+          "path": "src/registry/components/slider.tsx",
+          "type": "registry:component",
+          "target": "components/animated/slider.tsx"
+        }
+      ],
+      "categories": [
+        "input",
+        "slider",
+        "interactive",
+        "animation"
+      ],
+      "meta": {
+        "a1ui": {
+          "useCases": [
+            "Adjusting values with magnetic catches at meaningful presets or unevenly spaced stops."
+          ],
+          "limitations": [
+            "Horizontal single-thumb slider. Feedback is visual and does not vibrate the device. Dense stop labels can overlap."
+          ],
+          "requirements": [
+            "React 19, Tailwind CSS 4, Motion, Base UI, and theme colors. Supply label and stops. Keyboard input bypasses magnetic snapping. Reduced motion removes animation and preserves snapping."
+          ],
+          "docsUrl": "http://localhost:3000/docs/components/slider.md",
+          "registryUrl": "http://localhost:3000/r/slider.json"
+        }
+      },
+      "docs": "Read http://localhost:3000/docs/components/slider.md for usage, required props, and integration instructions."
     }
   ]
 }
