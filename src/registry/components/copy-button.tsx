@@ -37,7 +37,7 @@ export interface CopyButtonProps {
 
 export function CopyButton({
   value,
-  animation = "slide",
+  animation = "blur",
   duration = 0.2,
   disabled = false,
   className,
