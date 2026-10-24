@@ -8,7 +8,7 @@
 @theme inline {
   --font-heading: "Stack Sans Notch", sans-serif;
   --font-mono: "DM Mono", monospace;
-  --font-button: "DM Mono", monospace;
+  --font-button: "Inter", sans-serif;
   --font-sans: "Inter", sans-serif;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -142,8 +142,9 @@ button:where(:not(:disabled, [aria-disabled="true"], [data-disabled])),
   cursor: pointer;
 }
 
-button:where(:not([data-slot="button"], [data-slot="tabs-trigger"])) {
-  font-family: var(--font-button), monospace;
+button {
+  font-family: var(--font-button), sans-serif;
+  font-size: var(--text-xs);
 }
 
 code,

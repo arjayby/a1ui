@@ -79,6 +79,7 @@ test("the control and its label fit a narrow screen in both themes", async ({ pa
     expect(bounds.x).toBeGreaterThanOrEqual(0);
     expect(bounds.x + bounds.width).toBeLessThanOrEqual(320);
     const label = control.locator(".truncate");
+    await expect(label).toHaveCSS("font-family", "Inter, sans-serif");
     expect(await label.evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(true);
     const { thumb } = await startDrag(page, 1);
     await page.mouse.up();

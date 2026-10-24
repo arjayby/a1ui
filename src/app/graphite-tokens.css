@@ -20,7 +20,7 @@
   --font-sans: "Inter";
   --font-mono: "DM Mono";
   --font-heading: "Stack Sans Notch";
-  --font-button: "DM Mono";
+  --font-button: "Inter"; /* Local typography override. */
   --spacing-4: 4px;
   --spacing-8: 8px;
   --spacing-12: 12px;

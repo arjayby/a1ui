@@ -172,7 +172,7 @@ function ComponentExamples() {
                 {source.tokens.map((token) => (
                   <Fragment key={token.name}>
                     <dt>{token.name}</dt>
-                    <dd>{token.value}</dd>
+                    <dd>{token.name === "--font-button" ? "Inter" : token.value}</dd>
                   </Fragment>
                 ))}
               </dl>
@@ -239,7 +239,7 @@ function ComponentExamples() {
           <Section
             id="actions"
             title="03 / Actions & forms"
-            description="Rounded controls with clear labels, visible focus, and useful validation. Buttons use Inter 14px labels, with 44px touch targets on mobile."
+            description="Rounded controls with clear labels, visible focus, and useful validation. Buttons use Inter 12px labels, with 44px touch targets on mobile."
           >
             <div className="graphite-stack">
               <Specimen title="Button / variants">

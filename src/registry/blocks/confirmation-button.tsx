@@ -124,7 +124,7 @@ export function ConfirmationButton({
         data-dragging={dragging}
         data-disabled={disabled}
         className={cn(
-          "relative h-[60px] w-full overflow-hidden rounded-[20px] border font-mono text-[11px] transition-colors duration-300 select-none motion-reduce:transition-none",
+          "relative h-[60px] w-full overflow-hidden rounded-[20px] border font-sans text-[11px] transition-colors duration-300 select-none motion-reduce:transition-none",
           complete
             ? "border-[var(--confirmation-foreground)] bg-[var(--confirmation-foreground)] text-[var(--confirmation-background)]"
             : "border-[var(--confirmation-border)] bg-[var(--confirmation-track)] text-[var(--confirmation-foreground)]",
@@ -236,7 +236,7 @@ export function ConfirmationButton({
         aria-atomic="true"
         className={cn(
           state === "error"
-            ? "mt-3 block font-mono text-xs text-[var(--confirmation-foreground)]"
+            ? "mt-3 block font-sans text-xs text-[var(--confirmation-foreground)]"
             : "sr-only",
         )}
       >

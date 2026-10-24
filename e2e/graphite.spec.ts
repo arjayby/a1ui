@@ -13,7 +13,9 @@ test("source tokens and fonts support Vega component styles", async ({ page }) =
     return tokens.map(({ name }) => style.getPropertyValue(name).trim().replaceAll('"', ""));
   }, source.tokens);
   const normalize = (value: string) => value.toLowerCase().replace(/(^|-)0\./, "$1.");
-  expect(actual.map(normalize)).toEqual(source.tokens.map(({ value }) => normalize(value)));
+  expect(actual.map(normalize)).toEqual(
+    source.tokens.map(({ name, value }) => normalize(name === "--font-button" ? "Inter" : value)),
+  );
   await expect(page.locator("body")).toHaveCSS("background-color", "rgb(16, 16, 16)");
   await expect(page.locator("h1")).toHaveCSS("font-family", '"Stack Sans Notch", sans-serif');
   await expect(page.getByRole("button", { name: "Create report", exact: true })).toHaveCSS(
@@ -58,6 +60,10 @@ test("source tokens and fonts support Vega component styles", async ({ page }) =
   ).toBe(true);
   await page.getByText("All 66 design tokens", { exact: false }).click();
   await expect(page.locator(".graphite-token-list dt")).toHaveCount(66);
+  await expect(
+    page.locator(".graphite-token-list dt").filter({ hasText: "--font-button" }).locator("+ dd"),
+  ).toHaveText("Inter");
+  await expect(page.locator(".graphite-code code")).toHaveCSS("font-family", '"DM Mono", monospace');
 });
 
 test("native controls retain labels, form state, keyboard navigation, and disabled states", async ({

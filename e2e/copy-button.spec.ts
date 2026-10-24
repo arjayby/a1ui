@@ -40,6 +40,7 @@ for (const animation of ["blur", "slide", "flip"]) {
     await page.goto("/components/copy-button");
     const button = page.locator(`[data-slot="copy-button"][data-animation="${animation}"]`);
     await expect(button).toHaveAccessibleName("Copy");
+    await expect(button).toHaveCSS("font-family", "Inter, sans-serif");
     await expect(button).toHaveAttribute("data-size", "default");
     await expect(button).toHaveClass(/ui-button/);
     const width = (await button.boundingBox())?.width;

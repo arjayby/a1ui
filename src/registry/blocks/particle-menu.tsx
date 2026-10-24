@@ -668,7 +668,7 @@ function ParticleMenuEntry({
     </>
   );
   const className =
-    "text-foreground flex cursor-pointer flex-col items-center gap-2 rounded-sm bg-transparent px-3 pt-1 pb-4 font-mono no-underline outline-offset-4 select-none focus-visible:outline-1 focus-visible:outline-current";
+    "text-foreground flex cursor-pointer flex-col items-center gap-2 rounded-sm bg-transparent px-3 pt-1 pb-4 font-sans no-underline outline-offset-4 select-none focus-visible:outline-1 focus-visible:outline-current";
 
   return (
     <li ref={itemRef}>
