@@ -100,7 +100,11 @@ export function CopyButton({
               exit={reducedMotion ? visible : preset.icon.exit}
               transition={{ type: "tween", duration: transitionDuration }}
             >
-              {copied ? <CheckIcon size={16} weight="bold" /> : <CopyIcon size={16} />}
+              {copied ? (
+                <CheckIcon size={14} className="size-3.5" weight="bold" />
+              ) : (
+                <CopyIcon size={14} className="size-3.5" />
+              )}
             </motion.span>
           </AnimatePresence>
         </motion.span>
