@@ -104,6 +104,21 @@ export function AppSidebar() {
                   <span>Components</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  size="sm"
+                  isActive={pathname === "/components/copy-button"}
+                  render={
+                    <Link
+                      href="/components/copy-button"
+                      onClick={closeMobile}
+                      aria-current={pathname === "/components/copy-button" ? "page" : undefined}
+                    />
+                  }
+                >
+                  <span className="pl-6">Copy Button</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroup>
         </nav>

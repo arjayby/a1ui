@@ -13,7 +13,8 @@ import { AgentInstall, AgentRegistryConfiguration } from "@/components/agent-ins
 import { ConfirmationButtonDemo } from "@/components/block-demos/confirmation-button-demo";
 import { CompareCurtainDemo } from "@/components/block-demos/compare-curtain-demo";
 import { SectionRailDemo, SpiralTextDemo } from "@/components/block-demos";
-import { BlockSource, Installation } from "@/components/block-docs";
+import { BlockSource, ComponentSource, Installation } from "@/components/block-docs";
+import { CopyButtonDemo } from "@/components/component-demos/copy-button-demo";
 import { ParticleMenuDemo } from "@/components/block-demos/particle-menu-demo";
 import { TextScrambleDemo } from "@/components/block-demos/text-scramble-demo";
 import { TextBannerDemo } from "@/components/block-demos/text-banner-demo";
@@ -32,6 +33,8 @@ export function getMDXComponents(components?: MDXComponents) {
     AsciiMorphDemo,
     AsciiLensDemo,
     BlockSource,
+    ComponentSource,
+    CopyButtonDemo,
     ConfirmationButtonDemo,
     CompareCurtainDemo,
     Installation,

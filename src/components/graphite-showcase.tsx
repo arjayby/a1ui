@@ -1,6 +1,8 @@
 "use client";
 
 import { Fragment, useState, type ReactNode } from "react";
+import Link from "next/link";
+import { CopyButtonDemo } from "@/components/component-demos/copy-button-demo";
 import {
   ArrowUpRightIcon,
   CheckIcon,
@@ -59,6 +61,7 @@ import { ToastProvider, ToastViewport, useToastManager } from "@/components/ui/t
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const sections = [
+  ["animated-components", "Animated components"],
   ["foundations", "Foundations"],
   ["typography", "Typography & layout"],
   ["actions", "Actions & forms"],
@@ -147,6 +150,22 @@ function ComponentExamples() {
               palette in both light and dark themes.
             </p>
           </header>
+
+          <Section
+            id="animated-components"
+            title="Animated components"
+            description="Small interactions built with Motion. Each component includes a live demo and editable source."
+          >
+            <Specimen title="Copy Button">
+              <CopyButtonDemo />
+              <Link
+                href="/components/copy-button"
+                className="mt-4 inline-flex items-center gap-1 text-sm underline underline-offset-4"
+              >
+                Copy Button documentation <ArrowUpRightIcon aria-hidden="true" />
+              </Link>
+            </Specimen>
+          </Section>
 
           <Section
             id="foundations"

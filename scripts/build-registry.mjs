@@ -18,8 +18,9 @@ const guides = await Promise.all(
       if (!item.meta?.a1ui?.[key]?.length) throw new Error(`${item.name} needs meta.a1ui.${key}`);
     }
     if (!item.categories?.length) throw new Error(`${item.name} needs categories`);
-    const mdx = await readFile(`content/docs/blocks/${item.name}.mdx`, "utf8");
-    return { name: item.name, content: renderBlockGuide(item, mdx, siteUrl) };
+    const group = item.type === "registry:block" ? "blocks" : "components";
+    const mdx = await readFile(`content/docs/${group}/${item.name}.mdx`, "utf8");
+    return { name: item.name, group, content: renderBlockGuide(item, mdx, siteUrl) };
   }),
 );
 
@@ -27,6 +28,7 @@ const guides = await Promise.all(
 // items cannot remain installable after being removed from the catalog.
 await rm("public/r", { recursive: true, force: true });
 await rm("public/docs/blocks", { recursive: true, force: true });
+await rm("public/docs/components", { recursive: true, force: true });
 const build = spawnSync("pnpm", ["dlx", "shadcn@latest", "build", "registry.json", "--output", "public/r"], {
   stdio: "inherit",
 });
@@ -35,8 +37,10 @@ if (build.status !== 0) process.exit(build.status ?? 1);
 
 registry.homepage = siteUrl;
 await mkdir("public/docs/blocks", { recursive: true });
+await mkdir("public/docs/components", { recursive: true });
 for (const item of registry.items) {
-  const guideUrl = `${siteUrl}/docs/blocks/${item.name}.md`;
+  const group = item.type === "registry:block" ? "blocks" : "components";
+  const guideUrl = `${siteUrl}/docs/${group}/${item.name}.md`;
   item.docs = `Read ${guideUrl} for usage, required props, and integration instructions.`;
   item.meta.a1ui.docsUrl = guideUrl;
   item.meta.a1ui.registryUrl = `${siteUrl}/r/${item.name}.json`;
@@ -47,6 +51,6 @@ for (const item of registry.items) {
 await Promise.all([
   writeFile("public/r/registry.json", JSON.stringify(registry, null, 2) + "\n"),
   writeFile("public/llms.txt", renderAgentIndex(registry, siteUrl)),
-  ...guides.map(({ name, content }) => writeFile(`public/docs/blocks/${name}.md`, content)),
+  ...guides.map(({ name, group, content }) => writeFile(`public/docs/${group}/${name}.md`, content)),
 ]);
 console.log(`Built ${guides.length} registry items and agent guides for ${siteUrl}`);

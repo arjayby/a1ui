@@ -17,7 +17,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
-import { getBlock } from "@/lib/block-catalog";
+import registry from "../../registry.json";
 
 function GitHubLink() {
   return (
@@ -78,9 +78,12 @@ function SearchButton() {
 
 export function DocsHeader() {
   const pathname = usePathname();
-  const block = getBlock(pathname.replace(/^\/blocks\//, ""));
+  const item = registry.items.find(
+    ({ name, type }) => pathname === `/${type === "registry:block" ? "blocks" : "components"}/${name}`,
+  );
+  const group = item?.type === "registry:component" ? "Components" : "Blocks";
   const title =
-    block?.title ??
+    item?.title ??
     (pathname === "/agents" ? "Install with an agent" : pathname === "/components" ? "Components" : "Blocks");
 
   return (
@@ -93,10 +96,12 @@ export function DocsHeader() {
             <BreadcrumbLink render={<Link href="/" />}>Documentation</BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator className="hidden md:block" />
-          {block ? (
+          {item ? (
             <>
               <BreadcrumbItem className="hidden sm:inline-flex">
-                <BreadcrumbLink render={<Link href="/blocks" />}>Blocks</BreadcrumbLink>
+                <BreadcrumbLink render={<Link href={group === "Components" ? "/components" : "/blocks"} />}>
+                  {group}
+                </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator className="hidden sm:block" />
             </>

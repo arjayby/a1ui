@@ -11,7 +11,8 @@ export function installCommands(url) {
 // build so a new wrapper cannot silently hide instructions from agent readers.
 export function renderBlockGuide(item, mdx, siteUrl) {
   const registryUrl = `${siteUrl}/r/${item.name}.json`;
-  const pageUrl = `${siteUrl}/blocks/${item.name}`;
+  const group = item.type === "registry:block" ? "blocks" : "components";
+  const pageUrl = `${siteUrl}/${group}/${item.name}`;
   const body = mdx.replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n/, "");
   let fence = null;
   let installations = 0;
@@ -33,7 +34,7 @@ export function renderBlockGuide(item, mdx, siteUrl) {
       installations++;
       return `Choose the command for the target project's package manager. Run it from that project's directory.\n\n\`\`\`text\n${installCommands(registryUrl)}\n\`\`\``;
     }
-    if (/^\s*<BlockSource name="([\w-]+)"\s*\/>\s*$/.test(line)) {
+    if (/^\s*<(?:BlockSource|ComponentSource) name="([\w-]+)"\s*\/>\s*$/.test(line)) {
       return `[Complete source and dependencies](${registryUrl}). Each file's content is embedded in the registry JSON.`;
     }
     if (/^\s*<\w+Demo\s*\/>\s*$/.test(line)) return `[Interactive preview](${pageUrl})`;
@@ -57,7 +58,7 @@ export function renderBlockGuide(item, mdx, siteUrl) {
       advice.limitations.map((text) => `- ${text}`).join("\n"),
       "## Integration requirements",
       advice.requirements.map((text) => `- ${text}`).join("\n"),
-      "Import paths in examples assume the @/components/blocks path. Adapt them to the target project's components.json. Put examples with state or callbacks in a client component when using React Server Components.",
+      `Import paths in examples assume the @/components/${group === "blocks" ? "blocks" : "animated"} path. Adapt them to the target project's components.json. Put examples with state or callbacks in a client component when using React Server Components.`,
       lines.join("\n").trim(),
       "## Verification",
       "Run the target project's typecheck and build. Render the integrated component and check the browser for missing styles, hydration errors, and failed assets. Exercise its keyboard controls and primary interaction. Report any app data or callbacks still needed; sample data is not a live integration.",
@@ -68,7 +69,7 @@ export function renderBlockGuide(item, mdx, siteUrl) {
 export function renderAgentIndex(registry, siteUrl) {
   return `# a1ui
 
-> A collection of React blocks inspired by designs found online, installed as editable source through the shadcn CLI.
+> A collection of React components and blocks inspired by designs found online, installed as editable source through the shadcn CLI.
 
 ## Supported projects
 
@@ -90,13 +91,13 @@ ${installCommands(`${siteUrl}/r/NAME.json`)}
 7. Adapt the documented example to the requested page. Use the target project's actual import aliases, state, data, and callbacks. Keep accessible labels and reduced-motion behavior. Preserve the app's theme; check the guide for CSS tokens or font requirements. Demo artwork is not included.
 8. Run the project's typecheck, lint, and build scripts where available. Render the result, check browser errors and styling, and exercise the primary interaction. Report the selected block, changed files, checks, and any missing integration data.
 
-## Blocks
+## Components and blocks
 
 ${[...registry.items]
   .sort((a, b) => a.title.localeCompare(b.title))
   .map(
     (item) =>
-      `- [${item.title}](${siteUrl}/docs/blocks/${item.name}.md): ${item.description} ${item.meta.a1ui.useCases.join(" ")}`,
+      `- [${item.title}](${siteUrl}/docs/${item.type === "registry:block" ? "blocks" : "components"}/${item.name}.md): ${item.description} ${item.meta.a1ui.useCases.join(" ")}`,
   )
   .join("\n")}
 

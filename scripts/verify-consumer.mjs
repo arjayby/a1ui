@@ -134,6 +134,13 @@ body { margin: 0; padding: 32px; background: var(--background); color: var(--for
       for (const imported of ts.preProcessFile(file.content, true, true).importedFiles) {
         const specifier = imported.fileName;
         if (specifier.startsWith(".")) continue;
+        if (specifier.startsWith("@/components/ui/")) {
+          assert(
+            built.registryDependencies?.includes(specifier.slice("@/components/ui/".length)),
+            `${item.name} has undeclared registry dependency ${specifier}`,
+          );
+          continue;
+        }
         const dependency = specifier.startsWith("@")
           ? specifier.split("/").slice(0, 2).join("/")
           : specifier.split("/")[0];
@@ -143,7 +150,8 @@ body { margin: 0; padding: 32px; background: var(--background); color: var(--for
         );
       }
     }
-    const guide = await readFile(`public/docs/blocks/${item.name}.md`, "utf8");
+    const group = item.type === "registry:block" ? "blocks" : "components";
+    const guide = await readFile(`public/docs/${group}/${item.name}.md`, "utf8");
     const example = guide.match(/```tsx\n([\s\S]*?)```/)?.[1];
     assert(example, `${item.name} has no executable example`);
     const exportName = example.match(/export function (\w+)/)?.[1];

@@ -3,12 +3,17 @@ import registry from "../registry.json" with { type: "json" };
 
 test("blocks and reusable components have separate catalogs on desktop and mobile", async ({ page }) => {
   await page.goto("/blocks");
-  await expect(page.locator(".catalog-card")).toHaveCount(registry.items.length);
-  for (const item of registry.items) {
+  await expect(page.locator(".catalog-card")).toHaveCount(
+    registry.items.filter((item) => item.type === "registry:block").length,
+  );
+  for (const item of registry.items.filter((item) => item.type === "registry:block")) {
     await expect(page.locator(`.catalog-card-link[href="/blocks/${item.name}"]`)).toHaveText(item.title);
   }
 
-  await page.getByRole("navigation", { name: "Components", exact: true }).getByRole("link").click();
+  await page
+    .getByRole("navigation", { name: "Components", exact: true })
+    .getByRole("link", { name: "Components", exact: true })
+    .click();
   await expect(page).toHaveURL(/\/components$/);
   await expect(page.getByRole("heading", { name: "Components", exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "01 / Foundations" })).toBeVisible();
@@ -30,7 +35,7 @@ test("blocks and reusable components have separate catalogs on desktop and mobil
 });
 
 test("existing page and Markdown links redirect to the migrated blocks", async ({ request }) => {
-  for (const { name } of registry.items) {
+  for (const { name } of registry.items.filter((item) => item.type === "registry:block")) {
     for (const [oldPath, newPath] of [
       [`/components/${name}`, `/blocks/${name}`],
       [`/docs/components/${name}.md`, `/docs/blocks/${name}.md`],

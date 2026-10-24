@@ -10,7 +10,8 @@ const origin = "https://components.example.com";
 describe("agent documentation", () => {
   for (const item of registry.items) {
     it(`publishes usable ${item.name} documentation without MDX wrappers`, async () => {
-      const mdx = await readFile(`content/docs/blocks/${item.name}.mdx`, "utf8");
+      const group = item.type === "registry:block" ? "blocks" : "components";
+      const mdx = await readFile(`content/docs/${group}/${item.name}.mdx`, "utf8");
       const guide = renderBlockGuide(item, mdx, origin);
       expect(guide).toContain(`${origin}/r/${item.name}.json --yes`);
       expect(guide).toContain("## API reference");
@@ -18,19 +19,20 @@ describe("agent documentation", () => {
       expect(agentContext).toBeTruthy();
       expect(guide).toContain(agentContext);
       expect(guide).toContain(item.meta.a1ui.limitations[0]);
-      expect(guide).not.toMatch(/<(?:AgentOnly|Installation|BlockSource|Tabs|Tab|\w+Demo)\b/);
-      expect(guide).not.toContain("localhost");
+      expect(guide).not.toMatch(/<(?:AgentOnly|Installation|BlockSource|ComponentSource|Tabs|Tab|\w+Demo)\b/);
+      expect(guide).not.toMatch(/https?:\/\/localhost\b/);
       // Preserve executable examples byte for byte, including JSX and code URLs.
       for (const block of mdx.matchAll(/```tsx\n([\s\S]*?)```/g)) {
         expect(guide).toContain(block[0]);
       }
-      expect(renderAgentIndex(registry, origin)).toContain(`${origin}/docs/blocks/${item.name}.md`);
+      expect(renderAgentIndex(registry, origin)).toContain(`${origin}/docs/${group}/${item.name}.md`);
     });
   }
 
   it("rejects unknown MDX and incomplete examples instead of publishing broken instructions", async () => {
     const item = registry.items[0];
-    const mdx = await readFile(`content/docs/blocks/${item.name}.mdx`, "utf8");
+    const group = item.type === "registry:block" ? "blocks" : "components";
+    const mdx = await readFile(`content/docs/${group}/${item.name}.mdx`, "utf8");
     expect(() => renderBlockGuide(item, mdx + "\n<NewInstructions />", origin)).toThrow("Unresolved MDX");
     expect(() => renderBlockGuide(item, mdx.replaceAll("```tsx", "```text"), origin)).toThrow("Incomplete");
     expect(() => renderBlockGuide(item, mdx + "\n```tsx\n", origin)).toThrow("Incomplete");

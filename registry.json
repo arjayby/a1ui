@@ -350,6 +350,33 @@
           ]
         }
       }
+    },
+    {
+      "name": "copy-button",
+      "type": "registry:component",
+      "title": "Copy Button",
+      "description": "A copy button that animates its icon and label into a checkmark and copied confirmation.",
+      "dependencies": ["motion", "@phosphor-icons/react"],
+      "files": [
+        {
+          "path": "src/registry/components/copy-button.tsx",
+          "type": "registry:component",
+          "target": "components/animated/copy-button.tsx"
+        }
+      ],
+      "categories": ["button", "clipboard", "animation"],
+      "meta": {
+        "a1ui": {
+          "useCases": ["Copying text, links, and code with animated success feedback."],
+          "limitations": [
+            "Copies plain text only. Clipboard access requires HTTPS or localhost and browser permission."
+          ],
+          "requirements": [
+            "React 19, Tailwind CSS 4, Motion for React, and Phosphor icons. Supply value. Reduced motion skips the transitions."
+          ]
+        }
+      },
+      "registryDependencies": ["button"]
     }
   ]
 }

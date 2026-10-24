@@ -4,7 +4,7 @@ import { GraphiteShowcase } from "@/components/graphite-showcase";
 export const metadata: Metadata = {
   title: "Components",
   description:
-    "21 reusable Vega components with Phosphor icons, a Graphite palette, and Kousa analytics examples.",
+    "Animated Motion components and 21 reusable Vega components with Phosphor icons and a Graphite palette.",
 };
 
 export default function ComponentsPage() {

@@ -1,9 +1,9 @@
 import { expect, test } from "@playwright/test";
 import registry from "../registry.json" with { type: "json" };
 
-for (const { name, title } of registry.items) {
+for (const { name, title, type } of registry.items) {
   test(`${title} documentation supports installation and source tabs`, async ({ page }) => {
-    await page.goto(`/blocks/${name}`);
+    await page.goto(`/${type === "registry:block" ? "blocks" : "components"}/${name}`);
     await expect(page.getByRole("heading", { level: 1, name: title, exact: true })).toBeVisible();
     await expect(page.getByRole("navigation", { name: "On this page" }).getByRole("link")).toHaveText([
       "Demo",
