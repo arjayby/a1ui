@@ -88,14 +88,6 @@
 .landing-hero .landing-eyebrow {
   justify-content: center;
 }
-.landing-status {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--color-accent);
-  box-shadow: 0 0 0 4px color-mix(in oklab, var(--color-accent) 10%, transparent);
-  margin-right: 4px;
-}
 .landing-hero h1 {
   margin: 24px 0;
   font-size: clamp(48px, 6.6vw, 80px);

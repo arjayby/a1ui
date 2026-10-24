@@ -62,7 +62,7 @@ export default function HomePage() {
       <main id="main" className="landing-width">
         <section className="landing-hero" aria-labelledby="hero-heading">
           <p className="landing-eyebrow">
-            <span className="landing-status" /> Made for the details
+            {components.length} components · {blocks.length} blocks
           </p>
           <h1 id="hero-heading">
             Small details.
