@@ -1,5 +1,13 @@
+import { Check, ChevronDown } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/registry/components/dropdown-menu";
 
 export function DemoSelect<T extends string>({
   label,
@@ -13,23 +21,38 @@ export function DemoSelect<T extends string>({
   onChange: (value: T) => void;
 }) {
   return (
-    <label className="component-demo-control">
+    <div className="component-demo-control">
       <span>{label}</span>
-      <Select
-        value={value}
-        className="w-28 capitalize"
-        onChange={(event) => {
-          const option = options.find((option) => option === event.target.value);
-          if (option) onChange(option);
-        }}
-      >
-        {options.map((option) => (
-          <option key={option} value={option}>
-            {option}
-          </option>
-        ))}
-      </Select>
-    </label>
+      <DropdownMenu>
+        <DropdownMenuTrigger
+          aria-label={`${label}: ${value}`}
+          render={
+            <Button
+              variant="outline"
+              size="sm"
+              data-slot="demo-select-trigger"
+              className="w-28 justify-between capitalize"
+            />
+          }
+        >
+          {value}
+          <ChevronDown aria-hidden="true" />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent aria-label={label} className="min-w-(--anchor-width)">
+          {options.map((option) => (
+            <DropdownMenuItem
+              key={option}
+              aria-current={option === value ? "true" : undefined}
+              className="capitalize"
+              onClick={() => onChange(option)}
+            >
+              {option}
+              {option === value && <Check aria-hidden="true" className="ml-auto size-3.5" />}
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
   );
 }
 

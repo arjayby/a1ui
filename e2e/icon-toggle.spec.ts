@@ -49,7 +49,8 @@ test("all icon pairs reverse on mobile with reduced motion and controls reset th
     { icons: "play / pause", off: /^M8 5 L18 12 L8 19$/, on: /^M16 5 L16 12 L16 19$/, first: false },
     { icons: "plus / minus", off: /^M12 5 L12 19$/, on: /^M5 12 L19 12$/, first: false },
   ]) {
-    await page.getByRole("combobox", { name: "Icons", exact: true }).selectOption(icons);
+    await page.getByRole("button", { name: /^Icons:/ }).click();
+    await page.getByRole("menuitem", { name: icons, exact: true }).click();
     const path = first ? button.locator("path").first() : button.locator("path").last();
     await expect(button).toHaveAttribute("aria-pressed", "false");
     await expect(path).toHaveAttribute("d", off);
@@ -64,7 +65,7 @@ test("all icon pairs reverse on mobile with reduced motion and controls reset th
   await page.keyboard.press("Home");
   await expect(duration).toHaveValue("0");
   await expect(button).toHaveAttribute("aria-pressed", "false");
-  await expect(page.locator(".demo-frame button")).toHaveCount(1);
+  await expect(page.locator(".component-demo-stage button")).toHaveCount(1);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
 

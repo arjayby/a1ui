@@ -6,7 +6,8 @@ for (const animation of ["blur", "slide", "flip"]) {
     page.on("pageerror", (error) => errors.push(error.message));
     await page.goto("/components/loading-button");
     await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
-    await page.getByRole("combobox", { name: "Animation", exact: true }).selectOption(animation);
+    await page.getByRole("button", { name: /^Animation:/ }).click();
+    await page.getByRole("menuitem", { name: animation, exact: true }).click();
     await expect(page.locator('.demo-frame [data-slot="loading-button"]')).toHaveCount(1);
     const button = page.locator(
       `[data-outcome="success"] [data-slot="loading-button"][data-animation="${animation}"]`,
@@ -47,9 +48,12 @@ test("the error example shows red feedback inside the button and allows retry wi
 }) => {
   await page.goto("/components/loading-button");
   await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
-  await page.getByRole("combobox", { name: "Outcome", exact: true }).selectOption("error");
+  await page.getByRole("button", { name: /^Outcome:/ }).click();
+  await page.getByRole("menuitem", { name: "error", exact: true }).click();
+  await expect(page.getByRole("menu", { name: "Outcome", exact: true })).not.toBeVisible();
   const example = page.locator('[data-outcome="error"]');
   const button = example.getByRole("button");
+  await button.scrollIntoViewIfNeeded();
   const initial = await button.boundingBox();
   const background = await button.evaluate((element) => getComputedStyle(element).backgroundColor);
   await button.focus();
@@ -104,7 +108,8 @@ test("reduced motion preserves loading feedback on mobile without spinning", asy
   await page.setViewportSize({ width: 390, height: 844 });
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/components/loading-button");
-  await page.getByRole("combobox", { name: "Animation", exact: true }).selectOption("flip");
+  await page.getByRole("button", { name: /^Animation:/ }).click();
+  await page.getByRole("menuitem", { name: "flip", exact: true }).click();
   const button = page.locator('[data-slot="loading-button"][data-animation="flip"]');
   await button.click();
   await expect(button).toHaveText("Submitting");

@@ -43,7 +43,7 @@ export function IconToggleDemo() {
       <div className="component-demo-stage">
         <IconToggle key={`${icon}-${duration}`} {...preset} duration={duration} />
       </div>
-      <div className="component-demo-controls [&_select]:w-36">
+      <div className="component-demo-controls [&_[data-slot=demo-select-trigger]]:w-36">
         <DemoSelect label="Icons" value={icon} options={icons} onChange={setIcon} />
         <DemoDuration value={duration} onChange={setDuration} />
       </div>

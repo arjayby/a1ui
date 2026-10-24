@@ -38,7 +38,8 @@ for (const animation of ["blur", "slide", "flip"]) {
   }) => {
     await context.grantPermissions(["clipboard-read", "clipboard-write"]);
     await page.goto("/components/copy-button");
-    await page.getByRole("combobox", { name: "Animation", exact: true }).selectOption(animation);
+    await page.getByRole("button", { name: /^Animation:/ }).click();
+    await page.getByRole("menuitem", { name: animation, exact: true }).click();
     const button = page.locator(`.demo-frame [data-slot="copy-button"][data-animation="${animation}"]`);
     await expect(button).toHaveAccessibleName("Copy");
     await expect(button).toHaveCSS("font-family", "Inter, sans-serif");
@@ -78,7 +79,8 @@ test("failed clipboard writes show an error and allow retry", async ({ page }) =
     });
   });
   await page.goto("/components/copy-button");
-  await page.getByRole("combobox", { name: "Animation", exact: true }).selectOption("slide");
+  await page.getByRole("button", { name: /^Animation:/ }).click();
+  await page.getByRole("menuitem", { name: "slide", exact: true }).click();
   const button = page.locator('.demo-frame [data-slot="copy-button"][data-animation="slide"]');
   await button.click();
   await expect(button).toHaveAttribute("data-state", "error");
@@ -94,7 +96,8 @@ for (const animation of ["blur", "slide", "flip"]) {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/components/copy-button");
-    await page.getByRole("combobox", { name: "Animation", exact: true }).selectOption(animation);
+    await page.getByRole("button", { name: /^Animation:/ }).click();
+    await page.getByRole("menuitem", { name: animation, exact: true }).click();
     const button = page.locator(`.demo-frame [data-slot="copy-button"][data-animation="${animation}"]`);
     await button.click();
     await expect(button).toHaveText("Copied");
@@ -111,7 +114,7 @@ test("the components page links to the installable component", async ({ page, re
   await expect(page).toHaveURL(/\/components\/copy-button$/);
   await expect(page.locator('[data-slot="breadcrumb-page"]')).toHaveText("Copy Button");
   await expect(page.locator('.demo-frame [data-slot="copy-button"]')).toHaveCount(1);
-  await expect(page.getByRole("combobox", { name: "Animation", exact: true })).toHaveValue("blur");
+  await expect(page.getByRole("button", { name: "Animation: blur", exact: true })).toHaveText("blur");
   await expect(page.getByRole("slider", { name: "Animation duration", exact: true })).toHaveValue("0.3");
   const reference = page.getByRole("region", { name: "Reference table" });
   await expect(reference).toContainText("animation");

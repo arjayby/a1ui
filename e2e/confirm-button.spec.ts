@@ -66,7 +66,9 @@ for (const direction of ["right", "up", "left", "down"]) {
   test(`${direction} fills during a hold, cancels early, and confirms once at the end`, async ({ page }) => {
     await page.goto("/components/confirm-button");
     await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
-    await page.getByRole("combobox", { name: "Direction", exact: true }).selectOption(direction);
+    await page.getByRole("button", { name: /^Direction:/ }).click();
+    await page.getByRole("menuitem", { name: direction, exact: true }).click();
+    await expect(page.getByRole("menu", { name: "Direction", exact: true })).not.toBeVisible();
     await expect(page.locator('.demo-frame [data-slot="confirm-button"]')).toHaveCount(1);
     await page.clock.install();
     const button = page.locator(`.demo-frame [data-direction="${direction}"]`);
@@ -105,6 +107,7 @@ for (const direction of ["right", "up", "left", "down"]) {
       vertical ? "matrix(1, 0, 0, 0, 0, 0)" : "matrix(0, 0, 0, 1, 0, 0)",
     );
     await expect(button).toHaveAttribute("data-state", "idle");
+    await button.hover();
     await page.mouse.down();
     await page.clock.runFor(1850);
     await expect(button).toHaveText("Confirmed");
@@ -179,11 +182,11 @@ test("the library links to an installable component and its API reference", asyn
       .getByRole("navigation", { name: "Library" })
       .getByRole("link", { name: "Confirm Button", exact: true }),
   ).toHaveAttribute("aria-current", "page");
-  const buttons = page.locator(".demo-frame button");
+  const buttons = page.locator(".component-demo-stage button");
   await expect(buttons).toHaveCount(1);
   await expect(buttons).toHaveText(["Hold to confirm"]);
-  await expect(page.getByRole("combobox", { name: "Direction", exact: true })).toHaveValue("right");
-  await expect(page.getByRole("combobox", { name: "Animation", exact: true })).toHaveValue("blur");
+  await expect(page.getByRole("button", { name: "Direction: right", exact: true })).toHaveText("right");
+  await expect(page.getByRole("button", { name: "Animation: blur", exact: true })).toHaveText("blur");
   const reference = page.getByRole("region", { name: "Reference table" });
   await expect(reference).toContainText("direction");
   await expect(reference).toContainText("duration");
