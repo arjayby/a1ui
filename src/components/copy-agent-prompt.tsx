@@ -1,43 +1,25 @@
 "use client";
 
-import { CheckIcon, CopyIcon } from "@phosphor-icons/react";
 import { useId, useState } from "react";
 
-import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { CopyButton } from "@/registry/components/copy-button";
 
 export function CopyAgentPrompt({ prompt }: { prompt: string }) {
-  const [status, setStatus] = useState<"idle" | "copied" | "error">("idle");
+  const [error, setError] = useState(false);
   const id = useId();
-
-  async function copy() {
-    try {
-      await navigator.clipboard.writeText(prompt);
-      setStatus("copied");
-    } catch {
-      setStatus("error");
-    }
-  }
 
   return (
     <div className="max-w-full">
-      <Button variant="outline" size="default" onClick={copy}>
-        {status === "copied" ? (
-          <CheckIcon aria-hidden="true" className="size-3.5" />
-        ) : (
-          <CopyIcon aria-hidden="true" className="size-3.5" />
-        )}
-        Copy prompt for agent
-      </Button>
-      <span role="status" className="sr-only">
-        {status === "copied"
-          ? "Prompt copied. Paste it into your coding agent."
-          : status === "error"
-            ? "Clipboard unavailable. Copy the prompt below."
-            : ""}
-      </span>
-      {status === "error" ? (
+      <CopyButton
+        value={prompt}
+        label="Copy prompt for agent"
+        copiedLabel="Copy prompt for agent"
+        onCopy={() => setError(false)}
+        onCopyError={() => setError(true)}
+      />
+      {error ? (
         <div className="mt-3 flex flex-col gap-2">
           <Label htmlFor={id}>Copy this prompt into your agent</Label>
           <Textarea

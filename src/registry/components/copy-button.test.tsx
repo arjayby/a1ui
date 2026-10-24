@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { CopyButton } from "./copy-button";
 
-describe("CopyButton duration", () => {
+describe("CopyButton", () => {
   beforeEach(() => {
     vi.stubGlobal("matchMedia", () => Object.assign(new EventTarget(), { matches: false }));
     Object.defineProperty(navigator, "clipboard", {
@@ -15,6 +15,39 @@ describe("CopyButton duration", () => {
   afterEach(() => {
     cleanup();
     vi.unstubAllGlobals();
+  });
+
+  it("supports a custom label and reports failed and successful copy attempts", async () => {
+    const onCopy = vi.fn();
+    const onCopyError = vi.fn();
+    vi.mocked(navigator.clipboard.writeText).mockRejectedValueOnce(new Error("Denied"));
+    render(
+      <CopyButton
+        value="agent prompt"
+        label="Copy prompt for agent"
+        copiedLabel="Copy prompt for agent"
+        onCopy={onCopy}
+        onCopyError={onCopyError}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Copy prompt for agent" }));
+    await waitFor(() => expect(onCopyError).toHaveBeenCalledOnce());
+    expect(onCopy).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole("button", { name: "Copy prompt for agent" }));
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Copy prompt for agent" })).toHaveAttribute(
+        "data-state",
+        "copied",
+      ),
+    );
+    expect(screen.getByRole("button", { name: "Copy prompt for agent" })).toHaveTextContent(
+      /^Copy prompt for agent$/,
+    );
+    expect(onCopy).toHaveBeenCalledOnce();
+    expect(onCopyError).toHaveBeenCalledOnce();
+    expect(navigator.clipboard.writeText).toHaveBeenLastCalledWith("agent prompt");
   });
 
   it.each([0, -1])("switches without a transition for duration %s", async (duration) => {

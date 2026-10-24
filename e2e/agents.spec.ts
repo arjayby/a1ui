@@ -36,14 +36,28 @@ test("copy prompts support both discovery and a chosen block", async ({ page, co
   await context.grantPermissions(["clipboard-read", "clipboard-write"]);
   await page.goto("/");
   await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
-  await page.getByRole("button", { name: "Copy prompt for agent" }).click();
-  await expect(page.getByRole("status").filter({ hasText: "Prompt copied" })).toBeAttached();
+  const copyButton = page.getByRole("button", { name: "Copy prompt for agent" });
+  const idleWidth = await copyButton.evaluate((element) => element.getBoundingClientRect().width);
+  await copyButton.click();
+  await expect(copyButton).toHaveAttribute("data-slot", "copy-button");
+  await expect(copyButton).toHaveAttribute("data-state", "copied");
+  await expect(copyButton).toHaveText("Copy prompt for agent");
+  await expect
+    .poll(() =>
+      page
+        .getByRole("button", { name: "Copy prompt for agent", exact: true })
+        .evaluate((element) => element.getBoundingClientRect().width),
+    )
+    .toBe(idleWidth);
   const discovery = await page.evaluate(() => navigator.clipboard.readText());
   expect(discovery).toContain("/llms.txt");
   expect(discovery).toContain("[describe what you want]");
   await page.goto("/blocks/section-rail");
   await page.getByRole("button", { name: "Copy prompt for agent" }).click();
-  await expect(page.getByRole("status").filter({ hasText: "Prompt copied" })).toBeAttached();
+  await expect(page.getByRole("button", { name: "Copy prompt for agent" })).toHaveAttribute(
+    "data-state",
+    "copied",
+  );
   const selected = await page.evaluate(() => navigator.clipboard.readText());
   expect(selected).toContain("Install and integrate the a1ui section-rail block");
   expect(selected).toContain("/docs/blocks/section-rail.md");

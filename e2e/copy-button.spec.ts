@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 test("button width and position stay fixed while copying and resetting", async ({ page, context }) => {
   await context.grantPermissions(["clipboard-read", "clipboard-write"]);
   await page.goto("/components/copy-button");
-  const button = page.locator('[data-slot="copy-button"][data-animation="blur"]');
+  const button = page.locator('.demo-frame [data-slot="copy-button"][data-animation="blur"]');
   const samples = await button.evaluate(async (element) => {
     if (!(element instanceof HTMLButtonElement)) throw new Error("Expected a button");
     const widths = [];
@@ -38,14 +38,16 @@ for (const animation of ["blur", "slide", "flip"]) {
   }) => {
     await context.grantPermissions(["clipboard-read", "clipboard-write"]);
     await page.goto("/components/copy-button");
-    const button = page.locator(`[data-slot="copy-button"][data-animation="${animation}"]`);
+    const button = page.locator(`.demo-frame [data-slot="copy-button"][data-animation="${animation}"]`);
     await expect(button).toHaveAccessibleName("Copy");
     await expect(button).toHaveCSS("font-family", "Inter, sans-serif");
     await expect(button).toHaveAttribute("data-size", "default");
     await expect(button).toHaveClass(/ui-button/);
     const width = (await button.boundingBox())?.width;
     expect(width).toBeLessThan(100);
-    const neighbors = page.locator(`[data-slot="copy-button"]:not([data-animation="${animation}"])`);
+    const neighbors = page.locator(
+      `.demo-frame [data-slot="copy-button"]:not([data-animation="${animation}"])`,
+    );
     const positions = await neighbors.evaluateAll((buttons) =>
       buttons.map((button) => {
         const { x, y } = button.getBoundingClientRect();
@@ -91,7 +93,7 @@ test("failed clipboard writes show an error and allow retry", async ({ page }) =
     });
   });
   await page.goto("/components/copy-button");
-  const button = page.locator('[data-slot="copy-button"][data-animation="slide"]');
+  const button = page.locator('.demo-frame [data-slot="copy-button"][data-animation="slide"]');
   await button.click();
   await expect(button).toHaveAttribute("data-state", "error");
   await expect(page.getByRole("status").filter({ hasText: "Couldn't copy. Try again." })).toBeVisible();
@@ -106,7 +108,7 @@ for (const animation of ["blur", "slide", "flip"]) {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/components/copy-button");
-    const button = page.locator(`[data-slot="copy-button"][data-animation="${animation}"]`);
+    const button = page.locator(`.demo-frame [data-slot="copy-button"][data-animation="${animation}"]`);
     await button.click();
     await expect(button).toHaveText("Copied");
     await expect(button.locator("svg")).toHaveCount(1);
@@ -121,10 +123,10 @@ test("the components page links to the installable component", async ({ page, re
   await page.locator('.catalog-card-link[href="/components/copy-button"]').click();
   await expect(page).toHaveURL(/\/components\/copy-button$/);
   await expect(page.locator('[data-slot="breadcrumb-page"]')).toHaveText("Copy Button");
-  await expect(page.locator('[data-slot="copy-button"]')).toHaveCount(3);
+  await expect(page.locator('.demo-frame [data-slot="copy-button"]')).toHaveCount(3);
   expect(
     await page
-      .locator('[data-slot="copy-button"]')
+      .locator('.demo-frame [data-slot="copy-button"]')
       .evaluateAll((buttons) => buttons.map((button) => button.getAttribute("data-animation"))),
   ).toEqual(["blur", "slide", "flip"]);
   const reference = page.getByRole("region", { name: "Reference table" });

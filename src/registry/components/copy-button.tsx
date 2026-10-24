@@ -28,6 +28,10 @@ const visible = { opacity: 1, scale: 1, rotate: 0, rotateX: 0, y: 0, filter: "bl
 
 export interface CopyButtonProps {
   value: string;
+  label?: string;
+  copiedLabel?: string;
+  onCopy?: () => void;
+  onCopyError?: () => void;
   animation?: keyof typeof animations;
   /** Transition duration in seconds. The confirmation resets after two seconds. */
   duration?: number;
@@ -37,6 +41,10 @@ export interface CopyButtonProps {
 
 export function CopyButton({
   value,
+  label = "Copy",
+  copiedLabel = "Copied",
+  onCopy,
+  onCopyError,
   animation = "blur",
   duration = 0.2,
   disabled = false,
@@ -45,7 +53,7 @@ export function CopyButton({
   const [state, setState] = useState<"idle" | "copying" | "copied" | "error">("idle");
   const reducedMotion = useReducedMotion();
   const copied = state === "copied";
-  const label = copied ? "Copied" : "Copy";
+  const buttonLabel = copied ? copiedLabel : label;
   const preset = animations[animation];
   const transitionDuration = reducedMotion ? 0 : Number.isFinite(duration) ? Math.max(0, duration) : 0.2;
 
@@ -59,10 +67,13 @@ export function CopyButton({
     setState("copying");
     try {
       await navigator.clipboard.writeText(value);
-      setState("copied");
     } catch {
       setState("error");
+      onCopyError?.();
+      return;
     }
+    setState("copied");
+    onCopy?.();
   }
 
   return (
@@ -72,7 +83,7 @@ export function CopyButton({
         data-slot="copy-button"
         data-state={state}
         data-animation={animation}
-        aria-label={label}
+        aria-label={buttonLabel}
         aria-busy={state === "copying"}
         disabled={disabled || state === "copying" || copied}
         onClick={copy}
@@ -98,18 +109,20 @@ export function CopyButton({
         </span>
         <span
           aria-hidden="true"
-          className="relative grid h-5 overflow-hidden text-center after:invisible after:col-start-1 after:row-start-1 after:content-['Copied']"
+          data-label={label}
+          data-copied-label={copiedLabel}
+          className="relative grid h-5 overflow-hidden text-center before:invisible before:col-start-1 before:row-start-1 before:content-[attr(data-label)] after:invisible after:col-start-1 after:row-start-1 after:content-[attr(data-copied-label)]"
         >
           <AnimatePresence initial={false}>
             <motion.span
-              key={label}
+              key={buttonLabel}
               className="col-start-1 row-start-1 whitespace-nowrap"
               initial={reducedMotion ? false : preset.label.initial}
               animate={visible}
               exit={reducedMotion ? visible : preset.label.exit}
               transition={{ type: "tween", duration: transitionDuration }}
             >
-              {label}
+              {buttonLabel}
             </motion.span>
           </AnimatePresence>
         </span>

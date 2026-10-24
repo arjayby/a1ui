@@ -54,13 +54,17 @@ export function CopyButtonExample() {
 
 ## API reference
 
-| Prop        | Type                          | Default   | Purpose                                                                                                                                                                                                         |
-| ----------- | ----------------------------- | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `value`     | `string`                      | Required  | Plain text written to the clipboard.                                                                                                                                                                            |
-| `animation` | `"blur" \| "slide" \| "flip"` | `"blur"`  | Transition style for both the icon and label. Blur softens both. Slide rotates the icon and slides the text. Flip rotates both vertically.                                                                      |
-| `duration`  | `number`                      | `0.2`     | Transition time in seconds, applied to the icon and label. Zero or negative values switch instantly. Non-finite values use `0.2`. The copied confirmation resets after two seconds, independently of this prop. |
-| `disabled`  | `boolean`                     | `false`   | Prevents copying.                                                                                                                                                                                               |
-| `className` | `string`                      | None      | Additional classes for the button.                                                                                                                                                                              |
+| Prop          | Type                          | Default    | Purpose                                                                                                                                                                                                         |
+| ------------- | ----------------------------- | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `value`       | `string`                      | Required   | Plain text written to the clipboard.                                                                                                                                                                            |
+| `label`       | `string`                      | `"Copy"`   | Button text before copying.                                                                                                                                                                                     |
+| `copiedLabel` | `string`                      | `"Copied"` | Button text after a successful copy. Set to the same value as `label` to keep the text unchanged.                                                                                                               |
+| `onCopy`      | `() => void`                  | None       | Called after the clipboard write succeeds.                                                                                                                                                                      |
+| `onCopyError` | `() => void`                  | None       | Called when the clipboard is unavailable or the write fails.                                                                                                                                                    |
+| `animation`   | `"blur" \| "slide" \| "flip"` | `"blur"`   | Transition style for both the icon and label. Blur softens both. Slide rotates the icon and slides the text. Flip rotates both vertically.                                                                      |
+| `duration`    | `number`                      | `0.2`      | Transition time in seconds, applied to the icon and label. Zero or negative values switch instantly. Non-finite values use `0.2`. The copied confirmation resets after two seconds, independently of this prop. |
+| `disabled`    | `boolean`                     | `false`    | Prevents copying.                                                                                                                                                                                               |
+| `className`   | `string`                      | None       | Additional classes for the button.                                                                                                                                                                              |
 
 
 
