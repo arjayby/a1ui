@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
   Sidebar,
-  SidebarContent,
   SidebarFooter,
   SidebarGroup,
   SidebarGroupLabel,
@@ -24,6 +23,7 @@ import {
   SidebarMenuSubItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { Menu, MenuItem } from "@/registry/components/menu";
 import { blocks } from "@/lib/block-catalog";
 import { components } from "@/lib/component-catalog";
 
@@ -61,7 +61,12 @@ export function AppSidebar() {
           </Button>
         </div>
       </SidebarHeader>
-      <SidebarContent className="gap-1">
+      <Menu
+        value={pathname === "/" ? "/blocks" : pathname}
+        data-slot="sidebar-content"
+        data-sidebar="content"
+        className="flex min-h-0 flex-1 flex-col gap-1 overflow-auto"
+      >
         <nav aria-label="Guides">
           <SidebarGroup className="py-1">
             <SidebarGroupLabel className="h-6">Get started</SidebarGroupLabel>
@@ -71,10 +76,15 @@ export function AppSidebar() {
                   size="sm"
                   isActive={pathname === "/agents"}
                   render={
-                    <Link
-                      href="/agents"
-                      onClick={closeMobile}
-                      aria-current={pathname === "/agents" ? "page" : undefined}
+                    <MenuItem
+                      value="/agents"
+                      render={
+                        <Link
+                          href="/agents"
+                          onClick={closeMobile}
+                          aria-current={pathname === "/agents" ? "page" : undefined}
+                        />
+                      }
                     />
                   }
                 >
@@ -94,10 +104,15 @@ export function AppSidebar() {
                   size="sm"
                   isActive={pathname === "/components"}
                   render={
-                    <Link
-                      href="/components"
-                      onClick={closeMobile}
-                      aria-current={pathname === "/components" ? "page" : undefined}
+                    <MenuItem
+                      value="/components"
+                      render={
+                        <Link
+                          href="/components"
+                          onClick={closeMobile}
+                          aria-current={pathname === "/components" ? "page" : undefined}
+                        />
+                      }
                     />
                   }
                 >
@@ -125,10 +140,15 @@ export function AppSidebar() {
                             size="sm"
                             isActive={current}
                             render={
-                              <Link
-                                href={href}
-                                onClick={closeMobile}
-                                aria-current={current ? "page" : undefined}
+                              <MenuItem
+                                value={href}
+                                render={
+                                  <Link
+                                    href={href}
+                                    onClick={closeMobile}
+                                    aria-current={current ? "page" : undefined}
+                                  />
+                                }
                               />
                             }
                           >
@@ -145,10 +165,15 @@ export function AppSidebar() {
                   size="sm"
                   isActive={pathname === "/blocks" || pathname === "/"}
                   render={
-                    <Link
-                      href="/blocks"
-                      onClick={closeMobile}
-                      aria-current={pathname === "/blocks" || pathname === "/" ? "page" : undefined}
+                    <MenuItem
+                      value="/blocks"
+                      render={
+                        <Link
+                          href="/blocks"
+                          onClick={closeMobile}
+                          aria-current={pathname === "/blocks" || pathname === "/" ? "page" : undefined}
+                        />
+                      }
                     />
                   }
                 >
@@ -176,11 +201,16 @@ export function AppSidebar() {
                             size="sm"
                             isActive={current}
                             render={
-                              <Link
-                                href={href}
-                                onClick={closeMobile}
-                                aria-current={current ? "page" : undefined}
-                                aria-description={block.isNew ? "New block shipped" : undefined}
+                              <MenuItem
+                                value={href}
+                                render={
+                                  <Link
+                                    href={href}
+                                    onClick={closeMobile}
+                                    aria-current={current ? "page" : undefined}
+                                    aria-description={block.isNew ? "New block shipped" : undefined}
+                                  />
+                                }
                               />
                             }
                           >
@@ -198,7 +228,7 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroup>
         </nav>
-      </SidebarContent>
+      </Menu>
       <SidebarFooter className="text-muted-foreground px-5 py-4 text-xs">
         React components and ready-made blocks
       </SidebarFooter>

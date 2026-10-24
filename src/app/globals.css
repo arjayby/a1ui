@@ -189,9 +189,17 @@ h6 {
   color: var(--foreground);
 }
 
-[data-sidebar="sidebar"] :is([data-sidebar="menu-button"], [data-sidebar="menu-sub-button"])[data-active] {
-  background: var(--primary);
+[data-sidebar="sidebar"] [data-menu-item] {
+  overflow: visible;
+  background: transparent;
+}
+
+[data-sidebar="sidebar"] [data-menu-item][data-highlighted] {
   color: var(--on-primary);
+}
+
+[data-sidebar="sidebar"] [data-slot="menu-highlight"] {
+  background: var(--primary);
 }
 
 .ui-dialog.ui-sheet[data-side="left"] {

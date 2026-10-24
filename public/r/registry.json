@@ -636,6 +636,43 @@
         }
       },
       "docs": "Read http://localhost:3000/docs/components/confirm-button.md for usage, required props, and integration instructions."
+    },
+    {
+      "name": "menu",
+      "type": "registry:component",
+      "title": "Menu",
+      "description": "A shared highlight that travels between focused and selected menu items.",
+      "dependencies": [
+        "motion",
+        "@base-ui/react"
+      ],
+      "files": [
+        {
+          "path": "src/registry/components/menu.tsx",
+          "type": "registry:component",
+          "target": "components/animated/menu.tsx"
+        }
+      ],
+      "categories": [
+        "navigation",
+        "animation"
+      ],
+      "meta": {
+        "a1ui": {
+          "useCases": [
+            "Sidebar navigation and view selectors with a traveling focus and selection highlight."
+          ],
+          "limitations": [
+            "Selection is controlled by the caller. Each item needs a unique value. Keep item overflow visible so the highlight can travel between rows."
+          ],
+          "requirements": [
+            "React 19, Tailwind CSS 4, Motion for React, and Base UI. Supply value and wrap each link or button with MenuItem. Reduced motion switches the highlight instantly."
+          ],
+          "docsUrl": "http://localhost:3000/docs/components/menu.md",
+          "registryUrl": "http://localhost:3000/r/menu.json"
+        }
+      },
+      "docs": "Read http://localhost:3000/docs/components/menu.md for usage, required props, and integration instructions."
     }
   ]
 }

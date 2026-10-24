@@ -14,6 +14,7 @@ import { ConfirmationButtonDemo } from "@/components/block-demos/confirmation-bu
 import { CompareCurtainDemo } from "@/components/block-demos/compare-curtain-demo";
 import { SectionRailDemo, SpiralTextDemo } from "@/components/block-demos";
 import { BlockSource, ComponentSource, Installation } from "@/components/block-docs";
+import { MenuDemo } from "@/components/component-demos/menu-demo";
 import { ConfirmButtonDemo } from "@/components/component-demos/confirm-button-demo";
 import { CopyButtonDemo } from "@/components/component-demos/copy-button-demo";
 import { LoadingButtonDemo } from "@/components/component-demos/loading-button-demo";
@@ -36,6 +37,7 @@ export function getMDXComponents(components?: MDXComponents) {
     AsciiLensDemo,
     BlockSource,
     ComponentSource,
+    MenuDemo,
     ConfirmButtonDemo,
     CopyButtonDemo,
     LoadingButtonDemo,

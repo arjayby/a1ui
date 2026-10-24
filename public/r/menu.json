@@ -1,0 +1,39 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "menu",
+  "title": "Menu",
+  "description": "A shared highlight that travels between focused and selected menu items.",
+  "dependencies": [
+    "motion",
+    "@base-ui/react"
+  ],
+  "files": [
+    {
+      "path": "src/registry/components/menu.tsx",
+      "content": "\"use client\";\n\nimport { mergeProps } from \"@base-ui/react/merge-props\";\nimport { useRender } from \"@base-ui/react/use-render\";\nimport { LayoutGroup, motion, useReducedMotion } from \"motion/react\";\nimport { createContext, useContext, useId, useState, type ComponentProps } from \"react\";\n\ntype MenuContextValue = {\n  highlightedValue: string;\n  focusItem: (value: string) => void;\n};\n\nconst MenuContext = createContext<MenuContextValue | null>(null);\n\nexport type MenuProps = ComponentProps<typeof motion.div> & {\n  /** The selected item's value. Selection remains controlled by the caller. */\n  value: string;\n};\n\nexport function Menu({ value, children, onBlurCapture, ...props }: MenuProps) {\n  const id = useId();\n  const [focused, setFocused] = useState<{ item: string | null; selection: string }>({\n    item: null,\n    selection: value,\n  });\n  if (focused.selection !== value) setFocused({ item: null, selection: value });\n  const highlightedValue = focused.selection === value ? (focused.item ?? value) : value;\n\n  return (\n    <LayoutGroup id={id}>\n      <MenuContext.Provider\n        value={{ highlightedValue, focusItem: (item) => setFocused({ item, selection: value }) }}\n      >\n        <motion.div\n          {...props}\n          layoutScroll\n          data-menu=\"\"\n          onBlurCapture={(event) => {\n            onBlurCapture?.(event);\n            if (!event.currentTarget.contains(event.relatedTarget))\n              setFocused({ item: null, selection: value });\n          }}\n        >\n          {children}\n        </motion.div>\n      </MenuContext.Provider>\n    </LayoutGroup>\n  );\n}\n\nexport type MenuItemProps = useRender.ComponentProps<\"button\"> & {\n  value: string;\n};\n\nexport function MenuItem({ value, render, children, ...props }: MenuItemProps) {\n  const menu = useContext(MenuContext);\n  const reducedMotion = useReducedMotion();\n  if (!menu) throw new Error(\"MenuItem must be used within Menu.\");\n  const highlighted = menu.highlightedValue === value;\n\n  return useRender({\n    defaultTagName: \"button\",\n    render,\n    props: mergeProps<\"button\">(\n      {\n        type: render ? undefined : \"button\",\n        className: \"relative isolate rounded-md\",\n        onFocus: () => menu.focusItem(value),\n        children: (\n          <>\n            {highlighted && (\n              <motion.span\n                aria-hidden=\"true\"\n                data-slot=\"menu-highlight\"\n                layoutId=\"menu-highlight\"\n                initial={false}\n                transition={\n                  reducedMotion ? { duration: 0 } : { type: \"spring\", duration: 0.35, bounce: 0.12 }\n                }\n                className=\"pointer-events-none absolute inset-0 -z-10 bg-[var(--muted,#e5e7eb)]\"\n                style={{ borderRadius: \"inherit\" }}\n              />\n            )}\n            {children}\n          </>\n        ),\n      },\n      props,\n    ),\n    state: { \"menu-item\": true, highlighted },\n  });\n}\n",
+      "type": "registry:component",
+      "target": "components/animated/menu.tsx"
+    }
+  ],
+  "meta": {
+    "a1ui": {
+      "useCases": [
+        "Sidebar navigation and view selectors with a traveling focus and selection highlight."
+      ],
+      "limitations": [
+        "Selection is controlled by the caller. Each item needs a unique value. Keep item overflow visible so the highlight can travel between rows."
+      ],
+      "requirements": [
+        "React 19, Tailwind CSS 4, Motion for React, and Base UI. Supply value and wrap each link or button with MenuItem. Reduced motion switches the highlight instantly."
+      ],
+      "docsUrl": "http://localhost:3000/docs/components/menu.md",
+      "registryUrl": "http://localhost:3000/r/menu.json"
+    }
+  },
+  "categories": [
+    "navigation",
+    "animation"
+  ],
+  "type": "registry:component",
+  "docs": "Read http://localhost:3000/docs/components/menu.md for usage, required props, and integration instructions."
+}

@@ -29,10 +29,12 @@ test("selected block navigation keeps its label visible", async ({ page }) => {
 
   const colors = await activeLink.evaluate((element) => {
     const linkStyles = getComputedStyle(element);
+    const highlight = element.querySelector('[data-slot="menu-highlight"]');
+    if (!highlight) throw new Error("Expected a selection highlight");
     const pageStyles = getComputedStyle(document.body);
 
     return {
-      background: linkStyles.backgroundColor,
+      background: getComputedStyle(highlight).backgroundColor,
       color: linkStyles.color,
       pageBackground: pageStyles.backgroundColor,
       pageForeground: pageStyles.color,
