@@ -20,7 +20,7 @@ test("types, pastes, and switches length and characters", async ({ page }) => {
   await page.keyboard.press("Backspace");
   await page.keyboard.type("6");
   await expect(page.locator('.demo-frame [data-slot="otp-input"]')).toHaveAttribute("data-success", "true");
-  await expect(input).not.toBeFocused();
+  await expect(input).toBeFocused();
   await expect(input).not.toHaveAttribute("aria-invalid");
   await expect(page.locator('.demo-frame [data-slot="otp-input-highlight"]')).toHaveCount(0);
 

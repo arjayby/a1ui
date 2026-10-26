@@ -60,30 +60,30 @@ One native input sits over the slots. It handles typing, pasting, and SMS autofi
 
 ## Motion
 
-A highlight travels between slots as the code grows or shrinks, and a blinking caret marks the next empty slot. Each character rises into its slot with a short blur. Filling the last slot sends a small wave across the row. Setting `invalid` turns the borders red and shakes the row once. Setting `success` lights every slot in the success color, sweeping from left to right, and releases focus so the on-screen keyboard closes. Reduced motion removes the travel, wave, shake, and sweep and shows a steady caret.
+A highlight travels between slots as the code grows or shrinks, and a blinking caret marks the next empty slot. Each character rises into its slot with a short blur. Filling the last slot sends a small wave across the row. Setting `invalid` turns the borders red and shakes the row once. Setting `success` turns the borders green. The input keeps focus, and the highlight steps aside so every border shows the same color. Reduced motion removes the travel, wave, and shake and shows a steady caret.
 
 ## API reference
 
-| Prop            | Type                          | Default      | Purpose                                                                                        |
-| --------------- | ----------------------------- | ------------ | ---------------------------------------------------------------------------------------------- |
-| `label`         | `string`                      | Required     | Accessible name for the code field.                                                            |
-| `length`        | `number`                      | `6`          | Integer number of slots from 4 to 8.                                                           |
-| `mode`          | `"numeric" \| "alphanumeric"` | `"numeric"`  | Accepted characters. Alphanumeric codes are uppercased.                                        |
-| `value`         | `string`                      | Uncontrolled | Current code. Unsupported characters are dropped and extra characters are cut off.             |
-| `defaultValue`  | `string`                      | `""`         | Initial uncontrolled code.                                                                     |
-| `onValueChange` | `(value: string) => void`     | None         | Called with the filtered code on every change. Controlled usage requires updating `value`.     |
-| `onComplete`    | `(value: string) => void`     | None         | Called with the full code whenever the last slot is filled.                                    |
-| `invalid`       | `boolean`                     | `false`      | Sets `aria-invalid`, shows red borders, and shakes the row when it turns on.                   |
-| `success`       | `boolean`                     | `false`      | Lights every slot in the success color and releases focus, such as after the code is verified. |
-| `disabled`      | `boolean`                     | `false`      | Prevents input.                                                                                |
-| `name`          | `string`                      | None         | Field name for native form submission.                                                         |
-| `className`     | `string`                      | None         | Additional root classes.                                                                       |
+| Prop            | Type                          | Default      | Purpose                                                                                    |
+| --------------- | ----------------------------- | ------------ | ------------------------------------------------------------------------------------------ |
+| `label`         | `string`                      | Required     | Accessible name for the code field.                                                        |
+| `length`        | `number`                      | `6`          | Integer number of slots from 4 to 8.                                                       |
+| `mode`          | `"numeric" \| "alphanumeric"` | `"numeric"`  | Accepted characters. Alphanumeric codes are uppercased.                                    |
+| `value`         | `string`                      | Uncontrolled | Current code. Unsupported characters are dropped and extra characters are cut off.         |
+| `defaultValue`  | `string`                      | `""`         | Initial uncontrolled code.                                                                 |
+| `onValueChange` | `(value: string) => void`     | None         | Called with the filtered code on every change. Controlled usage requires updating `value`. |
+| `onComplete`    | `(value: string) => void`     | None         | Called with the full code whenever the last slot is filled.                                |
+| `invalid`       | `boolean`                     | `false`      | Sets `aria-invalid`, shows red borders, and shakes the row when it turns on.               |
+| `success`       | `boolean`                     | `false`      | Shows green borders, such as after the code is verified.                                   |
+| `disabled`      | `boolean`                     | `false`      | Prevents input.                                                                            |
+| `name`          | `string`                      | None         | Field name for native form submission.                                                     |
+| `className`     | `string`                      | None         | Additional root classes.                                                                   |
 
 
 
 OtpInput renders a single transparent native text input over a row of 4 to 8 visual slots built with Motion. The input carries the accessible name from label, autocomplete one-time-code for SMS autofill, inputmode numeric or text, and the form name. Typed, pasted, and autofilled text is filtered to digits in numeric mode or to letters and digits in alphanumeric mode, uppercased, and cut to length. The caret is kept at the end of the code, so edits append or remove the last character. Slots are hidden from assistive technology.
 
-While focused, a shared highlight moves to the next empty slot, or the last slot when the code is full, and a blinking caret marks an empty active slot. Characters rise and unblur on entry and lift out on removal. Filling the last slot calls onComplete and runs a staggered wave across the slots. The invalid prop sets aria-invalid, uses destructive borders, and shakes the row when it becomes true. The success prop fills every slot with the success color in a left-to-right sweep, hides the highlight, and blurs the input when it becomes true; the input can be focused again to edit. The component does not verify codes; the caller sets invalid or success after checking. Reduced motion removes all movement, blinking, and the color sweep. Lengths outside 4 to 8 or non-integer lengths throw. Supply callbacks and controlled state from a client component; the caller must update value after onValueChange in controlled usage.
+While focused, a shared highlight moves to the next empty slot, or the last slot when the code is full, and a blinking caret marks an empty active slot. Characters rise and unblur on entry and lift out on removal. Filling the last slot calls onComplete and runs a staggered wave across the slots. The invalid prop sets aria-invalid, uses destructive borders, and shakes the row when it becomes true. The success prop uses success borders on every slot and hides the highlight while keeping focus on the input, so the code can still be edited. The component does not verify codes; the caller sets invalid or success after checking. Reduced motion removes all movement and blinking. Lengths outside 4 to 8 or non-integer lengths throw. Supply callbacks and controlled state from a client component; the caller must update value after onValueChange in controlled usage.
 
 The demo starts with six numeric slots. The Length control selects 4 through 8, Characters switches between numeric and alphanumeric, and Correct code shows the expected code: the first digits of 12345678 or characters of A1B2C3D4. A complete correct code sets success; a complete wrong code sets invalid. Changing length or characters resets the code. Installation includes one component file and requires React 19, Tailwind CSS 4, Motion, and standard theme colors.
 

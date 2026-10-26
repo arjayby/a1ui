@@ -76,13 +76,13 @@ describe("OtpInput", () => {
     expect(input).toBeDisabled();
   });
 
-  it("releases focus and hides the highlight on success", () => {
+  it("keeps focus and hides the highlight on success", () => {
     const { container, rerender } = render(<OtpInput label="Code" length={4} defaultValue="1234" />);
     const input = screen.getByRole("textbox", { name: "Code" });
     act(() => input.focus());
     expect(container.querySelector('[data-slot="otp-input-highlight"]')).not.toBeNull();
     rerender(<OtpInput label="Code" length={4} defaultValue="1234" success />);
-    expect(input).not.toHaveFocus();
+    expect(input).toHaveFocus();
     expect(container.querySelector('[data-slot="otp-input"]')).toHaveAttribute("data-success", "true");
     expect(container.querySelector('[data-slot="otp-input-highlight"]')).toBeNull();
   });
