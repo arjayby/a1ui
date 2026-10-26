@@ -106,7 +106,7 @@ export function OtpInput({
             data-active={active || undefined}
             data-filled={char !== undefined || undefined}
             className={`bg-background text-foreground relative grid h-12 w-10 place-items-center rounded-md border font-mono text-lg tabular-nums ${success ? "border-success" : invalid ? "border-destructive" : "border-border"}`}
-            animate={{ y: complete && !reducedMotion ? [0, -3, 0] : 0 }}
+            animate={{ y: success && !reducedMotion ? [0, -3, 0] : 0 }}
             transition={{ duration: reducedMotion ? 0 : 0.28, delay: reducedMotion ? 0 : index * 0.035 }}
           >
             {active && (
