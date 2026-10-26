@@ -13,6 +13,7 @@ import { LoadingButtonPreview } from "@/components/component-demos/loading-butto
 import { SliderPreview } from "@/components/component-demos/slider-demo";
 import { OtpInputPreview } from "@/components/component-demos/otp-input-demo";
 import { ValidatedInputPreview } from "@/components/component-demos/validated-input-demo";
+import { TagInputPreview } from "@/components/component-demos/tag-input-demo";
 import { components } from "@/lib/component-catalog";
 
 export const metadata: Metadata = {
@@ -30,6 +31,7 @@ const previews: Record<string, ReactNode> = {
   slider: <SliderPreview />,
   "otp-input": <OtpInputPreview />,
   "validated-input": <ValidatedInputPreview />,
+  "tag-input": <TagInputPreview />,
 };
 
 export default function ComponentsPage() {

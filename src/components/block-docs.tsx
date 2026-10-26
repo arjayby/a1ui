@@ -47,7 +47,8 @@ export async function ComponentSource({
     | "dropdown-menu"
     | "slider"
     | "otp-input"
-    | "validated-input";
+    | "validated-input"
+    | "tag-input";
 }) {
   const source = await readFile(
     path.join(process.cwd(), "src", "registry", "components", `${name}.tsx`),

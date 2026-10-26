@@ -606,6 +606,35 @@
           ]
         }
       }
+    },
+    {
+      "name": "tag-input",
+      "type": "registry:component",
+      "title": "Tag Input",
+      "description": "A text field that collects multiple tags, with a two-step Backspace removal and an optional limit.",
+      "dependencies": ["motion", "@phosphor-icons/react"],
+      "registryDependencies": ["label"],
+      "files": [
+        {
+          "path": "src/registry/components/tag-input.tsx",
+          "type": "registry:component",
+          "target": "components/animated/tag-input.tsx"
+        }
+      ],
+      "categories": ["input", "form", "interactive", "animation"],
+      "meta": {
+        "a1ui": {
+          "useCases": [
+            "Collecting keywords, topics, skills, labels, or email recipients as a list of short tags in forms."
+          ],
+          "limitations": [
+            "Tags are plain trimmed strings added at the end; duplicates are rejected case-insensitively. No suggestions, reordering, or inline editing of existing tags."
+          ],
+          "requirements": [
+            "React 19, Tailwind CSS 4, Motion, Phosphor icons, the shadcn label component, and theme colors. Supply a label. Controlled usage requires updating value in onValueChange. Reduced motion removes the shake and transitions."
+          ]
+        }
+      }
     }
   ]
 }

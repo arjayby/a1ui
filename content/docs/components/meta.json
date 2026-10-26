@@ -10,6 +10,7 @@
     "icon-toggle",
     "slider",
     "otp-input",
-    "validated-input"
+    "validated-input",
+    "tag-input"
   ]
 }
