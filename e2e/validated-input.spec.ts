@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-test("validates the email on blur and submit", async ({ page }) => {
+test("validates the email on submit without shifting the layout", async ({ page }) => {
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
   await page.goto("/components/validated-input");
@@ -8,13 +8,23 @@ test("validates the email on blur and submit", async ({ page }) => {
   const frame = page.locator(".demo-frame");
   const input = frame.getByRole("textbox", { name: "Email" });
   const error = frame.locator('[data-slot="validated-input-error"]');
-  const result = frame.locator('[data-slot="validated-input-demo-result"]');
+  const field = frame.locator('[data-slot="validated-input"]');
 
-  await frame.getByRole("button", { name: "Subscribe" }).click();
+  // Measure from the stage, since focusing may scroll the page.
+  const layout = () =>
+    field.evaluate((element) => {
+      const stage = element.closest(".component-demo-stage")!.getBoundingClientRect();
+      const box = element.getBoundingClientRect();
+      return { y: box.y - stage.y, height: box.height, stage: stage.height };
+    });
+  const before = await layout();
+  await input.focus();
+  await page.keyboard.press("Enter");
   await expect(error).toHaveText("Enter your email address.");
+  await expect(frame.locator('[data-slot="validated-input-description"]')).toHaveCSS("opacity", "0");
+  expect(await layout()).toEqual(before);
   await expect(input).toBeFocused();
   await expect(input).toHaveAttribute("aria-invalid", "true");
-  await expect(result).toHaveText("Nothing yet");
 
   await input.fill("ada@");
   await expect(error).toHaveText("Enter a valid email address.");
@@ -23,7 +33,9 @@ test("validates the email on blur and submit", async ({ page }) => {
   await expect(input).not.toHaveAttribute("aria-invalid");
   await expect(frame.locator('[data-slot="validated-input-icon"]')).toBeVisible();
   await page.keyboard.press("Enter");
-  await expect(result).toHaveText("ada@example.com");
+  await expect(error).toHaveCount(0);
+  await expect(frame.locator('[data-slot="validated-input-description"]')).toHaveCSS("opacity", "1");
+  expect(await layout()).toEqual(before);
   expect(errors).toEqual([]);
 });
 

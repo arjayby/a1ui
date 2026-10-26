@@ -115,41 +115,49 @@ export function ValidatedInput({
           )}
         </AnimatePresence>
       </div>
-      {description && (
-        <p
-          id={descriptionId}
-          data-slot="validated-input-description"
-          className="text-muted-foreground mt-2 text-sm"
-        >
-          {description}
-        </p>
-      )}
-      <div aria-live="polite">
-        <AnimatePresence initial={false}>
-          {showError && (
-            <motion.div
-              key="error"
-              className="overflow-hidden"
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: reducedMotion ? 0 : 0.2, ease: [0.2, 0, 0, 1] }}
-            >
+      {/* The description and error share one reserved line, so showing an error never moves the layout. */}
+      <div data-slot="validated-input-message" className="mt-2 grid min-h-5 text-sm">
+        {description && (
+          <motion.p
+            id={descriptionId}
+            data-slot="validated-input-description"
+            className="text-muted-foreground col-start-1 row-start-1"
+            animate={
+              showError
+                ? { opacity: 0, y: reducedMotion ? 0 : 4, filter: reducedMotion ? "none" : "blur(4px)" }
+                : { opacity: 1, y: 0, filter: reducedMotion ? "none" : "blur(0px)" }
+            }
+            transition={{ duration: reducedMotion ? 0 : 0.18, ease: [0.2, 0, 0, 1] }}
+          >
+            {description}
+          </motion.p>
+        )}
+        <div aria-live="polite" className="col-start-1 row-start-1 grid">
+          <AnimatePresence initial={false}>
+            {showError && (
               <motion.p
-                key={error}
+                key="error"
                 id={`${id}-error`}
                 data-slot="validated-input-error"
-                className="text-destructive flex items-center gap-1.5 pt-2 text-sm"
+                className="text-destructive col-start-1 row-start-1 flex items-center gap-1.5"
                 initial={reducedMotion ? false : { opacity: 0, y: -4, filter: "blur(4px)" }}
                 animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                exit={reducedMotion ? { opacity: 0, transition: { duration: 0 } } : { opacity: 0, y: -4 }}
                 transition={{ duration: reducedMotion ? 0 : 0.18, ease: [0.2, 0, 0, 1] }}
               >
                 <WarningCircleIcon aria-hidden="true" className="size-4 shrink-0" />
-                {error}
+                <motion.span
+                  key={error}
+                  initial={reducedMotion ? false : { opacity: 0, filter: "blur(4px)" }}
+                  animate={{ opacity: 1, filter: "blur(0px)" }}
+                  transition={{ duration: reducedMotion ? 0 : 0.18 }}
+                >
+                  {error}
+                </motion.span>
               </motion.p>
-            </motion.div>
-          )}
-        </AnimatePresence>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
     </div>
   );

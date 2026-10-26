@@ -53,7 +53,7 @@ The field renders the shadcn `Input` and `Label` from `@/components/ui`. Other i
 
 ## Motion
 
-The error slides open under the field with a short blur, and a new message fades in when the error changes. A submit that fails shakes the input once. A check mark springs in at the end of the input when a touched value passes. Reduced motion removes the shake and the transitions.
+The description and the error share one reserved line under the field. When the error appears, the description fades out and the error fades in over it, so the field and everything below it stay in place. A new message blurs in when the error changes. Messages that wrap to more lines than the description still grow the line. A submit that fails shakes the input once. A check mark springs in at the end of the input when a touched value passes. Reduced motion removes the shake and the transitions.
 
 ## API reference
 
@@ -61,7 +61,7 @@ The error slides open under the field with a short blur, and a new message fades
 | --------------- | ------------------------------ | ------------ | --------------------------------------------------------------------------------------- |
 | `label`         | `ReactNode`                    | Required     | Visible label linked to the input.                                                      |
 | `schema`        | `ZodType<unknown, string>`     | Required     | Schema the value must pass. The first issue's message is shown as the error.            |
-| `description`   | `ReactNode`                    | None         | Hint shown under the field and linked with `aria-describedby`.                          |
+| `description`   | `ReactNode`                    | None         | Hint shown under the field, replaced by the error while it shows.                       |
 | `value`         | `string`                       | Uncontrolled | Current value.                                                                          |
 | `defaultValue`  | `string`                       | `""`         | Initial uncontrolled value.                                                             |
 | `onValueChange` | `(value: string) => void`      | None         | Called with the raw text on every change. Controlled usage requires updating `value`.   |
@@ -70,10 +70,10 @@ The error slides open under the field with a short blur, and a new message fades
 
 <AgentOnly>
 
-ValidatedInput renders a Label and the shadcn Input from @/components/ui, an optional description, and an animated error message. It runs schema.safeParse on the current text on every render and keeps the first issue's message as the error. The error is hidden until the field is touched: blurring after an edit, or a form submit that fires the input's invalid event. Once touched, the error updates on every change and is replaced by a check mark when the value passes. The error and description are linked with aria-describedby, aria-invalid is set while the error shows, and the error sits in a polite live region.
+ValidatedInput renders a Label and the shadcn Input from @/components/ui, and a message line under the input that always reserves one line of text. The optional description and the error sit in the same line: the description fades out while the error shows, so showing or clearing an error does not shift the layout unless the message wraps to more lines. It runs schema.safeParse on the current text on every render and keeps the first issue's message as the error. The error is hidden until the field is touched: blurring after an edit, or a form submit that fires the input's invalid event. Once touched, the error updates on every change and is replaced by a check mark when the value passes. The error and description are linked with aria-describedby, aria-invalid is set while the error shows, and the error sits in a polite live region.
 
 The schema result is applied with setCustomValidity, so native forms refuse to submit while the schema fails. On the invalid event the component prevents the browser popup, reveals the error, focuses the input when it is the first invalid control in its form, and shakes the input once. If the schema passes but a native constraint such as required or type fails, the browser reports it normally. The schema must be synchronous and accept a string; the component does not run async refinements or cross-field checks. Other input props pass through to the input. Supply callbacks and controlled state from a client component; the caller must update value after onValueChange in controlled usage. Reduced motion removes the shake and transitions.
 
-The demo is a subscribe form with one email field validated by z.string().trim().min(1).pipe(z.email()), a description, and a Subscribe button. Submitting a blank or malformed address shows the error and shakes the field; a valid address shows a check mark and the Submitted control shows the parsed email. Installation includes one component file and requires React 19, Tailwind CSS 4, Motion, Phosphor icons, Zod 4, the shadcn input and label components, and standard theme colors.
+The demo is a single email field in a form with no submit button, validated by z.string().trim().min(1).pipe(z.email()), with the description Monthly newsletter. Unsubscribe anytime. Leaving the field after typing, or pressing Enter to submit the form, shows any error in place of the description; pressing Enter with an invalid value also shakes the field. A valid address shows a check mark. Installation includes one component file and requires React 19, Tailwind CSS 4, Motion, Phosphor icons, Zod 4, the shadcn input and label components, and standard theme colors.
 
 </AgentOnly>
