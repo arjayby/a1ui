@@ -40,7 +40,14 @@ export async function ComponentSource({
   name,
 }: {
   name:
-    "copy-button" | "loading-button" | "confirm-button" | "menu" | "dropdown-menu" | "slider" | "otp-input";
+    | "copy-button"
+    | "loading-button"
+    | "confirm-button"
+    | "menu"
+    | "dropdown-menu"
+    | "slider"
+    | "otp-input"
+    | "validated-input";
 }) {
   const source = await readFile(
     path.join(process.cwd(), "src", "registry", "components", `${name}.tsx`),

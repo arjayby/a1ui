@@ -9,6 +9,7 @@
     "loading-button",
     "icon-toggle",
     "slider",
-    "otp-input"
+    "otp-input",
+    "validated-input"
   ]
 }

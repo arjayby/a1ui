@@ -12,6 +12,7 @@ import { IconToggle } from "@/registry/components/icon-toggle";
 import { LoadingButtonPreview } from "@/components/component-demos/loading-button-demo";
 import { SliderPreview } from "@/components/component-demos/slider-demo";
 import { OtpInputPreview } from "@/components/component-demos/otp-input-demo";
+import { ValidatedInputPreview } from "@/components/component-demos/validated-input-demo";
 import { components } from "@/lib/component-catalog";
 
 export const metadata: Metadata = {
@@ -28,6 +29,7 @@ const previews: Record<string, ReactNode> = {
   "loading-button": <LoadingButtonPreview />,
   slider: <SliderPreview />,
   "otp-input": <OtpInputPreview />,
+  "validated-input": <ValidatedInputPreview />,
 };
 
 export default function ComponentsPage() {

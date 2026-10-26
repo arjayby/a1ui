@@ -832,6 +832,50 @@
         }
       },
       "docs": "Read http://localhost:3000/docs/components/otp-input.md for usage, required props, and integration instructions."
+    },
+    {
+      "name": "validated-input",
+      "type": "registry:component",
+      "title": "Validated Input",
+      "description": "A labeled text field that checks its value against a Zod schema and animates the error and success states.",
+      "dependencies": [
+        "motion",
+        "@phosphor-icons/react",
+        "zod"
+      ],
+      "registryDependencies": [
+        "input",
+        "label"
+      ],
+      "files": [
+        {
+          "path": "src/registry/components/validated-input.tsx",
+          "type": "registry:component",
+          "target": "components/animated/validated-input.tsx"
+        }
+      ],
+      "categories": [
+        "input",
+        "form",
+        "validation",
+        "animation"
+      ],
+      "meta": {
+        "a1ui": {
+          "useCases": [
+            "Validating emails, usernames, URLs, and other single-line text fields with Zod in native forms."
+          ],
+          "limitations": [
+            "Validates one field against a synchronous schema that accepts a string. Shows the first issue only. Cross-field and async checks belong to the caller."
+          ],
+          "requirements": [
+            "React 19, Tailwind CSS 4, Motion, Phosphor icons, Zod 4, and the shadcn input and label components. Supply label and schema. Controlled usage requires updating value in onValueChange. Reduced motion removes the shake and transitions."
+          ],
+          "docsUrl": "http://localhost:3000/docs/components/validated-input.md",
+          "registryUrl": "http://localhost:3000/r/validated-input.json"
+        }
+      },
+      "docs": "Read http://localhost:3000/docs/components/validated-input.md for usage, required props, and integration instructions."
     }
   ]
 }
