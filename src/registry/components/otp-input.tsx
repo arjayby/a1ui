@@ -1,13 +1,13 @@
 "use client";
 
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { useId, useState } from "react";
+import { Fragment, useId, useState } from "react";
 
 export interface OtpInputProps {
   /** Accessible name for the code field, such as "Verification code". */
   label: string;
-  /** Number of characters, from 4 to 8. */
-  length?: number;
+  /** Number of characters. */
+  length?: 4 | 6 | 8;
   /** Numeric accepts digits only. Alphanumeric accepts letters and digits, uppercased. */
   mode?: "numeric" | "alphanumeric";
   value?: string;
@@ -15,6 +15,8 @@ export interface OtpInputProps {
   onValueChange?: (value: string) => void;
   /** Called with the full code whenever the last slot is filled. */
   onComplete?: (value: string) => void;
+  /** Splits the slots in half with a dash, or with the given text. */
+  separator?: boolean | string;
   invalid?: boolean;
   /** Shows success borders, such as after the code is verified. */
   success?: boolean;
@@ -31,14 +33,15 @@ export function OtpInput({
   defaultValue = "",
   onValueChange,
   onComplete,
+  separator = false,
   invalid = false,
   success = false,
   disabled = false,
   name,
   className,
 }: OtpInputProps) {
-  if (!Number.isInteger(length) || length < 4 || length > 8) {
-    throw new Error("OtpInput requires an integer length from 4 to 8.");
+  if (length !== 4 && length !== 6 && length !== 8) {
+    throw new Error("OtpInput requires a length of 4, 6, or 8.");
   }
   const sanitize = (text: string) =>
     (mode === "numeric" ? text.replace(/\D/g, "") : text.replace(/[^a-z0-9]/gi, "").toUpperCase()).slice(
@@ -65,7 +68,7 @@ export function OtpInput({
       data-complete={complete || undefined}
       data-invalid={invalid || undefined}
       data-success={success || undefined}
-      className={`relative inline-flex gap-2 ${disabled ? "cursor-not-allowed opacity-50" : ""} ${className ?? ""}`}
+      className={`relative flex w-full max-w-max items-center gap-1.5 sm:gap-2 ${disabled ? "cursor-not-allowed opacity-50" : ""} ${className ?? ""}`}
       animate={{ x: invalid && !reducedMotion ? [0, -6, 6, -4, 4, 0] : 0 }}
       transition={{ duration: reducedMotion ? 0 : 0.36 }}
     >
@@ -99,49 +102,61 @@ export function OtpInput({
         const char = code[index];
         const active = index === activeIndex;
         return (
-          <motion.div
-            key={index}
-            aria-hidden="true"
-            data-slot="otp-input-slot"
-            data-active={active || undefined}
-            data-filled={char !== undefined || undefined}
-            className={`bg-background text-foreground relative grid h-12 w-10 place-items-center rounded-md border font-mono text-lg tabular-nums ${success ? "border-success" : invalid ? "border-destructive" : "border-border"}`}
-            animate={{ y: success && !reducedMotion ? [0, -3, 0] : 0 }}
-            transition={{ duration: reducedMotion ? 0 : 0.28, delay: reducedMotion ? 0 : index * 0.035 }}
-          >
-            {active && (
-              <motion.span
-                layoutId={highlightId}
-                data-slot="otp-input-highlight"
-                className={`pointer-events-none absolute -inset-px rounded-md border ${invalid ? "border-destructive ring-destructive/25" : "border-ring ring-ring/30"} ring-3`}
-                transition={{ type: "spring", duration: reducedMotion ? 0 : 0.3, bounce: 0.2 }}
-              />
+          <Fragment key={index}>
+            {separator !== false && index === length / 2 && (
+              <span
+                aria-hidden="true"
+                data-slot="otp-input-separator"
+                className="text-muted-foreground flex w-3 shrink-0 items-center justify-center font-mono text-lg"
+              >
+                {separator === true ? "-" : separator}
+              </span>
             )}
-            <AnimatePresence initial={false}>
-              {char !== undefined && (
+            <motion.div
+              aria-hidden="true"
+              data-slot="otp-input-slot"
+              data-active={active || undefined}
+              data-filled={char !== undefined || undefined}
+              className={`bg-background text-foreground relative grid aspect-5/6 w-10 min-w-0 place-items-center rounded-md border font-mono text-lg tabular-nums ${success ? "border-success" : invalid ? "border-destructive" : "border-border"}`}
+              animate={{ y: success && !reducedMotion ? [0, -3, 0] : 0 }}
+              transition={{ duration: reducedMotion ? 0 : 0.28, delay: reducedMotion ? 0 : index * 0.035 }}
+            >
+              {active && (
                 <motion.span
-                  key={char}
-                  className="col-start-1 row-start-1"
-                  initial={reducedMotion ? false : { y: 8, opacity: 0, filter: "blur(4px)" }}
-                  animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
-                  exit={reducedMotion ? { opacity: 0, transition: { duration: 0 } } : { y: -6, opacity: 0 }}
-                  transition={{ duration: reducedMotion ? 0 : 0.18, ease: [0.2, 0, 0, 1] }}
-                >
-                  {char}
-                </motion.span>
+                  layoutId={highlightId}
+                  data-slot="otp-input-highlight"
+                  className={`pointer-events-none absolute -inset-px rounded-md border ${invalid ? "border-destructive ring-destructive/25" : "border-ring ring-ring/30"} ring-3`}
+                  transition={{ type: "spring", duration: reducedMotion ? 0 : 0.3, bounce: 0.2 }}
+                />
               )}
-            </AnimatePresence>
-            {active && char === undefined && (
-              <motion.span
-                data-slot="otp-input-caret"
-                className="bg-foreground col-start-1 row-start-1 h-5 w-px"
-                animate={{ opacity: reducedMotion ? 1 : [1, 1, 0, 0] }}
-                transition={
-                  reducedMotion ? { duration: 0 } : { duration: 1, repeat: Infinity, times: [0, 0.5, 0.5, 1] }
-                }
-              />
-            )}
-          </motion.div>
+              <AnimatePresence initial={false}>
+                {char !== undefined && (
+                  <motion.span
+                    key={char}
+                    className="col-start-1 row-start-1"
+                    initial={reducedMotion ? false : { y: 8, opacity: 0, filter: "blur(4px)" }}
+                    animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
+                    exit={reducedMotion ? { opacity: 0, transition: { duration: 0 } } : { y: -6, opacity: 0 }}
+                    transition={{ duration: reducedMotion ? 0 : 0.18, ease: [0.2, 0, 0, 1] }}
+                  >
+                    {char}
+                  </motion.span>
+                )}
+              </AnimatePresence>
+              {active && char === undefined && (
+                <motion.span
+                  data-slot="otp-input-caret"
+                  className="bg-foreground col-start-1 row-start-1 h-5 w-px"
+                  animate={{ opacity: reducedMotion ? 1 : [1, 1, 0, 0] }}
+                  transition={
+                    reducedMotion
+                      ? { duration: 0 }
+                      : { duration: 1, repeat: Infinity, times: [0, 0.5, 0.5, 1] }
+                  }
+                />
+              )}
+            </motion.div>
+          </Fragment>
         );
       })}
     </motion.div>

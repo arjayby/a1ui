@@ -9,7 +9,7 @@ import { source } from "@/lib/source";
 export const metadata: Metadata = {
   title: "OTP Input",
   description:
-    "A one-time code field with 4 to 8 slots, a traveling focus highlight, and characters that rise into place.",
+    "A one-time code field with 4, 6, or 8 slots, a traveling focus highlight, and characters that rise into place.",
 };
 
 export default function OtpInputPage() {

@@ -554,7 +554,7 @@
       "name": "otp-input",
       "type": "registry:component",
       "title": "OTP Input",
-      "description": "A one-time code field with 4 to 8 slots, a traveling focus highlight, and characters that rise into place.",
+      "description": "A one-time code field with 4, 6, or 8 slots, a traveling focus highlight, and characters that rise into place.",
       "dependencies": ["motion"],
       "files": [
         {
@@ -567,10 +567,10 @@
       "meta": {
         "a1ui": {
           "useCases": [
-            "Entering numeric or alphanumeric verification, two-factor, and invite codes of 4 to 8 characters."
+            "Entering numeric or alphanumeric verification, two-factor, and invite codes of 4, 6, or 8 characters."
           ],
           "limitations": [
-            "Single row of 4 to 8 slots. Edits happen at the end of the code; clicking a filled slot does not move the caret into it. Alphanumeric codes are uppercased."
+            "Single row of 4, 6, or 8 slots. Edits happen at the end of the code; clicking a filled slot does not move the caret into it. Alphanumeric codes are uppercased."
           ],
           "requirements": [
             "React 19, Tailwind CSS 4, Motion, and theme colors. Supply a label. Controlled usage requires updating value in onValueChange. Reduced motion removes animation and keeps a static caret."

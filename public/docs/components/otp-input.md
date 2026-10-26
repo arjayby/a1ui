@@ -1,16 +1,16 @@
 # OTP Input
 
-A one-time code field with 4 to 8 slots, a traveling focus highlight, and characters that rise into place.
+A one-time code field with 4, 6, or 8 slots, a traveling focus highlight, and characters that rise into place.
 
 See [agent setup instructions](http://localhost:3000/llms.txt) before installation. Supported baseline: React 19, TypeScript, Tailwind CSS 4. Components use client-side React and browser APIs.
 
 ## When to use
 
-- Entering numeric or alphanumeric verification, two-factor, and invite codes of 4 to 8 characters.
+- Entering numeric or alphanumeric verification, two-factor, and invite codes of 4, 6, or 8 characters.
 
 ## Limitations
 
-- Single row of 4 to 8 slots. Edits happen at the end of the code; clicking a filled slot does not move the caret into it. Alphanumeric codes are uppercased.
+- Single row of 4, 6, or 8 slots. Edits happen at the end of the code; clicking a filled slot does not move the caret into it. Alphanumeric codes are uppercased.
 
 ## Integration requirements
 
@@ -54,7 +54,7 @@ export function OtpInputExample() {
 
 ## Characters
 
-`length` sets between 4 and 8 slots. Numeric mode accepts digits only and opens the numeric keypad on touch devices. Alphanumeric mode accepts letters and digits and uppercases letters as they arrive. Other characters are dropped, so pasting `123-456` fills six slots.
+`length` sets 4, 6, or 8 slots. `separator` splits them in half with a dash, or with any text you pass, such as `separator="·"`. Slots are 40 pixels wide and shrink evenly when the container is narrower, so eight slots with a separator fit on a phone. Numeric mode accepts digits only and opens the numeric keypad on touch devices. Alphanumeric mode accepts letters and digits and uppercases letters as they arrive. Other characters are dropped, so pasting `123-456` fills six slots.
 
 One native input sits over the slots. It handles typing, pasting, and SMS autofill through `autocomplete="one-time-code"`, and submits the code with forms through `name`. Editing always happens at the end of the code: Backspace removes the last character, and the highlight moves to the next empty slot.
 
@@ -67,7 +67,8 @@ A highlight travels between slots as the code grows or shrinks, and a blinking c
 | Prop            | Type                          | Default      | Purpose                                                                                    |
 | --------------- | ----------------------------- | ------------ | ------------------------------------------------------------------------------------------ |
 | `label`         | `string`                      | Required     | Accessible name for the code field.                                                        |
-| `length`        | `number`                      | `6`          | Integer number of slots from 4 to 8.                                                       |
+| `length`        | `4 \| 6 \| 8`                 | `6`          | Number of slots.                                                                           |
+| `separator`     | `boolean \| string`           | `false`      | Splits the slots in half. `true` shows a dash; a string shows that text instead.           |
 | `mode`          | `"numeric" \| "alphanumeric"` | `"numeric"`  | Accepted characters. Alphanumeric codes are uppercased.                                    |
 | `value`         | `string`                      | Uncontrolled | Current code. Unsupported characters are dropped and extra characters are cut off.         |
 | `defaultValue`  | `string`                      | `""`         | Initial uncontrolled code.                                                                 |
@@ -81,11 +82,11 @@ A highlight travels between slots as the code grows or shrinks, and a blinking c
 
 
 
-OtpInput renders a single transparent native text input over a row of 4 to 8 visual slots built with Motion. The input carries the accessible name from label, autocomplete one-time-code for SMS autofill, inputmode numeric or text, and the form name. Typed, pasted, and autofilled text is filtered to digits in numeric mode or to letters and digits in alphanumeric mode, uppercased, and cut to length. The caret is kept at the end of the code, so edits append or remove the last character. Slots are hidden from assistive technology.
+OtpInput renders a single transparent native text input over a row of 4, 6, or 8 visual slots built with Motion. The input carries the accessible name from label, autocomplete one-time-code for SMS autofill, inputmode numeric or text, and the form name. Typed, pasted, and autofilled text is filtered to digits in numeric mode or to letters and digits in alphanumeric mode, uppercased, and cut to length. The caret is kept at the end of the code, so edits append or remove the last character. Slots are hidden from assistive technology. The separator prop places a dash, or the given string, between the two halves of the slots; it is decorative and is not part of the value.
 
-While focused, a shared highlight moves to the next empty slot, or the last slot when the code is full, and a blinking caret marks an empty active slot. Characters rise and unblur on entry and lift out on removal. Filling the last slot calls onComplete. The invalid prop sets aria-invalid, uses destructive borders, and shakes the row when it becomes true. The success prop uses success borders on every slot, runs a staggered wave across the slots when it becomes true, and hides the highlight while keeping focus on the input, so the code can still be edited. The component does not verify codes; the caller sets invalid or success after checking. Reduced motion removes all movement and blinking. Lengths outside 4 to 8 or non-integer lengths throw. Supply callbacks and controlled state from a client component; the caller must update value after onValueChange in controlled usage.
+While focused, a shared highlight moves to the next empty slot, or the last slot when the code is full, and a blinking caret marks an empty active slot. Characters rise and unblur on entry and lift out on removal. Filling the last slot calls onComplete. The invalid prop sets aria-invalid, uses destructive borders, and shakes the row when it becomes true. The success prop uses success borders on every slot, runs a staggered wave across the slots when it becomes true, and hides the highlight while keeping focus on the input, so the code can still be edited. The component does not verify codes; the caller sets invalid or success after checking. Reduced motion removes all movement and blinking. Lengths other than 4, 6, or 8 throw. Supply callbacks and controlled state from a client component; the caller must update value after onValueChange in controlled usage.
 
-The demo starts with six numeric slots. The Length control selects 4 through 8, Characters switches between numeric and alphanumeric, and Correct code shows the expected code: the first digits of 12345678 or characters of A1B2C3D4. A complete correct code sets success; a complete wrong code sets invalid. Changing length or characters resets the code. Installation includes one component file and requires React 19, Tailwind CSS 4, Motion, and standard theme colors.
+The demo starts with six numeric slots. The Length control selects 4, 6, or 8, Characters switches between numeric and alphanumeric, the Separator switch adds a center dash, and Correct code shows the expected code: the first digits of 12345678 or characters of A1B2C3D4. A complete correct code sets success; a complete wrong code sets invalid. Changing length or characters resets the code. Installation includes one component file and requires React 19, Tailwind CSS 4, Motion, and standard theme colors.
 
 ## Verification
 

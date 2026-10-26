@@ -29,6 +29,8 @@ test("types, pastes, and switches length and characters", async ({ page }) => {
   await page.getByRole("button", { name: "Characters: numeric" }).click();
   await page.getByRole("menuitem", { name: "alphanumeric", exact: true }).click();
   await expect(slots).toHaveCount(8);
+  await page.getByRole("switch", { name: "Separator" }).check();
+  await expect(page.locator('.demo-frame [data-slot="otp-input-separator"]')).toHaveText("-");
   await expect(page.locator('.demo-frame [data-slot="otp-demo-answer"]')).toHaveText("A1B2C3D4");
   await input.fill("ab-12 cd34");
   await expect(input).toHaveValue("AB12CD34");
@@ -43,7 +45,13 @@ test("fits a phone viewport", async ({ browser }) => {
   await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
   await page.getByRole("button", { name: "Length: 6" }).click();
   await page.getByRole("menuitem", { name: "8", exact: true }).click();
+  await page.getByRole("switch", { name: "Separator" }).check();
   await expect(page.locator('.demo-frame [data-slot="otp-input-slot"]')).toHaveCount(8);
+  const row = await page.locator('.demo-frame [data-slot="otp-input"]').boundingBox();
+  const stage = await page.locator(".demo-frame .component-demo-stage").boundingBox();
+  if (!row || !stage) throw new Error("Expected the OTP row and demo stage");
+  expect(row.x).toBeGreaterThanOrEqual(stage.x);
+  expect(row.x + row.width).toBeLessThanOrEqual(stage.x + stage.width);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await context.close();
 });

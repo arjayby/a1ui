@@ -53,7 +53,7 @@ describe("OtpInput", () => {
   });
 
   it("highlights the next empty slot while focused", () => {
-    const { container } = render(<OtpInput label="Code" length={5} defaultValue="12" />);
+    const { container } = render(<OtpInput label="Code" length={6} defaultValue="12" />);
     expect(container.querySelector('[data-slot="otp-input-slot"][data-active]')).toBeNull();
     fireEvent.focus(screen.getByRole("textbox", { name: "Code" }));
     const slots = container.querySelectorAll('[data-slot="otp-input-slot"]');
@@ -87,9 +87,26 @@ describe("OtpInput", () => {
     expect(container.querySelector('[data-slot="otp-input-highlight"]')).toBeNull();
   });
 
-  it("rejects lengths outside 4 to 8", () => {
-    expect(() => render(<OtpInput label="Code" length={3} />)).toThrow("from 4 to 8");
-    expect(() => render(<OtpInput label="Code" length={9} />)).toThrow("from 4 to 8");
-    expect(() => render(<OtpInput label="Code" length={5.5} />)).toThrow("from 4 to 8");
+  it("splits the slots in half with a dash or custom separator", () => {
+    const { container, rerender } = render(<OtpInput label="Code" length={6} />);
+    expect(container.querySelector('[data-slot="otp-input-separator"]')).toBeNull();
+    rerender(<OtpInput label="Code" length={6} separator />);
+    const separator = container.querySelector('[data-slot="otp-input-separator"]');
+    expect(separator).toHaveTextContent("-");
+    expect(separator?.previousElementSibling).toBe(
+      container.querySelectorAll('[data-slot="otp-input-slot"]')[2],
+    );
+    rerender(<OtpInput label="Code" length={8} separator="·" />);
+    expect(container.querySelector('[data-slot="otp-input-separator"]')).toHaveTextContent("·");
+    expect(container.querySelector('[data-slot="otp-input-separator"]')?.previousElementSibling).toBe(
+      container.querySelectorAll('[data-slot="otp-input-slot"]')[3],
+    );
+  });
+
+  it("rejects lengths other than 4, 6, or 8", () => {
+    for (const length of [3, 5, 7, 9]) {
+      // @ts-expect-error -- checks the runtime guard for untyped callers.
+      expect(() => render(<OtpInput label="Code" length={length} />)).toThrow("4, 6, or 8");
+    }
   });
 });
