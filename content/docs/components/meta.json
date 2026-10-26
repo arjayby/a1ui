@@ -8,6 +8,7 @@
     "copy-button",
     "loading-button",
     "icon-toggle",
-    "slider"
+    "slider",
+    "otp-input"
   ]
 }

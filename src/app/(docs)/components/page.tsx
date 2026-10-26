@@ -11,6 +11,7 @@ import { CopyButton } from "@/registry/components/copy-button";
 import { IconToggle } from "@/registry/components/icon-toggle";
 import { LoadingButtonPreview } from "@/components/component-demos/loading-button-demo";
 import { SliderPreview } from "@/components/component-demos/slider-demo";
+import { OtpInputPreview } from "@/components/component-demos/otp-input-demo";
 import { components } from "@/lib/component-catalog";
 
 export const metadata: Metadata = {
@@ -26,6 +27,7 @@ const previews: Record<string, ReactNode> = {
   "icon-toggle": <IconToggle label="Dark mode" />,
   "loading-button": <LoadingButtonPreview />,
   slider: <SliderPreview />,
+  "otp-input": <OtpInputPreview />,
 };
 
 export default function ComponentsPage() {

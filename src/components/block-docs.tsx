@@ -39,7 +39,8 @@ export async function BlockSource({ name }: { name: BlockSlug }) {
 export async function ComponentSource({
   name,
 }: {
-  name: "copy-button" | "loading-button" | "confirm-button" | "menu" | "dropdown-menu" | "slider";
+  name:
+    "copy-button" | "loading-button" | "confirm-button" | "menu" | "dropdown-menu" | "slider" | "otp-input";
 }) {
   const source = await readFile(
     path.join(process.cwd(), "src", "registry", "components", `${name}.tsx`),
