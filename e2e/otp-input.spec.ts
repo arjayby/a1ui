@@ -15,18 +15,23 @@ test("types, pastes, and switches length and characters", async ({ page }) => {
   await expect(slots.nth(3)).toHaveAttribute("data-active", "true");
   await page.keyboard.press("Backspace");
   await expect(input).toHaveValue("12");
-  await page.keyboard.type("3456");
-  await expect(page.locator(".demo-frame")).toContainText("Entered 123456");
+  await page.keyboard.type("3457");
+  await expect(input).toHaveAttribute("aria-invalid", "true");
+  await page.keyboard.press("Backspace");
+  await page.keyboard.type("6");
+  await expect(page.locator('.demo-frame [data-slot="otp-input"]')).toHaveAttribute("data-success", "true");
+  await expect(input).not.toBeFocused();
+  await expect(input).not.toHaveAttribute("aria-invalid");
+  await expect(page.locator('.demo-frame [data-slot="otp-input-highlight"]')).toHaveCount(0);
 
   await page.getByRole("button", { name: "Length: 6" }).click();
   await page.getByRole("menuitem", { name: "8", exact: true }).click();
   await page.getByRole("button", { name: "Characters: numeric" }).click();
   await page.getByRole("menuitem", { name: "alphanumeric", exact: true }).click();
   await expect(slots).toHaveCount(8);
+  await expect(page.locator('.demo-frame [data-slot="otp-demo-answer"]')).toHaveText("A1B2C3D4");
   await input.fill("ab-12 cd34");
   await expect(input).toHaveValue("AB12CD34");
-
-  await page.getByRole("switch", { name: "Invalid" }).check();
   await expect(input).toHaveAttribute("aria-invalid", "true");
   expect(errors).toEqual([]);
 });

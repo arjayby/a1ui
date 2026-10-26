@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { OtpInput } from "./otp-input";
@@ -74,6 +74,17 @@ describe("OtpInput", () => {
     expect(input).toHaveValue("123");
     expect(input).toHaveAttribute("aria-invalid", "true");
     expect(input).toBeDisabled();
+  });
+
+  it("releases focus and hides the highlight on success", () => {
+    const { container, rerender } = render(<OtpInput label="Code" length={4} defaultValue="1234" />);
+    const input = screen.getByRole("textbox", { name: "Code" });
+    act(() => input.focus());
+    expect(container.querySelector('[data-slot="otp-input-highlight"]')).not.toBeNull();
+    rerender(<OtpInput label="Code" length={4} defaultValue="1234" success />);
+    expect(input).not.toHaveFocus();
+    expect(container.querySelector('[data-slot="otp-input"]')).toHaveAttribute("data-success", "true");
+    expect(container.querySelector('[data-slot="otp-input-highlight"]')).toBeNull();
   });
 
   it("rejects lengths outside 4 to 8", () => {

@@ -3,11 +3,14 @@
 import { useState } from "react";
 
 import { DemoSelect } from "@/components/component-demos/demo-controls";
-import { Switch } from "@/components/ui/switch";
 import { OtpInput } from "@/registry/components/otp-input";
 
 const lengths = ["4", "5", "6", "7", "8"] as const;
 const modes = ["numeric", "alphanumeric"] as const;
+const answers = { numeric: "12345678", alphanumeric: "A1B2C3D4" } satisfies Record<
+  (typeof modes)[number],
+  string
+>;
 
 export function OtpInputPreview() {
   return <OtpInput label="Verification code" length={6} defaultValue="482" />;
@@ -16,23 +19,22 @@ export function OtpInputPreview() {
 export function OtpInputDemo() {
   const [length, setLength] = useState<(typeof lengths)[number]>("6");
   const [mode, setMode] = useState<(typeof modes)[number]>("numeric");
-  const [invalid, setInvalid] = useState(false);
   const [code, setCode] = useState("");
+  const answer = answers[mode].slice(0, Number(length));
+  const complete = code.length === answer.length;
 
   return (
     <div className="not-prose demo-frame">
-      <div className="component-demo-stage flex-col gap-4">
+      <div className="component-demo-stage">
         <OtpInput
           key={`${length}-${mode}`}
           label="Verification code"
           length={Number(length)}
           mode={mode}
-          invalid={invalid}
+          success={complete && code === answer}
+          invalid={complete && code !== answer}
           onValueChange={setCode}
         />
-        <p aria-live="polite" className="text-muted-foreground font-mono text-xs tabular-nums">
-          {code.length === Number(length) ? `Entered ${code}` : `${code.length} / ${length}`}
-        </p>
       </div>
       <div className="component-demo-controls [&_[data-slot=demo-select-trigger]]:w-36">
         <DemoSelect
@@ -53,12 +55,15 @@ export function OtpInputDemo() {
             setCode("");
           }}
         />
-        <label className="component-demo-control">
-          <span>Invalid</span>
-          <span className="flex h-8 items-center">
-            <Switch checked={invalid} onCheckedChange={setInvalid} />
+        <div className="component-demo-control">
+          <span>Correct code</span>
+          <span
+            data-slot="otp-demo-answer"
+            className="text-foreground flex h-8 items-center font-mono text-xs"
+          >
+            {answer}
           </span>
-        </label>
+        </div>
       </div>
     </div>
   );

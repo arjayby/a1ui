@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 
 export interface OtpInputProps {
   /** Accessible name for the code field, such as "Verification code". */
@@ -16,6 +16,8 @@ export interface OtpInputProps {
   /** Called with the full code whenever the last slot is filled. */
   onComplete?: (value: string) => void;
   invalid?: boolean;
+  /** Lights every slot in the success color and releases focus, such as after the code is verified. */
+  success?: boolean;
   disabled?: boolean;
   name?: string;
   className?: string;
@@ -30,6 +32,7 @@ export function OtpInput({
   onValueChange,
   onComplete,
   invalid = false,
+  success = false,
   disabled = false,
   name,
   className,
@@ -46,9 +49,19 @@ export function OtpInput({
   const [focused, setFocused] = useState(false);
   const reducedMotion = useReducedMotion();
   const highlightId = useId();
+  const inputRef = useRef<HTMLInputElement>(null);
   const code = sanitize(value ?? internalValue);
   const complete = code.length === length;
-  const activeIndex = focused ? Math.min(code.length, length - 1) : -1;
+  const activeIndex = focused && !success ? Math.min(code.length, length - 1) : -1;
+  const tone = success
+    ? "border-success bg-success/20 text-success shadow-[0_0_18px_-3px_var(--color-success)]"
+    : invalid
+      ? "border-destructive bg-background text-foreground"
+      : "border-border bg-background text-foreground";
+
+  useEffect(() => {
+    if (success) inputRef.current?.blur();
+  }, [success]);
 
   // Editing always happens at the end so the caret matches the highlighted slot.
   const moveCaretToEnd = (input: HTMLInputElement) => {
@@ -61,11 +74,13 @@ export function OtpInput({
       data-slot="otp-input"
       data-complete={complete || undefined}
       data-invalid={invalid || undefined}
+      data-success={success || undefined}
       className={`relative inline-flex gap-2 ${disabled ? "cursor-not-allowed opacity-50" : ""} ${className ?? ""}`}
       animate={{ x: invalid && !reducedMotion ? [0, -6, 6, -4, 4, 0] : 0 }}
       transition={{ duration: reducedMotion ? 0 : 0.36 }}
     >
       <input
+        ref={inputRef}
         aria-label={label}
         aria-invalid={invalid || undefined}
         name={name}
@@ -101,7 +116,9 @@ export function OtpInput({
             data-slot="otp-input-slot"
             data-active={active || undefined}
             data-filled={char !== undefined || undefined}
-            className={`bg-background text-foreground relative grid h-12 w-10 place-items-center rounded-md border font-mono text-lg tabular-nums ${invalid ? "border-destructive" : "border-border"}`}
+            className={`relative grid h-12 w-10 place-items-center rounded-md border font-mono text-lg tabular-nums transition-[border-color,background-color,color,box-shadow] duration-300 motion-reduce:transition-none ${tone}`}
+            // The success color sweeps across the slots alongside the completion wave.
+            style={{ transitionDelay: success && !reducedMotion ? `${index * 35}ms` : "0ms" }}
             animate={{ y: complete && !reducedMotion ? [0, -3, 0] : 0 }}
             transition={{ duration: reducedMotion ? 0 : 0.28, delay: reducedMotion ? 0 : index * 0.035 }}
           >
