@@ -918,6 +918,49 @@
         }
       },
       "docs": "Read http://localhost:3000/docs/components/tag-input.md for usage, required props, and integration instructions."
+    },
+    {
+      "name": "password-input",
+      "type": "registry:component",
+      "title": "Password Input",
+      "description": "A password field that requires a strong password, with a strength meter, a live requirement checklist, and a show/hide toggle.",
+      "dependencies": [
+        "motion",
+        "@phosphor-icons/react"
+      ],
+      "registryDependencies": [
+        "input",
+        "label"
+      ],
+      "files": [
+        {
+          "path": "src/registry/components/password-input.tsx",
+          "type": "registry:component",
+          "target": "components/animated/password-input.tsx"
+        }
+      ],
+      "categories": [
+        "input",
+        "form",
+        "validation",
+        "animation"
+      ],
+      "meta": {
+        "a1ui": {
+          "useCases": [
+            "Requiring a strong password in sign-up, password reset, and change-password forms, with live feedback on each requirement."
+          ],
+          "limitations": [
+            "Strength comes only from synchronous rules; there is no entropy estimate, breached-password lookup, or confirmation field. Every rule must pass for the field to be valid."
+          ],
+          "requirements": [
+            "React 19, Tailwind CSS 4, Motion, Phosphor icons, and the shadcn input and label components. Supply a label. Controlled usage requires updating value in onValueChange. Reduced motion removes the shake and transitions."
+          ],
+          "docsUrl": "http://localhost:3000/docs/components/password-input.md",
+          "registryUrl": "http://localhost:3000/r/password-input.json"
+        }
+      },
+      "docs": "Read http://localhost:3000/docs/components/password-input.md for usage, required props, and integration instructions."
     }
   ]
 }

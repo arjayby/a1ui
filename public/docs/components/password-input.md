@@ -1,0 +1,114 @@
+# Password Input
+
+A password field that requires a strong password, with a strength meter, a live requirement checklist, and a show/hide toggle.
+
+See [agent setup instructions](http://localhost:3000/llms.txt) before installation. Supported baseline: React 19, TypeScript, Tailwind CSS 4. Components use client-side React and browser APIs.
+
+## When to use
+
+- Requiring a strong password in sign-up, password reset, and change-password forms, with live feedback on each requirement.
+
+## Limitations
+
+- Strength comes only from synchronous rules; there is no entropy estimate, breached-password lookup, or confirmation field. Every rule must pass for the field to be valid.
+
+## Integration requirements
+
+- React 19, Tailwind CSS 4, Motion, Phosphor icons, and the shadcn input and label components. Supply a label. Controlled usage requires updating value in onValueChange. Reduced motion removes the shake and transitions.
+
+Import paths in examples assume the @/components/animated path. Adapt them to the target project's components.json. Put examples with state or callbacks in a client component when using React Server Components.
+
+## Demo
+
+[Interactive preview](http://localhost:3000/components/password-input)
+
+## Installation
+
+Choose the command for the target project's package manager. Run it from that project's directory.
+
+```text
+npm: npx shadcn@latest add http://localhost:3000/r/password-input.json --yes
+pnpm: pnpm dlx shadcn@latest add http://localhost:3000/r/password-input.json --yes
+yarn: yarn dlx shadcn@latest add http://localhost:3000/r/password-input.json --yes
+bun: bunx --bun shadcn@latest add http://localhost:3000/r/password-input.json --yes
+```
+
+## Code
+
+
+### Usage
+
+```tsx
+import { PasswordInput } from "@/components/animated/password-input";
+
+export function PasswordInputExample() {
+  return (
+    <form onSubmit={(event) => event.preventDefault()}>
+      <PasswordInput label="Password" name="password" />
+      <button type="submit">Create account</button>
+    </form>
+  );
+}
+```
+
+
+### Source
+[Complete source and dependencies](http://localhost:3000/r/password-input.json). Each file's content is embedded in the registry JSON.
+
+
+
+## Requirements
+
+By default the password needs at least 8 characters, upper and lowercase letters, a number, and a symbol. Pass `rules` to replace them. Each rule is a `label` shown in the checklist and a `test` that receives the current text. The default rules are exported as `defaultPasswordRules`, so you can spread them and add your own.
+
+```tsx
+import { defaultPasswordRules, PasswordInput } from "@/components/animated/password-input";
+
+const common = new Set(["password1!", "welcome123!", "qwerty123!"]);
+
+const rules = [
+  { label: "At least 12 characters", test: (value: string) => value.length >= 12 },
+  ...defaultPasswordRules.slice(1),
+  { label: "Not a common password", test: (value: string) => !common.has(value.toLowerCase()) },
+];
+
+<PasswordInput label="Password" name="password" rules={rules} />;
+```
+
+The field sets its native validity from the rules, so a surrounding form will not submit until every rule passes, including when the field is empty. Submitting a failing password marks the unmet rules in red, focuses the field, and skips the browser's own popup. Leaving the field after typing in it marks them too.
+
+The toggle at the end of the field switches between hidden and visible text. It keeps focus and the caret in the input. The input defaults to `autoComplete="new-password"` and turns off autocapitalize, autocorrect, and spellcheck. Other input props, such as `name`, `placeholder`, `required`, and `disabled`, pass through to the input.
+
+## Strength
+
+The meter has one segment per rule and fills a segment for each rule that passes. The label reads Weak up to a third of the rules, Fair up to two thirds, Good short of all, and Strong when every rule passes. Strength comes only from the rules, so it does not estimate entropy or check breached-password lists. Add a rule for those checks if you need them.
+
+## Motion
+
+Meter segments slide in from the left and change color with the strength. A rule's dot springs into a check when it passes and into a cross when it is marked as unmet. The eye icon blurs between its open and closed states. A submit that fails shakes the input once. Reduced motion removes the shake and transitions.
+
+## API reference
+
+| Prop            | Type                           | Default                | Purpose                                                                                         |
+| --------------- | ------------------------------ | ---------------------- | ----------------------------------------------------------------------------------------------- |
+| `label`         | `ReactNode`                    | Required               | Visible label linked to the input.                                                              |
+| `rules`         | `PasswordRule[]`               | `defaultPasswordRules` | Requirements, each `{ label, test }`. Every rule must pass for the field to be valid.           |
+| `description`   | `ReactNode`                    | None                   | Hint shown between the meter and the checklist.                                                 |
+| `value`         | `string`                       | Uncontrolled           | Current value.                                                                                  |
+| `defaultValue`  | `string`                       | `""`                   | Initial uncontrolled value.                                                                     |
+| `onValueChange` | `(value: string) => void`      | None                   | Called with the text on every change. Controlled usage requires updating `value`.               |
+| `autoComplete`  | `string`                       | `"new-password"`       | Autocomplete hint for password managers.                                                        |
+| `className`     | `string`                       | None                   | Additional root classes.                                                                        |
+| Input props     | `ComponentProps<typeof Input>` | None                   | Passed to the input, except `type`, `value`, `defaultValue`, `onChange`, `ref`, and `children`. |
+
+
+
+PasswordInput renders a Label and the shadcn Input from @/components/ui, a show/hide toggle button inside the end of the input, a segmented strength meter with a strength label, an optional description, and a checklist of rules. Each rule is an object with a label and a test function; the default rules (exported as defaultPasswordRules) require at least 8 characters, an uppercase and a lowercase letter, a number, and a symbol. Every rule is tested on every render. The meter has one segment per rule and fills one segment per passing rule. The strength label is Weak for up to a third of rules passing, Fair for up to two thirds, Good for anything short of all, and Strong for all; it is hidden while the field is empty. The root carries data-strength (weak, fair, good, strong) and each rule item carries data-met when it passes.
+
+The rules result is applied with setCustomValidity, so native forms refuse to submit until every rule passes, including when the value is empty. On the invalid event the component prevents the browser popup, marks the field as touched, focuses the input when it is the first invalid control in its form, and shakes the input once. Blurring after an edit also marks it as touched. While touched and failing, aria-invalid is set and unmet rules turn destructive with a cross icon. The strength label is a polite live region and, with the description and checklist, is linked to the input through aria-describedby. The toggle has aria-label Show password or Hide password, aria-pressed, and keeps focus in the input. The input defaults to autoComplete new-password and disables autocapitalize, autocorrect, and spellcheck. Strength comes only from the rules; there is no entropy estimate, breach lookup, confirmation field, or async check. Supply callbacks, custom rules, and controlled state from a client component; the caller must update value after onValueChange in controlled usage. Reduced motion removes the shake and transitions.
+
+The demo is a single password field in a form with no submit button and a Min length control that selects 8, 12, or 16 characters for the first rule; the other default rules stay. Pressing Enter with a failing password marks the unmet rules and shakes the field. Installation includes one component file and requires React 19, Tailwind CSS 4, Motion, Phosphor icons, the shadcn input and label components, and standard theme colors.
+
+## Verification
+
+Run the target project's typecheck and build. Render the integrated component and check the browser for missing styles, hydration errors, and failed assets. Exercise its keyboard controls and primary interaction. Report any app data or callbacks still needed; sample data is not a live integration.

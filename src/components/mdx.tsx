@@ -24,6 +24,7 @@ import { SliderDemo } from "@/components/component-demos/slider-demo";
 import { OtpInputDemo } from "@/components/component-demos/otp-input-demo";
 import { ValidatedInputDemo } from "@/components/component-demos/validated-input-demo";
 import { TagInputDemo } from "@/components/component-demos/tag-input-demo";
+import { PasswordInputDemo } from "@/components/component-demos/password-input-demo";
 import { ParticleMenuDemo } from "@/components/block-demos/particle-menu-demo";
 import { TextScrambleDemo } from "@/components/block-demos/text-scramble-demo";
 import { TextBannerDemo } from "@/components/block-demos/text-banner-demo";
@@ -53,6 +54,7 @@ export function getMDXComponents(components?: MDXComponents) {
     OtpInputDemo,
     ValidatedInputDemo,
     TagInputDemo,
+    PasswordInputDemo,
     ConfirmationButtonDemo,
     CompareCurtainDemo,
     Installation,
