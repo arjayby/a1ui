@@ -16,8 +16,9 @@ export function ValidatedInputPreview() {
       label="Email"
       type="email"
       placeholder="you@example.com"
+      description="We'll never share it."
       schema={emailSchema}
-      className="max-w-xs"
+      className="max-w-72 px-6"
     />
   );
 }
