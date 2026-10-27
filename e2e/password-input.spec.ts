@@ -8,20 +8,25 @@ test("rates the password, marks unmet rules on submit, and toggles visibility", 
   const frame = page.locator(".demo-frame");
   const input = frame.getByLabel("Password", { exact: true });
   const root = frame.locator('[data-slot="password-input"]');
-  const rules = frame.locator('[data-slot="password-input-rule"]');
+  const meter = frame.getByRole("button", { name: "Password requirements" });
+  // The popup is portaled out of the demo frame.
+  const popover = page.locator('[data-slot="password-input-popover"]');
+  const rules = popover.locator('[data-slot="password-input-rule"]');
 
   await input.click();
   await page.keyboard.type("graphite");
   await expect(root).toHaveAttribute("data-strength", "weak");
+  await expect(popover).toHaveCount(0);
   await page.keyboard.press("Enter");
   await expect(input).toHaveAttribute("aria-invalid", "true");
+  await expect(popover).toBeVisible();
   await expect(rules.filter({ hasText: "A number" })).not.toHaveAttribute("data-met");
   await expect(input).toBeFocused();
 
   await input.fill("Graphite7!");
   await expect(root).toHaveAttribute("data-strength", "strong");
   await expect(input).not.toHaveAttribute("aria-invalid");
-  await expect(frame.locator('[data-slot="password-input-strength"]')).toContainText("Strong");
+  await expect(popover.locator('[data-slot="password-input-strength"]')).toHaveText("Strong");
 
   await frame.getByRole("button", { name: "Show password" }).click();
   await expect(input).toHaveAttribute("type", "text");
@@ -29,6 +34,8 @@ test("rates the password, marks unmet rules on submit, and toggles visibility", 
 
   await page.getByRole("button", { name: "Min length: 8" }).click();
   await page.getByRole("menuitem", { name: "12", exact: true }).click();
+  await meter.hover();
+  await expect(popover).toBeVisible();
   await expect(rules.first()).toHaveText(/At least 12 characters/);
   await expect(root).toHaveAttribute("data-strength", "good");
   expect(errors).toEqual([]);

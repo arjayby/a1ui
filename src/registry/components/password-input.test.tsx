@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { PasswordInput } from "./password-input";
 
 const rules = () => screen.getAllByRole("listitem").map((item) => item.getAttribute("data-met") === "true");
+const openRequirements = () => fireEvent.click(screen.getByRole("button", { name: "Password requirements" }));
 
 describe("PasswordInput", () => {
   beforeEach(() => {
@@ -22,6 +23,8 @@ describe("PasswordInput", () => {
     expect(input).toHaveAttribute("type", "password");
     expect(input).toHaveAttribute("autocomplete", "new-password");
     expect(root).not.toHaveAttribute("data-strength");
+    expect(screen.queryByRole("list", { name: "Requirements" })).not.toBeInTheDocument();
+    openRequirements();
     expect(rules()).toEqual([false, false, false, false]);
 
     fireEvent.change(input, { target: { value: "abc" } });
@@ -34,7 +37,8 @@ describe("PasswordInput", () => {
     fireEvent.change(input, { target: { value: "abcDefgh1!" } });
     expect(rules()).toEqual([true, true, true, true]);
     expect(root).toHaveAttribute("data-strength", "strong");
-    expect(screen.getByText("Strong")).toBeInTheDocument();
+    expect(screen.getByText("Strong")).toHaveAttribute("data-slot", "password-input-strength");
+    expect(input).toHaveAccessibleDescription("Password strength: Strong. Meets every requirement.");
   });
 
   it("shows and hides the password without moving focus", () => {
@@ -65,7 +69,12 @@ describe("PasswordInput", () => {
     });
     expect(valid).toBe(false);
     expect(input).toHaveAttribute("aria-invalid", "true");
+    // A failed submit opens the requirements without moving focus out of the input.
     expect(screen.getByText("A number").closest("li")).toHaveClass("text-destructive");
+    expect(input).toHaveFocus();
+    expect(input).toHaveAccessibleDescription(
+      "Password strength: Weak. Still needs: At least 8 characters, Upper and lowercase letters, A number, A symbol.",
+    );
 
     fireEvent.change(input, { target: { value: "Weak-but-long1" } });
     expect(input).not.toHaveAttribute("aria-invalid");
@@ -82,6 +91,7 @@ describe("PasswordInput", () => {
       <PasswordInput label="Password" rules={custom} value="short" onValueChange={onValueChange} />,
     );
     const input = screen.getByLabelText("Password");
+    openRequirements();
     expect(screen.getAllByRole("listitem")).toHaveLength(1);
     fireEvent.change(input, { target: { value: "long enough pass" } });
     expect(onValueChange).toHaveBeenLastCalledWith("long enough pass");

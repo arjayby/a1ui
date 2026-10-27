@@ -9,7 +9,7 @@ import { source } from "@/lib/source";
 export const metadata: Metadata = {
   title: "Password Input",
   description:
-    "A password field that requires a strong password, with a strength meter, a live requirement checklist, and a show/hide toggle.",
+    "A password field that requires a strong password, with a strength meter that opens its requirements on hover, and a show/hide toggle.",
 };
 
 export default function PasswordInputPage() {

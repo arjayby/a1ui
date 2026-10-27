@@ -1,6 +1,7 @@
 "use client";
 
-import { CheckIcon, EyeIcon, EyeSlashIcon, XIcon } from "@phosphor-icons/react";
+import { Popover } from "@base-ui/react/popover";
+import { CheckIcon, EyeIcon, EyeSlashIcon, InfoIcon, WarningCircleIcon, XIcon } from "@phosphor-icons/react";
 import { AnimatePresence, motion, useAnimate, useReducedMotion } from "motion/react";
 import { useEffect, useId, useRef, useState, type ComponentProps, type ReactNode } from "react";
 
@@ -19,9 +20,9 @@ export interface PasswordInputProps extends Omit<
 > {
   /** Visible label for the field. */
   label: ReactNode;
-  /** Requirements the password must meet. Each one passed fills a segment of the meter. */
+  /** Requirements the password must meet. Each one passed fills a segment of the meter, and the meter's popup lists them. */
   rules?: PasswordRule[];
-  /** Hint shown between the meter and the checklist. */
+  /** Hint shown under the meter. */
   description?: ReactNode;
   value?: string;
   defaultValue?: string;
@@ -66,6 +67,7 @@ export function PasswordInput({
   const id = idProp ?? generatedId;
   const [internalValue, setInternalValue] = useState(defaultValue);
   const [visible, setVisible] = useState(false);
+  const [open, setOpen] = useState(false);
   // Unmet rules turn red only after the field is left following an edit, or its form is submitted.
   const [touched, setTouched] = useState(false);
   const editedRef = useRef(false);
@@ -126,6 +128,8 @@ export function PasswordInput({
             if (strong) return;
             event.preventDefault();
             setTouched(true);
+            // Shows which requirements are still missing, since the checklist lives in the popup.
+            setOpen(true);
             const input = event.currentTarget;
             if (input.form?.querySelector("input:invalid, select:invalid, textarea:invalid") === input)
               input.focus();
@@ -162,82 +166,128 @@ export function PasswordInput({
           </AnimatePresence>
         </button>
       </div>
-      <div className="mt-2.5 flex items-center gap-3">
-        <div aria-hidden="true" data-slot="password-input-meter" className="flex flex-1 gap-1">
-          {rules.map((rule, index) => (
-            <span key={rule.label} className="bg-muted h-1 flex-1 overflow-hidden rounded-full">
-              <motion.span
-                className={`block h-full origin-left rounded-full transition-colors ${level?.color ?? ""}`}
-                initial={false}
-                animate={{ scaleX: index < passed ? 1 : 0 }}
-                transition={{
-                  type: "spring",
-                  duration: reducedMotion ? 0 : 0.35,
-                  bounce: 0,
-                  // Segments fill left to right as a cascade when several rules pass at once.
-                  delay: reducedMotion ? 0 : index * 0.03,
-                }}
-              />
-            </span>
-          ))}
-        </div>
-        <span
-          id={strengthId}
-          aria-live="polite"
-          data-slot="password-input-strength"
-          className={`min-w-12 text-right text-xs font-medium transition-colors ${level?.text ?? "text-muted-foreground"}`}
+      <Popover.Root open={open} onOpenChange={setOpen}>
+        {/* The meter is the trigger: hovering, focusing, or clicking it opens the strength and requirements. */}
+        <Popover.Trigger
+          openOnHover
+          delay={100}
+          disabled={disabled}
+          aria-label="Password requirements"
+          aria-describedby={strengthId}
+          data-slot="password-input-meter"
+          className="group focus-visible:ring-ring/30 mt-1 flex w-full items-center gap-2 rounded-sm py-1.5 outline-none focus-visible:ring-3 disabled:pointer-events-none"
         >
-          <span className="sr-only">Password strength: </span>
-          {level?.label ?? <span className="sr-only">empty</span>}
-        </span>
-      </div>
+          <span aria-hidden="true" className="flex flex-1 items-center gap-1">
+            {rules.map((rule, index) => (
+              <span
+                key={rule.label}
+                className="bg-muted group-hover:bg-foreground/15 group-data-popup-open:bg-foreground/15 h-1 flex-1 overflow-hidden rounded-full transition-[height,background-color] group-hover:h-1.5 group-data-popup-open:h-1.5"
+              >
+                <motion.span
+                  className={`block h-full origin-left rounded-full transition-colors ${level?.color ?? ""}`}
+                  initial={false}
+                  animate={{ scaleX: index < passed ? 1 : 0 }}
+                  transition={{
+                    type: "spring",
+                    duration: reducedMotion ? 0 : 0.35,
+                    bounce: 0,
+                    // Segments fill left to right as a cascade when several rules pass at once.
+                    delay: reducedMotion ? 0 : index * 0.03,
+                  }}
+                />
+              </span>
+            ))}
+          </span>
+          <span
+            aria-hidden="true"
+            className={`grid size-4 shrink-0 place-items-center transition-colors ${showInvalid ? "text-destructive" : "text-muted-foreground group-hover:text-foreground group-data-popup-open:text-foreground"}`}
+          >
+            {showInvalid ? <WarningCircleIcon className="size-4" /> : <InfoIcon className="size-4" />}
+          </span>
+        </Popover.Trigger>
+        <Popover.Portal>
+          <Popover.Positioner side="bottom" align="end" sideOffset={6} className="z-60">
+            {/* Focus stays in the input, so the popup can open on a failed submit without interrupting typing. */}
+            <Popover.Popup
+              initialFocus={false}
+              finalFocus={false}
+              data-slot="password-input-popover"
+              className="bg-card text-foreground ring-foreground/10 w-64 max-w-[calc(100vw-2rem)] origin-(--transform-origin) rounded-md p-3 text-sm shadow-md ring-1 transition-[opacity,scale,filter] duration-150 data-ending-style:scale-95 data-ending-style:opacity-0 data-ending-style:blur-xs data-starting-style:scale-95 data-starting-style:opacity-0 data-starting-style:blur-xs motion-reduce:transition-none"
+            >
+              <div className="flex items-center justify-between gap-3">
+                <Popover.Title className="text-muted-foreground text-xs font-medium">Strength</Popover.Title>
+                <span
+                  data-slot="password-input-strength"
+                  className={`text-xs font-medium transition-colors ${level?.text ?? "text-muted-foreground"}`}
+                >
+                  {level?.label ?? "None"}
+                </span>
+              </div>
+              <ul role="list" aria-label="Requirements" className="mt-2.5 grid gap-1.5 border-t pt-2.5">
+                {rules.map((rule, index) => {
+                  const met = results[index];
+                  return (
+                    <li
+                      key={rule.label}
+                      data-slot="password-input-rule"
+                      data-met={met || undefined}
+                      className={`flex items-center gap-2 transition-colors ${met ? "text-foreground" : showInvalid ? "text-destructive" : "text-muted-foreground"}`}
+                    >
+                      <span aria-hidden="true" className="relative grid size-4 shrink-0 place-items-center">
+                        <AnimatePresence initial={false} mode="popLayout">
+                          <motion.span
+                            key={met ? "met" : showInvalid ? "unmet" : "pending"}
+                            className="grid place-items-center"
+                            initial={reducedMotion ? false : { opacity: 0, scale: 0.5, filter: "blur(4px)" }}
+                            animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+                            exit={
+                              reducedMotion
+                                ? { opacity: 0, transition: { duration: 0 } }
+                                : { opacity: 0, scale: 0.5 }
+                            }
+                            transition={{ type: "spring", duration: reducedMotion ? 0 : 0.3, bounce: 0.3 }}
+                          >
+                            {met ? (
+                              <CheckIcon weight="bold" className="size-3.5 text-(--status-success)" />
+                            ) : showInvalid ? (
+                              <XIcon weight="bold" className="size-3.5" />
+                            ) : (
+                              <span className="size-1.5 rounded-full bg-current opacity-60" />
+                            )}
+                          </motion.span>
+                        </AnimatePresence>
+                      </span>
+                      {rule.label}
+                      <span className="sr-only">{met ? " (met)" : " (not met)"}</span>
+                    </li>
+                  );
+                })}
+              </ul>
+            </Popover.Popup>
+          </Popover.Positioner>
+        </Popover.Portal>
+      </Popover.Root>
+      {/* The popup is unmounted while closed, so the strength and unmet rules are also read from here. */}
+      <span id={strengthId} aria-live="polite" className="sr-only">
+        {level ? `Password strength: ${level.label}.` : "Password strength: none."}
+      </span>
+      <span id={rulesId} className="sr-only">
+        {strong
+          ? "Meets every requirement."
+          : `Still needs: ${rules
+              .filter((_, index) => !results[index])
+              .map((rule) => rule.label)
+              .join(", ")}.`}
+      </span>
       {description && (
         <p
           id={descriptionId}
           data-slot="password-input-description"
-          className="text-muted-foreground mt-2 text-sm"
+          className="text-muted-foreground mt-1 text-sm"
         >
           {description}
         </p>
       )}
-      <ul id={rulesId} role="list" aria-label="Requirements" className="mt-2 grid gap-1 text-sm">
-        {rules.map((rule, index) => {
-          const met = results[index];
-          return (
-            <li
-              key={rule.label}
-              data-slot="password-input-rule"
-              data-met={met || undefined}
-              className={`flex items-center gap-2 transition-colors ${met ? "text-foreground" : showInvalid ? "text-destructive" : "text-muted-foreground"}`}
-            >
-              <span aria-hidden="true" className="relative grid size-4 shrink-0 place-items-center">
-                <AnimatePresence initial={false} mode="popLayout">
-                  <motion.span
-                    key={met ? "met" : showInvalid ? "unmet" : "pending"}
-                    className="grid place-items-center"
-                    initial={reducedMotion ? false : { opacity: 0, scale: 0.5, filter: "blur(4px)" }}
-                    animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
-                    exit={
-                      reducedMotion ? { opacity: 0, transition: { duration: 0 } } : { opacity: 0, scale: 0.5 }
-                    }
-                    transition={{ type: "spring", duration: reducedMotion ? 0 : 0.3, bounce: 0.3 }}
-                  >
-                    {met ? (
-                      <CheckIcon weight="bold" className="size-3.5 text-(--status-success)" />
-                    ) : showInvalid ? (
-                      <XIcon weight="bold" className="size-3.5" />
-                    ) : (
-                      <span className="size-1.5 rounded-full bg-current opacity-60" />
-                    )}
-                  </motion.span>
-                </AnimatePresence>
-              </span>
-              {rule.label}
-              <span className="sr-only">{met ? " (met)" : " (not met)"}</span>
-            </li>
-          );
-        })}
-      </ul>
     </div>
   );
 }
