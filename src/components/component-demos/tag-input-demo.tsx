@@ -14,7 +14,7 @@ export function TagInputPreview() {
       defaultValue={["Design", "Motion"]}
       max={5}
       placeholder="Add a topic"
-      className="max-w-xs"
+      className="max-w-72 px-6"
     />
   );
 }
