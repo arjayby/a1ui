@@ -28,14 +28,14 @@ export function ValidatedInputDemo() {
     <div className="not-prose demo-frame">
       <div className="component-demo-stage">
         {/* Enter submits the single-field form, which reveals any schema error. */}
-        <form className="w-full max-w-xs" onSubmit={(event) => event.preventDefault()}>
+        <form className="w-full max-w-xs [&_p]:m-0!" onSubmit={(event) => event.preventDefault()}>
           <ValidatedInput
             label="Email"
             name="email"
             type="email"
             autoComplete="email"
             placeholder="you@example.com"
-            description="Monthly newsletter. Unsubscribe anytime."
+            description="We'll never share it."
             schema={emailSchema}
           />
         </form>
