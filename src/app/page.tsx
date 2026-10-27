@@ -19,9 +19,9 @@ import { IconToggle } from "@/registry/components/icon-toggle";
 import "./landing.css";
 
 export const metadata: Metadata = {
-  title: { absolute: "a1ui — Small details. Better interfaces." },
+  title: { absolute: "a1ui — Animated React components and blocks" },
   description:
-    "Explore animated React components and ready-made blocks. Try the interactions, find your starting point, and make the source your own.",
+    "Animated React components and blocks. Copy and paste them, or install them with your agent. From restrained micro-interactions to flashy animation.",
 };
 
 const featuredBlocks = [
@@ -44,7 +44,7 @@ export default function HomePage() {
           <span className="landing-brand-divider" aria-hidden="true">
             /
           </span>
-          <span className="landing-brand-caption">An interface collection</span>
+          <span className="landing-brand-caption">Animated React UI</span>
         </Link>
         <nav aria-label="Main navigation">
           <Link href="/components">Components</Link>
@@ -65,12 +65,13 @@ export default function HomePage() {
             {components.length} components · {blocks.length} blocks
           </p>
           <h1 id="hero-heading">
-            Small details.
+            Animated React
             <br />
-            <span>Better interfaces.</span>
+            <span>components and blocks.</span>
           </h1>
           <p className="landing-hero-description">
-            Thoughtful React components and expressive blocks. Find something you love. Make it your own.
+            Copy and paste them, or install them with your agent. From restrained micro-interactions to flashy
+            animation.
           </p>
           <div className="landing-hero-actions">
             <Link href="/components" className="ui-button">
@@ -80,21 +81,21 @@ export default function HomePage() {
               Browse blocks <StackIcon aria-hidden="true" />
             </Link>
           </div>
-          <p className="landing-hero-note">React · Motion · Editable source</p>
+          <p className="landing-hero-note">Built with Framer Motion and distributed via shadcn</p>
         </section>
 
         <section aria-labelledby="components-heading" className="landing-components">
           <div className="landing-section-heading">
-            <h2 id="components-heading">Little things, brought to life</h2>
+            <h2 id="components-heading">Micro-interactions</h2>
             <span className="landing-section-note">
-              Go on, try them <ArrowUpRightIcon aria-hidden="true" />
+              Try them <ArrowUpRightIcon aria-hidden="true" />
             </span>
           </div>
           <div className="landing-playground">
             <article className="landing-specimen landing-spiral">
               <div className="landing-specimen-stage">
                 <SpiralText
-                  text="SMALL DETAILS. BETTER INTERFACES. · "
+                  text="ANIMATED COMPONENTS AND BLOCKS · "
                   rotating={false}
                   className="landing-spiral-art"
                 />
@@ -108,7 +109,7 @@ export default function HomePage() {
             </article>
             <article className="landing-specimen">
               <div className="landing-specimen-stage">
-                <CopyButton value="Small details. Better interfaces." label="Copy text" />
+                <CopyButton value="Animated React components and blocks." label="Copy text" />
               </div>
               <div className="landing-specimen-footer">
                 <Link href="/components/copy-button">
@@ -152,7 +153,7 @@ export default function HomePage() {
             </article>
           </div>
           <div className="landing-section-footer">
-            <p>Small interactions. A more considered experience.</p>
+            <p>The small moments, animated.</p>
             <Link href="/components">
               All {components.length} components <ArrowRightIcon aria-hidden="true" />
             </Link>
@@ -162,16 +163,16 @@ export default function HomePage() {
         <section aria-labelledby="blocks-heading" className="landing-blocks">
           <div className="landing-blocks-heading">
             <div>
-              <p className="landing-eyebrow">Ready-made blocks</p>
+              <p className="landing-eyebrow">Blocks</p>
               <h2 id="blocks-heading">
-                Copy the code.
+                Go bigger.
                 <br />
-                <span>Make it fit your project.</span>
+                <span>Ready to drop in.</span>
               </h2>
             </div>
             <p>
-              Ready-made compositions for the parts
-              <br className="hidden sm:block" /> you want people to remember.
+              Full sections for the parts
+              <br className="hidden sm:block" /> people remember.
             </p>
           </div>
           <div className="landing-block-grid">
@@ -192,7 +193,7 @@ export default function HomePage() {
             })}
           </div>
           <div className="landing-section-footer">
-            <p>A few favorites from the collection.</p>
+            <p>A few favorites.</p>
             <Link href="/blocks">
               All {blocks.length} blocks <ArrowRightIcon aria-hidden="true" />
             </Link>
@@ -202,12 +203,12 @@ export default function HomePage() {
         <section className="landing-start" aria-labelledby="start-heading">
           <div>
             <p className="landing-eyebrow">
-              <CodeIcon aria-hidden="true" /> From preview to your project
+              <CodeIcon aria-hidden="true" /> Get started
             </p>
-            <h2 id="start-heading">See it. Try it. Ship it.</h2>
+            <h2 id="start-heading">Copy and paste. Or ask your agent.</h2>
             <p>
-              Explore the demos, take the source, and adapt it to your project.
-              <br className="hidden sm:block" /> Or let your coding agent handle the installation.
+              Every component comes with its source. Paste it into your project,
+              <br className="hidden sm:block" /> or let your coding agent install it.
             </p>
             <AgentInstall />
           </div>
@@ -222,7 +223,7 @@ export default function HomePage() {
           <span className="brand-mark" aria-hidden="true" />
           a1ui
         </Link>
-        <p>A collection worth making your own.</p>
+        <p>Animated React components and blocks.</p>
         <a href="https://github.com/arjayby/a1ui" target="_blank" rel="noopener noreferrer">
           View source <ArrowUpRightIcon aria-hidden="true" />
         </a>

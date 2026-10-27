@@ -3,8 +3,8 @@ import registry from "../registry.json" with { type: "json" };
 
 test("home showcases the library and opens the documentation", async ({ page }) => {
   await page.goto("/");
-  await expect(page).toHaveTitle("a1ui — Small details. Better interfaces.");
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Small details.Better interfaces.");
+  await expect(page).toHaveTitle("a1ui — Animated React components and blocks");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Animated Reactcomponents and blocks.");
   await expect(page.locator('[data-sidebar="sidebar"]')).toHaveCount(0);
   await expect(page.locator(".landing-block-card")).toHaveCount(3);
   for (const item of registry.items) {
@@ -17,7 +17,7 @@ test("home showcases the library and opens the documentation", async ({ page }) 
   await expect(page).toHaveURL(/\/components$/);
   await expect(page.getByRole("heading", { name: "Components", exact: true })).toBeVisible();
   await page.getByRole("link", { name: "a1ui Documentation" }).click();
-  await expect(page.getByRole("heading", { level: 1 })).toContainText("Small details.");
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("Animated React");
   await page.getByRole("link", { name: "Browse blocks", exact: true }).click();
   await expect(page).toHaveURL(/\/blocks$/);
   await expect(page.getByRole("heading", { name: "Blocks", exact: true })).toBeVisible();
@@ -29,7 +29,9 @@ test("landing component previews respond to input", async ({ page, context }) =>
   await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
   await page.getByRole("button", { name: "Copy text", exact: true }).click();
   await expect(page.getByRole("button", { name: "Copied", exact: true })).toBeVisible();
-  expect(await page.evaluate(() => navigator.clipboard.readText())).toBe("Small details. Better interfaces.");
+  expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(
+    "Animated React components and blocks.",
+  );
   const toggle = page.getByRole("button", { name: "Toggle preview icon" });
   await toggle.click();
   await expect(toggle).toHaveAttribute("aria-pressed", "true");
