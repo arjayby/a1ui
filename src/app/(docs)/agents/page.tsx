@@ -7,6 +7,7 @@ import { source } from "@/lib/source";
 export const metadata: Metadata = {
   title: "Install with an agent",
   description: "Let your coding agent choose, install, and integrate an a1ui block.",
+  alternates: { canonical: "/agents" },
 };
 
 export default function AgentsPage() {

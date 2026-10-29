@@ -4,11 +4,13 @@ import { notFound } from "next/navigation";
 import { AgentInstall } from "@/components/agent-install";
 import { getMDXComponents } from "@/components/mdx";
 import { Badge } from "@/components/ui/badge";
+import { componentsGroup, docStructuredData, JsonLd } from "@/lib/seo";
 import { source } from "@/lib/source";
 
 export const metadata: Metadata = {
   title: "Icon Toggle",
   description: "A two-state icon button that morphs its SVG paths on every click.",
+  alternates: { canonical: "/components/icon-toggle" },
 };
 
 export default function IconTogglePage() {
@@ -18,6 +20,14 @@ export default function IconTogglePage() {
 
   return (
     <article className="docs-article">
+      <JsonLd
+        data={docStructuredData({
+          group: componentsGroup,
+          title: page.data.title,
+          description: page.data.description ?? "",
+          path: "/components/icon-toggle",
+        })}
+      />
       <header>
         <div className="docs-page-meta">
           <Badge variant="outline">React</Badge>

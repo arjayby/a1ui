@@ -4,12 +4,14 @@ import { notFound } from "next/navigation";
 import { AgentInstall } from "@/components/agent-install";
 import { getMDXComponents } from "@/components/mdx";
 import { Badge } from "@/components/ui/badge";
+import { componentsGroup, docStructuredData, JsonLd } from "@/lib/seo";
 import { source } from "@/lib/source";
 
 export const metadata: Metadata = {
   title: "Password Input",
   description:
     "A password field that requires a strong password, with a strength meter that opens its requirements on hover, and a show/hide toggle.",
+  alternates: { canonical: "/components/password-input" },
 };
 
 export default function PasswordInputPage() {
@@ -19,6 +21,14 @@ export default function PasswordInputPage() {
 
   return (
     <article className="docs-article">
+      <JsonLd
+        data={docStructuredData({
+          group: componentsGroup,
+          title: page.data.title,
+          description: page.data.description ?? "",
+          path: "/components/password-input",
+        })}
+      />
       <header>
         <div className="docs-page-meta">
           <Badge variant="outline">React</Badge>

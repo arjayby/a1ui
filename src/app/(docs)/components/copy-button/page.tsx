@@ -4,11 +4,13 @@ import { notFound } from "next/navigation";
 import { AgentInstall } from "@/components/agent-install";
 import { getMDXComponents } from "@/components/mdx";
 import { Badge } from "@/components/ui/badge";
+import { componentsGroup, docStructuredData, JsonLd } from "@/lib/seo";
 import { source } from "@/lib/source";
 
 export const metadata: Metadata = {
   title: "Copy Button",
   description: "A copy button with Motion transitions for its icon and label.",
+  alternates: { canonical: "/components/copy-button" },
 };
 
 export default function CopyButtonPage() {
@@ -18,6 +20,14 @@ export default function CopyButtonPage() {
 
   return (
     <article className="docs-article">
+      <JsonLd
+        data={docStructuredData({
+          group: componentsGroup,
+          title: page.data.title,
+          description: page.data.description ?? "",
+          path: "/components/copy-button",
+        })}
+      />
       <header>
         <div className="docs-page-meta">
           <Badge variant="outline">React</Badge>

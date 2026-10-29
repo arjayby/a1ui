@@ -4,12 +4,14 @@ import { notFound } from "next/navigation";
 import { AgentInstall } from "@/components/agent-install";
 import { getMDXComponents } from "@/components/mdx";
 import { Badge } from "@/components/ui/badge";
+import { componentsGroup, docStructuredData, JsonLd } from "@/lib/seo";
 import { source } from "@/lib/source";
 
 export const metadata: Metadata = {
   title: "Tag Input",
   description:
     "A text field that collects multiple tags, with a two-step Backspace removal and an optional limit.",
+  alternates: { canonical: "/components/tag-input" },
 };
 
 export default function TagInputPage() {
@@ -19,6 +21,14 @@ export default function TagInputPage() {
 
   return (
     <article className="docs-article">
+      <JsonLd
+        data={docStructuredData({
+          group: componentsGroup,
+          title: page.data.title,
+          description: page.data.description ?? "",
+          path: "/components/tag-input",
+        })}
+      />
       <header>
         <div className="docs-page-meta">
           <Badge variant="outline">React</Badge>

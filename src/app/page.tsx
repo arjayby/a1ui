@@ -12,6 +12,7 @@ import { HydrationMarker } from "@/components/hydration-marker";
 import { GitHubLink, ThemeButton } from "@/components/site-navigation";
 import { blocks } from "@/lib/block-catalog";
 import { components } from "@/lib/component-catalog";
+import { absoluteUrl, JsonLd, repositoryUrl, siteDescription, siteName } from "@/lib/seo";
 import { SpiralText } from "@/registry/blocks/spiral-text";
 import { CopyButton } from "@/registry/components/copy-button";
 import { IconToggle } from "@/registry/components/icon-toggle";
@@ -22,7 +23,29 @@ export const metadata: Metadata = {
   title: { absolute: "a1ui — Animated React components and blocks" },
   description:
     "Animated React components and blocks. Copy and paste them, or install them with your agent. From restrained micro-interactions to flashy animation.",
+  alternates: { canonical: "/" },
 };
+
+const structuredData = [
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: siteName,
+    url: absoluteUrl("/"),
+    description: siteDescription,
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareSourceCode",
+    name: siteName,
+    description: siteDescription,
+    url: absoluteUrl("/"),
+    codeRepository: repositoryUrl,
+    programmingLanguage: ["TypeScript", "React"],
+    license: "https://opensource.org/licenses/MIT",
+    author: { "@type": "Person", name: "Arjay Bayona", url: "https://github.com/arjayby" },
+  },
+];
 
 const featuredBlocks = [
   { slug: "arc-reel", Preview: ArcReelPreview, detail: "A new perspective on the carousel." },
@@ -33,6 +56,7 @@ const featuredBlocks = [
 export default function HomePage() {
   return (
     <div className="landing">
+      <JsonLd data={structuredData} />
       <HydrationMarker />
       <a className="landing-skip" href="#main">
         Skip to content

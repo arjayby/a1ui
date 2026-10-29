@@ -4,11 +4,13 @@ import { notFound } from "next/navigation";
 import { AgentInstall } from "@/components/agent-install";
 import { getMDXComponents } from "@/components/mdx";
 import { Badge } from "@/components/ui/badge";
+import { componentsGroup, docStructuredData, JsonLd } from "@/lib/seo";
 import { source } from "@/lib/source";
 
 export const metadata: Metadata = {
   title: "Slider",
   description: "A slider with magnetic stops that catch the thumb and pulse as you slide through them.",
+  alternates: { canonical: "/components/slider" },
 };
 
 export default function SliderPage() {
@@ -18,6 +20,14 @@ export default function SliderPage() {
 
   return (
     <article className="docs-article">
+      <JsonLd
+        data={docStructuredData({
+          group: componentsGroup,
+          title: page.data.title,
+          description: page.data.description ?? "",
+          path: "/components/slider",
+        })}
+      />
       <header>
         <div className="docs-page-meta">
           <Badge variant="outline">React</Badge>

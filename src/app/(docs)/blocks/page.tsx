@@ -25,6 +25,7 @@ import { blocks } from "@/lib/block-catalog";
 export const metadata: Metadata = {
   title: "Blocks",
   description: "Ready-made React compositions inspired by designs found online.",
+  alternates: { canonical: "/blocks" },
 };
 
 const previews: Record<string, ComponentType> = {

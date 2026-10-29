@@ -4,12 +4,14 @@ import { notFound } from "next/navigation";
 import { AgentInstall } from "@/components/agent-install";
 import { getMDXComponents } from "@/components/mdx";
 import { Badge } from "@/components/ui/badge";
+import { componentsGroup, docStructuredData, JsonLd } from "@/lib/seo";
 import { source } from "@/lib/source";
 
 export const metadata: Metadata = {
   title: "Validated Input",
   description:
     "A labeled text field that checks its value against a Zod schema and animates the error and success states.",
+  alternates: { canonical: "/components/validated-input" },
 };
 
 export default function ValidatedInputPage() {
@@ -19,6 +21,14 @@ export default function ValidatedInputPage() {
 
   return (
     <article className="docs-article">
+      <JsonLd
+        data={docStructuredData({
+          group: componentsGroup,
+          title: page.data.title,
+          description: page.data.description ?? "",
+          path: "/components/validated-input",
+        })}
+      />
       <header>
         <div className="docs-page-meta">
           <Badge variant="outline">React</Badge>

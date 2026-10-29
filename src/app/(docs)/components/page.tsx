@@ -20,6 +20,7 @@ import { components } from "@/lib/component-catalog";
 export const metadata: Metadata = {
   title: "Components",
   description: "Animated components built with Motion, with live previews and editable source.",
+  alternates: { canonical: "/components" },
 };
 
 const previews: Record<string, ReactNode> = {

@@ -5,6 +5,7 @@ import { getMDXComponents } from "@/components/mdx";
 import { AgentInstall } from "@/components/agent-install";
 import { Badge } from "@/components/ui/badge";
 import { blocks, getBlock } from "@/lib/block-catalog";
+import { blocksGroup, docStructuredData, JsonLd } from "@/lib/seo";
 import { source } from "@/lib/source";
 
 export default async function BlockPage({ params }: PageProps<"/blocks/[slug]">) {
@@ -18,6 +19,14 @@ export default async function BlockPage({ params }: PageProps<"/blocks/[slug]">)
 
   return (
     <article className="docs-article">
+      <JsonLd
+        data={docStructuredData({
+          group: blocksGroup,
+          title: block.title,
+          description: block.description,
+          path: `/blocks/${block.slug}`,
+        })}
+      />
       <header>
         <div className="docs-page-meta">
           <Badge variant="outline">React</Badge>
@@ -54,5 +63,6 @@ export async function generateMetadata({ params }: PageProps<"/blocks/[slug]">):
   return {
     title: block.title,
     description: block.description,
+    alternates: { canonical: `/blocks/${block.slug}` },
   };
 }

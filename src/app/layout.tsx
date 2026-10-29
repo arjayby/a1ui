@@ -2,17 +2,38 @@ import type { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/next";
 import { RootProvider } from "fumadocs-ui/provider/next";
 
+import { siteDescription, siteName, siteUrl } from "@/lib/seo";
+
 import "./globals.css";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
-
+// Pages set their own title, description, and canonical path. Open Graph and
+// Twitter cards take each page's title and description from those fields.
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "a1ui",
-    template: "%s | a1ui",
+    default: siteName,
+    template: `%s | ${siteName}`,
   },
-  description: "Animated React components and blocks. Copy and paste them, or install them with your agent.",
+  description: siteDescription,
+  applicationName: siteName,
+  authors: [{ name: "Arjay Bayona", url: "https://github.com/arjayby" }],
+  creator: "Arjay Bayona",
+  keywords: [
+    "React components",
+    "animated components",
+    "Motion",
+    "Tailwind CSS",
+    "shadcn registry",
+    "UI blocks",
+  ],
+  openGraph: {
+    type: "website",
+    siteName,
+    locale: "en_US",
+  },
+  twitter: {
+    card: "summary_large_image",
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

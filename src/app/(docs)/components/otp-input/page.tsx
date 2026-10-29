@@ -4,12 +4,14 @@ import { notFound } from "next/navigation";
 import { AgentInstall } from "@/components/agent-install";
 import { getMDXComponents } from "@/components/mdx";
 import { Badge } from "@/components/ui/badge";
+import { componentsGroup, docStructuredData, JsonLd } from "@/lib/seo";
 import { source } from "@/lib/source";
 
 export const metadata: Metadata = {
   title: "OTP Input",
   description:
     "A one-time code field with 4, 6, or 8 slots, a traveling focus highlight, and characters that rise into place.",
+  alternates: { canonical: "/components/otp-input" },
 };
 
 export default function OtpInputPage() {
@@ -19,6 +21,14 @@ export default function OtpInputPage() {
 
   return (
     <article className="docs-article">
+      <JsonLd
+        data={docStructuredData({
+          group: componentsGroup,
+          title: page.data.title,
+          description: page.data.description ?? "",
+          path: "/components/otp-input",
+        })}
+      />
       <header>
         <div className="docs-page-meta">
           <Badge variant="outline">React</Badge>

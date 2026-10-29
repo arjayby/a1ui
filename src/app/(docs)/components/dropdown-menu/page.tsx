@@ -4,11 +4,13 @@ import { notFound } from "next/navigation";
 import { AgentInstall } from "@/components/agent-install";
 import { getMDXComponents } from "@/components/mdx";
 import { Badge } from "@/components/ui/badge";
+import { componentsGroup, docStructuredData, JsonLd } from "@/lib/seo";
 import { source } from "@/lib/source";
 
 export const metadata: Metadata = {
   title: "Dropdown Menu",
   description: "A shadcn dropdown with open and close transitions and a traveling highlight.",
+  alternates: { canonical: "/components/dropdown-menu" },
 };
 
 export default function DropdownMenuPage() {
@@ -18,6 +20,14 @@ export default function DropdownMenuPage() {
 
   return (
     <article className="docs-article">
+      <JsonLd
+        data={docStructuredData({
+          group: componentsGroup,
+          title: page.data.title,
+          description: page.data.description ?? "",
+          path: "/components/dropdown-menu",
+        })}
+      />
       <header>
         <div className="docs-page-meta">
           <Badge variant="outline">React</Badge>
