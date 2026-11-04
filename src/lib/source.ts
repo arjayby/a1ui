@@ -3,11 +3,14 @@ import { metaSchema, pageSchema } from "fumadocs-core/source/schema";
 import { defineDocs } from "fumadocs-mdx/macro";
 import { applyMdxPreset } from "fumadocs-mdx/config";
 
+import rehypePropDescription from "@/lib/rehype-prop-description";
+
 const docs = defineDocs({
   dir: "content/docs",
   docs: {
     schema: pageSchema,
     mdxOptions: applyMdxPreset({
+      rehypePlugins: (plugins) => [...plugins, rehypePropDescription],
       remarkStructureOptions: {
         mdxTypes: (node) => node.children.length === 0,
       },
