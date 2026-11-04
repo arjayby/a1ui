@@ -2,21 +2,7 @@
 
 Reveals new text from left to right through a scramble of random characters.
 
-See [agent setup instructions](http://localhost:3000/llms.txt) before installation. Supported baseline: React 19, TypeScript, Tailwind CSS 4. Components use client-side React and browser APIs.
-
-## When to use
-
-- Animating changing headings, labels, or status text through scrambled characters.
-
-## Limitations
-
-- The initial text does not animate. Animation starts when the text prop changes.
-
-## Integration requirements
-
-- Update the text prop to animate. Use a monospace font to reduce width shifts.
-
-Import paths in examples assume the @/components/blocks path. Adapt them to the target project's components.json. Put examples with state or callbacks in a client component when using React Server Components.
+See [agent setup instructions](http://localhost:3000/llms.txt) before installation. Import paths in examples assume the @/components/blocks path; adapt them to the target project's components.json.
 
 ## Demo
 
@@ -32,6 +18,10 @@ pnpm: pnpm dlx shadcn@latest add http://localhost:3000/r/text-scramble.json --ye
 yarn: yarn dlx shadcn@latest add http://localhost:3000/r/text-scramble.json --yes
 bun: bunx --bun shadcn@latest add http://localhost:3000/r/text-scramble.json --yes
 ```
+
+## Dependencies
+
+None.
 
 ## Code
 
@@ -81,17 +71,3 @@ export function ScrambleExample() {
 | `characters` | `string`  | `ABCDEFGHJKLMNPQRSTUVWXYZ0123456789#%&@$?/` | Replacement characters. Whitespace is ignored. An empty pool resolves immediately. |
 | `disabled`   | `boolean` | `false`                                     | Shows the final text immediately and stops any active animation.                   |
 | `className`  | `string`  | None                                        | Styles the outer span. Typography inherits from its parent.                        |
-
-
-
-Standard span attributes, including `id`, `style`, and `aria-live`, pass through to the outer element.
-
-The initial value renders as plain text, including on the server. Whenever the text changes, the entire phrase scrambles and resolves from left to right, including characters shared with the previous value. Whitespace stays in place. A new value interrupts an active scramble and resolves to the latest text.
-
-Emoji and combining characters stay together in browsers that support `Intl.Segmenter`. Older browsers fall back to Unicode code points. Non-finite timing values use the defaults. Use a monospace font to keep replacement characters from shifting the text width.
-
-Screen readers receive the final text as soon as the prop changes. Animated characters are hidden from the accessibility tree. Add `aria-live="polite"` and `aria-atomic="true"` when changes should be announced. The component does not announce changes by default. Reduced motion skips the animation, including when the preference changes during a scramble.
-
-## Verification
-
-Run the target project's typecheck and build. Render the integrated component and check the browser for missing styles, hydration errors, and failed assets. Exercise its keyboard controls and primary interaction. Report any app data or callbacks still needed; sample data is not a live integration.

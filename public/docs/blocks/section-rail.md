@@ -2,21 +2,7 @@
 
 A compact reading rail that tracks progress through page sections.
 
-See [agent setup instructions](http://localhost:3000/llms.txt) before installation. Supported baseline: React 19, TypeScript, Tailwind CSS 4. Components use client-side React and browser APIs.
-
-## When to use
-
-- Table of contents and reading progress for long pages with sections.
-
-## Limitations
-
-- Tracks existing DOM sections; it does not create the page content.
-
-## Integration requirements
-
-- Match every item ID to a section element on the page.
-
-Import paths in examples assume the @/components/blocks path. Adapt them to the target project's components.json. Put examples with state or callbacks in a client component when using React Server Components.
+See [agent setup instructions](http://localhost:3000/llms.txt) before installation. Import paths in examples assume the @/components/blocks path; adapt them to the target project's components.json.
 
 ## Demo
 
@@ -32,6 +18,10 @@ pnpm: pnpm dlx shadcn@latest add http://localhost:3000/r/section-rail.json --yes
 yarn: yarn dlx shadcn@latest add http://localhost:3000/r/section-rail.json --yes
 bun: bunx --bun shadcn@latest add http://localhost:3000/r/section-rail.json --yes
 ```
+
+## Dependencies
+
+None.
 
 ## Code
 
@@ -78,13 +68,3 @@ export function ArticlePage() {
 | `ariaLabel`          | `string`                          | `"Page sections"` | Names the navigation landmark.                             |
 | `gap`                | `CSSProperties["gap"]`            | `0`               | Sets the gap between section markers.                      |
 | `className`          | `string`                          | None              | Controls placement in the consuming page.                  |
-
-
-
-Inside a scroll panel, marker activation scrolls only the nearest scrollable ancestor containing the target section. The outer document stays in place. The URL hash is updated without triggering native anchor scrolling. Modified clicks retain normal link behavior, and rails that track the main document use native anchor navigation. Reduced motion switches panel jumps to instant scrolling.
-
-The active link receives `aria-current="location"`. Use `activeMarkerLength="short"` to keep it at the base width or `"long"` to extend it. Both options retain the full-opacity active color. Every link also exposes `data-state="pending"`, `active`, or `complete` for styling. Hovering or focusing a link expands the nearby markers into a tapered group.
-
-## Verification
-
-Run the target project's typecheck and build. Render the integrated component and check the browser for missing styles, hydration errors, and failed assets. Exercise its keyboard controls and primary interaction. Report any app data or callbacks still needed; sample data is not a live integration.

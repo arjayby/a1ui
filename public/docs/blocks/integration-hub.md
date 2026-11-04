@@ -2,21 +2,7 @@
 
 A connected workspace with six tools and animated pulses flowing into a central product.
 
-See [agent setup instructions](http://localhost:3000/llms.txt) before installation. Supported baseline: React 19, TypeScript, Tailwind CSS 4. Components use client-side React and browser APIs.
-
-## When to use
-
-- Product integration diagrams with up to six tools, inward pulses, and optional tool selection.
-
-## Limitations
-
-- Visualization only. No account connections, synchronization, or live activity data. Extra tools beyond six are ignored.
-
-## Integration requirements
-
-- Supply tools with unique IDs and a product. Icons are React nodes. Supply a pause control for automatic motion. Reduced motion retains static connections.
-
-Import paths in examples assume the @/components/blocks path. Adapt them to the target project's components.json. Put examples with state or callbacks in a client component when using React Server Components.
+See [agent setup instructions](http://localhost:3000/llms.txt) before installation. Import paths in examples assume the @/components/blocks path; adapt them to the target project's components.json.
 
 ## Demo
 
@@ -32,6 +18,11 @@ pnpm: pnpm dlx shadcn@latest add http://localhost:3000/r/integration-hub.json --
 yarn: yarn dlx shadcn@latest add http://localhost:3000/r/integration-hub.json --yes
 bun: bunx --bun shadcn@latest add http://localhost:3000/r/integration-hub.json --yes
 ```
+
+## Dependencies
+
+- `clsx`
+- `lucide-react`
 
 ## Code
 
@@ -93,21 +84,3 @@ export function ConnectedWorkspace() {
 | `duration`     | `number`                                                                   | `4`      | Seconds per pulse cycle, including a short rest. Finite values are clamped to at least one second; non-finite values use four. |
 | `className`    | `string`                                                                   | None     | Adds classes to the outer element.                                                                                             |
 | `style`        | `CSSProperties`                                                            | None     | Inline styles and custom properties.                                                                                           |
-
-
-
-Each tool has a unique `id`, a `name`, an `icon` as a React node, and optional `description` and CSS `color`. Use compact, non-interactive icons and short names. The first half of the array goes on the left, the rest on the right. One tool sits at the middle of its column. Empty arrays leave only the product visible.
-
-Pulses travel from every tool toward the product, including the right column. The SVG paths and cards share proportional coordinates so their endpoints stay attached when the container resizes. Below a container width of 580 pixels, cards stack their icon and name and hide the secondary description. The component needs no measurement observers or animation library. Its scoped styles ship with the source.
-
-The component inherits the page font and the `--background`, `--foreground`, `--border`, and `--muted-foreground` theme tokens. Override `--integration-hub-surface`, `--integration-hub-foreground`, `--integration-hub-border`, `--integration-hub-product-background`, `--integration-hub-product-foreground`, and `--integration-hub-accent` on a parent to customize it.
-
-The tool cards and product tile use the theme's card surface and borders with 12px corners. Text inherits the page font. The product name uses `--font-heading` when available. The documentation demo uses Inter for labels and descriptions and Stack Sans Notch for the product name. These defaults adapt to light and dark themes. On narrow containers, secondary descriptions and product status are hidden while tool names remain visible.
-
-Provide a pause control for continuous motion, as in the example. Reduced motion hides the traveling pulses and retains the static connections. Tool selection still works. Without `onToolSelect`, the tool cards render as plain content with no extra tab stops.
-
-Relay is a fictional product in the demo. The component visualizes connections; it does not connect accounts, sync files, or measure live activity. Supply real integration data and status from your app. The demo's tool artwork and controls are separate from the installed component. The demo uses brand icons from [SVG Logos](https://github.com/gilbarbara/logos); source links and the collection's license are included with the demo assets.
-
-## Verification
-
-Run the target project's typecheck and build. Render the integrated component and check the browser for missing styles, hydration errors, and failed assets. Exercise its keyboard controls and primary interaction. Report any app data or callbacks still needed; sample data is not a live integration.

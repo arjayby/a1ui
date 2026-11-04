@@ -7,6 +7,13 @@ export function installCommands(url) {
   ].join("\n");
 }
 
+function dependencyList(item) {
+  const packages = (item.dependencies ?? []).map((spec) => `- \`${spec}\``);
+  const shadcn = (item.registryDependencies ?? []).map((name) => `- \`${name}\` (shadcn)`);
+  const all = [...packages, ...shadcn];
+  return all.length ? all.join("\n") : "None.";
+}
+
 // Convert only the docs components this project uses. Unknown MDX fails the
 // build so a new wrapper cannot silently hide instructions from agent readers.
 export function renderBlockGuide(item, mdx, siteUrl) {
@@ -38,7 +45,10 @@ export function renderBlockGuide(item, mdx, siteUrl) {
       return `[Complete source and dependencies](${registryUrl}). Each file's content is embedded in the registry JSON.`;
     }
     if (/^\s*<\w+Demo\s*\/>\s*$/.test(line)) return `[Interactive preview](${pageUrl})`;
-    if (/^\s*<\/?AgentOnly>\s*$/.test(line)) return "";
+    if (/^\s*<Dependencies name="([\w-]+)"\s*\/>\s*$/.test(line)) {
+      if (!line.includes(`name="${item.name}"`)) throw new Error(`Wrong dependencies item in ${item.name}`);
+      return dependencyList(item);
+    }
     if (/^\s*<Tabs items=\{.*\}>\s*$/.test(line) || /^\s*<\/(Tab|Tabs)>\s*$/.test(line)) return "";
     const tab = line.match(/^\s*<Tab value="(Usage|Source)">\s*$/);
     if (tab) return `### ${tab[1]}`;
@@ -46,22 +56,12 @@ export function renderBlockGuide(item, mdx, siteUrl) {
     return line.replace(/\]\(\/(?!\/)([^)]+)\)/g, (_, path) => `](${siteUrl}/${path})`);
   });
   if (fence || installations !== 1 || !examples) throw new Error(`Incomplete agent guide for ${item.name}`);
-  const advice = item.meta.a1ui;
   return (
     [
       `# ${item.title}`,
       item.description,
-      `See [agent setup instructions](${siteUrl}/llms.txt) before installation. Supported baseline: React 19, TypeScript, Tailwind CSS 4. Components use client-side React and browser APIs.`,
-      "## When to use",
-      advice.useCases.map((text) => `- ${text}`).join("\n"),
-      "## Limitations",
-      advice.limitations.map((text) => `- ${text}`).join("\n"),
-      "## Integration requirements",
-      advice.requirements.map((text) => `- ${text}`).join("\n"),
-      `Import paths in examples assume the @/components/${group === "blocks" ? "blocks" : "animated"} path. Adapt them to the target project's components.json. Put examples with state or callbacks in a client component when using React Server Components.`,
+      `See [agent setup instructions](${siteUrl}/llms.txt) before installation. Import paths in examples assume the @/components/${group === "blocks" ? "blocks" : "animated"} path; adapt them to the target project's components.json.`,
       lines.join("\n").trim(),
-      "## Verification",
-      "Run the target project's typecheck and build. Render the integrated component and check the browser for missing styles, hydration errors, and failed assets. Exercise its keyboard controls and primary interaction. Report any app data or callbacks still needed; sample data is not a live integration.",
     ].join("\n\n") + "\n"
   );
 }
@@ -79,7 +79,7 @@ The supported baseline is React 19, TypeScript, and Tailwind CSS 4. Installation
 
 1. Inspect the user's request, package.json, lockfile, components.json, import aliases, and global CSS in the target project. Work in the app or workspace that owns components.json. Do not silently change frameworks or upgrade an incompatible project.
 2. Read the [registry catalog](${siteUrl}/r/registry.json). Match descriptions, categories, and meta.a1ui.useCases to the request. Check meta.a1ui.limitations and requirements. If nothing fits, explain the gap instead of installing an unrelated block.
-3. Read the chosen block's Markdown guide below. It includes actual imports, props, examples, dependencies, and integration requirements. Read the registry item's embedded source when needed.
+3. Read the chosen block's Markdown guide below. It includes actual imports, props, examples, and dependencies. Read the registry item's embedded source when needed.
 4. If components.json is missing in an otherwise compatible project, initialize shadcn using the project's package runner and the existing framework and theme. Inspect \`shadcn init --help\` for current options. Preserve existing styles. Do not force initialization over an existing configuration.
 5. Inspect any existing destination files. Use \`shadcn add <item-url> --dry-run\` and \`--diff\` before updating them. Reuse existing compatible components or merge deliberately. Never use \`--overwrite\` automatically.
 6. Install from the selected item's URL using the target project's package manager. Replace NAME with the exact catalog name:

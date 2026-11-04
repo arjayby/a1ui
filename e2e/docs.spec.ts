@@ -16,6 +16,7 @@ test("catalog opens block documentation in the agreed order", async ({ page }) =
   await expect(page.locator(".docs-article-body h2")).toHaveText([
     "Demo",
     "Installation",
+    "Dependencies",
     "Code",
     "API reference",
   ]);

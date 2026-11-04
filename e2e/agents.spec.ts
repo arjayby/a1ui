@@ -1,35 +1,26 @@
 import { expect, test } from "@playwright/test";
 import registry from "../registry.json" with { type: "json" };
 
-for (const [name, context] of [
-  ["menu", "The highlight follows focus without changing the selected value."],
-  ["confirm-button", "The fill and hold use the same duration."],
-  ["loading-button", "The example expects your app to provide `/api/settings`."],
-]) {
-  test(`${name} usage shows only code and preserves notes for agents`, async ({ page, request }) => {
+for (const name of ["menu", "confirm-button", "loading-button"]) {
+  test(`${name} usage shows only code and its guide mirrors the page`, async ({ page, request }) => {
     await page.goto(`/components/${name}`);
     const usage = page.getByRole("tabpanel", { name: "Usage", exact: true });
     const code = usage.locator("pre code");
     await expect(code).toBeVisible();
     await expect(usage).toHaveText((await code.textContent()) ?? "");
-    await expect(page.locator(".docs-article-body")).not.toContainText(context.replaceAll("`", ""));
 
     const guide = await request.get(`/docs/components/${name}.md`);
     expect(guide.ok()).toBeTruthy();
-    expect(await guide.text()).toContain(context);
-    const search = await request.get(`/api/search?query=${encodeURIComponent(context)}`);
-    expect(search.ok()).toBeTruthy();
-    expect(await search.text()).not.toContain(context.replaceAll("`", ""));
+    const headings = (await guide.text()).match(/^## .+$/gm);
+    expect(headings).toEqual([
+      "## Demo",
+      "## Installation",
+      "## Dependencies",
+      "## Code",
+      "## API reference",
+    ]);
   });
 }
-
-test("agent-only context stays in guides and out of website search", async ({ request }) => {
-  const guide = await request.get("/docs/blocks/ascii-morph.md");
-  expect(await guide.text()).toContain("### Controlled shape");
-  const search = await request.get("/api/search?query=Controlled%20shape");
-  expect(search.ok()).toBeTruthy();
-  expect(await search.text()).not.toContain("#controlled-shape");
-});
 
 test("the agent entry point leads to every installable item and Markdown guide", async ({ request }) => {
   const entry = await request.get("/llms.txt");

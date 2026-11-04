@@ -8,6 +8,7 @@ for (const { name, title, type } of registry.items) {
     await expect(page.getByRole("navigation", { name: "On this page" }).getByRole("link")).toHaveText([
       "Demo",
       "Installation",
+      "Dependencies",
       "Code",
       "API reference",
     ]);

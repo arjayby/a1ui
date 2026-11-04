@@ -11,6 +11,10 @@ description: Text that reflows around a floating ASCII duck, powered by Pretext.
 
 <Installation name="shape-flow" />
 
+## Dependencies
+
+<Dependencies name="shape-flow" />
+
 ## Code
 
 <Tabs items={["Usage", "Source"]}>
@@ -49,13 +53,3 @@ export function ShapeFlowExample() {
 | `lineHeight` | `number` | `28`        | Line height in pixels, with a minimum of `fontSize`.                               |
 | `fontFamily` | `string` | `"Georgia"` | Named font family used for both measurement and rendering.                         |
 | `className`  | `string` | None        | Outer layout classes, such as `max-w-xl`.                                          |
-
-<AgentOnly>
-
-Text fills the available space around the ASCII duck silhouette. Gaps narrower than two characters are skipped. Drag the duck with a mouse, pen, or touch. Focus the duck and use arrow keys to move it by 8 pixels, or hold Shift for 32-pixel steps. Home centers the duck in the full layout. The duck stays inside the drag area when the container resizes.
-
-The full paragraph renders on the server and remains available to screen readers. Once the font loads, the component uses [Pretext](https://github.com/chenglou/pretext) to measure the text once and reuse those measurements during dragging and resizing. If font measurement is unavailable, it keeps the ordinary paragraph. The duck gently bobs and tilts while idle. Its motion pauses during dragging and stops when reduced motion is enabled. Text wrapping reserves room for the full motion.
-
-Use the typography props to keep measurement and rendering in sync. Supply a named font that your app loads, such as `Georgia` or `"Commit Mono"`, rather than `system-ui`. The interactive layout requires Canvas 2D, `Intl.Segmenter`, and `ResizeObserver`. This component lays out one plain-text paragraph from left to right; rich text and right-to-left paragraph flow are outside its scope.
-
-</AgentOnly>

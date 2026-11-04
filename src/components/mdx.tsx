@@ -13,7 +13,7 @@ import { AgentInstall, AgentRegistryConfiguration } from "@/components/agent-ins
 import { ConfirmationButtonDemo } from "@/components/block-demos/confirmation-button-demo";
 import { CompareCurtainDemo } from "@/components/block-demos/compare-curtain-demo";
 import { SectionRailDemo, SpiralTextDemo } from "@/components/block-demos";
-import { BlockSource, ComponentSource, Installation } from "@/components/block-docs";
+import { BlockSource, ComponentSource, Dependencies, Installation } from "@/components/block-docs";
 import { MenuDemo } from "@/components/component-demos/menu-demo";
 import { DropdownMenuDemo } from "@/components/component-demos/dropdown-menu-demo";
 import { ConfirmButtonDemo } from "@/components/component-demos/confirm-button-demo";
@@ -35,7 +35,6 @@ import { PeelStackDemo } from "@/components/block-demos/peel-stack-demo";
 export function getMDXComponents(components?: MDXComponents) {
   return {
     ...defaultMdxComponents,
-    AgentOnly: () => null,
     AgentInstall,
     AgentRegistryConfiguration,
     ArcReelDemo,
@@ -44,6 +43,7 @@ export function getMDXComponents(components?: MDXComponents) {
     AsciiLensDemo,
     BlockSource,
     ComponentSource,
+    Dependencies,
     MenuDemo,
     DropdownMenuDemo,
     ConfirmButtonDemo,

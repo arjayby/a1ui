@@ -10,7 +10,7 @@ The supported baseline is React 19, TypeScript, and Tailwind CSS 4. Installation
 
 1. Inspect the user's request, package.json, lockfile, components.json, import aliases, and global CSS in the target project. Work in the app or workspace that owns components.json. Do not silently change frameworks or upgrade an incompatible project.
 2. Read the [registry catalog](http://localhost:3000/r/registry.json). Match descriptions, categories, and meta.a1ui.useCases to the request. Check meta.a1ui.limitations and requirements. If nothing fits, explain the gap instead of installing an unrelated block.
-3. Read the chosen block's Markdown guide below. It includes actual imports, props, examples, dependencies, and integration requirements. Read the registry item's embedded source when needed.
+3. Read the chosen block's Markdown guide below. It includes actual imports, props, examples, and dependencies. Read the registry item's embedded source when needed.
 4. If components.json is missing in an otherwise compatible project, initialize shadcn using the project's package runner and the existing framework and theme. Inspect `shadcn init --help` for current options. Preserve existing styles. Do not force initialization over an existing configuration.
 5. Inspect any existing destination files. Use `shadcn add <item-url> --dry-run` and `--diff` before updating them. Reuse existing compatible components or merge deliberately. Never use `--overwrite` automatically.
 6. Install from the selected item's URL using the target project's package manager. Replace NAME with the exact catalog name:
