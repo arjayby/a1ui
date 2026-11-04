@@ -134,3 +134,55 @@ for (const method of ["button", "shortcut"]) {
     await expect(page.getByRole("dialog")).not.toBeVisible();
   });
 }
+
+test("on-page menu jumps straight to the clicked section and then follows scrolling", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/components/menu");
+  await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
+  const toc = page.getByRole("navigation", { name: "On this page" });
+  await expect(toc.getByRole("link", { name: "Demo" })).toHaveAttribute("aria-current", "location");
+
+  // Record every item the menu marks current, so a jump that passes through other sections fails.
+  await page.evaluate(() => {
+    const nav = document.querySelector(".docs-toc nav")!;
+    const seen: string[] = [];
+    Object.assign(window, { tocSeen: seen });
+    new MutationObserver(() => {
+      const current = nav.querySelector("[aria-current]")?.textContent;
+      if (current && seen.at(-1) !== current) seen.push(current);
+    }).observe(nav, { subtree: true, attributes: true, attributeFilter: ["aria-current"] });
+  });
+  const settledScroll = () =>
+    page.evaluate(
+      () =>
+        new Promise<void>((resolve) => {
+          let last = -1;
+          const check = () => {
+            if (window.scrollY === last) return resolve();
+            last = window.scrollY;
+            setTimeout(check, 200);
+          };
+          check();
+        }),
+    );
+
+  for (const [name, id] of [
+    ["API reference", "api-reference"],
+    ["Installation", "installation"],
+    ["Code", "code"],
+    ["Demo", "demo"],
+  ]) {
+    await toc.getByRole("link", { name, exact: true }).click();
+    await settledScroll();
+    await expect(page.locator(`#${id}`)).toBeInViewport();
+    await expect(page).toHaveURL(new RegExp(`#${id}$`));
+    expect(
+      await page.evaluate(() => (window as unknown as { tocSeen: string[] }).tocSeen.splice(0)),
+      `jumping to ${name}`,
+    ).toEqual([name]);
+  }
+
+  await page.mouse.move(400, 400);
+  await page.mouse.wheel(0, 800);
+  await expect(toc.getByRole("link", { name: "Dependencies" })).toHaveAttribute("aria-current", "location");
+});
