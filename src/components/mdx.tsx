@@ -21,6 +21,7 @@ import { CopyButtonDemo } from "@/components/component-demos/copy-button-demo";
 import { LoadingButtonDemo } from "@/components/component-demos/loading-button-demo";
 import { IconToggleDemo } from "@/components/component-demos/icon-toggle-demo";
 import { SwitchDemo } from "@/components/component-demos/switch-demo";
+import { CheckboxDemo } from "@/components/component-demos/checkbox-demo";
 import { TabsDemo } from "@/components/component-demos/tabs-demo";
 import { SliderDemo } from "@/components/component-demos/slider-demo";
 import { OtpInputDemo } from "@/components/component-demos/otp-input-demo";
@@ -53,6 +54,7 @@ export function getMDXComponents(components?: MDXComponents) {
     LoadingButtonDemo,
     IconToggleDemo,
     SwitchDemo,
+    CheckboxDemo,
     TabsDemo,
     SliderDemo,
     OtpInputDemo,

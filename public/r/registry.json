@@ -1039,6 +1039,45 @@
         }
       },
       "docs": "Read http://localhost:3000/docs/components/switch.md for usage, required props, and integration instructions."
+    },
+    {
+      "name": "checkbox",
+      "type": "registry:component",
+      "title": "Checkbox",
+      "description": "A checkbox that draws its check, morphs from an indeterminate dash, and can strike through its label.",
+      "dependencies": [
+        "motion",
+        "@base-ui/react"
+      ],
+      "files": [
+        {
+          "path": "src/registry/components/checkbox.tsx",
+          "type": "registry:component",
+          "target": "components/animated/checkbox.tsx"
+        }
+      ],
+      "categories": [
+        "input",
+        "checkbox",
+        "animation",
+        "interactive"
+      ],
+      "meta": {
+        "a1ui": {
+          "useCases": [
+            "Task lists, consent fields, and select-all groups where a parent shows a partial selection."
+          ],
+          "limitations": [
+            "The strikethrough is a single 1px line drawn with a background gradient. Indeterminate state is controlled by the caller."
+          ],
+          "requirements": [
+            "React 19, Tailwind CSS 4, Motion, Base UI, and theme colors. Supply label or aria-label. Clear indeterminate in onCheckedChange. Reduced motion draws the mark instantly and removes the burst."
+          ],
+          "docsUrl": "http://localhost:3000/docs/components/checkbox.md",
+          "registryUrl": "http://localhost:3000/r/checkbox.json"
+        }
+      },
+      "docs": "Read http://localhost:3000/docs/components/checkbox.md for usage, required props, and integration instructions."
     }
   ]
 }

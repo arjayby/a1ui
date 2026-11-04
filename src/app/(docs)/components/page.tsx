@@ -10,6 +10,7 @@ import { ConfirmButtonPreview } from "@/components/component-demos/confirm-butto
 import { CopyButton } from "@/registry/components/copy-button";
 import { IconToggle } from "@/registry/components/icon-toggle";
 import { SwitchPreview } from "@/components/component-demos/switch-demo";
+import { CheckboxPreview } from "@/components/component-demos/checkbox-demo";
 import { TabsPreview } from "@/components/component-demos/tabs-demo";
 import { LoadingButtonPreview } from "@/components/component-demos/loading-button-demo";
 import { SliderPreview } from "@/components/component-demos/slider-demo";
@@ -32,6 +33,7 @@ const previews: Record<string, ReactNode> = {
   "copy-button": <CopyButton value="hello@a1ui.dev" />,
   "icon-toggle": <IconToggle label="Dark mode" />,
   switch: <SwitchPreview />,
+  checkbox: <CheckboxPreview />,
   tabs: <TabsPreview />,
   "loading-button": <LoadingButtonPreview />,
   slider: <SliderPreview />,
