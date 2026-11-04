@@ -5,6 +5,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 import { mergeProps } from "@base-ui/react/merge-props";
 import { useRender } from "@base-ui/react/use-render";
+import { motion } from "motion/react";
 
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
@@ -217,7 +218,11 @@ function Sidebar({
             : "group-data-[collapsible=icon]:w-(--sidebar-width-icon)",
         )}
       />
-      <div
+      {/* A fixed Motion node with layoutScroll is a scroll root: layout animations inside it
+          (the menu highlight) are measured against the viewport, so a page scroll between
+          snapshot and layout, like scroll-to-top on navigation, no longer offsets them. */}
+      <motion.div
+        layoutScroll
         data-slot="sidebar-container"
         data-side={side}
         className={cn(
@@ -228,7 +233,7 @@ function Sidebar({
             : "group-data-[collapsible=icon]:w-(--sidebar-width-icon) group-data-[side=left]:border-r group-data-[side=right]:border-l",
           className,
         )}
-        {...props}
+        {...(props as React.ComponentProps<typeof motion.div>)}
       >
         <div
           data-sidebar="sidebar"
@@ -237,7 +242,7 @@ function Sidebar({
         >
           {children}
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }
