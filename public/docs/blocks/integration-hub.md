@@ -22,7 +22,6 @@ bun: bunx --bun shadcn@latest add http://localhost:3000/r/integration-hub.json -
 ## Dependencies
 
 - `clsx`
-- `lucide-react`
 
 ## Code
 
@@ -33,16 +32,67 @@ bun: bunx --bun shadcn@latest add http://localhost:3000/r/integration-hub.json -
 "use client";
 
 import { useState } from "react";
-import { Code, FileText, PenTool, Folder, Layers, MessageSquare, Radio } from "lucide-react";
 import { IntegrationHub, type IntegrationHubTool } from "@/components/blocks/integration-hub";
 
+// Any ReactNode works as an icon. Swap these for your own icon set.
+function Icon({ d }: { d: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d={d} />
+    </svg>
+  );
+}
+
 const tools: IntegrationHubTool[] = [
-  { id: "slack", name: "Slack", description: "Conversations", icon: <MessageSquare />, color: "#be6b96" },
-  { id: "notion", name: "Notion", description: "Knowledge", icon: <FileText />, color: "#909486" },
-  { id: "figma", name: "Figma", description: "Design files", icon: <PenTool />, color: "#c17f5f" },
-  { id: "github", name: "GitHub", description: "Code", icon: <Code />, color: "#899776" },
-  { id: "linear", name: "Linear", description: "Projects", icon: <Layers />, color: "#8b83d7" },
-  { id: "drive", name: "Google Drive", description: "Files", icon: <Folder />, color: "#699f88" },
+  {
+    id: "slack",
+    name: "Slack",
+    description: "Conversations",
+    icon: <Icon d="M4 5h16v11H9l-5 4z" />,
+    color: "#be6b96",
+  },
+  {
+    id: "notion",
+    name: "Notion",
+    description: "Knowledge",
+    icon: <Icon d="M6 3h8l4 4v14H6zM14 3v4h4M9 13h6M9 17h6" />,
+    color: "#909486",
+  },
+  {
+    id: "figma",
+    name: "Figma",
+    description: "Design files",
+    icon: <Icon d="M4 20l4-1L19 8l-3-3L5 16zM14 7l3 3" />,
+    color: "#c17f5f",
+  },
+  {
+    id: "github",
+    name: "GitHub",
+    description: "Code",
+    icon: <Icon d="M8 8l-4 4 4 4M16 8l4 4-4 4" />,
+    color: "#899776",
+  },
+  {
+    id: "linear",
+    name: "Linear",
+    description: "Projects",
+    icon: <Icon d="M12 3l9 5-9 5-9-5zM3 13l9 5 9-5" />,
+    color: "#8b83d7",
+  },
+  {
+    id: "drive",
+    name: "Google Drive",
+    description: "Files",
+    icon: <Icon d="M3 6h6l2 2h10v11H3z" />,
+    color: "#699f88",
+  },
 ];
 
 export function ConnectedWorkspace() {
@@ -53,7 +103,13 @@ export function ConnectedWorkspace() {
     <div className="flex flex-col gap-4">
       <IntegrationHub
         tools={tools}
-        product={{ name: "Relay", description: "Shared context", icon: <Radio /> }}
+        product={{
+          name: "Relay",
+          description: "Shared context",
+          icon: (
+            <Icon d="M12 12h.01M8.5 8.5a5 5 0 0 0 0 7M15.5 8.5a5 5 0 0 1 0 7M5.6 5.6a9 9 0 0 0 0 12.8M18.4 5.6a9 9 0 0 1 0 12.8" />
+          ),
+        }}
         activeToolId={activeToolId}
         onToolSelect={(tool) => setActiveToolId((current) => (current === tool.id ? null : tool.id))}
         paused={paused}

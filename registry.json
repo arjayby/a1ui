@@ -116,7 +116,7 @@
       "type": "registry:block",
       "title": "Integration Hub",
       "description": "A connected workspace with six tools and animated pulses flowing into a central product.",
-      "dependencies": ["clsx", "lucide-react"],
+      "dependencies": ["clsx"],
       "files": [
         {
           "path": "src/registry/blocks/integration-hub.tsx",
