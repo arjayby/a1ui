@@ -1,0 +1,41 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "switch",
+  "title": "Switch",
+  "description": "A switch whose thumb squashes on press, springs across the track, and can rotate icons in and out.",
+  "dependencies": [
+    "motion",
+    "@base-ui/react"
+  ],
+  "files": [
+    {
+      "path": "src/registry/components/switch.tsx",
+      "content": "\"use client\";\n\nimport { Switch as SwitchPrimitive } from \"@base-ui/react/switch\";\nimport { motion, useReducedMotion } from \"motion/react\";\nimport { useId, useState, type ReactNode } from \"react\";\n\n// Track 44 × 24 with 2px padding and a 20px thumb: 20px of travel.\nconst THUMB = 20;\nconst PRESSED_THUMB = 25;\nconst TRAVEL = 20;\n\nexport interface SwitchProps {\n  /** Visible label. Clicking it toggles the switch. */\n  label?: ReactNode;\n  /** Accessible name when there is no visible label. */\n  \"aria-label\"?: string;\n  checked?: boolean;\n  defaultChecked?: boolean;\n  onCheckedChange?: (checked: boolean) => void;\n  /** Icons that rotate in and out inside the thumb. */\n  thumbIcons?: { checked: ReactNode; unchecked: ReactNode };\n  /** Thumb travel time in seconds. */\n  duration?: number;\n  disabled?: boolean;\n  required?: boolean;\n  name?: string;\n  className?: string;\n}\n\nexport function Switch({\n  label,\n  \"aria-label\": ariaLabel,\n  checked,\n  defaultChecked = false,\n  onCheckedChange,\n  thumbIcons,\n  duration = 0.3,\n  disabled = false,\n  required,\n  name,\n  className,\n}: SwitchProps) {\n  const labelId = useId();\n  const reducedMotion = useReducedMotion();\n  const [internalChecked, setInternalChecked] = useState(defaultChecked);\n  const [pressed, setPressed] = useState(false);\n  const on = checked ?? internalChecked;\n  const squash = pressed && !disabled && !reducedMotion;\n  const width = squash ? PRESSED_THUMB : THUMB;\n  const visualDuration = reducedMotion ? 0 : Number.isFinite(duration) ? Math.max(0, duration) : 0.3;\n  const transition =\n    visualDuration === 0 ? { duration: 0 } : ({ type: \"spring\", visualDuration, bounce: 0.25 } as const);\n  const release = () => setPressed(false);\n\n  const control = (\n    <SwitchPrimitive.Root\n      data-slot=\"switch\"\n      checked={on}\n      disabled={disabled}\n      required={required}\n      name={name}\n      aria-label={label ? undefined : ariaLabel}\n      aria-labelledby={label ? labelId : undefined}\n      onCheckedChange={(next) => {\n        if (checked === undefined) setInternalChecked(next);\n        onCheckedChange?.(next);\n      }}\n      onPointerDown={() => setPressed(true)}\n      onPointerUp={release}\n      onPointerLeave={release}\n      onPointerCancel={release}\n      onKeyDown={(event) => {\n        if (event.key === \" \") setPressed(true);\n      }}\n      onKeyUp={release}\n      onBlur={release}\n      className={`bg-muted-foreground/25 data-checked:bg-foreground focus-visible:ring-ring/30 relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full p-0.5 transition-colors duration-200 outline-none focus-visible:ring-3 data-disabled:cursor-not-allowed ${label ? \"\" : `data-disabled:opacity-50 ${className ?? \"\"}`}`}\n    >\n      <SwitchPrimitive.Thumb\n        data-slot=\"switch-thumb\"\n        render={\n          <motion.span\n            initial={false}\n            animate={{ x: on ? TRAVEL + THUMB - width : 0, width }}\n            transition={transition}\n          />\n        }\n        className=\"bg-background text-foreground relative grid h-5 place-items-center overflow-hidden rounded-full shadow-[0_1px_3px_rgb(0_0_0/0.2),0_1px_1px_rgb(0_0_0/0.06)] [&_svg]:size-3\"\n        style={{ width: THUMB }}\n      >\n        {thumbIcons &&\n          ([\"unchecked\", \"checked\"] as const).map((state) => {\n            const visible = (state === \"checked\") === on;\n            return (\n              <motion.span\n                key={state}\n                aria-hidden=\"true\"\n                data-slot=\"switch-icon\"\n                data-state={state}\n                className=\"absolute inset-0 grid place-items-center\"\n                initial={false}\n                animate={{\n                  opacity: visible ? 1 : 0,\n                  scale: visible ? 1 : 0.4,\n                  rotate: visible ? 0 : state === \"checked\" ? -90 : 90,\n                }}\n                transition={transition}\n              >\n                {thumbIcons[state]}\n              </motion.span>\n            );\n          })}\n      </SwitchPrimitive.Thumb>\n    </SwitchPrimitive.Root>\n  );\n\n  if (!label) return control;\n\n  return (\n    <label\n      data-slot=\"switch-label\"\n      data-disabled={disabled || undefined}\n      className={`inline-flex cursor-pointer items-center gap-3 text-sm select-none data-disabled:cursor-not-allowed data-disabled:opacity-50 ${className ?? \"\"}`}\n    >\n      {control}\n      <span id={labelId}>{label}</span>\n    </label>\n  );\n}\n",
+      "type": "registry:component",
+      "target": "components/animated/switch.tsx"
+    }
+  ],
+  "meta": {
+    "a1ui": {
+      "useCases": [
+        "Settings that apply immediately, such as notifications or dark mode, with optional icons for the two states."
+      ],
+      "limitations": [
+        "One size, 44 by 24 pixels. Thumb icons should be small glyphs about 12 pixels across."
+      ],
+      "requirements": [
+        "React 19, Tailwind CSS 4, Motion, Base UI, and theme colors. Supply label or aria-label. Controlled usage requires updating checked in onCheckedChange. Reduced motion removes the squash and moves the thumb instantly."
+      ],
+      "docsUrl": "http://localhost:3000/docs/components/switch.md",
+      "registryUrl": "http://localhost:3000/r/switch.json"
+    }
+  },
+  "categories": [
+    "input",
+    "switch",
+    "animation",
+    "interactive"
+  ],
+  "type": "registry:component",
+  "docs": "Read http://localhost:3000/docs/components/switch.md for usage, required props, and integration instructions."
+}

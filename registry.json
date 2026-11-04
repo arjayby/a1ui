@@ -692,6 +692,34 @@
           ]
         }
       }
+    },
+    {
+      "name": "switch",
+      "type": "registry:component",
+      "title": "Switch",
+      "description": "A switch whose thumb squashes on press, springs across the track, and can rotate icons in and out.",
+      "dependencies": ["motion", "@base-ui/react"],
+      "files": [
+        {
+          "path": "src/registry/components/switch.tsx",
+          "type": "registry:component",
+          "target": "components/animated/switch.tsx"
+        }
+      ],
+      "categories": ["input", "switch", "animation", "interactive"],
+      "meta": {
+        "a1ui": {
+          "useCases": [
+            "Settings that apply immediately, such as notifications or dark mode, with optional icons for the two states."
+          ],
+          "limitations": [
+            "One size, 44 by 24 pixels. Thumb icons should be small glyphs about 12 pixels across."
+          ],
+          "requirements": [
+            "React 19, Tailwind CSS 4, Motion, Base UI, and theme colors. Supply label or aria-label. Controlled usage requires updating checked in onCheckedChange. Reduced motion removes the squash and moves the thumb instantly."
+          ]
+        }
+      }
     }
   ]
 }
