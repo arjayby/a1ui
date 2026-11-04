@@ -19,7 +19,8 @@ describe("agent documentation", () => {
       for (const dependency of [...(item.dependencies ?? []), ...(item.registryDependencies ?? [])]) {
         expect(guide).toContain(`- \`${dependency}\``);
       }
-      expect(guide).not.toMatch(
+      // Code examples may use these names as real JSX, such as a Tabs component.
+      expect(guide.replace(/```[\s\S]*?```/g, "")).not.toMatch(
         /<(?:Installation|Dependencies|BlockSource|ComponentSource|Tabs|Tab|\w+Demo)\b/,
       );
       expect(guide).not.toMatch(/https?:\/\/localhost\b/);

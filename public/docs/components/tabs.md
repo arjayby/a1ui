@@ -1,0 +1,84 @@
+# Tabs
+
+Tabs with a spring indicator that slides between triggers, a hover highlight, and direction-aware panels.
+
+See [agent setup instructions](http://localhost:3000/llms.txt) before installation. Import paths in examples assume the @/components/animated path; adapt them to the target project's components.json.
+
+## Demo
+
+[Interactive preview](http://localhost:3000/components/tabs)
+
+## Installation
+
+Choose the command for the target project's package manager. Run it from that project's directory.
+
+```text
+npm: npx shadcn@latest add http://localhost:3000/r/tabs.json --yes
+pnpm: pnpm dlx shadcn@latest add http://localhost:3000/r/tabs.json --yes
+yarn: yarn dlx shadcn@latest add http://localhost:3000/r/tabs.json --yes
+bun: bunx --bun shadcn@latest add http://localhost:3000/r/tabs.json --yes
+```
+
+## Dependencies
+
+- `motion`
+- `@base-ui/react`
+
+## Code
+
+
+### Usage
+
+```tsx
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/animated/tabs";
+
+export function TabsExample() {
+  return (
+    <Tabs defaultValue="overview" variant="pill">
+      <TabsList aria-label="Dashboard">
+        <TabsTrigger value="overview">Overview</TabsTrigger>
+        <TabsTrigger value="analytics">Analytics</TabsTrigger>
+        <TabsTrigger value="reports">Reports</TabsTrigger>
+      </TabsList>
+      <TabsContent value="overview">Visitors this week.</TabsContent>
+      <TabsContent value="analytics">Average session length.</TabsContent>
+      <TabsContent value="reports">Scheduled reports.</TabsContent>
+    </Tabs>
+  );
+}
+```
+
+
+### Source
+[Complete source and dependencies](http://localhost:3000/r/tabs.json). Each file's content is embedded in the registry JSON.
+
+
+
+## API reference
+
+### Tabs
+
+| Prop            | Type                      | Default      | Description                                                                                  |
+| --------------- | ------------------------- | ------------ | -------------------------------------------------------------------------------------------- |
+| `value`         | `string`                  | Uncontrolled | Selected tab when controlled by the caller.                                                  |
+| `defaultValue`  | `string`                  | None         | Initially selected tab when uncontrolled.                                                    |
+| `onValueChange` | `(value: string) => void` | None         | Called with the newly selected tab. Controlled usage requires the caller to update `value`.  |
+| `variant`       | `"pill" \| "underline"`   | `"pill"`     | `pill` slides a raised surface inside a muted track. `underline` slides a bar under the tab. |
+| `duration`      | `number`                  | `0.35`       | Indicator travel time in seconds. Zero moves it instantly.                                   |
+| `className`     | `string`                  | None         | Additional root classes.                                                                     |
+
+### TabsList
+
+| Prop              | Type      | Default | Description                                               |
+| ----------------- | --------- | ------- | --------------------------------------------------------- |
+| `aria-label`      | `string`  | None    | Names the tab list for assistive technology.              |
+| `activateOnFocus` | `boolean` | `false` | Selects a tab as soon as the arrow keys move focus to it. |
+| `className`       | `string`  | None    | Additional list classes.                                  |
+
+### TabsTrigger and TabsContent
+
+| Prop        | Type      | Default  | Description                                       |
+| ----------- | --------- | -------- | ------------------------------------------------- |
+| `value`     | `string`  | Required | Links a trigger to the panel with the same value. |
+| `disabled`  | `boolean` | `false`  | TabsTrigger only. Prevents selecting the tab.     |
+| `className` | `string`  | None     | Additional classes.                               |

@@ -961,6 +961,45 @@
         }
       },
       "docs": "Read http://localhost:3000/docs/components/password-input.md for usage, required props, and integration instructions."
+    },
+    {
+      "name": "tabs",
+      "type": "registry:component",
+      "title": "Tabs",
+      "description": "Tabs with a spring indicator that slides between triggers, a hover highlight, and direction-aware panels.",
+      "dependencies": [
+        "motion",
+        "@base-ui/react"
+      ],
+      "files": [
+        {
+          "path": "src/registry/components/tabs.tsx",
+          "type": "registry:component",
+          "target": "components/animated/tabs.tsx"
+        }
+      ],
+      "categories": [
+        "tabs",
+        "navigation",
+        "animation",
+        "interactive"
+      ],
+      "meta": {
+        "a1ui": {
+          "useCases": [
+            "Switching between related views, such as dashboard sections or settings panes, where the active tab should feel connected to the last one."
+          ],
+          "limitations": [
+            "Horizontal orientation only. Panels unmount when inactive. The underline variant expects one row of triggers."
+          ],
+          "requirements": [
+            "React 19, Tailwind CSS 4, Motion, Base UI, and theme colors. Give each TabsTrigger and TabsContent a matching string value and the list an aria-label. Reduced motion moves the indicator and swaps panels instantly."
+          ],
+          "docsUrl": "http://localhost:3000/docs/components/tabs.md",
+          "registryUrl": "http://localhost:3000/r/tabs.json"
+        }
+      },
+      "docs": "Read http://localhost:3000/docs/components/tabs.md for usage, required props, and integration instructions."
     }
   ]
 }
