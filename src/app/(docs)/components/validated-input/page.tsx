@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { AgentInstall } from "@/components/agent-install";
+import { DocsToc } from "@/components/docs-toc";
 import { getMDXComponents } from "@/components/mdx";
 import { Badge } from "@/components/ui/badge";
 import { componentsGroup, docStructuredData, JsonLd } from "@/lib/seo";
@@ -39,15 +40,7 @@ export default function ValidatedInputPage() {
         <p>{page.data.description}</p>
         <AgentInstall name="validated-input" />
       </header>
-      <nav aria-label="On this page" className="docs-section-nav">
-        {page.data.toc
-          .filter((item) => item.depth === 2)
-          .map((item) => (
-            <a key={item.url} href={item.url}>
-              {item.title}
-            </a>
-          ))}
-      </nav>
+      <DocsToc items={page.data.toc} />
       <div className="docs-article-body prose">
         <MDX components={getMDXComponents()} />
       </div>

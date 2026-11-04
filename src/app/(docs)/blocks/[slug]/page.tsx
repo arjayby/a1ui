@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
+import { DocsToc } from "@/components/docs-toc";
 import { getMDXComponents } from "@/components/mdx";
 import { AgentInstall } from "@/components/agent-install";
 import { Badge } from "@/components/ui/badge";
@@ -35,15 +36,7 @@ export default async function BlockPage({ params }: PageProps<"/blocks/[slug]">)
         <p>{block.description}</p>
         <AgentInstall name={block.slug} />
       </header>
-      <nav aria-label="On this page" className="docs-section-nav">
-        {page.data.toc
-          .filter((item) => item.depth === 2)
-          .map((item) => (
-            <a key={item.url} href={item.url}>
-              {item.title}
-            </a>
-          ))}
-      </nav>
+      <DocsToc items={page.data.toc} />
       <div className="docs-article-body prose">
         <MDX components={getMDXComponents()} />
       </div>

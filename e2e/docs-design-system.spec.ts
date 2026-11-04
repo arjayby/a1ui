@@ -30,12 +30,18 @@ for (const { name, title, type } of registry.items) {
     await expect(source).toHaveAttribute("aria-selected", "true");
     await expect(page.getByRole("tabpanel").filter({ hasText: "export function" })).toBeVisible();
 
-    await page.setViewportSize({ width: 390, height: 844 });
-    await page
-      .getByRole("navigation", { name: "On this page" })
-      .getByRole("link", { name: "API reference" })
-      .click();
+    await page.setViewportSize({ width: 1440, height: 900 });
+    const toc = page.getByRole("navigation", { name: "On this page" });
+    await toc.getByRole("link", { name: "API reference" }).click();
     await expect(page.getByRole("region", { name: "Reference table" })).toBeVisible();
+    await expect(toc.getByRole("link", { name: "API reference" })).toHaveAttribute(
+      "aria-current",
+      "location",
+    );
+    await expect(toc).toBeInViewport();
+
+    await page.setViewportSize({ width: 390, height: 844 });
+    await expect(toc).toBeHidden();
     await expect(page.locator(".docs-article-body > .docs-table ~ *")).toHaveCount(0);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   });
