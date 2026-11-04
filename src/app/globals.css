@@ -367,10 +367,10 @@ h6 {
 .docs-article {
   --docs-article-width: 48rem;
   --docs-toc-width: 12rem;
+  --docs-toc-gap: var(--spacing-48);
   display: grid;
   grid-template-columns: minmax(0, var(--docs-article-width));
   justify-content: center;
-  column-gap: var(--spacing-48);
   padding: var(--spacing-64) clamp(16px, 4vw, 48px) var(--spacing-96);
 }
 
@@ -441,19 +441,49 @@ h6 {
 }
 
 @media (min-width: 80rem) {
+  /* The article stays centered while there is room; the rail always sits at the far right. */
   .docs-article:has(> .docs-toc) {
-    grid-template-columns: minmax(0, var(--docs-article-width)) var(--docs-toc-width);
+    grid-template-columns:
+      minmax(0, 1fr) minmax(0, var(--docs-article-width))
+      minmax(calc(var(--docs-toc-width) + var(--docs-toc-gap)), 1fr);
+    justify-content: stretch;
+  }
+
+  .docs-article:has(> .docs-toc) > :not(.docs-toc) {
+    grid-column: 2;
   }
 
   .docs-toc {
     display: block;
-    grid-column: 2;
+    grid-column: 3;
     grid-row: 1 / span 2;
+    justify-self: end;
+    width: var(--docs-toc-width);
   }
 
-  .docs-toc > nav {
+  .docs-toc-rail {
+    --docs-toc-top: calc(3.5rem + var(--spacing-32));
     position: sticky;
-    top: calc(3.5rem + var(--spacing-32));
+    top: var(--docs-toc-top);
+    display: flex;
+    max-height: calc(100dvh - var(--docs-toc-top) - var(--spacing-32));
+    flex-direction: column;
+    gap: var(--spacing-24);
+  }
+
+  .docs-toc-rail > nav {
+    min-height: 0;
+    overflow-y: auto;
+  }
+
+  /* Pinned to the bottom of the viewport-height rail, e.g. for a sponsorship card. */
+  .docs-toc-footer {
+    flex-shrink: 0;
+    margin-top: auto;
+  }
+
+  .docs-toc-rail:has(> .docs-toc-footer) {
+    height: calc(100dvh - var(--docs-toc-top) - var(--spacing-32));
   }
 }
 

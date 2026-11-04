@@ -129,36 +129,40 @@ export function DocsToc({ items }: { items: DocsTocItem[] }) {
 
   return (
     <aside className="docs-toc">
-      <nav aria-label="On this page">
-        <p className="docs-toc-label">On this page</p>
-        <Menu value={active} className="flex flex-col gap-0.5">
-          {sections.map((item, index) => {
-            const id = ids[index];
-            const current = active === id;
-            return (
-              <MenuItem
-                key={item.url}
-                value={id}
-                data-active={current ? "" : undefined}
-                aria-current={current ? "location" : undefined}
-                onClick={(event) => {
-                  if (!isPlainClick(event)) return;
-                  event.preventDefault();
-                  jumpTo(id);
-                  // A pointer click leaves focus on the link, and Menu highlights the focused item, so a
-                  // later window refocus would pull the highlight back here after scrolling elsewhere.
-                  // Keyboard activation (detail 0) keeps focus so the reader stays in the menu.
-                  if (event.detail > 0) event.currentTarget.blur();
-                }}
-                className="docs-toc-link"
-                render={<a href={item.url} />}
-              >
-                {item.title}
-              </MenuItem>
-            );
-          })}
-        </Menu>
-      </nav>
+      <div className="docs-toc-rail">
+        <nav aria-label="On this page">
+          <p className="docs-toc-label">On this page</p>
+          <Menu value={active} className="flex flex-col gap-0.5">
+            {sections.map((item, index) => {
+              const id = ids[index];
+              const current = active === id;
+              return (
+                <MenuItem
+                  key={item.url}
+                  value={id}
+                  data-active={current ? "" : undefined}
+                  aria-current={current ? "location" : undefined}
+                  onClick={(event) => {
+                    if (!isPlainClick(event)) return;
+                    event.preventDefault();
+                    jumpTo(id);
+                    // A pointer click leaves focus on the link, and Menu highlights the focused item, so a
+                    // later window refocus would pull the highlight back here after scrolling elsewhere.
+                    // Keyboard activation (detail 0) keeps focus so the reader stays in the menu.
+                    if (event.detail > 0) event.currentTarget.blur();
+                  }}
+                  className="docs-toc-link"
+                  render={<a href={item.url} />}
+                >
+                  {item.title}
+                </MenuItem>
+              );
+            })}
+          </Menu>
+        </nav>
+        {/* To add a sponsorship card, render it inside <div className="docs-toc-footer">
+          here: it stays pinned to the bottom of the sticky rail. */}
+      </div>
     </aside>
   );
 }
