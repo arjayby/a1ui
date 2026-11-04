@@ -46,7 +46,7 @@ export function CopyButtonExample() {
 
 ## API reference
 
-| Prop          | Type                          | Default    | Purpose                                                      |
+| Prop          | Type                          | Default    | Description                                                  |
 | ------------- | ----------------------------- | ---------- | ------------------------------------------------------------ |
 | `value`       | `string`                      | Required   | Plain text written to the clipboard.                         |
 | `label`       | `string`                      | `"Copy"`   | Button text before copying.                                  |

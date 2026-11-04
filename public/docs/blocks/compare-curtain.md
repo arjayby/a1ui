@@ -62,7 +62,7 @@ export function ImageComparison() {
 
 ## API reference
 
-| Prop            | Type                      | Default              | Purpose                                                   |
+| Prop            | Type                      | Default              | Description                                               |
 | --------------- | ------------------------- | -------------------- | --------------------------------------------------------- |
 | `before`        | `ReactNode`               | Required             | Full layer behind the reveal.                             |
 | `after`         | `ReactNode`               | Required             | Layer revealed from the left.                             |

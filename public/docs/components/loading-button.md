@@ -67,7 +67,7 @@ export function LoadingButtonExample() {
 
 ## API reference
 
-| Prop           | Type                             | Default        | Purpose                                                                                                         |
+| Prop           | Type                             | Default        | Description                                                                                                     |
 | -------------- | -------------------------------- | -------------- | --------------------------------------------------------------------------------------------------------------- |
 | `onClick`      | `() => void \| Promise<unknown>` | Required       | Action to run. Return the promise so loading lasts until the action finishes. Throw or reject to show an error. |
 | `label`        | `string`                         | `"Submit"`     | Idle label and accessible name.                                                                                 |

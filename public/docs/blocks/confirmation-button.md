@@ -57,7 +57,7 @@ export function ConfirmationButtonExample() {
 
 ## API reference
 
-| Prop             | Type                          | Default                          | Purpose                                                                                                                   |
+| Prop             | Type                          | Default                          | Description                                                                                                               |
 | ---------------- | ----------------------------- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
 | `onConfirm`      | `() => void \| Promise<void>` | Required                         | Runs once after a completed gesture or keyboard activation. Resolve to confirm; throw or reject to allow another attempt. |
 | `label`          | `string`                      | `"Slide to confirm"`             | Idle text and the handle's accessible name.                                                                               |

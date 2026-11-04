@@ -63,7 +63,7 @@ export function ScrambleExample() {
 
 ## API reference
 
-| Prop         | Type      | Default                                     | Purpose                                                                            |
+| Prop         | Type      | Default                                     | Description                                                                        |
 | ------------ | --------- | ------------------------------------------- | ---------------------------------------------------------------------------------- |
 | `text`       | `string`  | Required                                    | The final value. Changing it starts a scramble.                                    |
 | `duration`   | `number`  | `800`                                       | Total animation time in milliseconds. Zero or negative values resolve immediately. |

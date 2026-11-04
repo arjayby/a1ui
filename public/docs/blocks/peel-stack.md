@@ -77,7 +77,7 @@ export function Collections() {
 
 ## API reference
 
-| Prop              | Type                   | Default           | Purpose                                                 |
+| Prop              | Type                   | Default           | Description                                             |
 | ----------------- | ---------------------- | ----------------- | ------------------------------------------------------- |
 | `items`           | `PeelStackItem[]`      | Required          | Cards in display order. An empty array renders nothing. |
 | `activeId`        | `string`               | None              | Controlled selection. Pair with `onActiveChange`.       |

@@ -53,7 +53,7 @@ export function Poster() {
 
 ## API reference
 
-| Prop              | Type      | Default  | Purpose                                                                                             |
+| Prop              | Type      | Default  | Description                                                                                         |
 | ----------------- | --------- | -------- | --------------------------------------------------------------------------------------------------- |
 | `text`            | `string`  | Required | Repeats along the spiral path and names the graphic for assistive technology.                       |
 | `density`         | `number`  | `1`      | Adjusts the number of resting turns between `0.65` and `1.6`.                                       |

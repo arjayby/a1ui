@@ -56,7 +56,7 @@ export function BannerExample() {
 
 ## API reference
 
-| Prop           | Type                | Default     | Purpose                                                                                          |
+| Prop           | Type                | Default     | Description                                                                                      |
 | -------------- | ------------------- | ----------- | ------------------------------------------------------------------------------------------------ |
 | `items`        | `readonly string[]` | Required    | Words or phrases to repeat. Blank entries are ignored.                                           |
 | `speed`        | `number`            | `80`        | Movement in pixels per second. Zero or negative values pause. Non-finite values use the default. |

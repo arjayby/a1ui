@@ -52,7 +52,7 @@ export function ShapeFlowExample() {
 
 ## API reference
 
-| Prop         | Type     | Default     | Purpose                                                                            |
+| Prop         | Type     | Default     | Description                                                                        |
 | ------------ | -------- | ----------- | ---------------------------------------------------------------------------------- |
 | `text`       | `string` | Required    | Plain text to wrap around the duck. Whitespace collapses as in a normal paragraph. |
 | `radius`     | `number` | `80`        | Half the duck's width and height in pixels. Shrinks to fit narrow containers.      |

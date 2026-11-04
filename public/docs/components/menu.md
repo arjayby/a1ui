@@ -69,7 +69,7 @@ export function MenuExample() {
 
 ## API reference
 
-| Component  | Prop        | Type                             | Purpose                                                                                          |
+| Component  | Prop        | Type                             | Description                                                                                      |
 | ---------- | ----------- | -------------------------------- | ------------------------------------------------------------------------------------------------ |
 | `Menu`     | `value`     | `string`                         | Required selected item value. The caller updates selection.                                      |
 | `Menu`     | Other props | Motion `div` props               | Container classes, accessible labels, and event handlers. Use this container for menu scrolling. |

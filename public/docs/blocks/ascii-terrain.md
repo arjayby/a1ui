@@ -56,7 +56,7 @@ export function AsciiTerrainExample() {
 
 ## API reference
 
-| Prop          | Type            | Default                              | Purpose                                                                                                                          |
+| Prop          | Type            | Default                              | Description                                                                                                                      |
 | ------------- | --------------- | ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------- |
 | `cellSize`    | `number`        | `10`                                 | Character spacing in pixels, clamped to 6–24. Smaller values add detail.                                                         |
 | `amplitude`   | `number`        | `1`                                  | Base hill height, clamped to 0–2. Pointer hills and ripples are independent.                                                     |

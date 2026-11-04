@@ -54,7 +54,7 @@ export function SiteNavigation() {
 
 ## API reference
 
-| Prop        | Type                 | Default           | Purpose                                                                  |
+| Prop        | Type                 | Default           | Description                                                              |
 | ----------- | -------------------- | ----------------- | ------------------------------------------------------------------------ |
 | `items`     | `ParticleMenuItem[]` | Required          | Items with a unique `id`, visible `label`, and `shape`.                  |
 | `ariaLabel` | `string`             | `"Particle menu"` | Accessible name for the navigation.                                      |

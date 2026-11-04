@@ -60,7 +60,7 @@ export function ArticlePage() {
 
 ## API reference
 
-| Prop                 | Type                              | Default           | Purpose                                                    |
+| Prop                 | Type                              | Default           | Description                                                |
 | -------------------- | --------------------------------- | ----------------- | ---------------------------------------------------------- |
 | `sections`           | `{ id: string; label: string }[]` | Required          | Maps each marker to an element ID and readable label.      |
 | `activeOffset`       | `number`                          | `0.36`            | Sets the reading line within the nearest scroll container. |

@@ -56,7 +56,7 @@ export function Providers() {
 
 ## API reference
 
-| Prop           | Type            | Default      | Purpose                                                 |
+| Prop           | Type            | Default      | Description                                             |
 | -------------- | --------------- | ------------ | ------------------------------------------------------- |
 | `items`        | `ArcReelItem[]` | Required     | Cards in display order. An empty array renders nothing. |
 | `initialIndex` | `number`        | `0`          | Starting card, clamped to the available items.          |

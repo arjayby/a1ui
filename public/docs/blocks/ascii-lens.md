@@ -56,7 +56,7 @@ export function PortfolioCard() {
 
 ## API reference
 
-| Prop          | Type            | Default       | Purpose                                                              |
+| Prop          | Type            | Default       | Description                                                          |
 | ------------- | --------------- | ------------- | -------------------------------------------------------------------- |
 | `src`         | `string`        | Required      | Image URL. Same-origin URLs work without extra server configuration. |
 | `alt`         | `string`        | Required      | Description read by assistive technology.                            |
