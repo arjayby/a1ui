@@ -1,4 +1,20 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
+
+// Resolves once the page has stopped scrolling, so smooth jumps have finished.
+function settledScroll(page: Page) {
+  return page.evaluate(
+    () =>
+      new Promise<void>((resolve) => {
+        let last = -1;
+        const check = () => {
+          if (window.scrollY === last) return resolve();
+          last = window.scrollY;
+          setTimeout(check, 200);
+        };
+        check();
+      }),
+  );
+}
 
 test("catalog opens block documentation in the agreed order", async ({ page }) => {
   await page.goto("/blocks");
@@ -152,20 +168,6 @@ test("on-page menu jumps straight to the clicked section and then follows scroll
       if (current && seen.at(-1) !== current) seen.push(current);
     }).observe(nav, { subtree: true, attributes: true, attributeFilter: ["aria-current"] });
   });
-  const settledScroll = () =>
-    page.evaluate(
-      () =>
-        new Promise<void>((resolve) => {
-          let last = -1;
-          const check = () => {
-            if (window.scrollY === last) return resolve();
-            last = window.scrollY;
-            setTimeout(check, 200);
-          };
-          check();
-        }),
-    );
-
   for (const [name, id] of [
     ["API reference", "api-reference"],
     ["Installation", "installation"],
@@ -173,7 +175,7 @@ test("on-page menu jumps straight to the clicked section and then follows scroll
     ["Demo", "demo"],
   ]) {
     await toc.getByRole("link", { name, exact: true }).click();
-    await settledScroll();
+    await settledScroll(page);
     await expect(page.locator(`#${id}`)).toBeInViewport();
     await expect(page).toHaveURL(new RegExp(`#${id}$`));
     expect(
@@ -185,4 +187,35 @@ test("on-page menu jumps straight to the clicked section and then follows scroll
   await page.mouse.move(400, 400);
   await page.mouse.wheel(0, 800);
   await expect(toc.getByRole("link", { name: "Dependencies" })).toHaveAttribute("aria-current", "location");
+});
+
+test("on-page menu highlight follows the page after the window regains focus", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/components/menu");
+  await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
+  const toc = page.getByRole("navigation", { name: "On this page" });
+  const highlighted = toc.locator("a:has(> [data-slot='menu-highlight'])");
+  const apiReference = toc.getByRole("link", { name: "API reference" });
+
+  await apiReference.click();
+  await expect(apiReference).toHaveAttribute("aria-current", "location");
+  await expect(apiReference).not.toBeFocused();
+  await settledScroll(page);
+
+  await page.mouse.move(400, 400);
+  await page.mouse.wheel(0, -5000);
+  await expect(toc.getByRole("link", { name: "Demo" })).toHaveAttribute("aria-current", "location");
+  // Switching apps and back blurs, then refocuses, whatever element had focus.
+  await page.evaluate(() => {
+    const focused = document.activeElement as HTMLElement | null;
+    focused?.blur();
+    focused?.focus();
+  });
+  await expect(highlighted).toHaveText("Demo");
+
+  // Keyboard activation keeps focus in the menu so the reader can continue from there.
+  await apiReference.focus();
+  await page.keyboard.press("Enter");
+  await expect(apiReference).toBeFocused();
+  await expect(apiReference).toHaveAttribute("aria-current", "location");
 });

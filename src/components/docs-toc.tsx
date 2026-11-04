@@ -8,20 +8,32 @@ export type DocsTocItem = { url: string; title: ReactNode; depth: number };
 
 // A heading counts as current once it crosses this line below the sticky header.
 const activationOffset = 128;
-// A jump also ends once scrolling has been idle this long (interrupted, or the target was unreachable).
-const scrollSettleMs = 150;
+// A jump ends when it lands, when the reader scrolls or presses a key, or as a fallback once
+// scrolling has been idle this long (for example after a layout shift moved the target). It is
+// generous so slow frames during the smooth scroll never end a jump early.
+const jumpIdleMs = 600;
+// Input that means the reader is taking over from a jump in progress.
+const takeoverEvents = ["wheel", "touchstart", "pointerdown", "keydown"] as const;
 
 // While set, a jump started from the menu is scrolling and the clicked item stays current.
 type Hold = RefObject<{ target: number; timer: number } | null>;
+// Recomputes the current section from the scroll position.
+type Resync = RefObject<() => void>;
 
 function release(hold: Hold) {
   if (hold.current) window.clearTimeout(hold.current.timer);
   hold.current = null;
 }
 
-function holdUntil(hold: Hold, target: number) {
+function holdUntil(hold: Hold, target: number, resync: Resync) {
   if (hold.current) window.clearTimeout(hold.current.timer);
-  hold.current = { target, timer: window.setTimeout(() => release(hold), scrollSettleMs) };
+  const settle = () => {
+    // Scrolling stopped short of the target: follow where the page ended up.
+    const strayed = Math.abs(window.scrollY - target) > 1;
+    release(hold);
+    if (strayed) resync.current();
+  };
+  hold.current = { target, timer: window.setTimeout(settle, jumpIdleMs) };
 }
 
 function scrollTarget(heading: HTMLElement) {
@@ -35,6 +47,7 @@ function scrollTarget(heading: HTMLElement) {
 function useActiveSection(key: string) {
   const [active, setActive] = useState(key.split("\n")[0]);
   const hold: Hold = useRef(null);
+  const resync: Resync = useRef(() => {});
 
   useEffect(() => {
     const headings = key
@@ -61,20 +74,30 @@ function useActiveSection(key: string) {
       // Skip the sections a jump passes through, and keep the clicked item once it lands.
       if (hold.current) {
         if (Math.abs(window.scrollY - hold.current.target) <= 1) release(hold);
-        else holdUntil(hold, hold.current.target);
+        else holdUntil(hold, hold.current.target, resync);
         return;
       }
       if (!frame) frame = requestAnimationFrame(update);
     };
 
+    const takeOver = () => {
+      if (!hold.current) return;
+      release(hold);
+      schedule();
+    };
+
+    resync.current = schedule;
     update();
     window.addEventListener("scroll", schedule, { passive: true });
     window.addEventListener("resize", schedule);
+    for (const type of takeoverEvents) window.addEventListener(type, takeOver, { passive: true });
     return () => {
       cancelAnimationFrame(frame);
       release(hold);
+      resync.current = () => {};
       window.removeEventListener("scroll", schedule);
       window.removeEventListener("resize", schedule);
+      for (const type of takeoverEvents) window.removeEventListener(type, takeOver);
     };
   }, [key]);
 
@@ -82,7 +105,7 @@ function useActiveSection(key: string) {
     const heading = document.getElementById(id);
     setActive(id);
     if (!heading) return;
-    holdUntil(hold, scrollTarget(heading));
+    holdUntil(hold, scrollTarget(heading), resync);
     // Updating the hash ourselves avoids the fragment navigation's popstate, which the router
     // answers with a second scroll that fights this one.
     window.history.pushState(window.history.state, "", `#${encodeURIComponent(id)}`);
@@ -122,6 +145,10 @@ export function DocsToc({ items }: { items: DocsTocItem[] }) {
                   if (!isPlainClick(event)) return;
                   event.preventDefault();
                   jumpTo(id);
+                  // A pointer click leaves focus on the link, and Menu highlights the focused item, so a
+                  // later window refocus would pull the highlight back here after scrolling elsewhere.
+                  // Keyboard activation (detail 0) keeps focus so the reader stays in the menu.
+                  if (event.detail > 0) event.currentTarget.blur();
                 }}
                 className="docs-toc-link"
                 render={<a href={item.url} />}
