@@ -32,6 +32,7 @@
     "avatar-group",
     "badge",
     "pagination",
-    "navigation-menu"
+    "navigation-menu",
+    "kbd"
   ]
 }
