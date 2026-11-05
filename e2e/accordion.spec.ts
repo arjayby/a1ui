@@ -61,10 +61,6 @@ test("panels glide to their height, reverse smoothly mid-open, and keep one item
   expect(interrupted.after[0]).toBeLessThanOrEqual(interrupted.before + 8);
   expect(interrupted.after.at(-1)).toBe(0);
 
-  const wholesale = frame.getByRole("button", { name: "Do you offer wholesale pricing?" });
-  await wholesale.click({ force: true });
-  await expect(wholesale).toHaveAttribute("aria-expanded", "false");
-
   await shipping.focus();
   await page.keyboard.press("Enter");
   await expect(shipping).toHaveAttribute("aria-expanded", "true");
@@ -81,7 +77,7 @@ test("plus icon and multiple mode open instantly on mobile with reduced motion",
   await page.getByRole("button", { name: /^Mode:/ }).click();
   await page.getByRole("menuitem", { name: "multiple", exact: true }).click();
   const frame = page.locator(".demo-frame");
-  await expect(frame.locator('[data-slot="accordion-icon"][data-icon="plus"]')).toHaveCount(4);
+  await expect(frame.locator('[data-slot="accordion-icon"][data-icon="plus"]')).toHaveCount(3);
 
   const returns = frame.getByRole("button", { name: "Can I return an item?" });
   const height = await returns.evaluate(async (button: HTMLElement) => {

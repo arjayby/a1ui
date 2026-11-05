@@ -39,12 +39,6 @@ const questions = [
     question: "Is there a warranty?",
     answer: ["Every product carries a two-year warranty against manufacturing defects."],
   },
-  {
-    value: "wholesale",
-    question: "Do you offer wholesale pricing?",
-    answer: ["Wholesale accounts open again next quarter."],
-    disabled: true,
-  },
 ];
 
 export function AccordionPreview() {
@@ -72,14 +66,13 @@ export function AccordionDemo() {
       <div className="component-demo-stage">
         <Accordion
           key={`${icon}-${mode}-${duration}`}
-          defaultValue={["shipping"]}
           icon={icon}
           multiple={mode === "multiple"}
           duration={duration}
           className="w-full max-w-md px-4"
         >
           {questions.map((item) => (
-            <AccordionItem key={item.value} value={item.value} disabled={item.disabled}>
+            <AccordionItem key={item.value} value={item.value}>
               <AccordionTrigger>{item.question}</AccordionTrigger>
               <AccordionContent className="grid gap-2">
                 {item.answer.map((line) => (
