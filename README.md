@@ -1,6 +1,6 @@
 # a1ui
 
-Editable React components and blocks inspired by designs found online. The site has previews, documentation, and a shadcn registry. Blocks contains the installable catalog. Components contains the local Graphite design-system review with Kousa analytics examples. See the [Graphite integration reference](./docs/graphite/README.md) for source status, component APIs, and verification.
+Editable React components and blocks inspired by designs found online. The site has previews, documentation, and a shadcn registry. Blocks contains the installable catalog. Components contains the reusable component catalog. The site is styled with the Graphite design system: see [DESIGN.md](./DESIGN.md) for its rules and tokens, and the [Graphite integration reference](./docs/graphite/README.md) for source status and component APIs.
 
 Blocks use React 19, TypeScript, and Tailwind CSS 4.
 

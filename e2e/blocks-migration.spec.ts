@@ -51,16 +51,9 @@ test("blocks and reusable components have separate catalogs on desktop and mobil
   await expect(page.locator('a[href="/design-system"]')).toHaveCount(0);
 });
 
-test("the design system is available by direct URL without a navigation link", async ({ page }) => {
-  await page.goto("/design-system");
-  await expect(page.getByRole("heading", { name: "Design system", exact: true })).toBeVisible();
-  await expect(
-    page
-      .getByRole("navigation", { name: "breadcrumb", exact: true })
-      .locator('[data-slot="breadcrumb-page"]'),
-  ).toHaveText("Design system");
-  await expect(page.getByRole("heading", { name: "01 / Foundations" })).toBeVisible();
-  await expect(page.locator('a[href="/design-system"]')).toHaveCount(0);
+test("the retired design system page is not served", async ({ request }) => {
+  const response = await request.get("/design-system");
+  expect(response.status()).toBe(404);
 });
 
 test("existing page and Markdown links redirect to the migrated blocks", async ({ request }) => {

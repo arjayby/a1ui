@@ -1,26 +1,24 @@
 # Graphite integration reference
 
-The local review page is [Components](http://localhost:3000/components). It follows the existing documentation shell and uses Kousa analytics examples. The application remains a1ui, with its existing block catalog and registry.
+The design rules, tokens and component guidelines are in [DESIGN.md](../../DESIGN.md). This page records where they came from and how the repository applies them.
 
 ## Source status
 
-The source is [Kousa — Graphite Design System](https://app.paper.design/file/01M4QXGJ7XQN84CH7BW3PF4GMX/p-1-0). The task began at Git revision `1792e28bfc9b44ce9d24883df0342c7bd4fbe80e` with a clean worktree.
+The source is the **Graphite** design system in Claude Design ([artifact](https://claude.ai/artifact/9MqfgLG4LdqrErKqj4Xnxk)), version `1793897822-33b3`, last changed November 5, 2026. Its `project/tokens.json` was copied to [tokens.json](./tokens.json) on November 6, 2026; [source.json](./source.json) records the version and the hash of the copied file.
 
-On October 23, 2026, Paper's read-only file overview returned eight artboards, three font families, and all 66 token values. The token hash was `ec211c92`, matching the supplied October 17 snapshot. The separate token export and Actions & Forms JSX export both returned a weekly-quota error. No further Paper reads or canvas writes were made.
+Later the same day, the neutral and danger colours were replaced with values from a supplied shadcn theme: `background`, `foreground`, `card`, `popover`, `secondary`, `muted`, `border`, `input`, `danger`, `on-danger`, the `danger-soft` tints and the sidebar surface, text, accent and border colours, each with its `-foreground` pair where it has one. Primary, `on-primary`, `primary-hover`, `sidebar-primary`, accent, ring, the blue chart ramp and the success and warning colours stay as Claude Design supplied them. Fonts, radii, spacing, shadows and type styles are unchanged. The same colour changes were then published to the Claude Design system as version `1793903447-21e7`, so the two match again.
 
-This is a partial source import with locally implemented component adaptations. Exact component JSX, computed styles, state variations, and any additional themes remain unverified. No measurements were taken from screenshots. The source overview now has a Kousa title, but its example text could not be checked.
-
-The confirmed values, artboard metadata, provenance, and quota responses are cached in [source.json](./source.json). The original component dimensions followed the supplied Graphite conventions. The current UI uses shadcn's `base-vega` style with the Graphite palette and Phosphor icons. Buttons and inputs are 36px high on desktop, with 44px touch targets on mobile. Cards and dialogs use 12px radii. Buttons, inputs, textareas, and menus use 6px radii. Enabled buttons use pointer cursors. Block implementations and demos retain their existing styles and icons.
+This replaces the earlier partial import from Paper (October 23, 2026), which had only the overview tokens. The new source adds full light and dark themes, shadcn-parity colour roles, chart and sidebar colours, named type styles, radii and shadows. The font files are unchanged: their SHA-256 hashes match [fonts.json](./fonts.json).
 
 ## Theme and typography
 
-All 11 source token namespaces are in `src/app/graphite-tokens.css`. The existing `globals.css` maps them to application and Fumadocs roles. Graphite dark mode is the default. The existing theme toggle remains usable. Light colors are an application adaptation, with darker status and syntax colors for readable text.
+`src/app/graphite-tokens.css` is generated from `tokens.json`: theme-independent spacing, radius, shadow and type-style tokens on `:root`, light colours on `:root` and dark colours on `.dark`. `src/app/globals.css` maps them to Tailwind, shadcn and Fumadocs roles. Graphite dark mode is the default and the theme toggle still switches to light.
 
-Source spacing names retain their literal pixel values. They are CSS variables, rather than replacements for Tailwind's numeric spacing scale: `var(--spacing-4)` is 4px, while Tailwind `p-4` retains its existing meaning. This preserves the block catalog's layout. Source colors stay constant across themes.
+Tailwind's `rounded-xs`, `rounded-sm`, `rounded-md` and `rounded-lg` now resolve to Graphite's 4, 6, 8 and 12px radii. Spacing tokens (`--space-4` to `--space-96`) are CSS variables and leave Tailwind's numeric spacing scale untouched.
 
-Headings use Stack Sans Notch 400 and 500. Body text, UI buttons, and form labels use Inter 400, 500, and 600. Code uses DM Mono 400 and 500. Fonts are served locally from `public/fonts/graphite`. [fonts.json](./fonts.json) records download URLs and SHA-256 hashes. Each family has its SIL Open Font License beside its files.
+Headings use Stack Sans Notch 400 and 500. Body text, buttons and form labels use Inter 400, 500 and 600. Code, URLs and the uppercase eyebrow use DM Mono 400 and 500. Fonts are served locally from `public/fonts/graphite`, each family with its SIL Open Font License.
 
-Headings use the supplied local `-0.025em` override. The source `--tracking-tight` token remains `-0.04em`.
+Local additions that Graphite does not define stay in `globals.css`: code-highlighting colours, the primitive type scale, container widths, and the `--status-*` and `--control-background` aliases that published registry components read.
 
 ## Components
 
@@ -41,12 +39,10 @@ Input, Textarea, Select, Checkbox, RadioGroupItem, and Switch use native form el
 
 Button, Dialog, Sheet, Popover, Tabs, DropdownMenu, Tooltip, Toast, and Collapsible use Base UI. Sidebar and Breadcrumb use Base UI's `useRender` for composition. Triggers and links accept `render` instead of `asChild`. Menu items use `onClick`. TooltipProvider accepts `delay`. Sheet reuses Dialog's focus and dismissal behavior, with `finalFocus` for the mobile sidebar's trigger. ToastViewport renders notifications added with `useToastManager().add()` inside ToastProvider.
 
-The showcase uses local state for funnel names, filters, reporting periods, and notifications. Its analytics numbers are sample data. These components are available in this repository; no new registry entries were published.
+These components are available in this repository; they are not published as registry entries.
 
 ## Verification
 
-The integration adds browser coverage in `e2e/graphite.spec.ts` and updates the existing Components-page, font-weight, and default-theme expectations. Browser checks cover all token values, seven font weights, native controls, modal focus, validation, draft cancellation, tabs, menus, tooltips, toast expiry, light mode, mobile overflow, and reduced motion.
-
 Run the project checks with `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm test:e2e`, and `pnpm build`.
 
-The cached Paper data records the original Graphite import. Current component styling follows Vega and does not claim to reproduce the Paper component exports.
+The `/design-system` review page has been removed; `e2e/blocks-migration.spec.ts` checks that it returns 404.
