@@ -29,6 +29,7 @@
     "popover",
     "select",
     "command",
-    "avatar-group"
+    "avatar-group",
+    "badge"
   ]
 }

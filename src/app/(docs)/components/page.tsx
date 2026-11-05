@@ -26,6 +26,7 @@ import { PopoverPreview } from "@/components/component-demos/popover-demo";
 import { SelectPreview } from "@/components/component-demos/select-demo";
 import { CommandPreview } from "@/components/component-demos/command-demo";
 import { AvatarGroupPreview } from "@/components/component-demos/avatar-group-demo";
+import { BadgePreview } from "@/components/component-demos/badge-demo";
 import { LoadingButtonPreview } from "@/components/component-demos/loading-button-demo";
 import { SliderPreview } from "@/components/component-demos/slider-demo";
 import { OtpInputPreview } from "@/components/component-demos/otp-input-demo";
@@ -63,6 +64,7 @@ const previews: Record<string, ReactNode> = {
   select: <SelectPreview />,
   command: <CommandPreview />,
   "avatar-group": <AvatarGroupPreview />,
+  badge: <BadgePreview />,
   "loading-button": <LoadingButtonPreview />,
   slider: <SliderPreview />,
   "otp-input": <OtpInputPreview />,
