@@ -1078,6 +1078,45 @@
         }
       },
       "docs": "Read http://localhost:3000/docs/components/checkbox.md for usage, required props, and integration instructions."
+    },
+    {
+      "name": "select",
+      "type": "registry:component",
+      "title": "Select",
+      "description": "A select whose list springs open from the trigger, with a traveling highlight, a drawn check, and a cross-fading value.",
+      "dependencies": [
+        "motion",
+        "@base-ui/react"
+      ],
+      "files": [
+        {
+          "path": "src/registry/components/select.tsx",
+          "type": "registry:component",
+          "target": "components/animated/select.tsx"
+        }
+      ],
+      "categories": [
+        "input",
+        "select",
+        "animation",
+        "interactive"
+      ],
+      "meta": {
+        "a1ui": {
+          "useCases": [
+            "Picking one option from a short or grouped list, such as a region, plan, or sort order, where a native select feels out of place."
+          ],
+          "limitations": [
+            "Single selection of string values only. The trigger shows labels from the items prop; without it the raw value is shown. Aligning the selected item over the trigger applies to mouse input and falls back to opening below near viewport edges."
+          ],
+          "requirements": [
+            "React 19, Tailwind CSS 4, Motion, Base UI, and theme colors. Pass items so the trigger can label the value, and give SelectTrigger an aria-label or aria-labelledby. Reduced motion opens, closes, and moves the highlight instantly."
+          ],
+          "docsUrl": "http://localhost:3000/docs/components/select.md",
+          "registryUrl": "http://localhost:3000/r/select.json"
+        }
+      },
+      "docs": "Read http://localhost:3000/docs/components/select.md for usage, required props, and integration instructions."
     }
   ]
 }
