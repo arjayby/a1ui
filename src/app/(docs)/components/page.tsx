@@ -18,6 +18,7 @@ import { AccordionPreview } from "@/components/component-demos/accordion-demo";
 import { ProgressPreview } from "@/components/component-demos/progress-demo";
 import { DialogPreview } from "@/components/component-demos/dialog-demo";
 import { AlertDialogPreview } from "@/components/component-demos/alert-dialog-demo";
+import { DrawerPreview } from "@/components/component-demos/drawer-demo";
 import { LoadingButtonPreview } from "@/components/component-demos/loading-button-demo";
 import { SliderPreview } from "@/components/component-demos/slider-demo";
 import { OtpInputPreview } from "@/components/component-demos/otp-input-demo";
@@ -47,6 +48,7 @@ const previews: Record<string, ReactNode> = {
   progress: <ProgressPreview />,
   dialog: <DialogPreview />,
   "alert-dialog": <AlertDialogPreview />,
+  drawer: <DrawerPreview />,
   "loading-button": <LoadingButtonPreview />,
   slider: <SliderPreview />,
   "otp-input": <OtpInputPreview />,

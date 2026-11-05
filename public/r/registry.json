@@ -1312,6 +1312,46 @@
         }
       },
       "docs": "Read http://localhost:3000/docs/components/alert-dialog.md for usage, required props, and integration instructions."
+    },
+    {
+      "name": "drawer",
+      "type": "registry:component",
+      "title": "Drawer",
+      "description": "A bottom or side sheet that springs in, follows your drag, rubber-bands, and can scale the page behind it.",
+      "dependencies": [
+        "motion",
+        "@base-ui/react"
+      ],
+      "files": [
+        {
+          "path": "src/registry/components/drawer.tsx",
+          "type": "registry:component",
+          "target": "components/animated/drawer.tsx"
+        }
+      ],
+      "categories": [
+        "overlay",
+        "drawer",
+        "sheet",
+        "animation",
+        "interactive"
+      ],
+      "meta": {
+        "a1ui": {
+          "useCases": [
+            "Mobile-first forms, pickers, share sheets, and filter panels that slide up from the bottom or in from the right and dismiss with a drag."
+          ],
+          "limitations": [
+            "Sides are bottom and right only, with no snap points. Dragging starts anywhere on the sheet except controls, so give scrollable regions data-drawer-no-drag. The scale effect only reaches content inside a DrawerScaleWrapper."
+          ],
+          "requirements": [
+            "React 19, Tailwind CSS 4, Motion, Base UI, and theme colors. Include a DrawerTitle or pass aria-label to DrawerContent. Controlled usage requires updating open in onOpenChange. Reduced motion moves the sheet instantly and removes the rubber band."
+          ],
+          "docsUrl": "http://localhost:3000/docs/components/drawer.md",
+          "registryUrl": "http://localhost:3000/r/drawer.json"
+        }
+      },
+      "docs": "Read http://localhost:3000/docs/components/drawer.md for usage, required props, and integration instructions."
     }
   ]
 }

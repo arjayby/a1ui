@@ -1,0 +1,96 @@
+---
+title: Drawer
+description: A bottom or side sheet that springs in, follows your drag, rubber-bands, and can scale the page behind it.
+---
+
+## Demo
+
+<DrawerDemo />
+
+## Installation
+
+<Installation name="drawer" />
+
+## Dependencies
+
+<Dependencies name="drawer" />
+
+## Code
+
+<Tabs items={["Usage", "Source"]}>
+  <Tab value="Usage">
+
+```tsx
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerScaleWrapper,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/animated/drawer";
+
+export function DrawerExample() {
+  return (
+    <DrawerScaleWrapper>
+      <Drawer scaleBackground>
+        <DrawerTrigger>Share</DrawerTrigger>
+        <DrawerContent>
+          <DrawerHeader>
+            <DrawerTitle>Share this page</DrawerTitle>
+            <DrawerDescription>Anyone with the link can view it.</DrawerDescription>
+          </DrawerHeader>
+          <DrawerFooter>
+            <DrawerClose>Done</DrawerClose>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
+    </DrawerScaleWrapper>
+  );
+}
+```
+
+  </Tab>
+  <Tab value="Source">
+    <ComponentSource name="drawer" />
+  </Tab>
+</Tabs>
+
+## API reference
+
+### Drawer
+
+| Prop              | Type                      | Default      | Description                                                                         |
+| ----------------- | ------------------------- | ------------ | ----------------------------------------------------------------------------------- |
+| `open`            | `boolean`                 | Uncontrolled | Whether the drawer is open when controlled by the caller.                           |
+| `defaultOpen`     | `boolean`                 | `false`      | Whether the drawer starts open when uncontrolled.                                   |
+| `onOpenChange`    | `(open: boolean) => void` | None         | Called with the next state. Controlled usage requires the caller to update `open`.  |
+| `side`            | `"bottom" \| "right"`     | `"bottom"`   | Edge the sheet slides in from. Dragging toward that edge dismisses it.              |
+| `duration`        | `number`                  | `0.5`        | Spring time in seconds for sliding and snapping back. Zero moves the sheet at once. |
+| `scaleBackground` | `boolean`                 | `false`      | Scales and rounds the nearest `DrawerScaleWrapper` while open.                      |
+| `modal`           | `boolean`                 | `true`       | Traps focus and locks page scroll while open.                                       |
+
+### DrawerContent
+
+| Prop         | Type        | Default | Description                                                             |
+| ------------ | ----------- | ------- | ----------------------------------------------------------------------- |
+| `hideHandle` | `boolean`   | `false` | Hides the grab handle. The whole sheet stays draggable.                 |
+| `aria-label` | `string`    | None    | Accessible name when there is no `DrawerTitle`.                         |
+| `className`  | `string`    | None    | Additional classes on the sheet surface.                                |
+| `children`   | `ReactNode` | None    | Sheet content. Add `data-drawer-no-drag` to regions that should scroll. |
+
+Dragging past 30% of the sheet, or flicking faster than 500 pixels per second, dismisses it. Dragging the other way meets increasing resistance and springs back on release.
+
+### DrawerScaleWrapper
+
+| Prop        | Type        | Default | Description                                                       |
+| ----------- | ----------- | ------- | ----------------------------------------------------------------- |
+| `scale`     | `number`    | `0.94`  | Scale of the wrapped content while the drawer is fully open.      |
+| `radius`    | `number`    | `16`    | Corner radius in pixels the wrapped content rounds to.            |
+| `className` | `string`    | None    | Additional classes on the wrapper.                                |
+| `children`  | `ReactNode` | None    | Content to scale. Place the `Drawer` anywhere inside the wrapper. |
+
+`DrawerTrigger`, `DrawerTitle`, `DrawerDescription`, and `DrawerClose` accept the props of their Base UI Drawer parts, including `render`. Pass a function as `className` to replace their default classes. `DrawerHeader` and `DrawerFooter` are plain `div` elements.

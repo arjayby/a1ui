@@ -21,6 +21,7 @@
     "accordion",
     "progress",
     "dialog",
-    "alert-dialog"
+    "alert-dialog",
+    "drawer"
   ]
 }
