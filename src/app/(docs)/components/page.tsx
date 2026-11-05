@@ -20,6 +20,7 @@ import { DialogPreview } from "@/components/component-demos/dialog-demo";
 import { AlertDialogPreview } from "@/components/component-demos/alert-dialog-demo";
 import { DrawerPreview } from "@/components/component-demos/drawer-demo";
 import { ToastPreview } from "@/components/component-demos/toast-demo";
+import { TooltipPreview } from "@/components/component-demos/tooltip-demo";
 import { LoadingButtonPreview } from "@/components/component-demos/loading-button-demo";
 import { SliderPreview } from "@/components/component-demos/slider-demo";
 import { OtpInputPreview } from "@/components/component-demos/otp-input-demo";
@@ -51,6 +52,7 @@ const previews: Record<string, ReactNode> = {
   "alert-dialog": <AlertDialogPreview />,
   drawer: <DrawerPreview />,
   toast: <ToastPreview />,
+  tooltip: <TooltipPreview />,
   "loading-button": <LoadingButtonPreview />,
   slider: <SliderPreview />,
   "otp-input": <OtpInputPreview />,

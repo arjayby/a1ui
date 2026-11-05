@@ -23,6 +23,7 @@
     "dialog",
     "alert-dialog",
     "drawer",
-    "toast"
+    "toast",
+    "tooltip"
   ]
 }
