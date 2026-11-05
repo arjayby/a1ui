@@ -15,6 +15,7 @@
     "otp-input",
     "validated-input",
     "tag-input",
-    "password-input"
+    "password-input",
+    "dialog"
   ]
 }
