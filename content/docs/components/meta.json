@@ -36,6 +36,7 @@
     "kbd",
     "skeleton",
     "textarea",
-    "breadcrumb"
+    "breadcrumb",
+    "carousel"
   ]
 }
