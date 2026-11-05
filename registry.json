@@ -1280,6 +1280,36 @@
           ]
         }
       }
+    },
+    {
+      "name": "textarea",
+      "type": "registry:component",
+      "title": "Textarea",
+      "description": "A textarea that grows smoothly to fit its text, with a rolling character counter and an error that slides in.",
+      "dependencies": ["motion"],
+      "files": [
+        {
+          "path": "src/registry/components/textarea.tsx",
+          "type": "registry:component",
+          "target": "components/animated/textarea.tsx"
+        }
+      ],
+      "categories": ["input", "textarea", "form", "animation"],
+      "meta": {
+        "a1ui": {
+          "useCases": [
+            "Comments, feedback, and chat composers that should start small and grow with the text instead of showing a scrollbar early.",
+            "Bios and posts with a character limit, where a rolling counter warns as the limit gets close."
+          ],
+          "limitations": [
+            "Height follows the text between minRows and maxRows; manual resizing is turned off. The counter needs maxLength and counts UTF-16 code units, like the native limit.",
+            "Rows are measured from the textarea's own font and padding, so classes that change them should be applied to the component source rather than to className."
+          ],
+          "requirements": [
+            "React 19, Tailwind CSS 4, Motion, and theme colors including destructive. Supply label or aria-label. Controlled usage requires updating value in onValueChange. Reduced motion resizes instantly and skips the counter shake."
+          ]
+        }
+      }
     }
   ]
 }
