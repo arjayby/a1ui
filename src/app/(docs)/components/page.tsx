@@ -15,6 +15,7 @@ import { TabsPreview } from "@/components/component-demos/tabs-demo";
 import { RadioGroupPreview } from "@/components/component-demos/radio-group-demo";
 import { ToggleGroupPreview } from "@/components/component-demos/toggle-group-demo";
 import { AccordionPreview } from "@/components/component-demos/accordion-demo";
+import { ProgressPreview } from "@/components/component-demos/progress-demo";
 import { LoadingButtonPreview } from "@/components/component-demos/loading-button-demo";
 import { SliderPreview } from "@/components/component-demos/slider-demo";
 import { OtpInputPreview } from "@/components/component-demos/otp-input-demo";
@@ -41,6 +42,7 @@ const previews: Record<string, ReactNode> = {
   "radio-group": <RadioGroupPreview />,
   "toggle-group": <ToggleGroupPreview />,
   accordion: <AccordionPreview />,
+  progress: <ProgressPreview />,
   "loading-button": <LoadingButtonPreview />,
   slider: <SliderPreview />,
   "otp-input": <OtpInputPreview />,

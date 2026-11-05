@@ -26,6 +26,7 @@ import { TabsDemo } from "@/components/component-demos/tabs-demo";
 import { RadioGroupDemo } from "@/components/component-demos/radio-group-demo";
 import { ToggleGroupDemo } from "@/components/component-demos/toggle-group-demo";
 import { AccordionDemo } from "@/components/component-demos/accordion-demo";
+import { ProgressDemo } from "@/components/component-demos/progress-demo";
 import { SliderDemo } from "@/components/component-demos/slider-demo";
 import { OtpInputDemo } from "@/components/component-demos/otp-input-demo";
 import { ValidatedInputDemo } from "@/components/component-demos/validated-input-demo";
@@ -62,6 +63,7 @@ export function getMDXComponents(components?: MDXComponents) {
     RadioGroupDemo,
     ToggleGroupDemo,
     AccordionDemo,
+    ProgressDemo,
     SliderDemo,
     OtpInputDemo,
     ValidatedInputDemo,

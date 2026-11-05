@@ -1195,6 +1195,45 @@
         }
       },
       "docs": "Read http://localhost:3000/docs/components/accordion.md for usage, required props, and integration instructions."
+    },
+    {
+      "name": "progress",
+      "type": "registry:component",
+      "title": "Progress",
+      "description": "A progress bar, ring, or step row whose fill springs to each value while the percentage rolls like a counter.",
+      "dependencies": [
+        "motion",
+        "@base-ui/react"
+      ],
+      "files": [
+        {
+          "path": "src/registry/components/progress.tsx",
+          "type": "registry:component",
+          "target": "components/animated/progress.tsx"
+        }
+      ],
+      "categories": [
+        "feedback",
+        "progress",
+        "animation",
+        "loading"
+      ],
+      "meta": {
+        "a1ui": {
+          "useCases": [
+            "Uploads, onboarding checklists, quotas, and background jobs where a value changes over time or is not yet known."
+          ],
+          "limitations": [
+            "Display only: the caller owns the value. The value text rolls digits 0 to 9 only, so other characters in formatValue output change instantly. The ring has one stroke width derived from its size."
+          ],
+          "requirements": [
+            "React 19, Tailwind CSS 4, Motion, Base UI, and theme colors. Supply label or aria-label. Pass value={null} for indeterminate. Reduced motion jumps the fill, stops the sweep and shimmer, and swaps digits without rolling."
+          ],
+          "docsUrl": "http://localhost:3000/docs/components/progress.md",
+          "registryUrl": "http://localhost:3000/r/progress.json"
+        }
+      },
+      "docs": "Read http://localhost:3000/docs/components/progress.md for usage, required props, and integration instructions."
     }
   ]
 }
