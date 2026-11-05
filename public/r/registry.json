@@ -1587,6 +1587,45 @@
         }
       },
       "docs": "Read http://localhost:3000/docs/components/command.md for usage, required props, and integration instructions."
+    },
+    {
+      "name": "avatar-group",
+      "type": "registry:component",
+      "title": "Avatar Group",
+      "description": "Overlapping avatars that spring apart on hover, lift with a name label, and fan extra people out of a counting +N chip.",
+      "dependencies": [
+        "motion",
+        "@base-ui/react"
+      ],
+      "files": [
+        {
+          "path": "src/registry/components/avatar-group.tsx",
+          "type": "registry:component",
+          "target": "components/animated/avatar-group.tsx"
+        }
+      ],
+      "categories": [
+        "avatar",
+        "display",
+        "animation",
+        "interactive"
+      ],
+      "meta": {
+        "a1ui": {
+          "useCases": [
+            "Showing who is on a project, in a document, or in a call, with names on hover and focus and a +N chip for the rest."
+          ],
+          "limitations": [
+            "Initials or local images only; there is no remote image loading policy. Sizes are sm, md, and lg (32, 40, and 48 pixels). The fanned-out row sits below the group in a single line, so very long overflow lists should use a smaller max or a separate list."
+          ],
+          "requirements": [
+            "React 19, Tailwind CSS 4, Motion, Base UI, and theme colors. Pass Avatar elements with a name as children, and give the group an aria-label. Controlled usage requires updating open in onOpenChange. Reduced motion keeps the spread and labels but makes every change instant and shows the count without counting."
+          ],
+          "docsUrl": "http://localhost:3000/docs/components/avatar-group.md",
+          "registryUrl": "http://localhost:3000/r/avatar-group.json"
+        }
+      },
+      "docs": "Read http://localhost:3000/docs/components/avatar-group.md for usage, required props, and integration instructions."
     }
   ]
 }

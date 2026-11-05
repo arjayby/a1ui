@@ -1,0 +1,48 @@
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+
+import { AgentInstall } from "@/components/agent-install";
+import { DocsToc } from "@/components/docs-toc";
+import { getMDXComponents } from "@/components/mdx";
+import { Badge } from "@/components/ui/badge";
+import { componentsGroup, docStructuredData, JsonLd } from "@/lib/seo";
+import { source } from "@/lib/source";
+
+export const metadata: Metadata = {
+  title: "Avatar Group",
+  description:
+    "Overlapping avatars that spring apart on hover, lift with a name label, and fan extra people out of a counting +N chip.",
+  alternates: { canonical: "/components/avatar-group" },
+};
+
+export default function AvatarGroupPage() {
+  const page = source.getPage(["components", "avatar-group"]);
+  if (!page) notFound();
+  const MDX = page.data.body;
+
+  return (
+    <article className="docs-article">
+      <JsonLd
+        data={docStructuredData({
+          group: componentsGroup,
+          title: page.data.title,
+          description: page.data.description ?? "",
+          path: "/components/avatar-group",
+        })}
+      />
+      <header>
+        <div className="docs-page-meta">
+          <Badge variant="outline">React</Badge>
+          <Badge variant="outline">Motion</Badge>
+        </div>
+        <h1>{page.data.title}</h1>
+        <p>{page.data.description}</p>
+        <AgentInstall name="avatar-group" />
+      </header>
+      <DocsToc items={page.data.toc} />
+      <div className="docs-article-body prose">
+        <MDX components={getMDXComponents()} />
+      </div>
+    </article>
+  );
+}
