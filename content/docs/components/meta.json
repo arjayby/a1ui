@@ -30,6 +30,7 @@
     "select",
     "command",
     "avatar-group",
-    "badge"
+    "badge",
+    "pagination"
   ]
 }
