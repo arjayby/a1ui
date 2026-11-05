@@ -1587,6 +1587,44 @@
         }
       },
       "docs": "Read http://localhost:3000/docs/components/command.md for usage, required props, and integration instructions."
+    },
+    {
+      "name": "badge",
+      "type": "registry:component",
+      "title": "Badge",
+      "description": "A badge whose count rolls like an odometer, resizes smoothly, pops in from zero, and can pulse a live status dot.",
+      "dependencies": [
+        "motion"
+      ],
+      "files": [
+        {
+          "path": "src/registry/components/badge.tsx",
+          "type": "registry:component",
+          "target": "components/animated/badge.tsx"
+        }
+      ],
+      "categories": [
+        "badge",
+        "status",
+        "notification",
+        "animation"
+      ],
+      "meta": {
+        "a1ui": {
+          "useCases": [
+            "Unread and notification counts on icons or tabs, status labels with a live indicator, and small tags such as Beta or New."
+          ],
+          "limitations": [
+            "One size, 20 pixels tall. Counts are whole numbers of zero or more, and the badge hides at zero unless showZero is set. The status dot uses the text color of the variant."
+          ],
+          "requirements": [
+            "React 19, Tailwind CSS 4, Motion, and theme colors. Pass countLabel so screen readers hear what a count means; counts are announced through a polite live region. Reduced motion swaps the digits instantly, skips the pop, and stops the pulse."
+          ],
+          "docsUrl": "http://localhost:3000/docs/components/badge.md",
+          "registryUrl": "http://localhost:3000/r/badge.json"
+        }
+      },
+      "docs": "Read http://localhost:3000/docs/components/badge.md for usage, required props, and integration instructions."
     }
   ]
 }
