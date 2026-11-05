@@ -13,6 +13,7 @@ import { SwitchPreview } from "@/components/component-demos/switch-demo";
 import { CheckboxPreview } from "@/components/component-demos/checkbox-demo";
 import { TabsPreview } from "@/components/component-demos/tabs-demo";
 import { RadioGroupPreview } from "@/components/component-demos/radio-group-demo";
+import { ToggleGroupPreview } from "@/components/component-demos/toggle-group-demo";
 import { LoadingButtonPreview } from "@/components/component-demos/loading-button-demo";
 import { SliderPreview } from "@/components/component-demos/slider-demo";
 import { OtpInputPreview } from "@/components/component-demos/otp-input-demo";
@@ -37,6 +38,7 @@ const previews: Record<string, ReactNode> = {
   checkbox: <CheckboxPreview />,
   tabs: <TabsPreview />,
   "radio-group": <RadioGroupPreview />,
+  "toggle-group": <ToggleGroupPreview />,
   "loading-button": <LoadingButtonPreview />,
   slider: <SliderPreview />,
   "otp-input": <OtpInputPreview />,

@@ -16,6 +16,7 @@
     "validated-input",
     "tag-input",
     "password-input",
-    "radio-group"
+    "radio-group",
+    "toggle-group"
   ]
 }
