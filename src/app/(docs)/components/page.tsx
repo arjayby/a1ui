@@ -32,6 +32,7 @@ import { NavigationMenuPreview } from "@/components/component-demos/navigation-m
 import { KbdPreview } from "@/components/component-demos/kbd-demo";
 import { SkeletonPreview } from "@/components/component-demos/skeleton-demo";
 import { TextareaPreview } from "@/components/component-demos/textarea-demo";
+import { BreadcrumbPreview } from "@/components/component-demos/breadcrumb-demo";
 import { LoadingButtonPreview } from "@/components/component-demos/loading-button-demo";
 import { SliderPreview } from "@/components/component-demos/slider-demo";
 import { OtpInputPreview } from "@/components/component-demos/otp-input-demo";
@@ -75,6 +76,7 @@ const previews: Record<string, ReactNode> = {
   kbd: <KbdPreview />,
   skeleton: <SkeletonPreview />,
   textarea: <TextareaPreview />,
+  breadcrumb: <BreadcrumbPreview />,
   "loading-button": <LoadingButtonPreview />,
   slider: <SliderPreview />,
   "otp-input": <OtpInputPreview />,

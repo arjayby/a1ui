@@ -1310,6 +1310,34 @@
           ]
         }
       }
+    },
+    {
+      "name": "breadcrumb",
+      "type": "registry:component",
+      "title": "Breadcrumb",
+      "description": "A breadcrumb trail whose middle collapses into an expandable ellipsis, with segments that slide in and out as you navigate.",
+      "dependencies": ["motion"],
+      "files": [
+        {
+          "path": "src/registry/components/breadcrumb.tsx",
+          "type": "registry:component",
+          "target": "components/animated/breadcrumb.tsx"
+        }
+      ],
+      "categories": ["breadcrumb", "navigation", "animation", "interactive"],
+      "meta": {
+        "a1ui": {
+          "useCases": [
+            "Showing where a page sits in a deep hierarchy, such as a file browser, docs tree, or nested settings, where the trail changes as people move around."
+          ],
+          "limitations": [
+            "Data-driven only: pass the whole trail as items. Collapsing hides a single run of middle segments. Fitting measures the nav's own width (full width by default), so keep it out of shrink-to-fit containers or turn collapseToFit off there. The last item is always the current page."
+          ],
+          "requirements": [
+            "React 19, Tailwind CSS 4, Motion, and theme colors. Give each item a label and an href (except the current page); pass renderLink to use a router link such as Next.js Link. Reduced motion swaps segments instantly."
+          ]
+        }
+      }
     }
   ]
 }

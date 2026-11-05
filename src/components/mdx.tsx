@@ -43,6 +43,7 @@ import { NavigationMenuDemo } from "@/components/component-demos/navigation-menu
 import { KbdDemo } from "@/components/component-demos/kbd-demo";
 import { SkeletonDemo } from "@/components/component-demos/skeleton-demo";
 import { TextareaDemo } from "@/components/component-demos/textarea-demo";
+import { BreadcrumbDemo } from "@/components/component-demos/breadcrumb-demo";
 import { SliderDemo } from "@/components/component-demos/slider-demo";
 import { OtpInputDemo } from "@/components/component-demos/otp-input-demo";
 import { ValidatedInputDemo } from "@/components/component-demos/validated-input-demo";
@@ -96,6 +97,7 @@ export function getMDXComponents(components?: MDXComponents) {
     KbdDemo,
     SkeletonDemo,
     TextareaDemo,
+    BreadcrumbDemo,
     SliderDemo,
     OtpInputDemo,
     ValidatedInputDemo,
