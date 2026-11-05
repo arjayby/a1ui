@@ -30,6 +30,7 @@ import { BadgePreview } from "@/components/component-demos/badge-demo";
 import { PaginationPreview } from "@/components/component-demos/pagination-demo";
 import { NavigationMenuPreview } from "@/components/component-demos/navigation-menu-demo";
 import { KbdPreview } from "@/components/component-demos/kbd-demo";
+import { SkeletonPreview } from "@/components/component-demos/skeleton-demo";
 import { LoadingButtonPreview } from "@/components/component-demos/loading-button-demo";
 import { SliderPreview } from "@/components/component-demos/slider-demo";
 import { OtpInputPreview } from "@/components/component-demos/otp-input-demo";
@@ -71,6 +72,7 @@ const previews: Record<string, ReactNode> = {
   pagination: <PaginationPreview />,
   "navigation-menu": <NavigationMenuPreview />,
   kbd: <KbdPreview />,
+  skeleton: <SkeletonPreview />,
   "loading-button": <LoadingButtonPreview />,
   slider: <SliderPreview />,
   "otp-input": <OtpInputPreview />,

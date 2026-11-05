@@ -33,6 +33,7 @@
     "badge",
     "pagination",
     "navigation-menu",
-    "kbd"
+    "kbd",
+    "skeleton"
   ]
 }

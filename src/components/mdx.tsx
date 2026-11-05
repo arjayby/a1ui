@@ -41,6 +41,7 @@ import { BadgeDemo } from "@/components/component-demos/badge-demo";
 import { PaginationDemo } from "@/components/component-demos/pagination-demo";
 import { NavigationMenuDemo } from "@/components/component-demos/navigation-menu-demo";
 import { KbdDemo } from "@/components/component-demos/kbd-demo";
+import { SkeletonDemo } from "@/components/component-demos/skeleton-demo";
 import { SliderDemo } from "@/components/component-demos/slider-demo";
 import { OtpInputDemo } from "@/components/component-demos/otp-input-demo";
 import { ValidatedInputDemo } from "@/components/component-demos/validated-input-demo";
@@ -92,6 +93,7 @@ export function getMDXComponents(components?: MDXComponents) {
     PaginationDemo,
     NavigationMenuDemo,
     KbdDemo,
+    SkeletonDemo,
     SliderDemo,
     OtpInputDemo,
     ValidatedInputDemo,

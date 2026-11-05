@@ -1781,6 +1781,44 @@
         }
       },
       "docs": "Read http://localhost:3000/docs/components/kbd.md for usage, required props, and integration instructions."
+    },
+    {
+      "name": "skeleton",
+      "type": "registry:component",
+      "title": "Skeleton",
+      "description": "Loading placeholders that shimmer in sync, then blur the real content into place without a layout jump.",
+      "dependencies": [
+        "motion"
+      ],
+      "files": [
+        {
+          "path": "src/registry/components/skeleton.tsx",
+          "type": "registry:component",
+          "target": "components/animated/skeleton.tsx"
+        }
+      ],
+      "categories": [
+        "loading",
+        "feedback",
+        "placeholder",
+        "animation"
+      ],
+      "meta": {
+        "a1ui": {
+          "useCases": [
+            "Cards, lists, and profile headers that wait on data, where the placeholder should match the final layout and hand over to the content without a jump."
+          ],
+          "limitations": [
+            "The shimmer runs on the Web Animations API and is lined up by page position, measured when placeholders mount or resize; a placeholder that moves without resizing keeps its old alignment. A wrapper without a fallback covers its children with one block, so the children need a size while loading."
+          ],
+          "requirements": [
+            "React 19, Tailwind CSS 4, Motion, and theme colors. Wrap content in Skeleton with loading, and pass fallback for a custom placeholder layout. The wrapper sets aria-busy and announces loadingLabel. Reduced motion removes the shimmer and pulse and swaps to the content instantly."
+          ],
+          "docsUrl": "http://localhost:3000/docs/components/skeleton.md",
+          "registryUrl": "http://localhost:3000/r/skeleton.json"
+        }
+      },
+      "docs": "Read http://localhost:3000/docs/components/skeleton.md for usage, required props, and integration instructions."
     }
   ]
 }
