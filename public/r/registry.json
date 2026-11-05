@@ -1587,6 +1587,44 @@
         }
       },
       "docs": "Read http://localhost:3000/docs/components/command.md for usage, required props, and integration instructions."
+    },
+    {
+      "name": "pagination",
+      "type": "registry:component",
+      "title": "Pagination",
+      "description": "Page numbers with an active surface that slides between pages, a window that reflows as it moves, and ellipses that fade in and out.",
+      "dependencies": [
+        "motion"
+      ],
+      "files": [
+        {
+          "path": "src/registry/components/pagination.tsx",
+          "type": "registry:component",
+          "target": "components/animated/pagination.tsx"
+        }
+      ],
+      "categories": [
+        "pagination",
+        "navigation",
+        "animation",
+        "interactive"
+      ],
+      "meta": {
+        "a1ui": {
+          "useCases": [
+            "Paging through search results, tables, feeds, and archives, either in client state or as links to real routes such as /posts?page=3."
+          ],
+          "limitations": [
+            "Pages are numbered from 1 and the component does not fetch or slice data; the caller owns the page count and the content. There is no page-size picker or jump-to-page input, and the ellipses are not clickable."
+          ],
+          "requirements": [
+            "React 19, Tailwind CSS 4, Motion, and theme colors. Pass pageCount, and either page with onPageChange or defaultPage. For routes, pass getHref, renderLink, or both; renderLink receives anchor props and the target page. Reduced motion moves the active surface and the number window instantly."
+          ],
+          "docsUrl": "http://localhost:3000/docs/components/pagination.md",
+          "registryUrl": "http://localhost:3000/r/pagination.json"
+        }
+      },
+      "docs": "Read http://localhost:3000/docs/components/pagination.md for usage, required props, and integration instructions."
     }
   ]
 }

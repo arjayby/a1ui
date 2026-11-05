@@ -1,0 +1,68 @@
+---
+title: Pagination
+description: Page numbers with an active surface that slides between pages and a window of numbers that reflows as it moves.
+---
+
+## Demo
+
+<PaginationDemo />
+
+## Installation
+
+<Installation name="pagination" />
+
+## Dependencies
+
+<Dependencies name="pagination" />
+
+## Code
+
+<Tabs items={["Usage", "Source"]}>
+  <Tab value="Usage">
+
+```tsx
+import { useState } from "react";
+import Link from "next/link";
+
+import { Pagination } from "@/components/animated/pagination";
+
+export function ResultsPagination() {
+  const [page, setPage] = useState(1);
+  return <Pagination page={page} pageCount={20} onPageChange={setPage} aria-label="Search results" />;
+}
+
+export function PostsPagination({ page }: { page: number }) {
+  return (
+    <Pagination
+      page={page}
+      pageCount={12}
+      getHref={(target) => `/posts?page=${target}`}
+      renderLink={({ href, ...props }) => <Link href={href!} scroll={false} {...props} />}
+    />
+  );
+}
+```
+
+  </Tab>
+  <Tab value="Source">
+    <ComponentSource name="pagination" />
+  </Tab>
+</Tabs>
+
+## API reference
+
+| Prop            | Type                                                         | Default        | Description                                                                                                              |
+| --------------- | ------------------------------------------------------------ | -------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `pageCount`     | `number`                                                     | Required       | Total number of pages. Values below 1 show a single page.                                                                |
+| `page`          | `number`                                                     | Uncontrolled   | Current page, starting at 1, when controlled by the caller. Clamped to `pageCount`.                                      |
+| `defaultPage`   | `number`                                                     | `1`            | Initial page when uncontrolled.                                                                                          |
+| `onPageChange`  | `(page: number) => void`                                     | None           | Called with the page the user picked. Controlled usage requires the caller to update `page`.                             |
+| `siblingCount`  | `number`                                                     | `1`            | Pages shown on each side of the current page.                                                                            |
+| `boundaryCount` | `number`                                                     | `1`            | Pages always shown at the start and end. Gaps between them and the window become ellipses.                               |
+| `getHref`       | `(page: number) => string`                                   | None           | Renders every control as an anchor to this URL instead of a button.                                                      |
+| `renderLink`    | `(props: PaginationLinkProps, page: number) => ReactElement` | None           | Renders enabled controls with your link element, such as a router `Link`. Disabled ends stay anchors without an `href`.  |
+| `previousLabel` | `ReactNode`                                                  | `"Previous"`   | Visible text beside the previous chevron, hidden below the `sm` breakpoint. The accessible name stays "Previous page".   |
+| `nextLabel`     | `ReactNode`                                                  | `"Next"`       | Visible text beside the next chevron, hidden below the `sm` breakpoint. The accessible name stays "Next page".           |
+| `aria-label`    | `string`                                                     | `"Pagination"` | Names the navigation landmark.                                                                                           |
+| `duration`      | `number`                                                     | `0.35`         | Travel time of the active surface and the number reflow in seconds. Zero, or reduced motion, moves everything instantly. |
+| `className`     | `string`                                                     | None           | Additional classes on the `nav`.                                                                                         |
