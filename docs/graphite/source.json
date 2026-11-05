@@ -41,7 +41,11 @@
         "sidebar-accent-foreground",
         "sidebar-border"
       ],
-      "from": "supplied shadcn theme (primary, accent, ring, chart and sidebar-primary/ring values not applied)"
+      "from": "supplied shadcn theme (primary, accent, ring, chart and sidebar-primary/ring values not applied)",
+      "publishedTo": {
+        "url": "https://claude.ai/artifact/9MqfgLG4LdqrErKqj4Xnxk",
+        "version": "1793903447-21e7"
+      }
     }
   ]
 }

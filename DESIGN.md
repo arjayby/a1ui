@@ -8,7 +8,7 @@ The source is the **Graphite** design system in Claude Design ([artifact](https:
 
 | What                                                              | Where                                                                                                              |
 | ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| Token source (Claude Design, with local colour updates)           | [`docs/graphite/tokens.json`](docs/graphite/tokens.json)                                                           |
+| Token source (matches Claude Design)                              | [`docs/graphite/tokens.json`](docs/graphite/tokens.json)                                                           |
 | Generated token CSS: light in `:root`, dark in `.dark`            | [`src/app/graphite-tokens.css`](src/app/graphite-tokens.css)                                                       |
 | Tailwind, shadcn and Fumadocs role mapping, plus local extensions | [`src/app/globals.css`](src/app/globals.css)                                                                       |
 | Component styles (`.ui-*`)                                        | [`src/app/graphite-components.css`](src/app/graphite-components.css)                                               |
@@ -23,7 +23,7 @@ The source is the **Graphite** design system in Claude Design ([artifact](https:
 - Local extensions that are not part of Graphite live in `globals.css`: code-highlighting colours (`--syntax-*`), the primitive `--text-*`/`--leading-*`/`--tracking-*` scale, container widths, and the legacy `--status-*` and `--control-background` aliases that published registry components read.
 - Registry blocks and components keep their own styles so they install cleanly into any shadcn theme.
 
-The neutral, surface, border, sidebar and danger colours were updated locally on November 6, 2026 from a supplied shadcn theme; primary, accent, ring, chart and status colours are still Claude Design's. To change a token, edit `docs/graphite/tokens.json` (or re-export it from Claude Design) and regenerate `src/app/graphite-tokens.css` to match; do not hand-edit values in the CSS.
+The neutral, surface, border, sidebar and danger colours were updated on November 6, 2026 from a supplied shadcn theme, in this repository and in Claude Design; primary, accent, ring, chart and status colours are unchanged. To change a token, edit `docs/graphite/tokens.json` (or re-export it from Claude Design) and regenerate `src/app/graphite-tokens.css` to match; do not hand-edit values in the CSS.
 
 ## Overview
 
