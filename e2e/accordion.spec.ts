@@ -6,7 +6,9 @@ test("panels glide to their height, reverse smoothly mid-open, and keep one item
   const frame = page.locator(".demo-frame");
   const shipping = frame.getByRole("button", { name: "How long does shipping take?" });
   const returns = frame.getByRole("button", { name: "Can I return an item?" });
-  await expect(shipping).toHaveAttribute("aria-expanded", "true");
+  // The demo starts with every item closed.
+  await expect(shipping).toHaveAttribute("aria-expanded", "false");
+  await expect(frame.getByRole("region")).toHaveCount(0);
 
   const opening = await returns.evaluate(async (button: HTMLElement) => {
     const item = button.closest('[data-slot="accordion-item"]')!;
@@ -91,6 +93,9 @@ test("plus icon and multiple mode open instantly on mobile with reduced motion",
   });
   expect(height.now).toBeGreaterThan(0);
   expect(Math.abs(height.now - height.full)).toBeLessThanOrEqual(1);
+  await expect(frame.getByRole("region")).toHaveCount(1);
+  // Multiple mode keeps the first panel open while a second one opens.
+  await frame.getByRole("button", { name: "How long does shipping take?" }).click();
   await expect(frame.getByRole("region")).toHaveCount(2);
 
   const bar = returns.locator('[data-slot="accordion-plus-vertical"]');
