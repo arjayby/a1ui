@@ -19,6 +19,7 @@
     "radio-group",
     "toggle-group",
     "accordion",
-    "progress"
+    "progress",
+    "dialog"
   ]
 }

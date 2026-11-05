@@ -1234,6 +1234,45 @@
         }
       },
       "docs": "Read http://localhost:3000/docs/components/progress.md for usage, required props, and integration instructions."
+    },
+    {
+      "name": "dialog",
+      "type": "registry:component",
+      "title": "Dialog",
+      "description": "A modal dialog that grows out of the button that opened it and shrinks back into it, over a blurred backdrop.",
+      "dependencies": [
+        "motion",
+        "@base-ui/react"
+      ],
+      "files": [
+        {
+          "path": "src/registry/components/dialog.tsx",
+          "type": "registry:component",
+          "target": "components/animated/dialog.tsx"
+        }
+      ],
+      "categories": [
+        "dialog",
+        "overlay",
+        "modal",
+        "animation"
+      ],
+      "meta": {
+        "a1ui": {
+          "useCases": [
+            "Focused tasks that interrupt the page, such as editing a profile, sharing a link, or confirming settings, where the dialog should feel connected to the button that opened it."
+          ],
+          "limitations": [
+            "Modal only. One popup per Dialog. Below 640px it rises from the bottom edge instead of growing from the trigger. Use an alert dialog for destructive confirmations that must not close on an outside click."
+          ],
+          "requirements": [
+            "React 19, Tailwind CSS 4, Motion, Base UI, and theme colors. Give every DialogContent a DialogTitle. Reduced motion replaces the scale, slide, and blur with a short fade."
+          ],
+          "docsUrl": "http://localhost:3000/docs/components/dialog.md",
+          "registryUrl": "http://localhost:3000/r/dialog.json"
+        }
+      },
+      "docs": "Read http://localhost:3000/docs/components/dialog.md for usage, required props, and integration instructions."
     }
   ]
 }
