@@ -1078,6 +1078,45 @@
         }
       },
       "docs": "Read http://localhost:3000/docs/components/checkbox.md for usage, required props, and integration instructions."
+    },
+    {
+      "name": "toast",
+      "type": "registry:component",
+      "title": "Toast",
+      "description": "Toasts that stack as a deck, fan out on hover, and swipe away, with a loading state that morphs into success.",
+      "dependencies": [
+        "motion",
+        "@base-ui/react"
+      ],
+      "files": [
+        {
+          "path": "src/registry/components/toast.tsx",
+          "type": "registry:component",
+          "target": "components/animated/toast.tsx"
+        }
+      ],
+      "categories": [
+        "feedback",
+        "toast",
+        "notification",
+        "animation"
+      ],
+      "meta": {
+        "a1ui": {
+          "useCases": [
+            "Save confirmations, errors, undo actions, and long-running uploads or deploys that resolve to success or failure."
+          ],
+          "limitations": [
+            "Three toasts show in the collapsed deck. Swiping is horizontal only. Success and default share the foreground color; errors use the destructive color."
+          ],
+          "requirements": [
+            "React 19, Tailwind CSS 4, Motion, Base UI, and theme colors including destructive. Wrap the app in ToastProvider and render one Toaster inside it. Reduced motion places toasts instantly and stops the spinner."
+          ],
+          "docsUrl": "http://localhost:3000/docs/components/toast.md",
+          "registryUrl": "http://localhost:3000/r/toast.json"
+        }
+      },
+      "docs": "Read http://localhost:3000/docs/components/toast.md for usage, required props, and integration instructions."
     }
   ]
 }
