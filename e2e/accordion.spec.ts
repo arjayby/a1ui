@@ -4,13 +4,13 @@ test("panels glide to their height, reverse smoothly mid-open, and keep one item
   await page.goto("/components/accordion");
   await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
   const frame = page.locator(".demo-frame");
-  const shipping = frame.getByRole("button", { name: "How long does shipping take?" });
-  const returns = frame.getByRole("button", { name: "Can I return an item?" });
+  const about = frame.getByRole("button", { name: "What is a1ui?" });
+  const install = frame.getByRole("button", { name: "How do I add a component?" });
   // The demo starts with every item closed.
-  await expect(shipping).toHaveAttribute("aria-expanded", "false");
+  await expect(about).toHaveAttribute("aria-expanded", "false");
   await expect(frame.getByRole("region")).toHaveCount(0);
 
-  const opening = await returns.evaluate(async (button: HTMLElement) => {
+  const opening = await install.evaluate(async (button: HTMLElement) => {
     const item = button.closest('[data-slot="accordion-item"]')!;
     const chevron = () => new DOMMatrix(getComputedStyle(item.querySelector("svg")!).transform);
     button.click();
@@ -33,14 +33,14 @@ test("panels glide to their height, reverse smoothly mid-open, and keep one item
   expect(opening.heights.some((h) => h > 4 && h < opening.final - 4)).toBe(true);
   expect(opening.angles.some((angle) => angle > 20 && angle < 160)).toBe(true);
   expect(opening.opacities.some((opacity) => opacity > 0.05 && opacity < 0.95)).toBe(true);
-  await expect(returns).toHaveAttribute("aria-expanded", "true");
-  await expect(shipping).toHaveAttribute("aria-expanded", "false");
+  await expect(install).toHaveAttribute("aria-expanded", "true");
+  await expect(about).toHaveAttribute("aria-expanded", "false");
   await expect(frame.getByRole("region")).toHaveCount(1);
-  await expect(frame.getByRole("region")).toContainText("Send anything back within 30 days");
+  await expect(frame.getByRole("region")).toContainText("Pass its registry URL to the shadcn CLI");
 
   // Clicking again mid-open turns the panel around from where it is, without a jump.
   const interrupted = await frame
-    .getByRole("button", { name: "Is there a warranty?" })
+    .getByRole("button", { name: "Can I change the code?" })
     .evaluate(async (button: HTMLElement) => {
       const item = button.closest('[data-slot="accordion-item"]')!;
       const height = () =>
@@ -63,10 +63,10 @@ test("panels glide to their height, reverse smoothly mid-open, and keep one item
   expect(interrupted.after[0]).toBeLessThanOrEqual(interrupted.before + 8);
   expect(interrupted.after.at(-1)).toBe(0);
 
-  await shipping.focus();
+  await about.focus();
   await page.keyboard.press("Enter");
-  await expect(shipping).toHaveAttribute("aria-expanded", "true");
-  await expect(returns).toHaveAttribute("aria-expanded", "false");
+  await expect(about).toHaveAttribute("aria-expanded", "true");
+  await expect(install).toHaveAttribute("aria-expanded", "false");
 });
 
 test("plus icon and multiple mode open instantly on mobile with reduced motion", async ({ page }) => {
@@ -81,8 +81,8 @@ test("plus icon and multiple mode open instantly on mobile with reduced motion",
   const frame = page.locator(".demo-frame");
   await expect(frame.locator('[data-slot="accordion-icon"][data-icon="plus"]')).toHaveCount(3);
 
-  const returns = frame.getByRole("button", { name: "Can I return an item?" });
-  const height = await returns.evaluate(async (button: HTMLElement) => {
+  const install = frame.getByRole("button", { name: "How do I add a component?" });
+  const height = await install.evaluate(async (button: HTMLElement) => {
     button.click();
     await new Promise(requestAnimationFrame);
     await new Promise(requestAnimationFrame);
@@ -95,10 +95,10 @@ test("plus icon and multiple mode open instantly on mobile with reduced motion",
   expect(Math.abs(height.now - height.full)).toBeLessThanOrEqual(1);
   await expect(frame.getByRole("region")).toHaveCount(1);
   // Multiple mode keeps the first panel open while a second one opens.
-  await frame.getByRole("button", { name: "How long does shipping take?" }).click();
+  await frame.getByRole("button", { name: "What is a1ui?" }).click();
   await expect(frame.getByRole("region")).toHaveCount(2);
 
-  const bar = returns.locator('[data-slot="accordion-plus-vertical"]');
+  const bar = install.locator('[data-slot="accordion-plus-vertical"]');
   const angle = await bar.evaluate((element) => {
     const { a, b } = new DOMMatrix(getComputedStyle(element).transform);
     return Math.round((Math.atan2(b, a) * 180) / Math.PI);

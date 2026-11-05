@@ -18,26 +18,28 @@ const modes: Mode[] = ["single", "multiple"];
 
 const questions = [
   {
-    value: "shipping",
-    question: "How long does shipping take?",
+    value: "about",
+    question: "What is a1ui?",
     answer: [
-      "Orders leave our warehouse within one business day.",
-      "Standard delivery takes two to four days. Express arrives the next day in most cities.",
+      "A collection of animated React components and blocks.",
+      "Each one has a live preview, documentation, and an entry in the shadcn registry.",
     ],
   },
   {
-    value: "returns",
-    question: "Can I return an item?",
+    value: "install",
+    question: "How do I add a component?",
     answer: [
-      "Send anything back within 30 days for a full refund.",
-      "Print a prepaid label from your order page and drop the parcel at any carrier point.",
-      "Refunds reach your card three to five days after we receive it.",
+      "Pass its registry URL to the shadcn CLI, and the source is copied into your project.",
+      "Or use Copy prompt for agent, and your coding agent installs and integrates it for you.",
+      "Components need React 19, TypeScript, and Tailwind CSS 4.",
     ],
   },
   {
-    value: "warranty",
-    question: "Is there a warranty?",
-    answer: ["Every product carries a two-year warranty against manufacturing defects."],
+    value: "editing",
+    question: "Can I change the code?",
+    answer: [
+      "Yes. The source lives in your project, so you can edit its markup, styles, and motion freely. a1ui is MIT licensed.",
+    ],
   },
 ];
 
