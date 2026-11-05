@@ -23,6 +23,7 @@ import { IconToggleDemo } from "@/components/component-demos/icon-toggle-demo";
 import { SwitchDemo } from "@/components/component-demos/switch-demo";
 import { CheckboxDemo } from "@/components/component-demos/checkbox-demo";
 import { TabsDemo } from "@/components/component-demos/tabs-demo";
+import { PopoverDemo } from "@/components/component-demos/popover-demo";
 import { SliderDemo } from "@/components/component-demos/slider-demo";
 import { OtpInputDemo } from "@/components/component-demos/otp-input-demo";
 import { ValidatedInputDemo } from "@/components/component-demos/validated-input-demo";
@@ -56,6 +57,7 @@ export function getMDXComponents(components?: MDXComponents) {
     SwitchDemo,
     CheckboxDemo,
     TabsDemo,
+    PopoverDemo,
     SliderDemo,
     OtpInputDemo,
     ValidatedInputDemo,

@@ -12,6 +12,7 @@ import { IconToggle } from "@/registry/components/icon-toggle";
 import { SwitchPreview } from "@/components/component-demos/switch-demo";
 import { CheckboxPreview } from "@/components/component-demos/checkbox-demo";
 import { TabsPreview } from "@/components/component-demos/tabs-demo";
+import { PopoverPreview } from "@/components/component-demos/popover-demo";
 import { LoadingButtonPreview } from "@/components/component-demos/loading-button-demo";
 import { SliderPreview } from "@/components/component-demos/slider-demo";
 import { OtpInputPreview } from "@/components/component-demos/otp-input-demo";
@@ -35,6 +36,7 @@ const previews: Record<string, ReactNode> = {
   switch: <SwitchPreview />,
   checkbox: <CheckboxPreview />,
   tabs: <TabsPreview />,
+  popover: <PopoverPreview />,
   "loading-button": <LoadingButtonPreview />,
   slider: <SliderPreview />,
   "otp-input": <OtpInputPreview />,
