@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Locator, type Page } from "@playwright/test";
 
 type Sample = { scale: number; opacity: number; first: number; last: number } | null;
 
@@ -27,6 +27,26 @@ function sampleCard(page: Page, ms: number) {
   }, ms);
 }
 
+// Under load the docs page can still shift after hydration; hovering before it settles
+// leaves the cursor behind and the card correctly closes. Wait for the trigger to hold still.
+async function hoverWhenSettled(trigger: Locator) {
+  await trigger.scrollIntoViewIfNeeded();
+  let previous = "";
+  await expect
+    .poll(
+      async () => {
+        const box = await trigger.boundingBox();
+        const current = JSON.stringify(box && [Math.round(box.x), Math.round(box.y)]);
+        const settled = current === previous;
+        previous = current;
+        return settled;
+      },
+      { intervals: [150] },
+    )
+    .toBe(true);
+  await trigger.hover();
+}
+
 test("card springs out on hover, staggers its contents, and leaves quickly", async ({ page }) => {
   // Leave room below the demo so the card keeps its requested side instead of flipping.
   await page.setViewportSize({ width: 1280, height: 1000 });
@@ -34,7 +54,7 @@ test("card springs out on hover, staggers its contents, and leaves quickly", asy
   await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
   const trigger = page.locator(".demo-frame").getByRole("link", { name: "@maraokafor" });
 
-  await trigger.hover();
+  await hoverWhenSettled(trigger);
   const opening = (await sampleCard(page, 1200)).filter((sample) => sample !== null);
   expect(opening.length).toBeGreaterThan(0);
   expect(opening.some((sample) => sample.scale > 0.9 && sample.scale < 0.99)).toBe(true);
@@ -77,7 +97,7 @@ test("reduced motion shows the card instantly and keeps it on screen at 390px", 
   await page.getByRole("button", { name: /^Side:/ }).click();
   await page.getByRole("menuitem", { name: "right", exact: true }).click();
   const trigger = page.locator(".demo-frame").getByRole("link", { name: "@maraokafor" });
-  await trigger.hover();
+  await hoverWhenSettled(trigger);
   const samples = (await sampleCard(page, 900)).filter((sample) => sample !== null);
   expect(samples.length).toBeGreaterThan(0);
   expect(samples.every((sample) => sample.opacity === 1 && sample.first === 1 && sample.last === 1)).toBe(

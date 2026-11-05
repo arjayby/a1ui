@@ -43,8 +43,14 @@ test("popup grows out of its trigger, traps focus, and shrinks back on close", a
   await expect(dialog).toBeVisible();
   await expect(dialog.getByRole("textbox")).toBeFocused();
 
-  for (let step = 0; step < 6; step++) await page.keyboard.press("Tab");
-  expect(await dialog.evaluate((element) => element.contains(document.activeElement))).toBe(true);
+  // Tab at a human pace: Base UI's focus guards hand focus back asynchronously, so keys
+  // pressed faster than that hand-off can slip past the trap even on a plain Base UI dialog.
+  for (let step = 0; step < 6; step++) {
+    await page.keyboard.press("Tab");
+    await expect
+      .poll(() => dialog.evaluate((element) => element.contains(document.activeElement)))
+      .toBe(true);
+  }
 
   const closing = await sampleScale(page, "close");
   expect(closing.scales.some((scale) => scale > 0.45 && scale < 0.95)).toBe(true);

@@ -133,7 +133,9 @@ test("dialog fits a phone and filters instantly with reduced motion", async ({ p
     }
     return samples;
   });
-  expect(new Set(heights.slice(2)).size).toBe(1);
+  // Reduced motion jumps straight to the new height: no in-between values, whenever it lands.
+  const [before, after] = [heights[0], heights.at(-1)];
+  expect(heights.every((height) => height === before || height === after)).toBe(true);
   await expect(dialog.getByRole("option")).toHaveCount(2);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });

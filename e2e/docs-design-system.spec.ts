@@ -33,7 +33,7 @@ for (const { name, title, type } of registry.items) {
     await page.setViewportSize({ width: 1440, height: 900 });
     const toc = page.getByRole("navigation", { name: "On this page" });
     await toc.getByRole("link", { name: "API reference" }).click();
-    await expect(page.getByRole("region", { name: "Reference table" })).toBeVisible();
+    await expect(page.getByRole("region", { name: "Reference table" }).first()).toBeVisible();
     await expect(toc.getByRole("link", { name: "API reference" })).toHaveAttribute(
       "aria-current",
       "location",
@@ -42,7 +42,12 @@ for (const { name, title, type } of registry.items) {
 
     await page.setViewportSize({ width: 390, height: 844 });
     await expect(toc).toBeHidden();
-    await expect(page.locator(".docs-article-body > .docs-table ~ *")).toHaveCount(0);
+    // The API reference ends the page; multi-part components list one table per part.
+    expect(
+      await page.evaluate(() =>
+        document.querySelector(".docs-article-body")?.lastElementChild?.classList.contains("docs-table"),
+      ),
+    ).toBe(true);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   });
 }
