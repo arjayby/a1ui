@@ -70,6 +70,8 @@ export function DrawerExample() {
 
 ## API reference
 
+`DrawerTrigger`, `DrawerTitle`, `DrawerDescription`, and `DrawerClose` accept the props of their Base UI Drawer parts, including `render`. Pass a function as `className` to replace their default classes. `DrawerHeader` and `DrawerFooter` are plain `div` elements.
+
 ### Drawer
 
 | Prop              | Type                      | Default      | Description                                                                         |
@@ -101,5 +103,3 @@ Dragging past 30% of the sheet, or flicking faster than 500 pixels per second, d
 | `radius`    | `number`    | `16`    | Corner radius in pixels the wrapped content rounds to.            |
 | `className` | `string`    | None    | Additional classes on the wrapper.                                |
 | `children`  | `ReactNode` | None    | Content to scale. Place the `Drawer` anywhere inside the wrapper. |
-
-`DrawerTrigger`, `DrawerTitle`, `DrawerDescription`, and `DrawerClose` accept the props of their Base UI Drawer parts, including `render`. Pass a function as `className` to replace their default classes. `DrawerHeader` and `DrawerFooter` are plain `div` elements.

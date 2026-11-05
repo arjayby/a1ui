@@ -88,6 +88,10 @@ export function FeedbackPopover() {
 
 Accepts Base UI trigger props such as `render`, `disabled`, and `openOnHover`. It is unstyled by default, so pass `render` to use your own button. With `morph`, it renders a pill that becomes the panel.
 
+### PopoverClose, PopoverTitle, and PopoverDescription
+
+`PopoverClose` is a button that closes the popover and accepts `render`. `PopoverTitle` labels the panel and `PopoverDescription` describes it for assistive technology. All three take `className`.
+
 ### PopoverContent
 
 | Prop           | Type                                     | Default    | Description                                                                            |
@@ -100,7 +104,3 @@ Accepts Base UI trigger props such as `render`, `disabled`, and `openOnHover`. I
 | `finalFocus`   | `boolean \| RefObject \| function`       | `true`     | Element to focus on close. Defaults to the trigger.                                    |
 | `aria-label`   | `string`                                 | None       | Names the panel when it has no PopoverTitle.                                           |
 | `className`    | `string`                                 | None       | Additional panel classes. The panel is `w-72` by default.                              |
-
-### PopoverClose, PopoverTitle, and PopoverDescription
-
-`PopoverClose` is a button that closes the popover and accepts `render`. `PopoverTitle` labels the panel and `PopoverDescription` describes it for assistive technology. All three take `className`.

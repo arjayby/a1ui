@@ -70,6 +70,8 @@ export function SaveButton() {
 
 ## API reference
 
+Set `type` to `"success"`, `"error"`, or `"loading"` to show an icon. Loading toasts stay open until they are updated, and the spinner closes into a ring as the check or cross draws in. Drag a toast sideways or flick it to dismiss it.
+
 ### ToastProvider
 
 | Prop           | Type           | Default | Description                                                                 |
@@ -100,5 +102,3 @@ Returns the Base UI toast manager for the nearest `ToastProvider`. `createToastM
 | `update`  | `(id, options) => void`                             | Changes a toast in place, such as turning a `loading` toast into `success`.                                |
 | `close`   | `(id?) => void`                                     | Closes one toast, or every toast when no id is passed.                                                     |
 | `promise` | `(promise, { loading, success, error }) => Promise` | Shows a loading toast that becomes success or error when the promise settles.                              |
-
-Set `type` to `"success"`, `"error"`, or `"loading"` to show an icon. Loading toasts stay open until they are updated, and the spinner closes into a ring as the check or cross draws in. Drag a toast sideways or flick it to dismiss it.
