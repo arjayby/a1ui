@@ -49,7 +49,7 @@ const questions = [
 
 export function AccordionPreview() {
   return (
-    <Accordion defaultValue={["shipping"]} className="w-full max-w-64">
+    <Accordion className="w-full max-w-64">
       {questions.slice(0, 2).map((item) => (
         <AccordionItem key={item.value} value={item.value}>
           <AccordionTrigger>{item.question}</AccordionTrigger>
