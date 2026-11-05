@@ -1078,6 +1078,45 @@
         }
       },
       "docs": "Read http://localhost:3000/docs/components/checkbox.md for usage, required props, and integration instructions."
+    },
+    {
+      "name": "radio-group",
+      "type": "registry:component",
+      "title": "Radio Group",
+      "description": "A radio group whose single dot slides from option to option, with a card variant whose highlighted border glides between cards.",
+      "dependencies": [
+        "motion",
+        "@base-ui/react"
+      ],
+      "files": [
+        {
+          "path": "src/registry/components/radio-group.tsx",
+          "type": "registry:component",
+          "target": "components/animated/radio-group.tsx"
+        }
+      ],
+      "categories": [
+        "input",
+        "radio",
+        "animation",
+        "interactive"
+      ],
+      "meta": {
+        "a1ui": {
+          "useCases": [
+            "Plan pickers, settings with a few mutually exclusive choices, and shipping or payment options shown as cards."
+          ],
+          "limitations": [
+            "Values are strings. The card highlight scales between cards of different heights, so its border can stretch slightly mid-flight."
+          ],
+          "requirements": [
+            "React 19, Tailwind CSS 4, Motion, Base UI, and theme colors. Give the group aria-label or aria-labelledby, and each item a label or aria-label. Controlled usage requires updating value in onValueChange. Reduced motion moves the dot and highlight instantly."
+          ],
+          "docsUrl": "http://localhost:3000/docs/components/radio-group.md",
+          "registryUrl": "http://localhost:3000/r/radio-group.json"
+        }
+      },
+      "docs": "Read http://localhost:3000/docs/components/radio-group.md for usage, required props, and integration instructions."
     }
   ]
 }
