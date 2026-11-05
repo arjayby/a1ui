@@ -35,6 +35,7 @@ import { TooltipDemo } from "@/components/component-demos/tooltip-demo";
 import { HoverCardDemo } from "@/components/component-demos/hover-card-demo";
 import { PopoverDemo } from "@/components/component-demos/popover-demo";
 import { SelectDemo } from "@/components/component-demos/select-demo";
+import { CommandDemo } from "@/components/component-demos/command-demo";
 import { SliderDemo } from "@/components/component-demos/slider-demo";
 import { OtpInputDemo } from "@/components/component-demos/otp-input-demo";
 import { ValidatedInputDemo } from "@/components/component-demos/validated-input-demo";
@@ -80,6 +81,7 @@ export function getMDXComponents(components?: MDXComponents) {
     HoverCardDemo,
     PopoverDemo,
     SelectDemo,
+    CommandDemo,
     SliderDemo,
     OtpInputDemo,
     ValidatedInputDemo,

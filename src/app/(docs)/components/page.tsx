@@ -24,6 +24,7 @@ import { TooltipPreview } from "@/components/component-demos/tooltip-demo";
 import { HoverCardPreview } from "@/components/component-demos/hover-card-demo";
 import { PopoverPreview } from "@/components/component-demos/popover-demo";
 import { SelectPreview } from "@/components/component-demos/select-demo";
+import { CommandPreview } from "@/components/component-demos/command-demo";
 import { LoadingButtonPreview } from "@/components/component-demos/loading-button-demo";
 import { SliderPreview } from "@/components/component-demos/slider-demo";
 import { OtpInputPreview } from "@/components/component-demos/otp-input-demo";
@@ -59,6 +60,7 @@ const previews: Record<string, ReactNode> = {
   "hover-card": <HoverCardPreview />,
   popover: <PopoverPreview />,
   select: <SelectPreview />,
+  command: <CommandPreview />,
   "loading-button": <LoadingButtonPreview />,
   slider: <SliderPreview />,
   "otp-input": <OtpInputPreview />,

@@ -1084,6 +1084,34 @@
           ]
         }
       }
+    },
+    {
+      "name": "command",
+      "type": "registry:component",
+      "title": "Command",
+      "description": "A command palette whose highlight glides between results, with filtered items that reflow, a height-animated list, and a \u2318K dialog.",
+      "dependencies": ["motion", "@base-ui/react"],
+      "files": [
+        {
+          "path": "src/registry/components/command.tsx",
+          "type": "registry:component",
+          "target": "components/animated/command.tsx"
+        }
+      ],
+      "categories": ["command", "search", "navigation", "animation", "interactive"],
+      "meta": {
+        "a1ui": {
+          "useCases": [
+            "App-wide command menus opened with \u2318K, and inline searchable action lists such as quick switchers or settings pickers."
+          ],
+          "limitations": [
+            "Filtering runs on the client over the rendered items, so large or remote result sets should be filtered by the caller. Item values must be unique. Nested pages and multi-select are not built in."
+          ],
+          "requirements": [
+            "React 19, Tailwind CSS 4, Motion, Base UI, and theme colors. Give every CommandItem a unique string value. Put a Command inside CommandDialog; the dialog closes when an item runs. Reduced motion moves the highlight, list height, and results instantly and opens the dialog without the spring."
+          ]
+        }
+      }
     }
   ]
 }

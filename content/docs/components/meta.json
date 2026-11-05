@@ -27,6 +27,7 @@
     "tooltip",
     "hover-card",
     "popover",
-    "select"
+    "select",
+    "command"
   ]
 }
