@@ -17,6 +17,7 @@
     "tag-input",
     "password-input",
     "radio-group",
-    "toggle-group"
+    "toggle-group",
+    "accordion"
   ]
 }

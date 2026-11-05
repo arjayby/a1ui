@@ -804,6 +804,34 @@
           ]
         }
       }
+    },
+    {
+      "name": "accordion",
+      "type": "registry:component",
+      "title": "Accordion",
+      "description": "An accordion whose panels glide open to their natural height, stagger their content in, and turn a chevron or fold a plus into a minus.",
+      "dependencies": ["motion", "@base-ui/react"],
+      "files": [
+        {
+          "path": "src/registry/components/accordion.tsx",
+          "type": "registry:component",
+          "target": "components/animated/accordion.tsx"
+        }
+      ],
+      "categories": ["disclosure", "accordion", "animation", "interactive"],
+      "meta": {
+        "a1ui": {
+          "useCases": [
+            "FAQs, settings sections, and long forms where readers open one or several sections at a time."
+          ],
+          "limitations": [
+            "Only direct child elements of AccordionContent stagger in; plain text fades as one block. Closed panels unmount, so browser find-in-page does not search them."
+          ],
+          "requirements": [
+            "React 19, Tailwind CSS 4, Motion, Base UI, and theme colors. Give every AccordionItem a unique value. Controlled usage requires updating value in onValueChange. Reduced motion opens panels instantly and skips the stagger."
+          ]
+        }
+      }
     }
   ]
 }

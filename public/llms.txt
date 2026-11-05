@@ -27,6 +27,7 @@ bun: bunx --bun shadcn@latest add http://localhost:3000/r/NAME.json --yes
 
 ## Components and blocks
 
+- [Accordion](http://localhost:3000/docs/components/accordion.md): An accordion whose panels glide open to their natural height, stagger their content in, and turn a chevron or fold a plus into a minus. FAQs, settings sections, and long forms where readers open one or several sections at a time.
 - [Arc Reel](http://localhost:3000/docs/blocks/arc-reel.md): An infinitely looping reel with curved provider cards and synchronized scroll controls. Looping galleries, provider cards, or logo reels with drag and keyboard controls.
 - [ASCII Lens](http://localhost:3000/docs/blocks/ascii-lens.md): An image rendered as ASCII, with a circular lens that reveals the original. Portfolio and product cards that reveal source artwork through an interactive lens.
 - [ASCII Morph](http://localhost:3000/docs/blocks/ascii-morph.md): A cloud of characters that morphs into a globe, a flower, and an A1 monogram. Interactive ASCII illustrations for landing pages, portfolios, and identity studies.
