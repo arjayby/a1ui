@@ -43,17 +43,24 @@ const questions = [
   },
 ];
 
+// The catalog card shows the same items as the demo.
+function Items() {
+  return questions.map((item) => (
+    <AccordionItem key={item.value} value={item.value}>
+      <AccordionTrigger>{item.question}</AccordionTrigger>
+      <AccordionContent className="grid gap-2">
+        {item.answer.map((line) => (
+          <div key={line}>{line}</div>
+        ))}
+      </AccordionContent>
+    </AccordionItem>
+  ));
+}
+
 export function AccordionPreview() {
   return (
     <Accordion className="w-full max-w-64">
-      {questions.slice(0, 2).map((item) => (
-        <AccordionItem key={item.value} value={item.value}>
-          <AccordionTrigger>{item.question}</AccordionTrigger>
-          <AccordionContent>
-            <div>{item.answer[0]}</div>
-          </AccordionContent>
-        </AccordionItem>
-      ))}
+      <Items />
     </Accordion>
   );
 }
@@ -73,16 +80,7 @@ export function AccordionDemo() {
           duration={duration}
           className="w-full max-w-md px-4"
         >
-          {questions.map((item) => (
-            <AccordionItem key={item.value} value={item.value}>
-              <AccordionTrigger>{item.question}</AccordionTrigger>
-              <AccordionContent className="grid gap-2">
-                {item.answer.map((line) => (
-                  <div key={line}>{line}</div>
-                ))}
-              </AccordionContent>
-            </AccordionItem>
-          ))}
+          <Items />
         </Accordion>
       </div>
       <div className="component-demo-controls">
