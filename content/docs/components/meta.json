@@ -24,6 +24,7 @@
     "alert-dialog",
     "drawer",
     "toast",
-    "tooltip"
+    "tooltip",
+    "hover-card"
   ]
 }

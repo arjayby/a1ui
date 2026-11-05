@@ -32,6 +32,7 @@ import { AlertDialogDemo } from "@/components/component-demos/alert-dialog-demo"
 import { DrawerDemo } from "@/components/component-demos/drawer-demo";
 import { ToastDemo } from "@/components/component-demos/toast-demo";
 import { TooltipDemo } from "@/components/component-demos/tooltip-demo";
+import { HoverCardDemo } from "@/components/component-demos/hover-card-demo";
 import { SliderDemo } from "@/components/component-demos/slider-demo";
 import { OtpInputDemo } from "@/components/component-demos/otp-input-demo";
 import { ValidatedInputDemo } from "@/components/component-demos/validated-input-demo";
@@ -74,6 +75,7 @@ export function getMDXComponents(components?: MDXComponents) {
     DrawerDemo,
     ToastDemo,
     TooltipDemo,
+    HoverCardDemo,
     SliderDemo,
     OtpInputDemo,
     ValidatedInputDemo,

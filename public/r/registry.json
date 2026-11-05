@@ -1430,6 +1430,45 @@
         }
       },
       "docs": "Read http://localhost:3000/docs/components/tooltip.md for usage, required props, and integration instructions."
+    },
+    {
+      "name": "hover-card",
+      "type": "registry:component",
+      "title": "Hover Card",
+      "description": "A link preview card that springs out from its trigger and staggers its contents in.",
+      "dependencies": [
+        "motion",
+        "@base-ui/react"
+      ],
+      "files": [
+        {
+          "path": "src/registry/components/hover-card.tsx",
+          "type": "registry:component",
+          "target": "components/animated/hover-card.tsx"
+        }
+      ],
+      "categories": [
+        "overlay",
+        "popover",
+        "animation",
+        "interactive"
+      ],
+      "meta": {
+        "a1ui": {
+          "useCases": [
+            "Profile mentions, linked repositories, and glossary terms that preview more detail without leaving the page."
+          ],
+          "limitations": [
+            "Only direct children of HoverCardContent stagger; wrap pieces that should arrive together. Touch devices never open the card, so the trigger must work as a plain link and the card must not hold the only copy of important content."
+          ],
+          "requirements": [
+            "React 19, Tailwind CSS 4, Motion, Base UI, and theme colors. The trigger renders a link, so give it an href or a render element. Opens after openDelay on mouse hover or keyboard focus and closes on Escape or an outside press. Reduced motion shows and hides the card instantly without the stagger."
+          ],
+          "docsUrl": "http://localhost:3000/docs/components/hover-card.md",
+          "registryUrl": "http://localhost:3000/r/hover-card.json"
+        }
+      },
+      "docs": "Read http://localhost:3000/docs/components/hover-card.md for usage, required props, and integration instructions."
     }
   ]
 }
