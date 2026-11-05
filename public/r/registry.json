@@ -1283,6 +1283,9 @@
         "motion",
         "@base-ui/react"
       ],
+      "registryDependencies": [
+        "button"
+      ],
       "files": [
         {
           "path": "src/registry/components/alert-dialog.tsx",

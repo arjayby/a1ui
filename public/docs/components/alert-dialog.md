@@ -23,6 +23,7 @@ bun: bunx --bun shadcn@latest add http://localhost:3000/r/alert-dialog.json --ye
 
 - `motion`
 - `@base-ui/react`
+- `button` (shadcn)
 
 ## Code
 

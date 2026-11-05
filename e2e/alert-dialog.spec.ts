@@ -23,7 +23,7 @@ test("popup springs in, shakes on a backdrop click, and fades out before unmount
   }, POPUP);
   expect(opening.some(({ opacity }) => opacity > 0.05 && opacity < 0.95)).toBe(true);
   expect(opening.some(({ scale }) => scale > 0.94 && scale < 0.995)).toBe(true);
-  const dialog = page.getByRole("alertdialog", { name: "Delete “Marketing site”?" });
+  const dialog = page.getByRole("alertdialog", { name: "Delete this project?" });
   await expect(dialog).toBeVisible();
   await expect(dialog.getByRole("button", { name: "Cancel" })).toBeFocused();
   await expect(dialog.getByRole("button", { name: "Delete project" })).toHaveAttribute(
@@ -70,7 +70,6 @@ test("popup springs in, shakes on a backdrop click, and fades out before unmount
   await frame.getByRole("button", { name: "Delete project" }).click();
   await page.getByRole("alertdialog").getByRole("button", { name: "Delete project" }).click();
   await expect(page.locator(POPUP)).toHaveCount(0);
-  await expect(frame.getByRole("status")).toHaveText("Project deleted.");
 });
 
 test("default action fits a phone and closes instantly with reduced motion", async ({ page }) => {

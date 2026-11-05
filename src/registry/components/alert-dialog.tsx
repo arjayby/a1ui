@@ -12,6 +12,8 @@ import {
   type RefObject,
 } from "react";
 
+import { Button } from "@/components/ui/button";
+
 // A damped side-to-side shake, in pixels, played when the backdrop is clicked.
 const SHAKE = [0, -10, 9, -6, 4, -2, 0];
 
@@ -196,41 +198,29 @@ export function AlertDialogFooter({ className, children }: AlertDialogFooterProp
   );
 }
 
-const buttonClass =
-  "focus-visible:ring-ring/30 inline-flex h-9 cursor-pointer items-center justify-center gap-1.5 rounded-md px-4 text-sm font-medium whitespace-nowrap transition-[background-color,scale] duration-150 outline-none select-none focus-visible:ring-3 active:scale-[0.97] disabled:pointer-events-none disabled:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0";
+export type AlertDialogCancelProps = ComponentProps<typeof AlertDialogPrimitive.Close>;
 
-export type AlertDialogCancelProps = Omit<ComponentProps<typeof AlertDialogPrimitive.Close>, "className"> & {
-  className?: string;
-};
-
-export function AlertDialogCancel({ className, ...props }: AlertDialogCancelProps) {
+export function AlertDialogCancel(props: AlertDialogCancelProps) {
   return (
     <AlertDialogPrimitive.Close
       data-slot="alert-dialog-cancel"
+      render={<Button variant="outline" />}
       {...props}
-      className={`${buttonClass} border-border bg-background hover:bg-muted border ${className ?? ""}`}
     />
   );
 }
 
-export type AlertDialogActionProps = Omit<ComponentProps<typeof AlertDialogPrimitive.Close>, "className"> & {
-  /** `destructive` paints the action in the danger color for irreversible choices. */
+export type AlertDialogActionProps = ComponentProps<typeof AlertDialogPrimitive.Close> & {
+  /** `destructive` paints the action in a soft danger color for irreversible choices. */
   variant?: "default" | "destructive";
-  className?: string;
 };
 
-export function AlertDialogAction({ variant = "default", className, ...props }: AlertDialogActionProps) {
-  const variantClass =
-    variant === "destructive"
-      ? "bg-destructive text-background hover:bg-destructive/90"
-      : "bg-foreground text-background hover:bg-foreground/90";
-
+export function AlertDialogAction({ variant = "default", ...props }: AlertDialogActionProps) {
   return (
     <AlertDialogPrimitive.Close
       data-slot="alert-dialog-action"
-      data-variant={variant}
+      render={<Button variant={variant} />}
       {...props}
-      className={`${buttonClass} ${variantClass} ${className ?? ""}`}
     />
   );
 }

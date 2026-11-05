@@ -1,6 +1,5 @@
 "use client";
 
-import { TrashIcon } from "@phosphor-icons/react";
 import { useState } from "react";
 
 import { DemoDuration, DemoSelect } from "@/components/component-demos/demo-controls";
@@ -39,34 +38,27 @@ export function AlertDialogPreview() {
 export function AlertDialogDemo() {
   const [variant, setVariant] = useState<Variant>("destructive");
   const [duration, setDuration] = useState(0.3);
-  const [deleted, setDeleted] = useState(false);
 
   return (
     <div className="not-prose demo-frame">
       <div className="component-demo-stage">
-        <div className="grid justify-items-center gap-3 px-4 text-center">
-          <AlertDialog duration={duration}>
-            <AlertDialogTrigger render={<Button variant="outline" />}>
-              <TrashIcon aria-hidden="true" />
-              Delete project
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogTitle>Delete “Marketing site”?</AlertDialogTitle>
-              <AlertDialogDescription>
-                This removes the project, its 14 deployments, and every preview link. You can’t undo this.
-              </AlertDialogDescription>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction variant={variant} onClick={() => setDeleted(true)}>
-                  Delete project
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-          <p role="status" className="text-muted-foreground text-xs">
-            {deleted ? "Project deleted." : "Click outside the dialog to see it refuse."}
-          </p>
-        </div>
+        <AlertDialog duration={duration}>
+          <AlertDialogTrigger
+            render={<Button variant={variant === "destructive" ? "destructive" : "outline"} />}
+          >
+            Delete project
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogTitle>Delete this project?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This removes its deployments and every preview link. You can’t undo this.
+            </AlertDialogDescription>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction variant={variant}>Delete project</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
       <div className="component-demo-controls [&_[data-slot=demo-select-trigger]]:w-32">
         <DemoSelect label="Action" value={variant} options={variants} onChange={setVariant} />

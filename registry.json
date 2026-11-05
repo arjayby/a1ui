@@ -895,6 +895,7 @@
       "title": "Alert Dialog",
       "description": "A confirmation dialog that springs in, shakes when you click outside it, and fades out before it unmounts.",
       "dependencies": ["motion", "@base-ui/react"],
+      "registryDependencies": ["button"],
       "files": [
         {
           "path": "src/registry/components/alert-dialog.tsx",

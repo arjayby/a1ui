@@ -51,7 +51,7 @@ describe("AlertDialog", () => {
     expect(dialog).toHaveAccessibleDescription("All deployments will be removed.");
     const action = screen.getByRole("button", { name: "Delete" });
     expect(action).toHaveAttribute("data-variant", "destructive");
-    expect(action).toHaveClass("bg-destructive");
+    expect(action).toHaveAttribute("data-slot", "alert-dialog-action");
     fireEvent.click(action);
     expect(onDelete).toHaveBeenCalledTimes(1);
     expect(onOpenChange.mock.calls.map(([open]) => open)).toEqual([true, false]);
