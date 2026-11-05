@@ -26,6 +26,7 @@
     "toast",
     "tooltip",
     "hover-card",
-    "popover"
+    "popover",
+    "select"
   ]
 }

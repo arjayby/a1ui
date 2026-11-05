@@ -1,0 +1,127 @@
+# Select
+
+A select whose list springs open from the trigger, with a traveling highlight, a drawn check, and a cross-fading value.
+
+See [agent setup instructions](http://localhost:3000/llms.txt) before installation. Import paths in examples assume the @/components/animated path; adapt them to the target project's components.json.
+
+## Demo
+
+[Interactive preview](http://localhost:3000/components/select)
+
+## Installation
+
+Choose the command for the target project's package manager. Run it from that project's directory.
+
+```text
+npm: npx shadcn@latest add http://localhost:3000/r/select.json --yes
+pnpm: pnpm dlx shadcn@latest add http://localhost:3000/r/select.json --yes
+yarn: yarn dlx shadcn@latest add http://localhost:3000/r/select.json --yes
+bun: bunx --bun shadcn@latest add http://localhost:3000/r/select.json --yes
+```
+
+## Dependencies
+
+- `motion`
+- `@base-ui/react`
+
+## Code
+
+
+### Usage
+
+```tsx
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectSeparator,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/animated/select";
+
+const items = {
+  "us-east": "US East (Virginia)",
+  "us-west": "US West (Oregon)",
+  "eu-west": "Europe (Ireland)",
+};
+
+export function SelectExample() {
+  return (
+    <Select items={items} defaultValue="eu-west">
+      <SelectTrigger aria-label="Region">
+        <SelectValue placeholder="Select a region" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectGroup>
+          <SelectLabel>Americas</SelectLabel>
+          <SelectItem value="us-east">US East (Virginia)</SelectItem>
+          <SelectItem value="us-west" disabled>
+            US West (Oregon)
+          </SelectItem>
+        </SelectGroup>
+        <SelectSeparator />
+        <SelectItem value="eu-west">Europe (Ireland)</SelectItem>
+      </SelectContent>
+    </Select>
+  );
+}
+```
+
+
+### Source
+[Complete source and dependencies](http://localhost:3000/r/select.json). Each file's content is embedded in the registry JSON.
+
+
+
+## API reference
+
+The list scales open from the trigger while its items fade in one after another. One highlight travels between the hovered or keyboard-highlighted items, the selected item's check draws itself in, and the trigger text slides toward the new value. With `alignItemWithTrigger`, Base UI places the list over the trigger so the selected item sits on top of the trigger text, and the list grows out from that item. This applies to mouse input only. Keyboard and touch, or a trigger close to the viewport edge, open the list below instead.
+
+### Select
+
+| Prop            | Type                                                                 | Default      | Description                                                                                   |
+| --------------- | -------------------------------------------------------------------- | ------------ | --------------------------------------------------------------------------------------------- |
+| `items`         | `Record<string, ReactNode> \| { value: string; label: ReactNode }[]` | None         | Labels for each value, so the trigger can show a label while the list is closed.              |
+| `value`         | `string \| null`                                                     | Uncontrolled | Selected value when controlled. `null` shows the placeholder.                                 |
+| `defaultValue`  | `string \| null`                                                     | `null`       | Initially selected value when uncontrolled.                                                   |
+| `onValueChange` | `(value: string \| null) => void`                                    | None         | Called with the newly selected value. Controlled usage requires the caller to update `value`. |
+| `open`          | `boolean`                                                            | Uncontrolled | Whether the list is open when controlled.                                                     |
+| `defaultOpen`   | `boolean`                                                            | `false`      | Whether the list starts open when uncontrolled.                                               |
+| `onOpenChange`  | `(open: boolean) => void`                                            | None         | Called when the list opens or closes.                                                         |
+| `duration`      | `number`                                                             | `0.3`        | Open, close, highlight, and text-change time in seconds. Zero makes every change instant.     |
+| `disabled`      | `boolean`                                                            | `false`      | Prevents opening the list.                                                                    |
+| `readOnly`      | `boolean`                                                            | `false`      | Opens the list but prevents changing the value.                                               |
+| `required`      | `boolean`                                                            | `false`      | Requires a value before a form submits.                                                       |
+| `name`          | `string`                                                             | None         | Field name for form submission.                                                               |
+| `modal`         | `boolean`                                                            | `true`       | Locks page scroll and outside clicks while the list is open.                                  |
+
+### SelectTrigger and SelectValue
+
+| Prop              | Type                           | Default | Description                                                                 |
+| ----------------- | ------------------------------ | ------- | --------------------------------------------------------------------------- |
+| `aria-label`      | `string`                       | None    | SelectTrigger only. Accessible name when there is no visible label.         |
+| `aria-labelledby` | `string`                       | None    | SelectTrigger only. Id of a visible label that names the select.            |
+| `placeholder`     | `ReactNode`                    | None    | SelectValue only. Shown while nothing is selected.                          |
+| `children`        | `(value: string) => ReactNode` | None    | SelectValue only. Formats the selected value instead of looking up `items`. |
+| `className`       | `string`                       | None    | Additional classes.                                                         |
+
+### SelectContent
+
+| Prop                   | Type                           | Default    | Description                                                                       |
+| ---------------------- | ------------------------------ | ---------- | --------------------------------------------------------------------------------- |
+| `alignItemWithTrigger` | `boolean`                      | `true`     | Places the selected item over the trigger text. Set `false` to always open below. |
+| `side`                 | `"top" \| "bottom"`            | `"bottom"` | Side of the trigger the list opens on when it is not aligned over it.             |
+| `align`                | `"start" \| "center" \| "end"` | `"start"`  | Alignment against the trigger when it is not aligned over it.                     |
+| `sideOffset`           | `number`                       | `4`        | Gap between the trigger and the list in pixels.                                   |
+| `className`            | `string`                       | None       | Additional list classes.                                                          |
+
+### SelectItem, SelectGroup, SelectLabel, and SelectSeparator
+
+| Prop        | Type      | Default  | Description                                                                |
+| ----------- | --------- | -------- | -------------------------------------------------------------------------- |
+| `value`     | `string`  | Required | SelectItem only. The value selected by this item.                          |
+| `disabled`  | `boolean` | `false`  | SelectItem only. Shown muted and cannot be selected.                       |
+| `label`     | `string`  | None     | SelectItem only. Text for type-ahead when the children are not plain text. |
+| `className` | `string`  | None     | Additional classes. SelectLabel names the SelectGroup it sits in.          |
