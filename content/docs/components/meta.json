@@ -20,6 +20,7 @@
     "toggle-group",
     "accordion",
     "progress",
-    "dialog"
+    "dialog",
+    "alert-dialog"
   ]
 }

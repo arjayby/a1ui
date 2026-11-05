@@ -1273,6 +1273,45 @@
         }
       },
       "docs": "Read http://localhost:3000/docs/components/dialog.md for usage, required props, and integration instructions."
+    },
+    {
+      "name": "alert-dialog",
+      "type": "registry:component",
+      "title": "Alert Dialog",
+      "description": "A confirmation dialog that springs in, shakes when you click outside it, and fades out before it unmounts.",
+      "dependencies": [
+        "motion",
+        "@base-ui/react"
+      ],
+      "files": [
+        {
+          "path": "src/registry/components/alert-dialog.tsx",
+          "type": "registry:component",
+          "target": "components/animated/alert-dialog.tsx"
+        }
+      ],
+      "categories": [
+        "overlay",
+        "dialog",
+        "animation",
+        "interactive"
+      ],
+      "meta": {
+        "a1ui": {
+          "useCases": [
+            "Confirming destructive or irreversible actions such as deleting a project, signing out, or discarding unsaved changes."
+          ],
+          "limitations": [
+            "One centered size capped at 28rem wide. Backdrop clicks never close it. Cancel and Action always close the dialog, so run async work before or after rather than inside the dialog."
+          ],
+          "requirements": [
+            "React 19, Tailwind CSS 4, Motion, Base UI, and theme colors including destructive. Always include AlertDialogTitle and AlertDialogDescription. Controlled usage requires updating open in onOpenChange. Reduced motion opens and closes instantly and removes the shake."
+          ],
+          "docsUrl": "http://localhost:3000/docs/components/alert-dialog.md",
+          "registryUrl": "http://localhost:3000/r/alert-dialog.json"
+        }
+      },
+      "docs": "Read http://localhost:3000/docs/components/alert-dialog.md for usage, required props, and integration instructions."
     }
   ]
 }
