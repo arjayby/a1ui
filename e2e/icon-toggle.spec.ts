@@ -73,7 +73,11 @@ test("catalog, registry, and agent docs include the icon toggle", async ({ page,
   await page.goto("/components");
   await page.locator('.catalog-card-link[href="/components/icon-toggle"]').click();
   await expect(page.getByRole("heading", { name: "Icon Toggle", exact: true })).toBeVisible();
-  await expect(page.locator('[data-slot="breadcrumb-page"]')).toHaveText("Icon Toggle");
+  await expect(
+    page
+      .getByRole("navigation", { name: "breadcrumb", exact: true })
+      .locator('[data-slot="breadcrumb-page"]'),
+  ).toHaveText("Icon Toggle");
   await expect(page.getByRole("slider", { name: "Animation duration", exact: true })).toHaveValue("0.3");
   const item = await (await request.get("/r/icon-toggle.json")).json();
   expect(item.type).toBe("registry:component");

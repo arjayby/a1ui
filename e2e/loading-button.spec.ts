@@ -124,7 +124,11 @@ test("the library links to an installable loading button with documentation", as
   await page.goto("/components");
   await page.locator('.catalog-card-link[href="/components/loading-button"]').click();
   await expect(page).toHaveURL(/\/components\/loading-button$/);
-  await expect(page.locator('[data-slot="breadcrumb-page"]')).toHaveText("Loading Button");
+  await expect(
+    page
+      .getByRole("navigation", { name: "breadcrumb", exact: true })
+      .locator('[data-slot="breadcrumb-page"]'),
+  ).toHaveText("Loading Button");
   await expect(
     page
       .getByRole("navigation", { name: "Library" })

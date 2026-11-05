@@ -112,7 +112,11 @@ test("the components page links to the installable component", async ({ page, re
   await page.goto("/components");
   await page.locator('.catalog-card-link[href="/components/copy-button"]').click();
   await expect(page).toHaveURL(/\/components\/copy-button$/);
-  await expect(page.locator('[data-slot="breadcrumb-page"]')).toHaveText("Copy Button");
+  await expect(
+    page
+      .getByRole("navigation", { name: "breadcrumb", exact: true })
+      .locator('[data-slot="breadcrumb-page"]'),
+  ).toHaveText("Copy Button");
   await expect(page.locator('.demo-frame [data-slot="copy-button"]')).toHaveCount(1);
   await expect(page.getByRole("button", { name: "Animation: blur", exact: true })).toHaveText("blur");
   await expect(page.getByRole("slider", { name: "Animation duration", exact: true })).toHaveValue("0.3");

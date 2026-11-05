@@ -54,7 +54,11 @@ test("blocks and reusable components have separate catalogs on desktop and mobil
 test("the design system is available by direct URL without a navigation link", async ({ page }) => {
   await page.goto("/design-system");
   await expect(page.getByRole("heading", { name: "Design system", exact: true })).toBeVisible();
-  await expect(page.locator('[data-slot="breadcrumb-page"]')).toHaveText("Design system");
+  await expect(
+    page
+      .getByRole("navigation", { name: "breadcrumb", exact: true })
+      .locator('[data-slot="breadcrumb-page"]'),
+  ).toHaveText("Design system");
   await expect(page.getByRole("heading", { name: "01 / Foundations" })).toBeVisible();
   await expect(page.locator('a[href="/design-system"]')).toHaveCount(0);
 });
