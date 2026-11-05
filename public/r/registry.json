@@ -1587,6 +1587,45 @@
         }
       },
       "docs": "Read http://localhost:3000/docs/components/command.md for usage, required props, and integration instructions."
+    },
+    {
+      "name": "kbd",
+      "type": "registry:component",
+      "title": "Kbd",
+      "description": "A keycap that sinks and springs back when its key is pressed, with platform-aware labels and combos that pulse when held.",
+      "dependencies": [
+        "motion"
+      ],
+      "files": [
+        {
+          "path": "src/registry/components/kbd.tsx",
+          "type": "registry:component",
+          "target": "components/animated/kbd.tsx"
+        }
+      ],
+      "categories": [
+        "keyboard",
+        "shortcut",
+        "display",
+        "animation",
+        "interactive"
+      ],
+      "meta": {
+        "a1ui": {
+          "useCases": [
+            "Keyboard shortcut hints in menus, tooltips, command palettes, and onboarding, where the keycap presses as the user tries the shortcut."
+          ],
+          "limitations": [
+            "One size, 24 pixels tall. Listening shows the press only; it never prevents the browser default or runs an action, so pair it with your own shortcut handler. Labels cover Mac and a single label set for every other platform."
+          ],
+          "requirements": [
+            "React 19, Tailwind CSS 4, Motion, and theme colors. Use mod for the platform command key: ⌘ on Mac, Ctrl elsewhere. Labels render as Ctrl on the server and switch after mount, so pass platform to pin them. Reduced motion keeps the press state but moves the cap instantly and shows the combo pulse as a still glow."
+          ],
+          "docsUrl": "http://localhost:3000/docs/components/kbd.md",
+          "registryUrl": "http://localhost:3000/r/kbd.json"
+        }
+      },
+      "docs": "Read http://localhost:3000/docs/components/kbd.md for usage, required props, and integration instructions."
     }
   ]
 }
