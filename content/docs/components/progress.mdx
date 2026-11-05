@@ -1,0 +1,53 @@
+---
+title: Progress
+description: A progress bar, ring, or step row whose fill springs to each value while the percentage rolls like a counter.
+---
+
+## Demo
+
+<ProgressDemo />
+
+## Installation
+
+<Installation name="progress" />
+
+## Dependencies
+
+<Dependencies name="progress" />
+
+## Code
+
+<Tabs items={["Usage", "Source"]}>
+  <Tab value="Usage">
+
+```tsx
+import { Progress } from "@/components/animated/progress";
+
+export function ProgressExample({ uploaded }: { uploaded: number | null }) {
+  return <Progress label="Uploading assets" value={uploaded} shimmer />;
+}
+```
+
+  </Tab>
+  <Tab value="Source">
+    <ComponentSource name="progress" />
+  </Tab>
+</Tabs>
+
+## API reference
+
+| Prop          | Type                                         | Default         | Description                                                                                 |
+| ------------- | -------------------------------------------- | --------------- | ------------------------------------------------------------------------------------------- |
+| `value`       | `number \| null`                             | `0`             | Current value, clamped between `min` and `max`. `null` shows a looping indeterminate sweep. |
+| `min`         | `number`                                     | `0`             | Lowest value.                                                                               |
+| `max`         | `number`                                     | `100`           | Highest value. Reaching it marks the bar `data-complete`.                                   |
+| `variant`     | `"bar" \| "ring" \| "steps"`                 | `"bar"`         | A horizontal track, a circular stroke, or a row of segments that fill one after another.    |
+| `steps`       | `number`                                     | `5`             | Number of segments for the `steps` variant.                                                 |
+| `label`       | `ReactNode`                                  | None            | Visible label, used as the progress bar's accessible name.                                  |
+| `aria-label`  | `string`                                     | None            | Accessible name when there is no visible label.                                             |
+| `showValue`   | `boolean`                                    | `true`          | Shows the value text, which rolls its digits like a counter.                                |
+| `formatValue` | `(value: number, percent: number) => string` | Rounded percent | Formats the value text and `aria-valuetext`. Receives the clamped value and its percentage. |
+| `shimmer`     | `boolean`                                    | `false`         | Moves a highlight across the fill while it is below 100%.                                   |
+| `size`        | `number`                                     | `64`            | Ring diameter in pixels. The stroke width scales with it.                                   |
+| `duration`    | `number`                                     | `0.6`           | Fill spring duration in seconds. Zero jumps to each value and stops the sweep and shimmer.  |
+| `className`   | `string`                                     | None            | Additional classes on the root element.                                                     |
