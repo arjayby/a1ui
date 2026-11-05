@@ -1587,6 +1587,46 @@
         }
       },
       "docs": "Read http://localhost:3000/docs/components/command.md for usage, required props, and integration instructions."
+    },
+    {
+      "name": "navigation-menu",
+      "type": "registry:component",
+      "title": "Navigation Menu",
+      "description": "A site navigation whose one dropdown panel resizes and glides between sections, which slide in from the side you move toward.",
+      "dependencies": [
+        "motion",
+        "@base-ui/react"
+      ],
+      "files": [
+        {
+          "path": "src/registry/components/navigation-menu.tsx",
+          "type": "registry:component",
+          "target": "components/animated/navigation-menu.tsx"
+        }
+      ],
+      "categories": [
+        "navigation-menu",
+        "navigation",
+        "header",
+        "animation",
+        "interactive"
+      ],
+      "meta": {
+        "a1ui": {
+          "useCases": [
+            "Marketing and docs site headers with a few top-level sections, such as Products, Solutions, and Resources, that each open a panel of links."
+          ],
+          "limitations": [
+            "Horizontal, single-level menus only: nested submenus and a vertical sidebar layout are not styled. Below the sm breakpoint panels take the screen width minus a 1rem gutter and the list wraps, so a dedicated mobile drawer is still the better fit for long menus. The panel always opens below the triggers."
+          ],
+          "requirements": [
+            "React 19, Tailwind CSS 4, Motion, Base UI, and theme colors. Put a NavigationMenuTrigger and NavigationMenuContent, or a single NavigationMenuLink, in each NavigationMenuItem, and name the root with aria-label. Reduced motion resizes the panel and swaps sections instantly."
+          ],
+          "docsUrl": "http://localhost:3000/docs/components/navigation-menu.md",
+          "registryUrl": "http://localhost:3000/r/navigation-menu.json"
+        }
+      },
+      "docs": "Read http://localhost:3000/docs/components/navigation-menu.md for usage, required props, and integration instructions."
     }
   ]
 }
