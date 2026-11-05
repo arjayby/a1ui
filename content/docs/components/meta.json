@@ -31,6 +31,7 @@
     "command",
     "avatar-group",
     "badge",
-    "pagination"
+    "pagination",
+    "navigation-menu"
   ]
 }

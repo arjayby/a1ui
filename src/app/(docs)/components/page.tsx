@@ -28,6 +28,7 @@ import { CommandPreview } from "@/components/component-demos/command-demo";
 import { AvatarGroupPreview } from "@/components/component-demos/avatar-group-demo";
 import { BadgePreview } from "@/components/component-demos/badge-demo";
 import { PaginationPreview } from "@/components/component-demos/pagination-demo";
+import { NavigationMenuPreview } from "@/components/component-demos/navigation-menu-demo";
 import { LoadingButtonPreview } from "@/components/component-demos/loading-button-demo";
 import { SliderPreview } from "@/components/component-demos/slider-demo";
 import { OtpInputPreview } from "@/components/component-demos/otp-input-demo";
@@ -67,6 +68,7 @@ const previews: Record<string, ReactNode> = {
   "avatar-group": <AvatarGroupPreview />,
   badge: <BadgePreview />,
   pagination: <PaginationPreview />,
+  "navigation-menu": <NavigationMenuPreview />,
   "loading-button": <LoadingButtonPreview />,
   slider: <SliderPreview />,
   "otp-input": <OtpInputPreview />,
