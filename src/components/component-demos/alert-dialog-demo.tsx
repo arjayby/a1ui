@@ -19,20 +19,35 @@ import {
 type Variant = NonNullable<AlertDialogActionProps["variant"]>;
 const variants: Variant[] = ["destructive", "default"];
 
-export function AlertDialogPreview() {
+// The catalog card shows the same dialog as the demo.
+function DeleteProjectDialog({
+  variant = "destructive",
+  duration,
+}: {
+  variant?: Variant;
+  duration?: number;
+}) {
   return (
-    <AlertDialog>
-      <AlertDialogTrigger render={<Button variant="outline" />}>Sign out</AlertDialogTrigger>
+    <AlertDialog duration={duration}>
+      <AlertDialogTrigger render={<Button variant={variant === "destructive" ? "destructive" : "outline"} />}>
+        Delete project
+      </AlertDialogTrigger>
       <AlertDialogContent>
-        <AlertDialogTitle>Sign out of a1ui?</AlertDialogTitle>
-        <AlertDialogDescription>You will need to sign in again to edit your projects.</AlertDialogDescription>
+        <AlertDialogTitle>Delete this project?</AlertDialogTitle>
+        <AlertDialogDescription>
+          This removes its deployments and every preview link. You can’t undo this.
+        </AlertDialogDescription>
         <AlertDialogFooter>
-          <AlertDialogCancel>Stay</AlertDialogCancel>
-          <AlertDialogAction>Sign out</AlertDialogAction>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction variant={variant}>Delete project</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
   );
+}
+
+export function AlertDialogPreview() {
+  return <DeleteProjectDialog />;
 }
 
 export function AlertDialogDemo() {
@@ -42,23 +57,7 @@ export function AlertDialogDemo() {
   return (
     <div className="not-prose demo-frame">
       <div className="component-demo-stage">
-        <AlertDialog duration={duration}>
-          <AlertDialogTrigger
-            render={<Button variant={variant === "destructive" ? "destructive" : "outline"} />}
-          >
-            Delete project
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogTitle>Delete this project?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This removes its deployments and every preview link. You can’t undo this.
-            </AlertDialogDescription>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction variant={variant}>Delete project</AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+        <DeleteProjectDialog variant={variant} duration={duration} />
       </div>
       <div className="component-demo-controls [&_[data-slot=demo-select-trigger]]:w-32">
         <DemoSelect label="Action" value={variant} options={variants} onChange={setVariant} />
