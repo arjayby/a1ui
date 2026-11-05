@@ -165,7 +165,8 @@ export function AccordionTrigger({ className, children }: AccordionTriggerProps)
               strokeLinejoin="round"
               className="size-4"
               initial={false}
-              animate={{ rotate: open ? 180 : 0 }}
+              // Counter-clockwise, so the point swings through the right on open and on close.
+              animate={{ rotate: open ? -180 : 0 }}
               transition={transition}
             >
               <path d="M4 6 L8 10 L12 6" />
