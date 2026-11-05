@@ -748,6 +748,34 @@
           ]
         }
       }
+    },
+    {
+      "name": "tooltip",
+      "type": "registry:component",
+      "title": "Tooltip",
+      "description": "A tooltip that springs from its trigger and glides between neighboring triggers, morphing its size and text.",
+      "dependencies": ["motion", "@base-ui/react"],
+      "files": [
+        {
+          "path": "src/registry/components/tooltip.tsx",
+          "type": "registry:component",
+          "target": "components/animated/tooltip.tsx"
+        }
+      ],
+      "categories": ["overlay", "tooltip", "animation", "interactive"],
+      "meta": {
+        "a1ui": {
+          "useCases": [
+            "Icon-button toolbars, editor controls, and dense action bars where hints should follow the pointer from button to button."
+          ],
+          "limitations": [
+            "Tooltips inside one gliding TooltipProvider share a single popup, so only one shows at a time. Tooltip text is a hint for pointer and keyboard users; it is not announced on touch devices, so icon buttons still need an aria-label."
+          ],
+          "requirements": [
+            "React 19, Tailwind CSS 4, Motion, Base UI, and theme colors. Wrap triggers in TooltipProvider to share delays and glide between them. Reduced motion shows and moves the tooltip instantly."
+          ]
+        }
+      }
     }
   ]
 }
