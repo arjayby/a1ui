@@ -126,6 +126,12 @@
     border-color: var(--border);
   }
 
+  /* Layered so a button's own text-* utility still sets its size. */
+  button {
+    font-family: var(--font-sans);
+    font-size: var(--text-xs);
+  }
+
   a:focus-visible,
   button:focus-visible,
   select:focus-visible {
@@ -160,11 +166,6 @@ body {
 button:where(:not(:disabled, [aria-disabled="true"], [data-disabled])),
 [role="button"]:where(:not([aria-disabled="true"], [data-disabled])) {
   cursor: pointer;
-}
-
-button {
-  font-family: var(--font-sans);
-  font-size: var(--text-xs);
 }
 
 code,

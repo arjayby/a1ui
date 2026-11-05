@@ -65,12 +65,16 @@ function DemoLink({ children, className }: { children: ReactNode; className?: st
   );
 }
 
+// Four top-level items wrap onto two rows on a phone, and an open panel would cover the second.
+// A smaller size there keeps Resources on the first row.
+const phoneSize = "max-sm:text-xs";
+
 function SiteNavigation(props: Omit<NavigationMenuProps, "children">) {
   return (
     <NavigationMenu aria-label="Main" {...props}>
       <NavigationMenuList>
         <NavigationMenuItem value="products">
-          <NavigationMenuTrigger>Products</NavigationMenuTrigger>
+          <NavigationMenuTrigger className={phoneSize}>Products</NavigationMenuTrigger>
           <NavigationMenuContent>
             <ul className="grid gap-1 sm:w-[23rem] sm:grid-cols-2">
               {products.map(({ icon: Icon, title, text }) => (
@@ -90,7 +94,7 @@ function SiteNavigation(props: Omit<NavigationMenuProps, "children">) {
           </NavigationMenuContent>
         </NavigationMenuItem>
         <NavigationMenuItem value="solutions">
-          <NavigationMenuTrigger>Solutions</NavigationMenuTrigger>
+          <NavigationMenuTrigger className={phoneSize}>Solutions</NavigationMenuTrigger>
           <NavigationMenuContent>
             <ul className="grid gap-x-2 sm:w-[24rem] sm:grid-cols-2">
               {solutions.map(({ icon: Icon, title, text }) => (
@@ -108,7 +112,7 @@ function SiteNavigation(props: Omit<NavigationMenuProps, "children">) {
           </NavigationMenuContent>
         </NavigationMenuItem>
         <NavigationMenuItem value="resources">
-          <NavigationMenuTrigger>Resources</NavigationMenuTrigger>
+          <NavigationMenuTrigger className={phoneSize}>Resources</NavigationMenuTrigger>
           <NavigationMenuContent>
             <ul className="grid sm:w-52">
               {resources.map(({ icon: Icon, title }) => (
@@ -123,7 +127,7 @@ function SiteNavigation(props: Omit<NavigationMenuProps, "children">) {
           </NavigationMenuContent>
         </NavigationMenuItem>
         <NavigationMenuItem value="pricing">
-          <NavigationMenuLink href="#" onClick={stay}>
+          <NavigationMenuLink href="#" onClick={stay} className={phoneSize}>
             Pricing
           </NavigationMenuLink>
         </NavigationMenuItem>
