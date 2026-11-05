@@ -1078,6 +1078,45 @@
         }
       },
       "docs": "Read http://localhost:3000/docs/components/checkbox.md for usage, required props, and integration instructions."
+    },
+    {
+      "name": "toggle-group",
+      "type": "registry:component",
+      "title": "Toggle Group",
+      "description": "A segmented control whose surface slides between items, or chips that pop in with a check when pressed.",
+      "dependencies": [
+        "motion",
+        "@base-ui/react"
+      ],
+      "files": [
+        {
+          "path": "src/registry/components/toggle-group.tsx",
+          "type": "registry:component",
+          "target": "components/animated/toggle-group.tsx"
+        }
+      ],
+      "categories": [
+        "toggle",
+        "input",
+        "animation",
+        "interactive"
+      ],
+      "meta": {
+        "a1ui": {
+          "useCases": [
+            "Switching a view or alignment with a segmented control, or picking several filters as chips."
+          ],
+          "limitations": [
+            "Single mode keeps one item pressed once chosen. Chips wrap onto new lines; the segmented track expects one row. Icon-only detection treats any item without text children as icon-only."
+          ],
+          "requirements": [
+            "React 19, Tailwind CSS 4, Motion, Base UI, and theme colors. Give each ToggleGroupItem a unique string value, the group an aria-label, and icon-only items an aria-label. Reduced motion moves the surface and presses chips instantly."
+          ],
+          "docsUrl": "http://localhost:3000/docs/components/toggle-group.md",
+          "registryUrl": "http://localhost:3000/r/toggle-group.json"
+        }
+      },
+      "docs": "Read http://localhost:3000/docs/components/toggle-group.md for usage, required props, and integration instructions."
     }
   ]
 }
