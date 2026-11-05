@@ -1028,6 +1028,34 @@
           ]
         }
       }
+    },
+    {
+      "name": "popover",
+      "type": "registry:component",
+      "title": "Popover",
+      "description": "A popover that springs out of its trigger, or morphs the trigger button itself into the panel.",
+      "dependencies": ["motion", "@base-ui/react"],
+      "files": [
+        {
+          "path": "src/registry/components/popover.tsx",
+          "type": "registry:component",
+          "target": "components/animated/popover.tsx"
+        }
+      ],
+      "categories": ["popover", "overlay", "animation", "interactive"],
+      "meta": {
+        "a1ui": {
+          "useCases": [
+            "Small anchored panels such as display settings, filters, or share options, and a feedback button that opens into a short form in place."
+          ],
+          "limitations": [
+            "Morph panels open over the trigger instead of beside it, wrap the popover in an inline-flex box, support only top and bottom sides, and never flip or shift to stay in the viewport. The morph trigger is a 36 pixel pill."
+          ],
+          "requirements": [
+            "React 19, Tailwind CSS 4, Motion, Base UI, and theme colors. Give the panel a PopoverTitle or aria-label. Controlled usage requires updating open in onOpenChange. Reduced motion opens and closes the panel instantly without the morph."
+          ]
+        }
+      }
     }
   ]
 }

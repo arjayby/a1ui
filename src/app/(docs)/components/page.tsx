@@ -22,6 +22,7 @@ import { DrawerPreview } from "@/components/component-demos/drawer-demo";
 import { ToastPreview } from "@/components/component-demos/toast-demo";
 import { TooltipPreview } from "@/components/component-demos/tooltip-demo";
 import { HoverCardPreview } from "@/components/component-demos/hover-card-demo";
+import { PopoverPreview } from "@/components/component-demos/popover-demo";
 import { LoadingButtonPreview } from "@/components/component-demos/loading-button-demo";
 import { SliderPreview } from "@/components/component-demos/slider-demo";
 import { OtpInputPreview } from "@/components/component-demos/otp-input-demo";
@@ -55,6 +56,7 @@ const previews: Record<string, ReactNode> = {
   toast: <ToastPreview />,
   tooltip: <TooltipPreview />,
   "hover-card": <HoverCardPreview />,
+  popover: <PopoverPreview />,
   "loading-button": <LoadingButtonPreview />,
   slider: <SliderPreview />,
   "otp-input": <OtpInputPreview />,
