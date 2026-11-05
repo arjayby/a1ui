@@ -1587,6 +1587,46 @@
         }
       },
       "docs": "Read http://localhost:3000/docs/components/command.md for usage, required props, and integration instructions."
+    },
+    {
+      "name": "carousel",
+      "type": "registry:component",
+      "title": "Carousel",
+      "description": "A carousel whose slides scale, fade, and drift with the drag, with dots that stretch from one slide to the next.",
+      "dependencies": [
+        "embla-carousel-react",
+        "motion"
+      ],
+      "files": [
+        {
+          "path": "src/registry/components/carousel.tsx",
+          "type": "registry:component",
+          "target": "components/animated/carousel.tsx"
+        }
+      ],
+      "categories": [
+        "carousel",
+        "slider",
+        "gallery",
+        "animation",
+        "interactive"
+      ],
+      "meta": {
+        "a1ui": {
+          "useCases": [
+            "Swipeable galleries, product shots, testimonials, and onboarding cards where the current slide should stand out from its neighbours while the user drags."
+          ],
+          "limitations": [
+            "Scale, fade, and parallax are tied to snap distance, so slides wider than the viewport or groups scrolled together share one value. Previous and next buttons are not positioned for you. CarouselDots lays out horizontally, and looping needs enough slides to fill the viewport."
+          ],
+          "requirements": [
+            "React 19, Tailwind CSS 4, Motion, Embla Carousel, and theme colors. Give Carousel an aria-label and set each CarouselItem's width with a basis class. Reduced motion removes the scale, fade, and parallax and makes buttons, keys, and dots jump instead of scrolling."
+          ],
+          "docsUrl": "http://localhost:3000/docs/components/carousel.md",
+          "registryUrl": "http://localhost:3000/r/carousel.json"
+        }
+      },
+      "docs": "Read http://localhost:3000/docs/components/carousel.md for usage, required props, and integration instructions."
     }
   ]
 }
