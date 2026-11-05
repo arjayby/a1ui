@@ -63,7 +63,14 @@ test("the error example shows red feedback inside the button and allows retry wi
   await expect(button).toHaveAttribute("data-state", "error");
   await expect(button).toHaveAccessibleName("Try again");
   await expect(button).toHaveText("Try again");
-  await expect(button).toHaveCSS("color", "rgb(213, 138, 128)");
+  const danger = await page.evaluate(() => {
+    const probe = document.body.appendChild(document.createElement("span"));
+    probe.style.color = "var(--danger)";
+    const color = getComputedStyle(probe).color;
+    probe.remove();
+    return color;
+  });
+  await expect(button).toHaveCSS("color", danger);
   await expect(button).toHaveCSS("background-color", background);
   await expect(button).toBeEnabled();
   await expect(button.locator("svg")).toHaveCount(0);
