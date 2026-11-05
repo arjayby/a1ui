@@ -30,6 +30,7 @@ import { ProgressDemo } from "@/components/component-demos/progress-demo";
 import { DialogDemo } from "@/components/component-demos/dialog-demo";
 import { AlertDialogDemo } from "@/components/component-demos/alert-dialog-demo";
 import { DrawerDemo } from "@/components/component-demos/drawer-demo";
+import { ToastDemo } from "@/components/component-demos/toast-demo";
 import { SliderDemo } from "@/components/component-demos/slider-demo";
 import { OtpInputDemo } from "@/components/component-demos/otp-input-demo";
 import { ValidatedInputDemo } from "@/components/component-demos/validated-input-demo";
@@ -70,6 +71,7 @@ export function getMDXComponents(components?: MDXComponents) {
     DialogDemo,
     AlertDialogDemo,
     DrawerDemo,
+    ToastDemo,
     SliderDemo,
     OtpInputDemo,
     ValidatedInputDemo,
