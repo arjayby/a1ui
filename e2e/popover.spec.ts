@@ -1,10 +1,11 @@
 import { expect, test } from "@playwright/test";
 
-test("feedback button morphs into the panel and collapses back on close", async ({ page }) => {
+test("share button morphs into the panel and collapses back on close", async ({ page }) => {
   await page.goto("/components/popover");
   await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
   const frame = page.locator(".demo-frame");
-  const trigger = frame.getByRole("button", { name: "Feedback" });
+  await expect(frame.getByRole("switch", { name: "Morph" })).toBeChecked();
+  const trigger = frame.getByRole("button", { name: "Share" });
   const start = (await trigger.boundingBox())!;
 
   const widths = await trigger.evaluate(async (element: HTMLElement) => {
@@ -18,18 +19,16 @@ test("feedback button morphs into the panel and collapses back on close", async 
     }
     return samples;
   });
-  const dialog = frame.getByRole("dialog", { name: "Send feedback" });
+  const dialog = frame.getByRole("dialog", { name: "Share roadmap" });
   await expect(dialog).toBeVisible();
   const panel = (await dialog.boundingBox())!;
-  // The shape starts at the trigger's size and grows in place, pinned to its top-left corner.
+  // The shape starts at the trigger's size and grows in place from its top edge, centered on it.
   expect(widths.some((width) => width > start.width + 4 && width < panel.width - 4)).toBe(true);
-  expect(Math.abs(panel.x - start.x)).toBeLessThan(2);
+  expect(Math.abs(panel.x + panel.width / 2 - (start.x + start.width / 2))).toBeLessThan(2);
   expect(Math.abs(panel.y - start.y)).toBeLessThan(2);
-  await expect(frame.getByRole("textbox", { name: "Feedback" })).toBeFocused();
+  await expect(frame.getByRole("textbox", { name: "Share link" })).toBeFocused();
 
-  await page.keyboard.type("Love the tabs");
-  const closing = await page.evaluate(async () => {
-    (document.activeElement as HTMLElement).closest("form")!.requestSubmit();
+  const sampling = page.evaluate(async () => {
     const samples: number[] = [];
     const began = performance.now();
     while (performance.now() - began < 600) {
@@ -39,15 +38,19 @@ test("feedback button morphs into the panel and collapses back on close", async 
     }
     return samples;
   });
+  await page.keyboard.press("Escape");
+  const closing = await sampling;
   expect(closing.some((width) => width > start.width + 4)).toBe(true);
   await expect(dialog).toHaveCount(0);
-  await expect(frame.getByRole("button", { name: "Thanks!" })).toBeFocused();
+  await expect(trigger).toBeFocused();
 });
 
-test("settings popover grows out of its trigger and closes on Escape", async ({ page }) => {
+test("with morph off, the panel grows out of its trigger and closes on Escape", async ({ page }) => {
   await page.goto("/components/popover");
   await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
-  const trigger = page.locator(".demo-frame").getByRole("button", { name: "Settings", exact: true });
+  const frame = page.locator(".demo-frame");
+  await frame.getByRole("switch", { name: "Morph" }).click();
+  const trigger = frame.getByRole("button", { name: "Share", exact: true });
   const scales = await trigger.evaluate(async (element: HTMLElement) => {
     element.click();
     const samples: number[] = [];
@@ -60,11 +63,11 @@ test("settings popover grows out of its trigger and closes on Escape", async ({ 
     return samples;
   });
   expect(scales.some((scale) => scale > 0.89 && scale < 0.99)).toBe(true);
-  const dialog = page.getByRole("dialog", { name: "Display" });
+  const dialog = page.getByRole("dialog", { name: "Share roadmap" });
   await expect(dialog).toBeVisible();
   const [panel, anchor] = await Promise.all([dialog.boundingBox(), trigger.boundingBox()]);
   expect(panel!.y).toBeGreaterThan(anchor!.y + anchor!.height);
-  await expect(dialog.getByRole("switch", { name: "Compact rows" })).toBeFocused();
+  await expect(dialog.getByRole("textbox", { name: "Share link" })).toBeFocused();
   await page.keyboard.press("Escape");
   await expect(dialog).toHaveCount(0);
   await expect(trigger).toBeFocused();
@@ -76,8 +79,8 @@ test("morph panel fits a 390px screen and opens instantly with reduced motion", 
   await page.goto("/components/popover");
   await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
   const frame = page.locator(".demo-frame");
-  await frame.getByRole("button", { name: "Feedback" }).click();
-  const dialog = frame.getByRole("dialog", { name: "Send feedback" });
+  await frame.getByRole("button", { name: "Share" }).click();
+  const dialog = frame.getByRole("dialog", { name: "Share roadmap" });
   await expect(dialog).toBeVisible();
   expect(
     await dialog.evaluate((element) =>
@@ -88,7 +91,7 @@ test("morph panel fits a 390px screen and opens instantly with reduced motion", 
   expect(panel!.x).toBeGreaterThanOrEqual(box!.x);
   expect(panel!.x + panel!.width).toBeLessThanOrEqual(box!.x + box!.width);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-  await frame.getByRole("button", { name: "Cancel" }).click();
+  await page.keyboard.press("Escape");
   await expect(dialog).toHaveCount(0);
 });
 

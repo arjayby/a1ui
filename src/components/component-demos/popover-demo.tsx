@@ -1,13 +1,13 @@
 "use client";
 
-import { ChatCircleDotsIcon, CheckIcon, GearSixIcon, PaperPlaneTiltIcon } from "@phosphor-icons/react";
+import { CheckIcon, CopyIcon, ShareNetworkIcon } from "@phosphor-icons/react";
 import { useState } from "react";
 
 import { DemoDuration, DemoSelect } from "@/components/component-demos/demo-controls";
 import { Button } from "@/components/ui/button";
+import { Switch as DemoSwitch } from "@/components/ui/switch";
 import {
   Popover,
-  PopoverClose,
   PopoverContent,
   PopoverDescription,
   PopoverTitle,
@@ -18,95 +18,70 @@ import { Switch } from "@/registry/components/switch";
 
 type Side = NonNullable<PopoverContentProps["side"]>;
 const sides: Side[] = ["bottom", "top", "left", "right"];
+const shareLink = "a1ui.dev/s/q3-roadmap";
 
-function SettingsPopover({ side, duration }: { side?: Side; duration?: number }) {
+function SharePopover({ morph = true, side, duration }: { morph?: boolean; side?: Side; duration?: number }) {
+  const [copied, setCopied] = useState(false);
+
   return (
-    <Popover duration={duration}>
-      <PopoverTrigger render={<Button variant="outline" size="sm" />}>
-        <GearSixIcon aria-hidden="true" />
-        Settings
+    <Popover morph={morph} duration={duration} onOpenChange={(open) => open && setCopied(false)}>
+      <PopoverTrigger render={morph ? undefined : <Button variant="outline" size="sm" />}>
+        <ShareNetworkIcon aria-hidden="true" />
+        Share
       </PopoverTrigger>
-      <PopoverContent side={side} className="grid w-64 gap-4">
+      <PopoverContent side={side} className="grid gap-4">
         <div className="grid gap-1">
-          <PopoverTitle>Display</PopoverTitle>
-          <PopoverDescription>Tune how the inbox looks on this device.</PopoverDescription>
+          <PopoverTitle>Share roadmap</PopoverTitle>
+          <PopoverDescription>Anyone you send this link to can open the Q3 roadmap.</PopoverDescription>
         </div>
-        <div className="grid gap-3">
-          <Switch label="Compact rows" defaultChecked duration={duration} />
-          <Switch label="Show avatars" duration={duration} />
-        </div>
-      </PopoverContent>
-    </Popover>
-  );
-}
-
-function FeedbackPopover({ duration }: { duration?: number }) {
-  const [open, setOpen] = useState(false);
-  const [sent, setSent] = useState(false);
-
-  return (
-    <Popover
-      morph
-      open={open}
-      onOpenChange={(next) => {
-        setOpen(next);
-        if (next) setSent(false);
-      }}
-      duration={duration}
-    >
-      <PopoverTrigger>
-        {sent ? <CheckIcon aria-hidden="true" weight="bold" /> : <ChatCircleDotsIcon aria-hidden="true" />}
-        {sent ? "Thanks!" : "Feedback"}
-      </PopoverTrigger>
-      <PopoverContent align="start">
-        <form
-          className="grid gap-3"
-          onSubmit={(event) => {
-            event.preventDefault();
-            setSent(true);
-            setOpen(false);
-          }}
-        >
-          <PopoverTitle>Send feedback</PopoverTitle>
-          <textarea
-            name="feedback"
-            aria-label="Feedback"
-            placeholder="What could be better?"
-            required
-            rows={4}
-            className="bg-muted/40 border-border placeholder:text-muted-foreground focus-visible:ring-ring/30 w-full resize-none rounded-lg border px-3 py-2 text-sm outline-none focus-visible:ring-3"
+        <div className="flex items-center gap-2">
+          <input
+            readOnly
+            value={shareLink}
+            aria-label="Share link"
+            onFocus={(event) => event.currentTarget.select()}
+            className="bg-muted/40 border-border focus-visible:ring-ring/30 h-8 min-w-0 flex-1 rounded-lg border px-3 font-mono text-xs outline-none focus-visible:ring-3"
           />
-          <div className="flex items-center justify-end gap-2">
-            <PopoverClose render={<Button variant="ghost" size="sm" />}>Cancel</PopoverClose>
-            <Button type="submit" size="sm">
-              <PaperPlaneTiltIcon aria-hidden="true" />
-              Send
-            </Button>
-          </div>
-        </form>
+          <Button
+            size="sm"
+            variant="outline"
+            aria-label={copied ? "Copied" : "Copy link"}
+            onClick={() => {
+              void navigator.clipboard?.writeText(`https://${shareLink}`).catch(() => {});
+              setCopied(true);
+            }}
+          >
+            {copied ? <CheckIcon aria-hidden="true" weight="bold" /> : <CopyIcon aria-hidden="true" />}
+          </Button>
+        </div>
+        <Switch label="Allow comments" defaultChecked duration={duration} />
       </PopoverContent>
     </Popover>
   );
 }
 
 export function PopoverPreview() {
-  return <SettingsPopover />;
+  return <SharePopover />;
 }
 
 export function PopoverDemo() {
+  const [morph, setMorph] = useState(true);
   const [side, setSide] = useState<Side>("bottom");
   const [duration, setDuration] = useState(0.3);
 
   return (
     <div className="not-prose demo-frame">
-      <div className="component-demo-stage min-h-[20rem]! items-start!">
-        <div key={duration} className="flex w-full max-w-md items-start justify-between gap-3">
-          <FeedbackPopover duration={duration} />
-          <SettingsPopover side={side} duration={duration} />
-        </div>
+      <div className="component-demo-stage min-h-[24rem]!">
+        <SharePopover key={`${morph}-${duration}`} morph={morph} side={side} duration={duration} />
       </div>
       <div className="component-demo-controls">
-        <DemoSelect label="Settings side" value={side} options={sides} onChange={setSide} />
+        <label className="component-demo-control">
+          <span>Morph</span>
+          <span className="flex h-8 items-center">
+            <DemoSwitch checked={morph} onCheckedChange={setMorph} />
+          </span>
+        </label>
+        <DemoSelect label="Side" value={side} options={sides} onChange={setSide} />
         <DemoDuration value={duration} onChange={setDuration} />
       </div>
     </div>

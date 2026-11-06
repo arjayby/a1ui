@@ -30,26 +30,26 @@ import {
   PopoverTrigger,
 } from "@/components/animated/popover";
 
-export function SettingsPopover() {
+export function SharePopover() {
   return (
-    <Popover>
-      <PopoverTrigger>Settings</PopoverTrigger>
-      <PopoverContent side="bottom">
-        <PopoverTitle>Display</PopoverTitle>
-        <PopoverDescription>Tune how the inbox looks.</PopoverDescription>
+    <Popover morph>
+      <PopoverTrigger>Share</PopoverTrigger>
+      <PopoverContent>
+        <PopoverTitle>Share roadmap</PopoverTitle>
+        <PopoverDescription>Anyone with the link can open it.</PopoverDescription>
+        <PopoverClose>Done</PopoverClose>
       </PopoverContent>
     </Popover>
   );
 }
 
-export function FeedbackPopover() {
+// Without `morph`, the panel springs out of your own trigger instead.
+export function PlainSharePopover() {
   return (
-    <Popover morph>
-      <PopoverTrigger>Feedback</PopoverTrigger>
-      <PopoverContent align="start">
-        <PopoverTitle>Send feedback</PopoverTitle>
-        <textarea aria-label="Feedback" />
-        <PopoverClose>Cancel</PopoverClose>
+    <Popover>
+      <PopoverTrigger render={<button />}>Share</PopoverTrigger>
+      <PopoverContent side="bottom">
+        <PopoverTitle>Share roadmap</PopoverTitle>
       </PopoverContent>
     </Popover>
   );
