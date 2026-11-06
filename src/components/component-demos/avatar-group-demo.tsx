@@ -25,14 +25,19 @@ const sizeOptions: AvatarSize[] = ["sm", "md", "lg"];
 type MaxOption = "none" | "3" | "4" | "5";
 const maxOptions: MaxOption[] = ["none", "3", "4", "5"];
 
-export function AvatarGroupPreview() {
+// The catalog card shows the same group as the demo.
+function ProjectMembers({ size, max, duration }: { size?: AvatarSize; max?: number; duration?: number }) {
   return (
-    <AvatarGroup max={4} aria-label="Team">
-      {team.slice(0, 6).map(({ name, tone }) => (
+    <AvatarGroup aria-label="Project members" size={size} max={max} duration={duration}>
+      {team.map(({ name, tone }) => (
         <Avatar key={name} name={name} tone={tone} src={portrait(name)} />
       ))}
     </AvatarGroup>
   );
+}
+
+export function AvatarGroupPreview() {
+  return <ProjectMembers max={4} />;
 }
 
 export function AvatarGroupDemo() {
@@ -43,17 +48,12 @@ export function AvatarGroupDemo() {
   return (
     <div className="not-prose demo-frame">
       <div className="component-demo-stage">
-        <AvatarGroup
+        <ProjectMembers
           key={`${size}-${max}-${duration}`}
-          aria-label="Project members"
           size={size}
           max={max === "none" ? undefined : Number(max)}
           duration={duration}
-        >
-          {team.map(({ name, tone }) => (
-            <Avatar key={name} name={name} tone={tone} src={portrait(name)} />
-          ))}
-        </AvatarGroup>
+        />
       </div>
       <div className="component-demo-controls">
         <DemoSelect label="Size" value={size} options={sizeOptions} onChange={setSize} />
