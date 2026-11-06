@@ -34,16 +34,38 @@ function useClimbingCount(max: number) {
   return count;
 }
 
-export function BadgePreview() {
+// The catalog card shows the same badges as the demo.
+function BadgeShowcase({ variant, max, duration }: { variant: Variant; max: number; duration?: number }) {
+  const count = useClimbingCount(max);
+
   return (
-    <div className="flex items-center gap-2">
-      <Badge count={12} countLabel="unread messages" />
-      <Badge variant="outline" dot live>
+    <div className="flex flex-wrap items-center justify-center gap-4">
+      <span className="border-border text-foreground relative inline-grid size-10 place-items-center rounded-full border">
+        <BellIcon aria-hidden="true" className="size-5" />
+        <span className="absolute -top-1.5 left-6">
+          <Badge
+            variant={variant}
+            count={count}
+            max={max}
+            countLabel="unread notifications"
+            duration={duration}
+            className="ring-background ring-2"
+          />
+        </span>
+      </span>
+      <Badge variant={variant} count={count} max={max} showZero countLabel="messages" duration={duration}>
+        <TrayIcon aria-hidden="true" weight="bold" />
+        Inbox
+      </Badge>
+      <Badge variant={variant} dot live duration={duration}>
         Live
       </Badge>
-      <Badge variant="secondary">Beta</Badge>
     </div>
   );
+}
+
+export function BadgePreview() {
+  return <BadgeShowcase variant="outline" max={9} />;
 }
 
 export function BadgeDemo() {
@@ -51,41 +73,12 @@ export function BadgeDemo() {
   const [cap, setCap] = useState<Cap>("9");
   const [duration, setDuration] = useState(0.4);
   const max = Number(cap);
-  const count = useClimbingCount(max);
 
   return (
     <div className="not-prose demo-frame">
       <div className="component-demo-stage">
         <div key={duration} className="grid justify-items-center gap-6 px-4">
-          <div className="flex flex-wrap items-center justify-center gap-4">
-            <span className="border-border text-foreground relative inline-grid size-10 place-items-center rounded-full border">
-              <BellIcon aria-hidden="true" className="size-5" />
-              <span className="absolute -top-1.5 left-6">
-                <Badge
-                  variant={variant}
-                  count={count}
-                  max={max}
-                  countLabel="unread notifications"
-                  duration={duration}
-                  className="ring-background ring-2"
-                />
-              </span>
-            </span>
-            <Badge
-              variant={variant}
-              count={count}
-              max={max}
-              showZero
-              countLabel="messages"
-              duration={duration}
-            >
-              <TrayIcon aria-hidden="true" weight="bold" />
-              Inbox
-            </Badge>
-            <Badge variant={variant} dot live duration={duration}>
-              Live
-            </Badge>
-          </div>
+          <BadgeShowcase variant={variant} max={max} duration={duration} />
         </div>
       </div>
       <div className="component-demo-controls [&_[data-slot=demo-select-trigger]]:w-32">
