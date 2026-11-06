@@ -49,7 +49,7 @@ export function HoverCard({
   open,
   defaultOpen = false,
   onOpenChange,
-  openDelay = 500,
+  openDelay = 0,
   closeDelay = 200,
   duration = 0.35,
   children,

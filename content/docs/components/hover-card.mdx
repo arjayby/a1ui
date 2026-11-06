@@ -25,13 +25,13 @@ import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/anim
 
 export function HoverCardExample() {
   return (
-    <HoverCard openDelay={400}>
-      <HoverCardTrigger href="/people/mara">@maraokafor</HoverCardTrigger>
+    <HoverCard>
+      <HoverCardTrigger href="https://github.com/arjayby">@arjayby</HoverCardTrigger>
       <HoverCardContent className="grid grid-cols-[2.5rem_1fr] items-center gap-x-3">
-        <span className="bg-foreground text-background grid size-10 place-items-center rounded-full">MO</span>
-        <p className="font-semibold">Mara Okafor</p>
-        <p className="col-span-2 mt-3">Designs motion systems for interfaces.</p>
-        <p className="text-muted-foreground col-span-2 mt-3">18.4K followers</p>
+        <span className="bg-foreground text-background grid size-10 place-items-center rounded-full">AB</span>
+        <p className="font-semibold">Arjay Bayona</p>
+        <p className="col-span-2 mt-3">Building a1ui, animated React components and blocks.</p>
+        <p className="text-muted-foreground col-span-2 mt-3">github.com/arjayby/a1ui</p>
       </HoverCardContent>
     </HoverCard>
   );
@@ -61,7 +61,7 @@ export function HoverCardExample() {
 | `open`         | `boolean`                 | Uncontrolled | Whether the card is open when controlled by the caller.                      |
 | `defaultOpen`  | `boolean`                 | `false`      | Initial state when uncontrolled.                                             |
 | `onOpenChange` | `(open: boolean) => void` | None         | Called with the next state. Controlled usage requires the caller to update.  |
-| `openDelay`    | `number`                  | `500`        | Milliseconds the pointer or keyboard focus rests on the trigger before open. |
+| `openDelay`    | `number`                  | `0`          | Milliseconds the pointer or keyboard focus rests on the trigger before open. |
 | `closeDelay`   | `number`                  | `200`        | Milliseconds after the pointer leaves before the card closes.                |
 | `duration`     | `number`                  | `0.35`       | Spring time in seconds for the card. Zero shows it instantly.                |
 

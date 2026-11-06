@@ -52,7 +52,7 @@ test("card springs out on hover, staggers its contents, and leaves quickly", asy
   await page.setViewportSize({ width: 1280, height: 1000 });
   await page.goto("/components/hover-card");
   await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
-  const trigger = page.locator(".demo-frame").getByRole("link", { name: "@maraokafor" });
+  const trigger = page.locator(".demo-frame").getByRole("link", { name: "@arjayby" });
 
   await hoverWhenSettled(trigger);
   const opening = (await sampleCard(page, 1200)).filter((sample) => sample !== null);
@@ -60,8 +60,8 @@ test("card springs out on hover, staggers its contents, and leaves quickly", asy
   expect(opening.some((sample) => sample.scale > 0.9 && sample.scale < 0.99)).toBe(true);
   expect(opening.some((sample) => sample.first > sample.last + 0.2)).toBe(true);
   const card = page.locator('[data-slot="hover-card-content"]');
-  await expect(card).toContainText("Mara Okafor");
-  await expect(card).toContainText("18.4K");
+  await expect(card).toContainText("Arjay Bayona");
+  await expect(card).toContainText("arjayby/a1ui");
   await expect(trigger).toHaveAttribute("data-popup-open");
   const [cardBox, triggerBox] = await Promise.all([card.boundingBox(), trigger.boundingBox()]);
   expect(cardBox!.y).toBeGreaterThan(triggerBox!.y + triggerBox!.height);
@@ -96,7 +96,7 @@ test("reduced motion shows the card instantly and keeps it on screen at 390px", 
   await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
   await page.getByRole("button", { name: /^Side:/ }).click();
   await page.getByRole("menuitem", { name: "right", exact: true }).click();
-  const trigger = page.locator(".demo-frame").getByRole("link", { name: "@maraokafor" });
+  const trigger = page.locator(".demo-frame").getByRole("link", { name: "@arjayby" });
   await hoverWhenSettled(trigger);
   const samples = (await sampleCard(page, 900)).filter((sample) => sample !== null);
   expect(samples.length).toBeGreaterThan(0);
@@ -115,7 +115,7 @@ test.describe("on a touch screen", () => {
   test("tapping the link never leaves the card stuck open", async ({ page }) => {
     await page.goto("/components/hover-card");
     await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
-    const trigger = page.locator(".demo-frame").getByRole("link", { name: "@maraokafor" });
+    const trigger = page.locator(".demo-frame").getByRole("link", { name: "@arjayby" });
     await trigger.tap();
     await page.waitForTimeout(800);
     await expect(page.locator('[data-slot="hover-card-content"]')).toHaveCount(0);
