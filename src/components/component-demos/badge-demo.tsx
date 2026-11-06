@@ -1,16 +1,38 @@
 "use client";
 
-import { ArrowCounterClockwiseIcon, BellIcon, MinusIcon, PlusIcon, TrayIcon } from "@phosphor-icons/react";
-import { useState } from "react";
+import { BellIcon, TrayIcon } from "@phosphor-icons/react";
+import { useEffect, useState } from "react";
 
 import { DemoDuration, DemoSelect } from "@/components/component-demos/demo-controls";
-import { Button } from "@/components/ui/button";
 import { Badge, type BadgeProps } from "@/registry/components/badge";
 
 type Variant = NonNullable<BadgeProps["variant"]>;
 const variants: Variant[] = ["default", "secondary", "outline", "destructive"];
 type Cap = "9" | "99" | "999";
 const caps: Cap[] = ["9", "99", "999"];
+const TICK_MS = 900;
+const HOLD_MS = 1800;
+
+// Counts up from zero in steps of one tenth of the next power of ten (1, 10, 100) until it passes max, then holds and starts over.
+function useClimbingCount(max: number) {
+  const step = (max + 1) / 10;
+  const [count, setCount] = useState(0);
+  const [startedFor, setStartedFor] = useState(max);
+  if (startedFor !== max) {
+    setStartedFor(max);
+    setCount(0);
+  }
+
+  useEffect(() => {
+    const timer = window.setTimeout(
+      () => setCount((current) => (current > max ? 0 : current + step)),
+      count > max ? HOLD_MS : TICK_MS,
+    );
+    return () => window.clearTimeout(timer);
+  }, [count, max, step]);
+
+  return count;
+}
 
 export function BadgePreview() {
   return (
@@ -25,11 +47,11 @@ export function BadgePreview() {
 }
 
 export function BadgeDemo() {
-  const [variant, setVariant] = useState<Variant>("default");
-  const [cap, setCap] = useState<Cap>("99");
+  const [variant, setVariant] = useState<Variant>("outline");
+  const [cap, setCap] = useState<Cap>("9");
   const [duration, setDuration] = useState(0.4);
-  const [count, setCount] = useState(8);
   const max = Number(cap);
+  const count = useClimbingCount(max);
 
   return (
     <div className="not-prose demo-frame">
@@ -38,14 +60,16 @@ export function BadgeDemo() {
           <div className="flex flex-wrap items-center justify-center gap-4">
             <span className="border-border text-foreground relative inline-grid size-10 place-items-center rounded-full border">
               <BellIcon aria-hidden="true" className="size-5" />
-              <Badge
-                variant={variant}
-                count={count}
-                max={max}
-                countLabel="unread notifications"
-                duration={duration}
-                className="ring-background absolute -top-1.5 left-6 ring-2"
-              />
+              <span className="absolute -top-1.5 left-6">
+                <Badge
+                  variant={variant}
+                  count={count}
+                  max={max}
+                  countLabel="unread notifications"
+                  duration={duration}
+                  className="ring-background ring-2"
+                />
+              </span>
             </span>
             <Badge
               variant={variant}
@@ -61,32 +85,6 @@ export function BadgeDemo() {
             <Badge variant={variant} dot live duration={duration}>
               Live
             </Badge>
-            <Badge variant={variant} dot duration={duration}>
-              Offline
-            </Badge>
-          </div>
-          <div className="flex flex-wrap justify-center gap-2">
-            <Button variant="outline" size="sm" onClick={() => setCount((current) => current + 1)}>
-              <PlusIcon aria-hidden="true" weight="bold" />
-              Add 1
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => setCount((current) => current + 25)}>
-              <PlusIcon aria-hidden="true" weight="bold" />
-              Add 25
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={count === 0}
-              onClick={() => setCount((current) => Math.max(0, current - 1))}
-            >
-              <MinusIcon aria-hidden="true" weight="bold" />
-              Remove 1
-            </Button>
-            <Button variant="ghost" size="sm" disabled={count === 0} onClick={() => setCount(0)}>
-              <ArrowCounterClockwiseIcon aria-hidden="true" weight="bold" />
-              Clear
-            </Button>
           </div>
         </div>
       </div>
