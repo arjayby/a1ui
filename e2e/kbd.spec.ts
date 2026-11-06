@@ -48,6 +48,8 @@ test("caps sink while keys are held, spring back on release, and the combo pulse
   await page.keyboard.down("Shift");
   await expect(shift).toHaveAttribute("data-pressed", "true");
   await expect.poll(() => capY(shift)).toBeCloseTo(2, 1);
+  // The edge behind the cap sinks with it, so none of it shows above the pressed cap.
+  await expect(shift.locator('[data-slot="kbd-edge"]')).toHaveCSS("top", "2px");
   const release = sampleCapY(shift, 600);
   await page.keyboard.up("Shift");
   const samples = await release;
@@ -107,7 +109,7 @@ test("labels follow the platform and presses land instantly on mobile with reduc
   await expect(group).toContainText("Ctrl");
   await page.getByRole("button", { name: /^Labels:/ }).click();
   await page.getByRole("menuitem", { name: "mac", exact: true }).click();
-  await expect(group.locator('[data-slot="kbd"] [aria-hidden="true"]').first()).toHaveText("⌘");
+  await expect(group.locator('[data-slot="kbd-cap"] [aria-hidden="true"]').first()).toHaveText("⌘");
   await page.getByRole("button", { name: /^Combo:/ }).click();
   await page.getByRole("menuitem", { name: "shift + enter", exact: true }).click();
   await expect(group.locator('[data-slot="kbd"]')).toHaveCount(2);

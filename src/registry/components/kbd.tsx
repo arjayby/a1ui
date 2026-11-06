@@ -251,9 +251,18 @@ export function Kbd({
         if (event.defaultPrevented || (event.pointerType === "mouse" && event.button !== 0)) return;
         setPointerHeld(true);
       }}
-      className={`bg-border relative inline-flex h-6 min-w-6 shrink-0 rounded-md pb-[3px] align-middle font-sans text-xs font-medium select-none ${className ?? ""}`}
+      className={`relative isolate inline-flex h-6 min-w-6 shrink-0 rounded-md pb-[3px] align-middle font-sans text-xs font-medium select-none ${className ?? ""}`}
       {...props}
     >
+      {/* The edge's top follows the cap down, so none of it shows above the cap while pressed. */}
+      <motion.span
+        aria-hidden="true"
+        data-slot="kbd-edge"
+        initial={false}
+        animate={{ top: active ? TRAVEL : 0 }}
+        transition={transition}
+        className="bg-border absolute inset-x-0 bottom-0 -z-10 rounded-md"
+      />
       <motion.span
         data-slot="kbd-cap"
         initial={false}

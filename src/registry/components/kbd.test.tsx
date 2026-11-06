@@ -80,8 +80,12 @@ describe("Kbd", () => {
       </>,
     );
     expect(screen.getByTestId("mac")).toHaveTextContent("⌘Command");
-    expect(screen.getByTestId("mac").querySelector('[aria-hidden="true"]')).toHaveTextContent("⌘");
-    expect(screen.getByTestId("other").querySelector('[aria-hidden="true"]')).toHaveTextContent(/^Ctrl$/);
+    expect(
+      screen.getByTestId("mac").querySelector('[data-slot="kbd-cap"] [aria-hidden="true"]'),
+    ).toHaveTextContent("⌘");
+    expect(
+      screen.getByTestId("other").querySelector('[data-slot="kbd-cap"] [aria-hidden="true"]'),
+    ).toHaveTextContent(/^Ctrl$/);
     expect(screen.getByTestId("other").querySelector(".sr-only")).toHaveTextContent("Control");
     expect(screen.getByTestId("shift").querySelector(".sr-only")).toHaveTextContent("Shift");
     expect(screen.getByText("Esc").closest("kbd")).toBeInTheDocument();
