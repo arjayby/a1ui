@@ -3,18 +3,23 @@
 import { useState } from "react";
 
 import { DemoDuration, DemoSelect } from "@/components/component-demos/demo-controls";
-import { Avatar, AvatarGroup, type AvatarSize } from "@/registry/components/avatar-group";
+import { Avatar, AvatarGroup, type AvatarSize, type AvatarTone } from "@/registry/components/avatar-group";
 
-const team = [
-  "Ada Lovelace",
-  "Grace Hopper",
-  "Alan Turing",
-  "Katherine Johnson",
-  "Margaret Hamilton",
-  "Dennis Ritchie",
-  "Radia Perlman",
-  "Tim Berners-Lee",
+// Original dark-fantasy faces with transparent backgrounds, so each tone shows through and follows the theme.
+const team: { name: string; tone: AvatarTone }[] = [
+  { name: "Ashen Warden", tone: "warning" },
+  { name: "Hollow Seer", tone: "chart-3" },
+  { name: "Thornback", tone: "success" },
+  { name: "Pale Regent", tone: "danger" },
+  { name: "Gravecaller", tone: "chart-5" },
+  { name: "Iron Penitent", tone: "other" },
+  { name: "Mire Hag", tone: "chart-1" },
+  { name: "Ember Wyrm", tone: "primary" },
 ];
+
+function portrait(name: string) {
+  return `/images/avatar-group/${name.toLowerCase().replace(/\s+/g, "-")}.svg`;
+}
 
 const sizeOptions: AvatarSize[] = ["sm", "md", "lg"];
 type MaxOption = "none" | "3" | "4" | "5";
@@ -23,8 +28,8 @@ const maxOptions: MaxOption[] = ["none", "3", "4", "5"];
 export function AvatarGroupPreview() {
   return (
     <AvatarGroup max={4} aria-label="Team">
-      {team.slice(0, 6).map((name) => (
-        <Avatar key={name} name={name} />
+      {team.slice(0, 6).map(({ name, tone }) => (
+        <Avatar key={name} name={name} tone={tone} src={portrait(name)} />
       ))}
     </AvatarGroup>
   );
@@ -45,8 +50,8 @@ export function AvatarGroupDemo() {
           max={max === "none" ? undefined : Number(max)}
           duration={duration}
         >
-          {team.map((name) => (
-            <Avatar key={name} name={name} />
+          {team.map(({ name, tone }) => (
+            <Avatar key={name} name={name} tone={tone} src={portrait(name)} />
           ))}
         </AvatarGroup>
       </div>

@@ -63,11 +63,11 @@ The avatars overlap until the pointer or keyboard focus enters the group, then s
 
 ### Avatar
 
-| Prop        | Type                   | Default     | Description                                                                       |
-| ----------- | ---------------------- | ----------- | --------------------------------------------------------------------------------- |
-| `name`      | `string`               | Required    | Accessible name, hover label, and the source of the initials.                     |
-| `src`       | `string`               | None        | Local image path. The coloured initials show until it loads, and if it fails.     |
-| `hue`       | `number`               | From `name` | Hue from 0 to 360 for the initials background.                                    |
-| `size`      | `"sm" \| "md" \| "lg"` | `"md"`      | Size outside a group. Inside an `AvatarGroup`, the group's size wins.             |
-| `duration`  | `number`               | `0.3`       | Lift and label time in seconds outside a group. Inside a group, the group's wins. |
-| `className` | `string`               | None        | Additional classes on the focusable avatar.                                       |
+| Prop        | Type                                                                                    | Default     | Description                                                                       |
+| ----------- | --------------------------------------------------------------------------------------- | ----------- | --------------------------------------------------------------------------------- |
+| `name`      | `string`                                                                                | Required    | Accessible name, hover label, and the source of the initials.                     |
+| `src`       | `string`                                                                                | None        | Local image path. The coloured initials show until it loads, and if it fails.     |
+| `tone`      | `"chart-1"` … `"chart-5"`, `"success"`, `"warning"`, `"danger"`, `"primary"`, `"other"` | From `name` | Theme colour behind the initials, and behind a transparent image.                 |
+| `size`      | `"sm" \| "md" \| "lg"`                                                                  | `"md"`      | Size outside a group. Inside an `AvatarGroup`, the group's size wins.             |
+| `duration`  | `number`                                                                                | `0.3`       | Lift and label time in seconds outside a group. Inside a group, the group's wins. |
+| `className` | `string`                                                                                | None        | Additional classes on the focusable avatar.                                       |

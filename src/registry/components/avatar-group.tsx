@@ -61,10 +61,30 @@ function initialsOf(name: string) {
   return (first + last).toUpperCase();
 }
 
-function hueOf(name: string) {
+// Every colour in the theme: the five chart steps, the three status colours, ink and the neutral.
+// Each pairs with the theme's text for it. danger with on-danger (4.2:1) and other with foreground
+// (4.4:1) fall just under 4.5:1 in dark mode; every other pair clears it in both themes.
+const TONES = {
+  "chart-1": "bg-chart-1 text-chart-5",
+  "chart-2": "bg-chart-2 text-black",
+  "chart-3": "bg-chart-3 text-white",
+  "chart-4": "bg-chart-4 text-white",
+  "chart-5": "bg-chart-5 text-white",
+  success: "bg-success text-background",
+  warning: "bg-warning text-background",
+  danger: "bg-danger text-destructive-foreground",
+  primary: "bg-primary text-primary-foreground",
+  other: "bg-[var(--chart-other)] text-foreground",
+} satisfies Record<string, string>;
+
+export type AvatarTone = keyof typeof TONES;
+
+const TONE_NAMES = Object.keys(TONES) as AvatarTone[];
+
+function toneOf(name: string): AvatarTone {
   let hash = 0;
   for (const character of name) hash = (hash * 31 + character.codePointAt(0)!) % 360;
-  return hash;
+  return TONE_NAMES[hash % TONE_NAMES.length];
 }
 
 export interface AvatarProps {
@@ -72,8 +92,8 @@ export interface AvatarProps {
   name: string;
   /** Optional local image path. Initials show until it loads, and if it fails. */
   src?: string;
-  /** Hue from 0 to 360 for the initials background. Derived from `name` by default. */
-  hue?: number;
+  /** Theme colour behind the initials, and behind a transparent image. Derived from `name` by default. */
+  tone?: AvatarTone;
   /** Size when used outside an AvatarGroup. Inside a group, the group's size wins. */
   size?: AvatarSize;
   /** Hover label and lift time in seconds when used outside an AvatarGroup. */
@@ -81,7 +101,7 @@ export interface AvatarProps {
   className?: string;
 }
 
-export function Avatar({ name, src, hue, size, duration, className }: AvatarProps) {
+export function Avatar({ name, src, tone, size, duration, className }: AvatarProps) {
   const group = useContext(GroupContext);
   const ownSeconds = useSeconds(duration, 0.3);
   const seconds = group ? group.seconds : ownSeconds;
@@ -89,7 +109,7 @@ export function Avatar({ name, src, hue, size, duration, className }: AvatarProp
   const [hovered, setHovered] = useState(false);
   const [focused, setFocused] = useState(false);
   const active = hovered || focused;
-  const tone = hue ?? hueOf(name);
+  const colors = TONES[tone ?? toneOf(name)] ?? TONES["chart-1"];
   const below = useContext(LabelBelowContext);
 
   return (
@@ -112,8 +132,7 @@ export function Avatar({ name, src, hue, size, duration, className }: AvatarProp
       <AvatarPrimitive.Root
         aria-hidden="true"
         data-slot="avatar-face"
-        className={`${metrics.box} ring-background inline-flex items-center justify-center overflow-hidden rounded-full leading-none font-medium ring-2 select-none`}
-        style={{ backgroundColor: `oklch(0.9 0.06 ${tone})`, color: `oklch(0.38 0.1 ${tone})` }}
+        className={`${metrics.box} ${colors} ring-background inline-flex items-center justify-center overflow-hidden rounded-full leading-none font-medium ring-2 select-none`}
       >
         {src && <AvatarPrimitive.Image src={src} alt="" className="size-full object-cover" />}
         <AvatarPrimitive.Fallback data-slot="avatar-fallback">{initialsOf(name)}</AvatarPrimitive.Fallback>

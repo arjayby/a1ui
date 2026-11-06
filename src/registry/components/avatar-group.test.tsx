@@ -101,9 +101,9 @@ describe("AvatarGroup", () => {
     const face = screen.getByRole("img", { name: "Ada Lovelace" }).querySelector('[data-slot="avatar-face"]');
     expect(face).toHaveClass("size-12");
     cleanup();
-    render(<Avatar name="Grace Hopper" size="sm" hue={200} />);
+    render(<Avatar name="Grace Hopper" size="sm" tone="success" />);
     const solo = screen.getByRole("img", { name: "Grace Hopper" }).querySelector('[data-slot="avatar-face"]');
     expect(solo).toHaveClass("size-8");
-    expect(solo).toHaveStyle({ backgroundColor: "oklch(0.9 0.06 200)" });
+    expect(solo).toHaveClass("bg-success", "text-background");
   });
 });
