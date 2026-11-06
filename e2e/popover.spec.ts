@@ -45,6 +45,25 @@ test("share button morphs into the panel and collapses back on close", async ({ 
   await expect(trigger).toBeFocused();
 });
 
+test("morph panel stays visible when reopened while it is still closing", async ({ page }) => {
+  await page.goto("/components/popover");
+  await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
+  const frame = page.locator(".demo-frame");
+  const trigger = frame.getByRole("button", { name: "Share" });
+  const box = (await trigger.boundingBox())!;
+  const dialog = frame.getByRole("dialog", { name: "Share roadmap" });
+
+  await trigger.click();
+  await expect(dialog).toBeVisible();
+  await page.waitForTimeout(500);
+  await page.keyboard.press("Escape");
+  await page.waitForTimeout(30);
+  await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+
+  await expect(dialog).toBeVisible();
+  await expect.poll(() => dialog.evaluate((element) => getComputedStyle(element).opacity)).toBe("1");
+});
+
 test("with morph off, the panel grows out of its trigger and closes on Escape", async ({ page }) => {
   await page.goto("/components/popover");
   await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");

@@ -210,8 +210,10 @@ export function PopoverContent({
                 className={`text-foreground relative isolate w-72 max-w-[calc(100vw-2rem)] p-4 text-sm outline-none ${className ?? ""}`}
                 render={
                   // Base UI keeps the popup visible only while the popup itself animates.
+                  // `animate` restores opacity when reopened mid-exit; without it the panel stays invisible.
                   <motion.div
                     initial={false}
+                    animate={{ opacity: 1, transition: { duration: seconds * 0.2 } }}
                     exit={{ opacity: 0, transition: { duration: seconds * 0.35, ease: [0.4, 0, 1, 1] } }}
                   />
                 }
