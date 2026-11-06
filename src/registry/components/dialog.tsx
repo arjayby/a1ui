@@ -51,14 +51,14 @@ export function Dialog({
   open,
   defaultOpen = false,
   onOpenChange,
-  duration = 0.35,
+  duration = 0.2,
   dismissible = true,
   children,
 }: DialogProps) {
   const reducedMotion = useReducedMotion() ?? false;
   const [internalOpen, setInternalOpen] = useState(defaultOpen);
   const current = open ?? internalOpen;
-  const seconds = Number.isFinite(duration) ? Math.max(0, duration) : 0.35;
+  const seconds = Number.isFinite(duration) ? Math.max(0, duration) : 0.2;
   // The trigger that opened the dialog, so the popup can grow out of it and shrink back into it.
   const triggerRef = useRef<HTMLElement | null>(null);
   // A dialog opened without a trigger, such as from a menu item or a shortcut, grows from whatever had focus.

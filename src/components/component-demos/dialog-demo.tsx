@@ -1,6 +1,6 @@
 "use client";
 
-import { PencilSimpleIcon, ShareNetworkIcon } from "@phosphor-icons/react";
+import { PencilSimpleIcon } from "@phosphor-icons/react";
 import { useState } from "react";
 
 import { DemoDuration, DemoSelect } from "@/components/component-demos/demo-controls";
@@ -41,26 +41,28 @@ export function DialogPreview() {
 
 export function DialogDemo() {
   const [dismiss, setDismiss] = useState<Dismiss>("outside click");
-  const [duration, setDuration] = useState(0.35);
-  const [name, setName] = useState("Ada Lovelace");
+  const [duration, setDuration] = useState(0.2);
+  const [name, setName] = useState("a1ui");
   const dismissible = dismiss === "outside click";
 
   return (
     <div className="not-prose demo-frame">
       <div className="component-demo-stage">
-        <div className="flex w-full max-w-md flex-wrap items-center justify-between gap-3 px-4">
+        <div className="flex w-full max-w-md items-center justify-center px-4">
           <Dialog duration={duration} dismissible={dismissible}>
             <DialogTrigger>
               <PencilSimpleIcon aria-hidden="true" />
-              Edit profile
+              Edit project
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Edit profile</DialogTitle>
-                <DialogDescription>Changes appear on your public profile right away.</DialogDescription>
+                <DialogTitle>Edit project</DialogTitle>
+                <DialogDescription>
+                  Rename this project. Everyone with access sees the new name.
+                </DialogDescription>
               </DialogHeader>
               <label className="grid gap-1.5 text-sm font-medium">
-                Display name
+                Project name
                 <input
                   className={fieldClass}
                   value={name}
@@ -70,27 +72,6 @@ export function DialogDemo() {
               <DialogFooter>
                 <DialogClose>Cancel</DialogClose>
                 <DialogClose className={primaryClass}>Save changes</DialogClose>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-          <Dialog duration={duration} dismissible={dismissible}>
-            <DialogTrigger>
-              <ShareNetworkIcon aria-hidden="true" />
-              Share
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Share this page</DialogTitle>
-                <DialogDescription>Anyone with the link can view it.</DialogDescription>
-              </DialogHeader>
-              <input
-                aria-label="Link"
-                readOnly
-                className={`${fieldClass} text-muted-foreground font-mono`}
-                value="https://a1ui.dev/components/dialog"
-              />
-              <DialogFooter>
-                <DialogClose className={primaryClass}>Done</DialogClose>
               </DialogFooter>
             </DialogContent>
           </Dialog>

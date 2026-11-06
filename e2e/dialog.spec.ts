@@ -6,7 +6,7 @@ const popup = '[data-slot="dialog-content"]';
 async function sampleScale(page: Page, act: "open" | "close") {
   return page.evaluate(async (act) => {
     const trigger = [...document.querySelectorAll<HTMLButtonElement>('[data-slot="dialog-trigger"]')].find(
-      (button) => button.textContent?.includes("Edit profile"),
+      (button) => button.textContent?.includes("Edit project"),
     )!;
     if (act === "open") trigger.click();
     else document.querySelector<HTMLButtonElement>('[data-slot="dialog-corner-close"]')!.click();
@@ -39,7 +39,7 @@ test("popup grows out of its trigger, traps focus, and shrinks back on close", a
   expect(opening.scales.some((scale) => scale > 0.45 && scale < 0.95)).toBe(true);
   expect(Math.abs(opening.origin!.x - opening.trigger.x)).toBeLessThan(2);
   expect(Math.abs(opening.origin!.y - opening.trigger.y)).toBeLessThan(2);
-  const dialog = page.getByRole("dialog", { name: "Edit profile" });
+  const dialog = page.getByRole("dialog", { name: "Edit project" });
   await expect(dialog).toBeVisible();
   await expect(dialog.getByRole("textbox")).toBeFocused();
 
@@ -55,14 +55,14 @@ test("popup grows out of its trigger, traps focus, and shrinks back on close", a
   const closing = await sampleScale(page, "close");
   expect(closing.scales.some((scale) => scale > 0.45 && scale < 0.95)).toBe(true);
   await expect(page.locator(popup)).toHaveCount(0);
-  await expect(page.getByRole("button", { name: "Edit profile" })).toBeFocused();
+  await expect(page.getByRole("button", { name: "Edit project" })).toBeFocused();
 
   // Escape closes, and reopening while the exit plays reuses the same popup.
-  await page.getByRole("button", { name: "Edit profile" }).click();
+  await page.getByRole("button", { name: "Edit project" }).click();
   await expect(dialog).toBeVisible();
   await page.keyboard.press("Escape");
   await expect(page.locator(popup)).toHaveAttribute("data-state", "closed");
-  await page.getByRole("button", { name: "Edit profile" }).click();
+  await page.getByRole("button", { name: "Edit project" }).click();
   await expect(page.locator(popup)).toHaveCount(1);
   await expect(page.locator(popup)).toHaveAttribute("data-state", "open");
 
@@ -77,13 +77,13 @@ test("buttons-only dialogs ignore outside clicks", async ({ page }) => {
   await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
   await page.getByRole("button", { name: /^Dismiss:/ }).click();
   await page.getByRole("menuitem", { name: "buttons only", exact: true }).click();
-  await page.getByRole("button", { name: "Share" }).click();
-  const dialog = page.getByRole("dialog", { name: "Share this page" });
+  await page.getByRole("button", { name: "Edit project" }).click();
+  const dialog = page.getByRole("dialog", { name: "Edit project" });
   await expect(dialog).toHaveAttribute("data-state", "open");
   await page.mouse.click(8, 8);
   await page.waitForTimeout(400);
   await expect(dialog).toHaveAttribute("data-state", "open");
-  await dialog.getByRole("button", { name: "Done" }).click();
+  await dialog.getByRole("button", { name: "Cancel" }).click();
   await expect(page.locator(popup)).toHaveCount(0);
 });
 
@@ -94,7 +94,7 @@ test("rises as a bottom sheet on mobile and only fades with reduced motion", asy
   await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
   const opening = await sampleScale(page, "open");
   expect(opening.scales.every((scale) => scale === 1)).toBe(true);
-  const dialog = page.getByRole("dialog", { name: "Edit profile" });
+  const dialog = page.getByRole("dialog", { name: "Edit project" });
   await expect(dialog).toHaveAttribute("data-sheet", "true");
   await expect(dialog).toHaveCSS("opacity", "1");
   const box = (await dialog.boundingBox())!;
