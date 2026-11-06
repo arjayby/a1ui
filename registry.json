@@ -1090,7 +1090,7 @@
       "name": "command",
       "type": "registry:component",
       "title": "Command",
-      "description": "A command palette whose highlight glides between results, with filtered items that reflow, a height-animated list, and a \u2318K dialog.",
+      "description": "A command palette whose highlight glides between results, with filtered items that reflow, a height-animated list, and a ⌘K dialog.",
       "dependencies": ["motion", "@base-ui/react"],
       "files": [
         {
@@ -1103,7 +1103,7 @@
       "meta": {
         "a1ui": {
           "useCases": [
-            "App-wide command menus opened with \u2318K, and inline searchable action lists such as quick switchers or settings pickers."
+            "App-wide command menus opened with ⌘K, and inline searchable action lists such as quick switchers or settings pickers."
           ],
           "limitations": [
             "Filtering runs on the client over the rendered items, so large or remote result sets should be filtered by the caller. Item values must be unique. Nested pages and multi-select are not built in."
@@ -1249,7 +1249,7 @@
             "One size, 24 pixels tall. Listening shows the press only; it never prevents the browser default or runs an action, so pair it with your own shortcut handler. Labels cover Mac and a single label set for every other platform."
           ],
           "requirements": [
-            "React 19, Tailwind CSS 4, Motion, and theme colors. Use mod for the platform command key: \u2318 on Mac, Ctrl elsewhere. Labels render as Ctrl on the server and switch after mount, so pass platform to pin them. Reduced motion keeps the press state but moves the cap instantly and shows the combo pulse as a still glow."
+            "React 19, Tailwind CSS 4, Motion, and theme colors. Use mod for the platform command key: ⌘ on Mac, Ctrl elsewhere. Labels render as Ctrl on the server and switch after mount, so pass platform to pin them. Reduced motion keeps the press state but moves the cap instantly and shows the combo pulse as a still glow."
           ]
         }
       }
@@ -1336,34 +1336,6 @@
           ],
           "requirements": [
             "React 19, Tailwind CSS 4, Motion, and theme colors. Give each item a label and an href (except the current page); pass renderLink to use a router link such as Next.js Link. Reduced motion swaps segments instantly."
-          ]
-        }
-      }
-    },
-    {
-      "name": "carousel",
-      "type": "registry:component",
-      "title": "Carousel",
-      "description": "A carousel whose slides scale, fade, and drift with the drag, with dots that stretch from one slide to the next.",
-      "dependencies": ["embla-carousel-react", "motion"],
-      "files": [
-        {
-          "path": "src/registry/components/carousel.tsx",
-          "type": "registry:component",
-          "target": "components/animated/carousel.tsx"
-        }
-      ],
-      "categories": ["carousel", "slider", "gallery", "animation", "interactive"],
-      "meta": {
-        "a1ui": {
-          "useCases": [
-            "Swipeable galleries, product shots, testimonials, and onboarding cards where the current slide should stand out from its neighbours while the user drags."
-          ],
-          "limitations": [
-            "Scale, fade, and parallax are tied to snap distance, so slides wider than the viewport or groups scrolled together share one value. Previous and next buttons are not positioned for you. CarouselDots lays out horizontally, and looping needs enough slides to fill the viewport."
-          ],
-          "requirements": [
-            "React 19, Tailwind CSS 4, Motion, Embla Carousel, and theme colors. Give Carousel an aria-label and set each CarouselItem's width with a basis class. Reduced motion removes the scale, fade, and parallax and makes buttons, keys, and dots jump instead of scrolling."
           ]
         }
       }
