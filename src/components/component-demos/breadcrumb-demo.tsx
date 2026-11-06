@@ -1,10 +1,26 @@
 "use client";
 
-import { ArrowUpIcon, FileIcon, FolderIcon } from "@phosphor-icons/react";
+import {
+  ArrowUpIcon,
+  FileCssIcon,
+  FileIcon,
+  FileHtmlIcon,
+  FileJpgIcon,
+  FileMdIcon,
+  FilePdfIcon,
+  FileSvgIcon,
+  FileTsIcon,
+  FileTsxIcon,
+  FileTxtIcon,
+  FileXlsIcon,
+  FolderIcon,
+  type Icon,
+} from "@phosphor-icons/react";
 import { useState } from "react";
 
 import { DemoDuration, DemoSelect } from "@/components/component-demos/demo-controls";
 import { Breadcrumb, type BreadcrumbSegment } from "@/registry/components/breadcrumb";
+import { Menu, MenuItem } from "@/registry/components/menu";
 
 type Folder = { name: string; children?: Folder[] };
 
@@ -28,20 +44,46 @@ const root: Folder = {
                       children: [{ name: "breadcrumb.tsx" }, { name: "tabs.tsx" }, { name: "select.tsx" }],
                     },
                     { name: "blocks", children: [{ name: "section-rail.tsx" }] },
+                    { name: "utils.ts" },
                   ],
                 },
-                { name: "app", children: [{ name: "layout.tsx" }, { name: "page.tsx" }] },
+                {
+                  name: "app",
+                  children: [{ name: "layout.tsx" }, { name: "page.tsx" }, { name: "globals.css" }],
+                },
               ],
             },
-            { name: "public", children: [{ name: "llms.txt" }] },
+            { name: "public", children: [{ name: "llms.txt" }, { name: "logo.svg" }] },
+            { name: "README.md" },
           ],
         },
-        { name: "Website", children: [{ name: "index.html" }] },
+        {
+          name: "Website",
+          children: [{ name: "index.html" }, { name: "styles.css" }, { name: "hero.jpg" }],
+        },
       ],
     },
-    { name: "Documents", children: [{ name: "Invoices", children: [{ name: "2026.pdf" }] }] },
+    {
+      name: "Documents",
+      children: [{ name: "Invoices", children: [{ name: "2026.pdf" }, { name: "totals.xlsx" }] }],
+    },
   ],
 };
+
+const fileIcons: Record<string, Icon> = {
+  css: FileCssIcon,
+  html: FileHtmlIcon,
+  jpg: FileJpgIcon,
+  md: FileMdIcon,
+  pdf: FilePdfIcon,
+  svg: FileSvgIcon,
+  ts: FileTsIcon,
+  tsx: FileTsxIcon,
+  txt: FileTxtIcon,
+  xlsx: FileXlsIcon,
+};
+
+const iconFor = (name: string) => fileIcons[name.split(".").pop()!.toLowerCase()] ?? FileIcon;
 
 type Collapse = "4 items" | "3 items" | "fit only";
 const collapses: Collapse[] = ["4 items", "3 items", "fit only"];
@@ -85,10 +127,18 @@ export function BreadcrumbPreview() {
   );
 }
 
+const row =
+  "focus-visible:ring-ring/30 flex items-center gap-2 px-2.5 py-1.5 text-left text-sm outline-none focus-visible:ring-3";
+
 export function BreadcrumbDemo() {
   const [path, setPath] = useState(["Projects", "a1ui", "src", "registry", "components"]);
   const [collapse, setCollapse] = useState<Collapse>("4 items");
   const [duration, setDuration] = useState(0.3);
+  const [hovered, setHovered] = useState<string | null>(null);
+  const navigate = (next: string[]) => {
+    setPath(next);
+    setHovered(null);
+  };
   const folders = trailFor(path);
   const current = folders.at(-1)!;
   const items: BreadcrumbSegment[] = folders.map((folder, depth) => ({
@@ -111,43 +161,56 @@ export function BreadcrumbDemo() {
                 {...props}
                 onClick={(event) => {
                   event.preventDefault();
-                  setPath(path.slice(0, items.indexOf(item)));
+                  navigate(path.slice(0, items.indexOf(item)));
                 }}
               />
             )}
           />
-          <div className="border-border flex flex-col rounded-lg border p-1">
-            <button
-              type="button"
+          <Menu
+            value={hovered ?? ""}
+            onPointerLeave={() => setHovered(null)}
+            className="border-border flex flex-col rounded-lg border p-1"
+          >
+            <MenuItem
+              value="up"
               disabled={path.length === 0}
-              onClick={() => setPath(path.slice(0, -1))}
-              className="text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-ring/30 flex items-center gap-2 rounded-md px-2.5 py-1.5 text-left text-sm outline-none focus-visible:ring-3 disabled:pointer-events-none disabled:opacity-40"
+              onPointerMove={() => setHovered("up")}
+              onClick={() => navigate(path.slice(0, -1))}
+              className={`${row} text-muted-foreground data-highlighted:text-foreground disabled:pointer-events-none disabled:opacity-40`}
             >
               <ArrowUpIcon aria-hidden="true" className="size-4" />
               Up one level
-            </button>
-            {current.children?.map((child) =>
-              child.children ? (
-                <button
-                  key={child.name}
-                  type="button"
-                  onClick={() => setPath([...path, child.name])}
-                  className="hover:bg-muted focus-visible:ring-ring/30 flex items-center gap-2 rounded-md px-2.5 py-1.5 text-left text-sm outline-none focus-visible:ring-3"
+            </MenuItem>
+            {current.children?.map((child) => {
+              const value = `${child.children ? "folder" : "file"}:${child.name}`;
+              if (child.children)
+                return (
+                  <MenuItem
+                    key={value}
+                    value={value}
+                    onPointerMove={() => setHovered(value)}
+                    onClick={() => navigate([...path, child.name])}
+                    className={row}
+                  >
+                    <FolderIcon aria-hidden="true" weight="fill" className="text-muted-foreground size-4" />
+                    {child.name}
+                  </MenuItem>
+                );
+              const FileTypeIcon = iconFor(child.name);
+              return (
+                <MenuItem
+                  key={value}
+                  value={value}
+                  render={<div />}
+                  onPointerMove={() => setHovered(value)}
+                  className={`${row} text-muted-foreground data-highlighted:text-foreground`}
                 >
-                  <FolderIcon aria-hidden="true" weight="fill" className="text-muted-foreground size-4" />
+                  <FileTypeIcon aria-hidden="true" className="size-4" />
                   {child.name}
-                </button>
-              ) : (
-                <div
-                  key={child.name}
-                  className="text-muted-foreground flex items-center gap-2 px-2.5 py-1.5 text-sm"
-                >
-                  <FileIcon aria-hidden="true" className="size-4" />
-                  {child.name}
-                </div>
-              ),
-            )}
-          </div>
+                </MenuItem>
+              );
+            })}
+          </Menu>
         </div>
       </div>
       <div className="component-demo-controls">
