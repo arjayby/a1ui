@@ -44,8 +44,8 @@ export function SharePopover() {
     <Popover morph>
       <PopoverTrigger>Share</PopoverTrigger>
       <PopoverContent>
-        <PopoverTitle>Share roadmap</PopoverTitle>
-        <PopoverDescription>Anyone with the link can open it.</PopoverDescription>
+        <PopoverTitle>Share this project</PopoverTitle>
+        <PopoverDescription>Send the link to anyone you want to show a1ui to.</PopoverDescription>
         <PopoverClose>Done</PopoverClose>
       </PopoverContent>
     </Popover>
@@ -58,7 +58,7 @@ export function PlainSharePopover() {
     <Popover>
       <PopoverTrigger render={<button />}>Share</PopoverTrigger>
       <PopoverContent side="bottom">
-        <PopoverTitle>Share roadmap</PopoverTitle>
+        <PopoverTitle>Share this project</PopoverTitle>
       </PopoverContent>
     </Popover>
   );

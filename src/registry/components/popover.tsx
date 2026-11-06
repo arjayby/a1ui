@@ -229,6 +229,8 @@ export function PopoverContent({
                 />
                 <motion.div
                   data-slot="popover-body"
+                  // Mirror the panel's layout so `className` gaps and flex/grid apply to the children.
+                  className="[display:inherit] [grid-template-columns:inherit] [grid-template-rows:inherit] [flex-direction:inherit] [flex-wrap:inherit] [align-items:inherit] [justify-content:inherit] [gap:inherit]"
                   initial={seconds === 0 ? false : { opacity: 0, y: 6, filter: "blur(4px)" }}
                   animate={{
                     opacity: 1,

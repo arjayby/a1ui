@@ -19,14 +19,16 @@ test("share button morphs into the panel and collapses back on close", async ({ 
     }
     return samples;
   });
-  const dialog = frame.getByRole("dialog", { name: "Share roadmap" });
+  const dialog = frame.getByRole("dialog", { name: "Share this project" });
   await expect(dialog).toBeVisible();
   const panel = (await dialog.boundingBox())!;
   // The shape starts at the trigger's size and grows in place from its top edge, centered on it.
   expect(widths.some((width) => width > start.width + 4 && width < panel.width - 4)).toBe(true);
-  expect(Math.abs(panel.x + panel.width / 2 - (start.x + start.width / 2))).toBeLessThan(2);
-  expect(Math.abs(panel.y - start.y)).toBeLessThan(2);
-  await expect(frame.getByRole("textbox", { name: "Share link" })).toBeFocused();
+  // Focusing the copy button can scroll the page, so compare against where the trigger is now.
+  const anchor = (await trigger.boundingBox())!;
+  expect(Math.abs(panel.x + panel.width / 2 - (anchor.x + anchor.width / 2))).toBeLessThan(2);
+  expect(Math.abs(panel.y - anchor.y)).toBeLessThan(2);
+  await expect(frame.getByRole("button", { name: "Copy link" })).toBeFocused();
 
   const sampling = page.evaluate(async () => {
     const samples: number[] = [];
@@ -50,16 +52,18 @@ test("morph panel stays visible when reopened while it is still closing", async 
   await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
   const frame = page.locator(".demo-frame");
   const trigger = frame.getByRole("button", { name: "Share" });
-  const box = (await trigger.boundingBox())!;
-  const dialog = frame.getByRole("dialog", { name: "Share roadmap" });
+  const dialog = frame.getByRole("dialog", { name: "Share this project" });
 
   await trigger.click();
   await expect(dialog).toBeVisible();
   await page.waitForTimeout(500);
+  // Measure after opening: focusing the copy button can scroll the page.
+  const box = (await trigger.boundingBox())!;
   await page.keyboard.press("Escape");
-  await page.waitForTimeout(30);
+  await page.waitForTimeout(120);
   await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
 
+  await expect(trigger).toHaveAttribute("aria-expanded", "true");
   await expect(dialog).toBeVisible();
   await expect.poll(() => dialog.evaluate((element) => getComputedStyle(element).opacity)).toBe("1");
 });
@@ -82,11 +86,11 @@ test("with morph off, the panel grows out of its trigger and closes on Escape", 
     return samples;
   });
   expect(scales.some((scale) => scale > 0.89 && scale < 0.99)).toBe(true);
-  const dialog = page.getByRole("dialog", { name: "Share roadmap" });
+  const dialog = page.getByRole("dialog", { name: "Share this project" });
   await expect(dialog).toBeVisible();
   const [panel, anchor] = await Promise.all([dialog.boundingBox(), trigger.boundingBox()]);
   expect(panel!.y).toBeGreaterThan(anchor!.y + anchor!.height);
-  await expect(dialog.getByRole("textbox", { name: "Share link" })).toBeFocused();
+  await expect(dialog.getByRole("button", { name: "Copy link" })).toBeFocused();
   await page.keyboard.press("Escape");
   await expect(dialog).toHaveCount(0);
   await expect(trigger).toBeFocused();
@@ -99,7 +103,7 @@ test("morph panel fits a 390px screen and opens instantly with reduced motion", 
   await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
   const frame = page.locator(".demo-frame");
   await frame.getByRole("button", { name: "Share" }).click();
-  const dialog = frame.getByRole("dialog", { name: "Share roadmap" });
+  const dialog = frame.getByRole("dialog", { name: "Share this project" });
   await expect(dialog).toBeVisible();
   expect(
     await dialog.evaluate((element) =>
