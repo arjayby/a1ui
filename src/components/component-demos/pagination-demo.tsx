@@ -10,8 +10,6 @@ type PageCount = (typeof pageCounts)[number];
 const siblingCounts = ["0", "1", "2"] as const;
 type SiblingCount = (typeof siblingCounts)[number];
 
-const perPage = 12;
-
 export function PaginationPreview() {
   return <Pagination defaultPage={5} pageCount={10} siblingCount={0} previousLabel={null} nextLabel={null} />;
 }
@@ -21,26 +19,20 @@ export function PaginationDemo() {
   const [siblings, setSiblings] = useState<SiblingCount>("1");
   const [duration, setDuration] = useState(0.35);
   const [page, setPage] = useState(1);
-  const total = Number(pages) * perPage - 5;
-  const first = (page - 1) * perPage + 1;
-  const last = Math.min(total, page * perPage);
 
   return (
     <div className="not-prose demo-frame">
       <div className="component-demo-stage">
-        <div className="grid w-full justify-items-center gap-4">
-          <Pagination
-            page={page}
-            pageCount={Number(pages)}
-            onPageChange={setPage}
-            siblingCount={Number(siblings)}
-            aria-label="Search results"
-            duration={duration}
-          />
-          <p className="text-muted-foreground text-sm tabular-nums" data-slot="demo-results">
-            Showing {first}–{last} of {total} results
-          </p>
-        </div>
+        <Pagination
+          page={page}
+          pageCount={Number(pages)}
+          onPageChange={setPage}
+          siblingCount={Number(siblings)}
+          previousLabel={null}
+          nextLabel={null}
+          aria-label="Search results"
+          duration={duration}
+        />
       </div>
       <div className="component-demo-controls">
         <DemoSelect

@@ -82,9 +82,6 @@ test("the active surface slides between pages and the window reflows", async ({ 
   // Pages 2 and 3 finish leaving instead of lingering in the list.
   await expect(nav.locator('[data-slot="pagination-list"] > li')).toHaveCount(9);
   await expect.poll(() => visible(nav)).toEqual(["1", "…", "4", "5", "6", "…", "10"]);
-  await expect(page.locator(".demo-frame [data-slot=demo-results]")).toHaveText(
-    "Showing 49–60 of 115 results",
-  );
 
   // Keyboard: move to Next, then through to the last page, where Next disables and focus stays on a page.
   await nav.getByRole("button", { name: "Page 5" }).focus();
@@ -104,8 +101,7 @@ test("reduced motion moves everything instantly on a phone", async ({ page }) =>
   await page.setViewportSize({ width: 390, height: 844 });
   await page.emulateMedia({ reducedMotion: "reduce" });
   const nav = await open(page);
-  // The text labels hide on small screens; the chevrons keep their accessible names.
-  await expect(nav.getByText("Next", { exact: true })).toBeHidden();
+  // The chevrons keep their accessible names.
   await expect(nav.getByRole("button", { name: "Next page" })).toBeVisible();
 
   const jump = await nav.evaluate(async (element) => {
