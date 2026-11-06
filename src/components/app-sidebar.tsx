@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Menu, MenuItem } from "@/registry/components/menu";
 import { blocks } from "@/lib/block-catalog";
-import { components } from "@/lib/component-catalog";
+import { componentCategories } from "@/lib/component-catalog";
 
 export function AppSidebar() {
   const pathname = usePathname();
@@ -131,31 +131,55 @@ export function AppSidebar() {
                   <CaretRightIcon aria-hidden="true" />
                 </CollapsibleTrigger>
                 <CollapsibleContent>
-                  <SidebarMenuSub className="mr-0 border-l-0 pr-0">
-                    {components.map((component) => {
-                      const href = `/components/${component.slug}`;
-                      const current = pathname === href;
+                  <SidebarMenuSub className="mr-0 gap-3 border-l-0 pr-0">
+                    {componentCategories.map((category) => {
+                      const labelId = `component-category-${category.title.replace(/\W+/g, "-").toLowerCase()}`;
                       return (
-                        <SidebarMenuSubItem key={component.slug}>
-                          <SidebarMenuSubButton
-                            size="sm"
-                            isActive={current}
-                            render={
-                              <MenuItem
-                                value={href}
-                                render={
-                                  <Link
-                                    href={href}
-                                    onClick={closeMobile}
-                                    aria-current={current ? "page" : undefined}
-                                  />
-                                }
-                              />
-                            }
+                        <Collapsible
+                          key={category.title}
+                          defaultOpen
+                          render={<li />}
+                          className="flex flex-col gap-1"
+                        >
+                          <CollapsibleTrigger
+                            id={labelId}
+                            className="text-sidebar-foreground/60 hover:text-sidebar-foreground focus-visible:ring-sidebar-ring flex h-6 w-full items-center justify-between rounded-md px-2 text-[11px] font-medium outline-hidden transition-colors focus-visible:ring-2 [&[data-panel-open]>svg]:rotate-90"
                           >
-                            <span>{component.title}</span>
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
+                            {category.title}
+                            <CaretRightIcon aria-hidden="true" className="size-3 transition-transform" />
+                          </CollapsibleTrigger>
+                          <CollapsibleContent
+                            render={<ul aria-labelledby={labelId} />}
+                            className="flex flex-col gap-1"
+                          >
+                            {category.components.map((component) => {
+                              const href = `/components/${component.slug}`;
+                              const current = pathname === href;
+                              return (
+                                <SidebarMenuSubItem key={component.slug}>
+                                  <SidebarMenuSubButton
+                                    size="sm"
+                                    isActive={current}
+                                    render={
+                                      <MenuItem
+                                        value={href}
+                                        render={
+                                          <Link
+                                            href={href}
+                                            onClick={closeMobile}
+                                            aria-current={current ? "page" : undefined}
+                                          />
+                                        }
+                                      />
+                                    }
+                                  >
+                                    <span>{component.title}</span>
+                                  </SidebarMenuSubButton>
+                                </SidebarMenuSubItem>
+                              );
+                            })}
+                          </CollapsibleContent>
+                        </Collapsible>
                       );
                     })}
                   </SidebarMenuSub>
