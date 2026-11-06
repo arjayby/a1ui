@@ -131,7 +131,7 @@ export function AppSidebar() {
                   <CaretRightIcon aria-hidden="true" />
                 </CollapsibleTrigger>
                 <CollapsibleContent>
-                  <SidebarMenuSub className="mr-0 pr-0">
+                  <SidebarMenuSub className="mr-0 border-l-0 pr-0">
                     {components.map((component) => {
                       const href = `/components/${component.slug}`;
                       const current = pathname === href;
@@ -192,7 +192,7 @@ export function AppSidebar() {
                   <CaretRightIcon aria-hidden="true" />
                 </CollapsibleTrigger>
                 <CollapsibleContent>
-                  <SidebarMenuSub className="mr-0 pr-0">
+                  <SidebarMenuSub className="mr-0 border-l-0 pr-0">
                     {blocks.map((block) => {
                       const href = `/blocks/${block.slug}`;
                       const current = pathname === href;
