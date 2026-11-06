@@ -28,7 +28,7 @@ export function MenuPreview() {
           value={itemValue}
           aria-pressed={value === itemValue}
           onClick={() => setValue(itemValue)}
-          className="text-muted-foreground focus-visible:ring-ring data-highlighted:text-foreground flex h-10 items-center gap-3 px-3 text-sm outline-none focus-visible:ring-2"
+          className="text-muted-foreground focus-visible:ring-ring data-highlighted:text-foreground flex h-10 items-center gap-3 px-3 text-xs outline-none focus-visible:ring-2"
         >
           <Icon size={16} aria-hidden="true" />
           <span>{label}</span>
