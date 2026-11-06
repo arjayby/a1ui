@@ -27,26 +27,13 @@ export function KbdDemo() {
   const [combo, setCombo] = useState<Combo>("mod + shift + enter");
   const [labels, setLabels] = useState<Labels>("auto");
   const [duration, setDuration] = useState(0.3);
-  const [held, setHeld] = useState(0);
   const platform = labels === "auto" ? undefined : labels;
 
   return (
     <div className="not-prose demo-frame">
       <div className="component-demo-stage">
         <div className="grid justify-items-center gap-8">
-          <div className="grid justify-items-center gap-3">
-            <KbdGroup
-              key={combo}
-              keys={combos[combo]}
-              listen
-              platform={platform}
-              duration={duration}
-              onComplete={() => setHeld((count) => count + 1)}
-            />
-            <div data-slot="kbd-demo-status" aria-live="polite" className="text-muted-foreground text-sm">
-              {held === 0 ? "Hold the combo on your keyboard" : `Combo held ${held}×`}
-            </div>
-          </div>
+          <KbdGroup key={combo} keys={combos[combo]} listen platform={platform} duration={duration} />
           <div data-slot="kbd-demo-keys" className="flex flex-wrap justify-center gap-2">
             {singles.map((key) => (
               <Kbd key={key} listen={key} platform={platform} duration={duration} />

@@ -80,7 +80,6 @@ test("caps sink while keys are held, spring back on release, and the combo pulse
   await page.keyboard.down("Enter");
   await expect(group).toHaveAttribute("data-complete", "true");
   expect((await pulse).some((scale) => scale > 1.005 && scale < 1.06)).toBe(true);
-  await expect(frame.locator('[data-slot="kbd-demo-status"]')).toHaveText("Combo held 1×");
   await page.keyboard.up("Enter");
   await expect(group).not.toHaveAttribute("data-complete");
   await page.keyboard.up("Shift");
