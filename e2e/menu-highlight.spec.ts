@@ -14,7 +14,7 @@ const scenarios = [
     url: "/components/menu",
     container: '[data-sidebar="content"]',
     role: "link",
-    from: "Confirm Button",
+    from: "Breadcrumb",
     to: "Menu",
   },
   {
@@ -22,7 +22,7 @@ const scenarios = [
     url: "/components/menu",
     container: '[data-sidebar="content"]',
     role: "link",
-    from: "Confirm Button",
+    from: "Breadcrumb",
     to: "ASCII Morph",
   },
   {

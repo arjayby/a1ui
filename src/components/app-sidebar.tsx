@@ -1,6 +1,6 @@
 "use client";
 
-import { BookOpenIcon, CaretRightIcon, CubeIcon, SquaresFourIcon, XIcon } from "@phosphor-icons/react";
+import { CaretRightIcon, XIcon } from "@phosphor-icons/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
@@ -15,7 +15,6 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
-  SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarMenuSub,
@@ -89,18 +88,17 @@ export function AppSidebar() {
                     />
                   }
                 >
-                  <BookOpenIcon aria-hidden="true" />
                   <span>Install with an agent</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroup>
         </nav>
-        <nav aria-label="Library">
+        <nav aria-label="Components">
           <SidebarGroup className="py-1">
-            <SidebarGroupLabel className="h-6">Library</SidebarGroupLabel>
+            <SidebarGroupLabel className="h-6">Components</SidebarGroupLabel>
             <SidebarMenu>
-              <Collapsible defaultOpen render={<SidebarMenuItem />}>
+              <SidebarMenuItem>
                 <SidebarMenuButton
                   size="sm"
                   isActive={pathname === "/components"}
@@ -117,75 +115,64 @@ export function AppSidebar() {
                     />
                   }
                 >
-                  <SquaresFourIcon aria-hidden="true" />
-                  <span>Components</span>
+                  <span>All components</span>
                 </SidebarMenuButton>
-                <CollapsibleTrigger
-                  render={
-                    <SidebarMenuAction
-                      aria-label="Toggle component navigation"
-                      className="data-panel-open:rotate-90"
-                    />
-                  }
+              </SidebarMenuItem>
+              {componentCategories.map((category) => (
+                <Collapsible
+                  key={category.title}
+                  // Closed by default, except the category holding the current page.
+                  defaultOpen={category.components.some(({ slug }) => pathname === `/components/${slug}`)}
+                  render={<SidebarMenuItem />}
                 >
-                  <CaretRightIcon aria-hidden="true" />
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <SidebarMenuSub className="mr-0 gap-3 border-l-0 pr-0">
-                    {componentCategories.map((category) => {
-                      const labelId = `component-category-${category.title.replace(/\W+/g, "-").toLowerCase()}`;
-                      return (
-                        <Collapsible
-                          key={category.title}
-                          defaultOpen
-                          render={<li />}
-                          className="flex flex-col gap-1"
-                        >
-                          <CollapsibleTrigger
-                            id={labelId}
-                            className="text-sidebar-foreground/60 hover:text-sidebar-foreground focus-visible:ring-sidebar-ring flex h-6 w-full items-center justify-between rounded-md px-2 text-[11px] font-medium outline-hidden transition-colors focus-visible:ring-2 [&[data-panel-open]>svg]:rotate-90"
-                          >
-                            {category.title}
-                            <CaretRightIcon aria-hidden="true" className="size-3 transition-transform" />
-                          </CollapsibleTrigger>
-                          <CollapsibleContent
-                            render={<ul aria-labelledby={labelId} />}
-                            className="flex flex-col gap-1"
-                          >
-                            {category.components.map((component) => {
-                              const href = `/components/${component.slug}`;
-                              const current = pathname === href;
-                              return (
-                                <SidebarMenuSubItem key={component.slug}>
-                                  <SidebarMenuSubButton
-                                    size="sm"
-                                    isActive={current}
-                                    render={
-                                      <MenuItem
-                                        value={href}
-                                        render={
-                                          <Link
-                                            href={href}
-                                            onClick={closeMobile}
-                                            aria-current={current ? "page" : undefined}
-                                          />
-                                        }
-                                      />
-                                    }
-                                  >
-                                    <span>{component.title}</span>
-                                  </SidebarMenuSubButton>
-                                </SidebarMenuSubItem>
-                              );
-                            })}
-                          </CollapsibleContent>
-                        </Collapsible>
-                      );
-                    })}
-                  </SidebarMenuSub>
-                </CollapsibleContent>
-              </Collapsible>
-              <Collapsible defaultOpen render={<SidebarMenuItem />}>
+                  <SidebarMenuButton
+                    size="sm"
+                    render={<CollapsibleTrigger render={<MenuItem value={`category:${category.title}`} />} />}
+                    className="[&[data-panel-open]>svg]:rotate-90"
+                  >
+                    <span className="flex-1">{category.title}</span>
+                    <CaretRightIcon aria-hidden="true" className="ml-auto transition-transform" />
+                  </SidebarMenuButton>
+                  <CollapsibleContent>
+                    <SidebarMenuSub className="mr-0 pr-0">
+                      {category.components.map((component) => {
+                        const href = `/components/${component.slug}`;
+                        const current = pathname === href;
+                        return (
+                          <SidebarMenuSubItem key={component.slug}>
+                            <SidebarMenuSubButton
+                              size="sm"
+                              isActive={current}
+                              render={
+                                <MenuItem
+                                  value={href}
+                                  render={
+                                    <Link
+                                      href={href}
+                                      onClick={closeMobile}
+                                      aria-current={current ? "page" : undefined}
+                                    />
+                                  }
+                                />
+                              }
+                            >
+                              <span>{component.title}</span>
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                        );
+                      })}
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </Collapsible>
+              ))}
+            </SidebarMenu>
+          </SidebarGroup>
+        </nav>
+        <nav aria-label="Blocks">
+          <SidebarGroup className="py-1">
+            <SidebarGroupLabel className="h-6">Blocks</SidebarGroupLabel>
+            <SidebarMenu>
+              <SidebarMenuItem>
                 <SidebarMenuButton
                   size="sm"
                   isActive={pathname === "/blocks"}
@@ -202,54 +189,37 @@ export function AppSidebar() {
                     />
                   }
                 >
-                  <CubeIcon aria-hidden="true" />
-                  <span>Blocks</span>
+                  <span>All blocks</span>
                 </SidebarMenuButton>
-                <CollapsibleTrigger
-                  render={
-                    <SidebarMenuAction
-                      aria-label="Toggle block navigation"
-                      className="data-panel-open:rotate-90"
-                    />
-                  }
-                >
-                  <CaretRightIcon aria-hidden="true" />
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <SidebarMenuSub className="mr-0 border-l-0 pr-0">
-                    {blocks.map((block) => {
-                      const href = `/blocks/${block.slug}`;
-                      const current = pathname === href;
-                      return (
-                        <SidebarMenuSubItem key={block.slug}>
-                          <SidebarMenuSubButton
-                            size="sm"
-                            isActive={current}
-                            render={
-                              <MenuItem
-                                value={href}
-                                render={
-                                  <Link
-                                    href={href}
-                                    onClick={closeMobile}
-                                    aria-current={current ? "page" : undefined}
-                                    aria-description={block.isNew ? "New block shipped" : undefined}
-                                  />
-                                }
-                              />
-                            }
-                          >
-                            <span className="flex-1">{block.title}</span>
-                            {block.isNew ? (
-                              <Badge variant="dot" className="size-1.5" aria-hidden="true" />
-                            ) : null}
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                      );
-                    })}
-                  </SidebarMenuSub>
-                </CollapsibleContent>
-              </Collapsible>
+              </SidebarMenuItem>
+              {blocks.map((block) => {
+                const href = `/blocks/${block.slug}`;
+                const current = pathname === href;
+                return (
+                  <SidebarMenuItem key={block.slug}>
+                    <SidebarMenuButton
+                      size="sm"
+                      isActive={current}
+                      render={
+                        <MenuItem
+                          value={href}
+                          render={
+                            <Link
+                              href={href}
+                              onClick={closeMobile}
+                              aria-current={current ? "page" : undefined}
+                              aria-description={block.isNew ? "New block shipped" : undefined}
+                            />
+                          }
+                        />
+                      }
+                    >
+                      <span className="flex-1">{block.title}</span>
+                      {block.isNew ? <Badge variant="dot" className="size-1.5" aria-hidden="true" /> : null}
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
             </SidebarMenu>
           </SidebarGroup>
         </nav>

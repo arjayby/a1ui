@@ -41,7 +41,7 @@ test("catalog opens block documentation in the agreed order", async ({ page }) =
 test("selected block navigation keeps its label visible", async ({ page }) => {
   await page.goto("/blocks/section-rail");
   const activeLink = page
-    .getByRole("navigation", { name: "Library" })
+    .getByRole("navigation", { name: "Blocks" })
     .getByRole("link", { name: "Section Rail" });
 
   const colors = await activeLink.evaluate((element) => {
@@ -73,7 +73,7 @@ test("desktop sidebar can scroll to its final block", async ({ page }) => {
   await page.goto("/blocks");
 
   const sidebar = page.locator('[data-sidebar="content"]');
-  const finalLink = page.getByRole("navigation", { name: "Library" }).getByRole("link").last();
+  const finalLink = page.getByRole("navigation", { name: "Blocks" }).getByRole("link").last();
 
   await sidebar.evaluate((element) => {
     element.scrollTop = element.scrollHeight;
@@ -115,18 +115,19 @@ test("mobile sidebar opens, navigates, closes, and restores focus", async ({ pag
   await expect(trigger).toBeFocused();
 });
 
-test("desktop sidebar and block group support collapsing", async ({ page }) => {
-  await page.goto("/blocks/section-rail");
+test("desktop sidebar and component categories support collapsing", async ({ page }) => {
+  await page.goto("/components/dialog");
   await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
   const sidebar = page.locator('[data-slot="sidebar-container"]');
-  const blockToggle = page.getByRole("button", { name: "Toggle block navigation" });
-  const activeBlock = page
-    .getByRole("navigation", { name: "Library", exact: true })
-    .getByRole("link", { name: "Section Rail", exact: true });
-  await blockToggle.click();
-  await expect(activeBlock).not.toBeVisible();
-  await blockToggle.click();
-  await expect(activeBlock).toBeVisible();
+  const components = page.getByRole("navigation", { name: "Components", exact: true });
+  const overlays = components.getByRole("button", { name: "Overlays", exact: true });
+  const activeComponent = components.getByRole("link", { name: "Dialog", exact: true });
+  await expect(components.getByRole("link", { name: "Copy Button", exact: true })).not.toBeVisible();
+  await expect(activeComponent).toBeVisible();
+  await overlays.click();
+  await expect(activeComponent).not.toBeVisible();
+  await overlays.click();
+  await expect(activeComponent).toBeVisible();
   await page.getByRole("button", { name: "Toggle Sidebar", exact: true }).click();
   await expect(sidebar).not.toBeInViewport();
   await page.keyboard.press("Control+b");
