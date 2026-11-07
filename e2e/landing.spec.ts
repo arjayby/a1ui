@@ -6,12 +6,12 @@ test("home showcases the library and opens the documentation", async ({ page }) 
   await expect(page).toHaveTitle("a1ui — Animated React components and blocks");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Animated Reactcomponents and blocks.");
   await expect(page.locator('[data-sidebar="sidebar"]')).toHaveCount(0);
-  await expect(page.locator(".landing-block-card")).toHaveCount(3);
+  await expect(page.locator(".landing-block-card")).toHaveCount(5);
   for (const item of registry.items) {
     const link = page.locator(
       `main a[href="/${item.type === "registry:block" ? "blocks" : "components"}/${item.name}"]`,
     );
-    if ((await link.count()) > 0) await expect(link).toBeVisible();
+    if ((await link.count()) > 0) await expect(link.first()).toBeVisible();
   }
   await page.getByRole("link", { name: "Explore components", exact: true }).click();
   await expect(page).toHaveURL(/\/components$/);
@@ -57,11 +57,9 @@ for (const width of [1440, 390, 320]) {
           .getByRole("navigation", { name: "Main navigation" })
           .getByRole("link", { name: "Blocks", exact: true }),
       ).toBeVisible();
-      const terrain = page
-        .locator(".landing-block-card")
-        .filter({ has: page.getByRole("heading", { name: "ASCII Terrain" }) });
+      const terrain = page.locator(".landing-stage-art canvas");
       await terrain.scrollIntoViewIfNeeded();
-      await expect(terrain.locator("canvas")).toHaveAttribute("data-ready", "true");
+      await expect(terrain).toHaveAttribute("data-ready", "true");
       await page.getByRole("button", { name: "Toggle theme" }).click();
     }
   });
