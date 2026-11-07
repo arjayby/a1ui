@@ -43,7 +43,7 @@ Tally is a web analytics platform: traffic tracking, visitor journeys, funnels a
 
 Dark is the primary theme; light is its paper counterpart. Use the tokens, never raw hex.
 
-- **Surfaces:** `background` for the page (true black in dark, `#f5f5f7` in light), `card` for every raised surface (cards, the docs content panel, dialogs, menus, toasts), `muted` for hover, selection, secondary buttons and the tabs track. Demos, code and catalog tiles sit in recessed `background` wells inside a card.
+- **Surfaces:** `background` for the page (true black in dark, `#f5f5f7` in light), `card` for every raised surface (cards, the docs content panel, dialogs, menus, toasts), `muted` for hover, selection, secondary buttons and the tabs track. Demos, code and catalog tiles sit in recessed `--well` surfaces inside a card (`background` in light, a soft `#232325` in dark so they never read as black holes).
 - **Text:** `foreground` for primary text, `muted-foreground` for descriptions, metadata and axis labels. Both pass 4.5:1 on `background`, `card` and `muted` in both themes (`muted-foreground` on `muted` is 5.4:1 in dark, 4.9:1 in light). `subtle-foreground` is for non-text marks only. `link` colours inline links.
 - **Lines:** `hairline` replaces most dividers between sections; `border` is a decorative edge (cards, separators, gridlines). Controls take `input`, which is a hairline too (1.8:1 on `card` in dark, 1.5:1 in light), below the 3:1 a control edge needs; `prefers-contrast: more` strengthens all three.
 - **Primary is ink.** The primary button, checked controls and badges are `primary` (near-white in dark, near-black in light) with `on-primary` text.
