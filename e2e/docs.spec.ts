@@ -50,22 +50,22 @@ test("selected block navigation keeps its label visible", async ({ page }) => {
     const highlight = element.querySelector('[data-slot="menu-highlight"]');
     if (!highlight) throw new Error("Expected a selection highlight");
     const probe = document.body.appendChild(document.createElement("span"));
-    probe.style.background = "var(--primary)";
-    probe.style.color = "var(--on-primary)";
+    probe.style.background = "var(--accent)";
+    probe.style.color = "var(--accent-foreground)";
     const tokens = getComputedStyle(probe);
     const result = {
       background: getComputedStyle(highlight).backgroundColor,
       color: linkStyles.color,
-      primary: tokens.backgroundColor,
-      onPrimary: tokens.color,
+      accent: tokens.backgroundColor,
+      onAccent: tokens.color,
     };
     probe.remove();
     return result;
   });
 
   expect(colors).toMatchObject({
-    background: colors.primary,
-    color: colors.onPrimary,
+    background: colors.accent,
+    color: colors.onAccent,
   });
 });
 
