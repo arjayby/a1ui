@@ -373,12 +373,12 @@ h6 {
 
 [data-sidebar="sidebar"] [data-menu-item][data-highlighted],
 [data-sidebar="sidebar"] [data-menu-item][data-highlighted] ~ [data-sidebar="menu-action"]:not(:hover) {
-  color: var(--accent-foreground);
+  color: var(--foreground);
 }
 
 [data-sidebar="sidebar"] [data-slot="menu-highlight"] {
   border-radius: var(--radius-md);
-  background: var(--accent);
+  background: var(--muted);
 }
 
 .ui-dialog.ui-sheet[data-side="left"] {
