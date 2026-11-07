@@ -3,17 +3,14 @@
 @import "fumadocs-ui/css/preset.css";
 @import "./graphite-fonts.css";
 @import "./graphite-tokens.css";
-@import "./apple-tokens.css";
 @import "./graphite-components.css";
 
 /*
  * Tailwind's default --font-sans, --font-mono and --radius-* utilities read the
- * values from graphite-tokens.css, as redefined by apple-tokens.css. Only the
- * heading face needs registering.
+ * Graphite values from graphite-tokens.css. Only the heading face needs registering.
  */
 @theme {
-  --font-heading: -apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif;
-  --radius-xl: 24px;
+  --font-heading: "Stack Sans Notch", "Inter", sans-serif;
 }
 
 @theme inline {
@@ -86,6 +83,8 @@
   --leading-40: 40px;
   --leading-52: 52px;
   --leading-68: 68px;
+  --tracking-tight: -0.04em;
+  --tracking-heading: -0.025em;
   --tracking-normal: 0em;
   --tracking-wide: 0.08em;
   --container-reading: 640px;
@@ -160,7 +159,7 @@ body {
   font-size: var(--text-sm);
   font-weight: 400;
   font-optical-sizing: auto;
-  letter-spacing: var(--tracking-body);
+  letter-spacing: var(--tracking-normal);
   line-height: 1.5;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -343,11 +342,11 @@ h6 {
 
 [data-sidebar="sidebar"] :is([data-sidebar="menu-button"], [data-sidebar="menu-sub-button"]) {
   height: 30px;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   color: var(--foreground);
   font-family: var(--font-sans);
   font-size: 13px;
-  letter-spacing: var(--tracking-body);
+  letter-spacing: var(--tracking-normal);
   text-decoration: none;
 }
 
@@ -373,7 +372,7 @@ h6 {
 }
 
 [data-sidebar="sidebar"] [data-slot="menu-highlight"] {
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   background: var(--primary);
 }
 
@@ -411,7 +410,7 @@ h6 {
   margin: var(--space-8) 0 var(--space-12);
   font-size: clamp(34px, 5vw, 48px);
   font-weight: 700;
-  letter-spacing: var(--tracking-display);
+  letter-spacing: var(--tracking-tight);
   line-height: 1.08;
 }
 
@@ -554,7 +553,7 @@ h6 {
   font-size: clamp(34px, 5vw, 48px);
   font-weight: 700;
   line-height: 1.08;
-  letter-spacing: var(--tracking-display);
+  letter-spacing: var(--tracking-tight);
 }
 
 .docs-article > header p {
@@ -692,7 +691,7 @@ h6 {
   scroll-margin-top: 5rem;
   font-size: 24px;
   font-weight: 600;
-  letter-spacing: var(--tracking-headline);
+  letter-spacing: var(--tracking-heading);
   line-height: 1.2;
 }
 
@@ -862,7 +861,7 @@ h6 {
   font-family: var(--font-heading);
   font-size: clamp(2.5rem, 6vw, 4rem);
   font-weight: 600;
-  letter-spacing: var(--tracking-display);
+  letter-spacing: var(--tracking-tight);
   line-height: 1;
 }
 
@@ -1082,7 +1081,7 @@ h6 {
 .text-scramble-demo-text {
   font-size: clamp(1.125rem, 3.5vw, 2.5rem);
   font-weight: 600;
-  letter-spacing: var(--tracking-display);
+  letter-spacing: var(--tracking-tight);
 }
 
 .text-scramble-demo-controls {
@@ -1097,7 +1096,7 @@ h6 {
 .text-scramble-preview-text {
   font-size: 1.25rem;
   font-weight: 600;
-  letter-spacing: var(--tracking-display);
+  letter-spacing: var(--tracking-tight);
 }
 
 .particle-menu-demo {

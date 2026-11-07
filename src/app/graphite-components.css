@@ -1,4 +1,4 @@
-/* Vega component APIs with Apple geometry, materials and press feedback (see DESIGN.md, "Apple layer").
+/* Vega component APIs with Graphite geometry, materials and spring press feedback (see DESIGN.md).
    Reference: https://ui.shadcn.com/r/styles/base-vega/{component}.json */
 
 @layer components {
@@ -10,14 +10,14 @@
     justify-content: center;
     gap: 6px;
     border: 1px solid transparent;
-    border-radius: var(--radius-pill);
-    padding: 0 16px;
+    border-radius: var(--radius-md);
+    padding: 0 10px;
     background: var(--primary);
     color: var(--on-primary);
     font-family: var(--font-sans);
-    font-size: 13px;
+    font-size: var(--text-xs);
     font-weight: 500;
-    letter-spacing: var(--tracking-body);
+    letter-spacing: var(--tracking-normal);
     line-height: var(--leading-20);
     cursor: pointer;
     user-select: none;
@@ -69,10 +69,9 @@
     background: var(--danger-soft-hover);
   }
   .ui-button[data-size="sm"] {
-    min-height: 30px;
+    min-height: 32px;
     gap: 4px;
-    padding-inline: 12px;
-    font-size: 12px;
+    padding-inline: 10px;
   }
   .ui-button[data-size="icon"],
   .ui-icon-button {
@@ -123,7 +122,7 @@
     color: var(--foreground);
     font-family: var(--font-sans);
     font-size: var(--text-sm);
-    letter-spacing: var(--tracking-body);
+    letter-spacing: var(--tracking-normal);
     line-height: var(--leading-20);
     transition:
       border-color 150ms var(--ease-press),
@@ -299,7 +298,7 @@
     margin: 0;
     font-size: var(--text-base);
     font-weight: 600;
-    letter-spacing: var(--tracking-headline);
+    letter-spacing: var(--tracking-heading);
     line-height: var(--leading-32);
   }
   .ui-description {
@@ -403,7 +402,7 @@
     max-height: calc(100dvh - 32px);
     overflow-y: auto;
     transform: translate(-50%, -50%);
-    border-radius: var(--radius-xl);
+    border-radius: var(--radius-lg);
     padding: var(--space-24);
     background: var(--card);
     color: var(--foreground);
@@ -445,7 +444,7 @@
     font-family: var(--font-heading);
     font-size: var(--text-lg);
     font-weight: 600;
-    letter-spacing: var(--tracking-headline);
+    letter-spacing: var(--tracking-heading);
     line-height: var(--leading-32);
   }
   .ui-dialog-close {
@@ -542,20 +541,20 @@
     flex-wrap: wrap;
     width: fit-content;
     gap: 0;
-    border-radius: 9px;
+    border-radius: var(--radius-md);
     padding: 2px;
     background: color-mix(in srgb, var(--foreground) 7%, transparent);
   }
   .ui-tabs-trigger {
     min-height: 28px;
     border: 0;
-    border-radius: 7px;
+    border-radius: var(--radius-sm);
     padding: 4px 12px;
     color: var(--foreground);
     font-family: var(--font-sans);
     font-size: 13px;
     font-weight: 500;
-    letter-spacing: var(--tracking-body);
+    letter-spacing: var(--tracking-normal);
     cursor: pointer;
     transition:
       background-color 200ms var(--ease-press),

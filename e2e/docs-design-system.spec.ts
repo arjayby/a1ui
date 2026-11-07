@@ -100,22 +100,22 @@ test("documentation shares the component geometry in both themes", async ({ page
     await expect(page.locator("html")).toHaveClass(new RegExp(theme));
     await expect(page.getByRole("button", { name: "Copy prompt for agent" })).toHaveCSS(
       "border-radius",
-      "980px",
+      "8px",
     );
     await expect(page.getByRole("button", { name: "Copy prompt for agent" })).toHaveCSS(
       "font-family",
-      '-apple-system, "system-ui", Inter, system-ui, sans-serif',
+      "Inter, system-ui, sans-serif",
     );
-    await expect(page.locator(".demo-frame")).toHaveCSS("border-radius", "18px");
+    await expect(page.locator(".demo-frame")).toHaveCSS("border-radius", "12px");
     await expect(page.getByRole("tab", { name: "Usage", exact: true })).toHaveCSS(
       "font-family",
-      '-apple-system, "system-ui", Inter, system-ui, sans-serif',
+      "Inter, system-ui, sans-serif",
     );
     await expect(
       page
         .getByRole("navigation", { name: "Components", exact: true })
         .getByRole("button", { name: "Buttons & Actions", exact: true }),
-    ).toHaveCSS("font-family", '-apple-system, "system-ui", Inter, system-ui, sans-serif');
+    ).toHaveCSS("font-family", "Inter, system-ui, sans-serif");
     await page.getByRole("button", { name: "Toggle theme" }).click();
   }
 });

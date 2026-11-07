@@ -1,5 +1,5 @@
-/* Landing page. Apple layer conventions: translucent global nav, large semibold
-   display type with size-specific tracking, tiles instead of bordered boxes. */
+/* Landing page: translucent global nav, large display type, tiles instead of
+   bordered boxes. */
 
 .landing-width {
   width: min(calc(100% - 96px), var(--container-content));
@@ -379,7 +379,7 @@
   justify-content: space-between;
   gap: 32px;
   margin-block: 120px 96px;
-  border-radius: var(--radius-xl);
+  border-radius: var(--radius-lg);
   padding: 48px;
   background: var(--card);
   box-shadow: var(--shadow-card);
