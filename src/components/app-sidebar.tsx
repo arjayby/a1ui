@@ -144,13 +144,15 @@ export function AppSidebar() {
                   }
                   render={<SidebarMenuItem />}
                 >
+                  {/* A category only discloses its components, so it stays out of the menu's
+                      highlight: clicking it opens the group without marking it as the selection. */}
                   <SidebarMenuButton
                     size="sm"
-                    render={<CollapsibleTrigger render={<MenuItem value={`category:${category.title}`} />} />}
+                    render={<CollapsibleTrigger />}
                     className="[&[data-panel-open]>svg]:rotate-90"
                   >
+                    <CaretRightIcon aria-hidden="true" className="transition-transform" />
                     <span className="flex-1">{category.title}</span>
-                    <CaretRightIcon aria-hidden="true" className="ml-auto transition-transform" />
                   </SidebarMenuButton>
                   <CollapsibleContent>
                     <SidebarMenuSub className="mr-0 pr-0">
