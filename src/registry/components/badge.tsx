@@ -1,7 +1,19 @@
 "use client";
 
 import { AnimatePresence, motion, useAnimate, useReducedMotion } from "motion/react";
-import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+
+// Motion's useReducedMotion reads the media query on the first client render, which the server
+// cannot know. Applying it only after hydration keeps the client's first render identical to the
+// server HTML; React re-renders with the real preference right after hydrating.
+const subscribeNever = () => () => {};
+function useHydrated() {
+  return useSyncExternalStore(
+    subscribeNever,
+    () => true,
+    () => false,
+  );
+}
 
 const variantClasses = {
   default: "bg-foreground text-background border-transparent",
@@ -51,7 +63,9 @@ export function Badge({
   duration = 0.4,
   className,
 }: BadgeProps) {
-  const reducedMotion = useReducedMotion();
+  const hydrated = useHydrated();
+  const prefersReducedMotion = useReducedMotion();
+  const reducedMotion = hydrated && prefersReducedMotion === true;
   const seconds = reducedMotion ? 0 : Number.isFinite(duration) ? Math.max(0, duration) : 0.4;
   const value = toCount(count);
   const cap = max === undefined || !Number.isFinite(max) ? undefined : Math.max(0, Math.floor(max));

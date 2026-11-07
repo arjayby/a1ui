@@ -3,10 +3,30 @@
 import { Popover } from "@base-ui/react/popover";
 import { CheckIcon, EyeIcon, EyeSlashIcon, InfoIcon, WarningCircleIcon, XIcon } from "@phosphor-icons/react";
 import { AnimatePresence, motion, useAnimate, useReducedMotion } from "motion/react";
-import { useEffect, useId, useRef, useState, type ComponentProps, type ReactNode } from "react";
+import {
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type ComponentProps,
+  type ReactNode,
+} from "react";
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+
+// Motion's useReducedMotion reads the media query on the first client render, which the server
+// cannot know. Applying it only after hydration keeps the client's first render identical to the
+// server HTML; React re-renders with the real preference right after hydrating.
+const subscribeNever = () => () => {};
+function useHydrated() {
+  return useSyncExternalStore(
+    subscribeNever,
+    () => true,
+    () => false,
+  );
+}
 
 export interface PasswordRule {
   /** Requirement shown in the checklist, such as "At least 8 characters". */
@@ -73,7 +93,9 @@ export function PasswordInput({
   const editedRef = useRef(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const [scope, animate] = useAnimate<HTMLDivElement>();
-  const reducedMotion = useReducedMotion();
+  const hydrated = useHydrated();
+  const prefersReducedMotion = useReducedMotion();
+  const reducedMotion = hydrated && prefersReducedMotion === true;
   const text = value ?? internalValue;
   const results = rules.map((rule) => rule.test(text));
   const passed = results.filter(Boolean).length;

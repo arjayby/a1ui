@@ -3,7 +3,7 @@ import type { CSSProperties } from "react";
 
 import { ArcReel, type ArcReelItem } from "@/registry/blocks/arc-reel";
 
-function ReelArtwork({ scene }: { scene: string }) {
+function ReelArtwork({ scene, eager = false }: { scene: string; eager?: boolean }) {
   return (
     <div aria-hidden="true" className="arc-reel-artwork">
       <Image
@@ -11,6 +11,7 @@ function ReelArtwork({ scene }: { scene: string }) {
         alt=""
         fill
         sizes="(max-width: 640px) 200px, 320px"
+        loading={eager ? "eager" : "lazy"}
         className="object-cover"
         draggable={false}
       />
@@ -18,7 +19,7 @@ function ReelArtwork({ scene }: { scene: string }) {
   );
 }
 
-const providers: ArcReelItem[] = [
+const scenes = [
   { id: "openai", name: "OpenAI", scene: "astral" },
   { id: "elevenlabs", name: "ElevenLabs", scene: "sound-wave" },
   { id: "anthropic", name: "Anthropic", scene: "porsche-garage" },
@@ -28,7 +29,17 @@ const providers: ArcReelItem[] = [
   { id: "runway", name: "Runway", scene: "airport-runway" },
   { id: "cohere", name: "Cohere", scene: "library" },
   { id: "xai", name: "xAI", scene: "radio-telescope" },
-].map(({ scene, ...provider }) => ({ ...provider, artwork: <ReelArtwork scene={scene} /> }));
+];
+
+// Previews sit further down the landing and catalog pages, so their artwork loads lazily. On the
+// block's own page the reel is above the fold and its cards are the largest paint, so load eagerly.
+const reel = (eager: boolean): ArcReelItem[] =>
+  scenes.map(({ scene, ...provider }) => ({
+    ...provider,
+    artwork: <ReelArtwork scene={scene} eager={eager} />,
+  }));
+const providers = reel(false);
+const eagerProviders = reel(true);
 
 export function ArcReelPreview() {
   return (
@@ -53,7 +64,7 @@ export function ArcReelDemo() {
   return (
     <>
       <div className="not-prose demo-frame">
-        <ArcReel items={providers} initialIndex={3} ariaLabel="AI provider arc reel" />
+        <ArcReel items={eagerProviders} initialIndex={3} ariaLabel="AI provider arc reel" />
       </div>
       <p className="demo-caption text-center">
         Drag left or right. Use the arrows or scrub the line below to move through the providers.

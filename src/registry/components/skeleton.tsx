@@ -8,10 +8,23 @@ import {
   useLayoutEffect,
   useRef,
   useState,
+  useSyncExternalStore,
   type CSSProperties,
   type ReactNode,
   type RefObject,
 } from "react";
+
+// Motion's useReducedMotion reads the media query on the first client render, which the server
+// cannot know. Applying it only after hydration keeps the client's first render identical to the
+// server HTML; React re-renders with the real preference right after hydrating.
+const subscribeNever = () => () => {};
+function useHydrated() {
+  return useSyncExternalStore(
+    subscribeNever,
+    () => true,
+    () => false,
+  );
+}
 
 export type SkeletonAnimation = "shimmer" | "pulse" | "none";
 export type SkeletonDirection = "right" | "left" | "down" | "up";
@@ -130,7 +143,9 @@ function useSyncedAnimation(
 
 function useSettings({ animation, direction, cycle }: Partial<SkeletonSettings>) {
   const parent = useContext(SkeletonContext);
-  const reducedMotion = useReducedMotion();
+  const hydrated = useHydrated();
+  const prefersReducedMotion = useReducedMotion();
+  const reducedMotion = hydrated && prefersReducedMotion === true;
   const settings: SkeletonSettings = {
     animation: animation ?? parent?.animation ?? "shimmer",
     direction: direction ?? parent?.direction ?? "right",
@@ -263,7 +278,9 @@ function Reveal({
   className?: string;
   style?: CSSProperties;
 }) {
-  const reducedMotion = useReducedMotion();
+  const hydrated = useHydrated();
+  const prefersReducedMotion = useReducedMotion();
+  const reducedMotion = hydrated && prefersReducedMotion === true;
   const seconds = reducedMotion ? 0 : Number.isFinite(duration) ? Math.max(0, duration) : 0.5;
   const overlay = fallback === undefined;
   const container = useRef<HTMLDivElement>(null);

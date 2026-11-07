@@ -9,7 +9,19 @@ import {
   useTransform,
   type MotionValue,
 } from "motion/react";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useSyncExternalStore, type ReactNode } from "react";
+
+// Motion's useReducedMotion reads the media query on the first client render, which the server
+// cannot know. Applying it only after hydration keeps the client's first render identical to the
+// server HTML; React re-renders with the real preference right after hydrating.
+const subscribeNever = () => () => {};
+function useHydrated() {
+  return useSyncExternalStore(
+    subscribeNever,
+    () => true,
+    () => false,
+  );
+}
 
 const DIGITS = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
 const clamp = (value: number, low: number, high: number) => Math.min(high, Math.max(low, value));
@@ -61,7 +73,9 @@ export function Progress({
   duration = 0.6,
   className,
 }: ProgressProps) {
-  const reducedMotion = useReducedMotion();
+  const hydrated = useHydrated();
+  const prefersReducedMotion = useReducedMotion();
+  const reducedMotion = hydrated && prefersReducedMotion === true;
   const seconds = reducedMotion ? 0 : Number.isFinite(duration) ? Math.max(0, duration) : 0.6;
   const indeterminate = value === null || !Number.isFinite(value);
   const range = max - min;
