@@ -483,10 +483,13 @@
       transform var(--ease-spring-snappy-duration) var(--ease-spring-snappy);
   }
   .ui-popover:is([data-starting-style], [data-ending-style]),
-  .ui-tooltip:is([data-starting-style], [data-ending-style]),
-  .ui-menu:is([data-starting-style], [data-ending-style]) {
+  .ui-tooltip:is([data-starting-style], [data-ending-style]) {
     opacity: 0;
     transform: scale(0.96);
+  }
+  /* The registry Dropdown Menu animates its own scale on top of this class; only fade here. */
+  .ui-menu:is([data-starting-style], [data-ending-style]) {
+    opacity: 0;
   }
   .ui-popover {
     width: 288px;

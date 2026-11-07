@@ -36,14 +36,14 @@ export function CopyButtonExample() {
 
 ## API reference
 
-| Prop          | Type                          | Default    | Description                                                  |
-| ------------- | ----------------------------- | ---------- | ------------------------------------------------------------ |
-| `value`       | `string`                      | Required   | Plain text written to the clipboard.                         |
-| `label`       | `string`                      | `"Copy"`   | Button text before copying.                                  |
-| `copiedLabel` | `string`                      | `"Copied"` | Button text after a successful copy.                         |
-| `onCopy`      | `() => void`                  | None       | Called after the clipboard write succeeds.                   |
-| `onCopyError` | `() => void`                  | None       | Called when the clipboard is unavailable or the write fails. |
-| `animation`   | `"blur" \| "slide" \| "flip"` | `"blur"`   | Transition style for the icon and label.                     |
-| `duration`    | `number`                      | `0.2`      | Transition time in seconds. Zero switches instantly.         |
-| `disabled`    | `boolean`                     | `false`    | Prevents copying.                                            |
-| `className`   | `string`                      | None       | Additional classes for the button.                           |
+| Prop          | Type                          | Default    | Description                                                                                     |
+| ------------- | ----------------------------- | ---------- | ----------------------------------------------------------------------------------------------- |
+| `value`       | `string`                      | Required   | Plain text written to the clipboard.                                                            |
+| `label`       | `string`                      | `"Copy"`   | Button text before copying.                                                                     |
+| `copiedLabel` | `string`                      | `"Copied"` | Button text after a successful copy.                                                            |
+| `onCopy`      | `() => void`                  | None       | Called after the clipboard write succeeds.                                                      |
+| `onCopyError` | `() => void`                  | None       | Called when the clipboard is unavailable or the write fails.                                    |
+| `animation`   | `"blur" \| "slide" \| "flip"` | `"blur"`   | Transition style for the icon and label.                                                        |
+| `duration`    | `number`                      | `0.2`      | Fade time in seconds; movement settles on a spring of the same length. Zero switches instantly. |
+| `disabled`    | `boolean`                     | `false`    | Prevents copying.                                                                               |
+| `className`   | `string`                      | None       | Additional classes for the button.                                                              |

@@ -49,7 +49,7 @@ export function Switch({
   const width = squash ? PRESSED_THUMB : THUMB;
   const visualDuration = reducedMotion ? 0 : Number.isFinite(duration) ? Math.max(0, duration) : 0.3;
   const transition =
-    visualDuration === 0 ? { duration: 0 } : ({ type: "spring", visualDuration, bounce: 0.25 } as const);
+    visualDuration === 0 ? { duration: 0 } : ({ type: "spring", visualDuration, bounce: 0 } as const);
   const release = () => setPressed(false);
 
   const control = (

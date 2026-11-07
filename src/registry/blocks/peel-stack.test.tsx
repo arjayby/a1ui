@@ -21,9 +21,12 @@ function pointer(
   x: number,
   y = 50,
   pointerId = 1,
+  time?: number,
 ) {
   const event = new MouseEvent(type, { bubbles: true, clientX: x, clientY: y, button: 0 });
   Object.defineProperties(event, { pointerId: { value: pointerId }, isPrimary: { value: true } });
+  // React reads a zero timestamp as missing, so timed gestures start at 1000ms.
+  if (time !== undefined) Object.defineProperty(event, "timeStamp", { value: time });
   fireEvent(target, event);
 }
 
@@ -178,6 +181,31 @@ describe("PeelStack", () => {
     pointer(stage, "pointerdown", 100);
     pointer(stage, "pointerup", 10, 50, 2);
     pointer(stage, "pointerup", 100);
+    expect(onActiveChange).not.toHaveBeenCalled();
+  });
+
+  it("tracks the card 1:1 and commits a short flick from its projected landing point", () => {
+    render(<PeelStack items={items} />);
+    const stage = enablePointerCapture();
+    const card = document.querySelector<HTMLElement>('[data-peel-stack-card="form"]')!;
+    pointer(stage, "pointerdown", 160, 50, 1, 1000);
+    pointer(stage, "pointermove", 148, 50, 1, 1010);
+    pointer(stage, "pointermove", 140, 50, 1, 1020);
+    expect(card.style.translate).toBe("-20px 0");
+    expect(screen.getByRole("status")).toHaveTextContent("Form studies");
+    pointer(stage, "pointerup", 138, 50, 1, 1024);
+    expect(screen.getByRole("status")).toHaveTextContent("Material notes");
+  });
+
+  it("returns the card when the release flicks back toward where it started", () => {
+    const onActiveChange = vi.fn();
+    render(<PeelStack items={items} onActiveChange={onActiveChange} />);
+    const stage = enablePointerCapture();
+    pointer(stage, "pointerdown", 160, 50, 1, 1000);
+    pointer(stage, "pointermove", 100, 50, 1, 1050);
+    pointer(stage, "pointermove", 90, 50, 1, 1100);
+    pointer(stage, "pointermove", 110, 50, 1, 1140);
+    pointer(stage, "pointerup", 120, 50, 1, 1150);
     expect(onActiveChange).not.toHaveBeenCalled();
   });
 

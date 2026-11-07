@@ -195,7 +195,7 @@ function DialogLayer({
     time === 0
       ? { duration: 0 }
       : {
-          default: { type: "spring", visualDuration: time, bounce: sheet ? 0 : 0.16 },
+          default: { type: "spring", visualDuration: time, bounce: 0 },
           opacity: { duration: time * 0.5, ease: "easeOut" },
         };
   const exit: Transition = time === 0 ? { duration: 0 } : { duration: time * 0.7, ease: [0.4, 0, 0.9, 0.4] };

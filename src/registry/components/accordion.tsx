@@ -122,13 +122,13 @@ export function AccordionTrigger({ className, children }: AccordionTriggerProps)
   const transition: Transition =
     accordion.seconds === 0
       ? { duration: 0 }
-      : { type: "spring", visualDuration: accordion.seconds, bounce: 0.2 };
+      : { type: "spring", visualDuration: accordion.seconds, bounce: 0 };
 
   return (
     <AccordionPrimitive.Header data-slot="accordion-header" className="flex">
       <AccordionPrimitive.Trigger
         data-slot="accordion-trigger"
-        className={`group/accordion-trigger focus-visible:ring-ring/30 flex flex-1 cursor-pointer items-center justify-between gap-4 rounded-md py-4 text-left text-sm font-medium transition-colors outline-none select-none hover:underline focus-visible:ring-3 data-disabled:cursor-not-allowed data-disabled:opacity-50 data-disabled:hover:no-underline ${className ?? ""}`}
+        className={`group/accordion-trigger focus-visible:ring-ring/30 flex flex-1 cursor-pointer items-center justify-between gap-4 rounded-md py-4 text-left text-sm font-medium transition-colors outline-none select-none hover:underline focus-visible:ring-3 not-data-disabled:active:opacity-70 data-disabled:cursor-not-allowed data-disabled:opacity-50 data-disabled:hover:no-underline ${className ?? ""}`}
       >
         {children}
         <span

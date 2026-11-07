@@ -77,7 +77,7 @@ export function MenuItem({ value, render, children, ...props }: MenuItemProps) {
                 layoutId="menu-highlight"
                 initial={false}
                 transition={
-                  reducedMotion ? { duration: 0 } : { type: "spring", duration: 0.35, bounce: 0.12 }
+                  reducedMotion ? { duration: 0 } : { type: "spring", visualDuration: 0.3, bounce: 0 }
                 }
                 className="pointer-events-none absolute inset-0 -z-10 bg-[var(--muted,#e5e7eb)]"
                 style={{ borderRadius: "inherit" }}

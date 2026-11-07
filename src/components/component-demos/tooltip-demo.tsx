@@ -62,7 +62,7 @@ function Toolbar({ tools, side }: { tools: Tool[][]; side?: TooltipContentProps[
                 <span className="flex items-center gap-2 whitespace-nowrap">
                   {tool.hint}
                   {tool.shortcut && (
-                    <kbd className="text-background/60 font-sans text-[11px] tracking-wide">
+                    <kbd className="text-muted-foreground font-sans text-[11px] tracking-wide">
                       {tool.shortcut}
                     </kbd>
                   )}

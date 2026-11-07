@@ -43,7 +43,8 @@ const GroupContext = createContext<GroupContextValue | null>(null);
 // Avatars fanned out below the stack show their label underneath, so it never covers the stack.
 const LabelBelowContext = createContext(false);
 
-function springFor(seconds: number, bounce = 0.25): Transition {
+// Spreading, lifting, and fanning are discrete state changes, so they settle without overshoot.
+function springFor(seconds: number, bounce = 0): Transition {
   return seconds ? { type: "spring", visualDuration: seconds, bounce } : { duration: 0 };
 }
 
@@ -123,7 +124,7 @@ export function Avatar({ name, src, tone, size, duration, className }: AvatarPro
       style={{ zIndex: active ? 30 : undefined }}
       initial={false}
       animate={{ y: active && seconds ? -metrics.lift : 0 }}
-      transition={springFor(seconds * 0.8, 0.4)}
+      transition={springFor(seconds * 0.8)}
       onPointerEnter={(event) => event.pointerType !== "touch" && setHovered(true)}
       onPointerLeave={() => setHovered(false)}
       onFocus={() => setFocused(true)}
@@ -148,7 +149,7 @@ export function Avatar({ name, src, tone, size, duration, className }: AvatarPro
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: below ? -2 : 2, scale: 0.95 }}
             transition={
-              seconds ? { type: "spring", visualDuration: seconds * 0.6, bounce: 0.2 } : { duration: 0 }
+              seconds ? { type: "spring", visualDuration: seconds * 0.6, bounce: 0 } : { duration: 0 }
             }
           >
             {name}
@@ -287,7 +288,7 @@ export function AvatarGroup({
               aria-label={`Show ${hidden.length} more`}
               aria-expanded={open}
               aria-controls={open ? trayId : undefined}
-              className={`${metrics.box} bg-muted text-muted-foreground ring-background hover:text-foreground focus-visible:ring-ring/30 relative inline-flex shrink-0 cursor-pointer items-center justify-center rounded-full leading-none font-medium tabular-nums ring-2 outline-none focus-visible:ring-3`}
+              className={`${metrics.box} bg-muted text-muted-foreground ring-background hover:text-foreground focus-visible:ring-ring/30 relative inline-flex shrink-0 cursor-pointer items-center justify-center rounded-full leading-none font-medium tabular-nums ring-2 transition-[color,scale] duration-100 ease-out outline-none focus-visible:ring-3 motion-safe:active:scale-[0.94]`}
               onClick={() => {
                 const chip = chipRef.current?.getBoundingClientRect();
                 const root = rootRef.current?.getBoundingClientRect();
@@ -340,7 +341,7 @@ export function AvatarGroup({
                         ? {
                             type: "spring",
                             visualDuration: seconds,
-                            bounce: 0.3,
+                            bounce: 0,
                             delay: index * Math.min(0.05, seconds * 0.15),
                           }
                         : { duration: 0 },

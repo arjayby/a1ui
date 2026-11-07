@@ -7,14 +7,17 @@ import { Children, createContext, useContext, useEffect, useId, useState, type R
 
 type ToggleGroupVariant = "muted" | "outline";
 
+// Items shrink the moment they are pressed and settle back without overshoot on release.
+const PRESS: Transition = { type: "spring", visualDuration: 0.2, bounce: 0 };
+
 type ToggleGroupContextValue = {
   value: readonly string[];
   multiple: boolean;
   variant: ToggleGroupVariant;
   /** Seconds, already zero under reduced motion. */
   seconds: number;
-  slide: Transition;
-  pop: Transition;
+  /** Critically damped spring shared by the sliding surface and the chip fill. */
+  transition: Transition;
 };
 
 const ToggleGroupContext = createContext<ToggleGroupContextValue | null>(null);
@@ -69,10 +72,8 @@ export function ToggleGroup({
   const [internalValue, setInternalValue] = useState<string[]>(defaultValue ?? []);
   const current = value ?? internalValue;
   const seconds = reducedMotion ? 0 : Number.isFinite(duration) ? Math.max(0, duration) : 0.35;
-  const slide: Transition =
-    seconds === 0 ? { duration: 0 } : { type: "spring", visualDuration: seconds, bounce: 0.18 };
-  const pop: Transition =
-    seconds === 0 ? { duration: 0 } : { type: "spring", visualDuration: seconds, bounce: 0.45 };
+  const transition: Transition =
+    seconds === 0 ? { duration: 0 } : { type: "spring", visualDuration: seconds, bounce: 0 };
 
   const layout = multiple
     ? `flex-wrap gap-2 ${orientation === "vertical" ? "flex-col items-start" : "items-center"}`
@@ -80,7 +81,7 @@ export function ToggleGroup({
 
   return (
     <LayoutGroup id={id}>
-      <ToggleGroupContext.Provider value={{ value: current, multiple, variant, seconds, slide, pop }}>
+      <ToggleGroupContext.Provider value={{ value: current, multiple, variant, seconds, transition }}>
         <ToggleGroupPrimitive
           {...props}
           data-slot="toggle-group"
@@ -146,6 +147,9 @@ export function ToggleGroupItem({
         aria-label={ariaLabel}
         data-slot="toggle-group-item"
         data-icon-only={iconOnly || undefined}
+        render={
+          <motion.button whileTap={group.seconds === 0 ? undefined : { scale: 0.97 }} transition={PRESS} />
+        }
         className={`${base} text-muted-foreground hover:text-foreground data-pressed:text-foreground h-full min-h-[30px] rounded-md ${iconOnly ? "aspect-square px-0" : "px-3"} ${className ?? ""}`}
       >
         {pressed && (
@@ -154,7 +158,7 @@ export function ToggleGroupItem({
             data-slot="toggle-group-indicator"
             layoutId="toggle-group-indicator"
             initial={false}
-            transition={group.slide}
+            transition={group.transition}
             className={`pointer-events-none absolute inset-0 -z-10 rounded-md ${group.variant === "muted" ? "bg-background ring-foreground/5 shadow-sm ring-1" : "bg-muted"}`}
           />
         )}
@@ -173,10 +177,7 @@ export function ToggleGroupItem({
       data-slot="toggle-group-item"
       data-icon-only={iconOnly || undefined}
       render={
-        <motion.button
-          whileTap={group.seconds === 0 ? undefined : { scale: 0.94 }}
-          transition={{ type: "spring", visualDuration: 0.2, bounce: 0.5 }}
-        />
+        <motion.button whileTap={group.seconds === 0 ? undefined : { scale: 0.96 }} transition={PRESS} />
       }
       className={`${base} data-pressed:text-background isolate h-8 rounded-full border ${outline ? "border-border bg-background" : "bg-muted border-transparent"} text-muted-foreground not-data-pressed:hover:text-foreground ${iconOnly ? "w-8 px-0" : "px-3"} ${className ?? ""}`}
     >
@@ -188,8 +189,18 @@ export function ToggleGroupItem({
             className="bg-foreground pointer-events-none absolute -inset-px -z-10 rounded-full"
             initial={{ scale: 0.6, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.85, opacity: 0, transition: { duration: group.seconds * 0.5 } }}
-            transition={group.pop}
+            exit={{
+              scale: 0.85,
+              opacity: 0,
+              transition:
+                group.seconds === 0
+                  ? { duration: 0 }
+                  : {
+                      scale: { type: "spring", visualDuration: group.seconds * 0.5, bounce: 0 },
+                      opacity: { duration: group.seconds * 0.5 },
+                    },
+            }}
+            transition={group.transition}
           />
         )}
       </AnimatePresence>
@@ -202,7 +213,7 @@ export function ToggleGroupItem({
             initial={{ width: 0, opacity: 0 }}
             animate={{ width: "auto", opacity: 1 }}
             exit={{ width: 0, opacity: 0 }}
-            transition={group.pop}
+            transition={group.transition}
           >
             <svg
               viewBox="0 0 16 16"

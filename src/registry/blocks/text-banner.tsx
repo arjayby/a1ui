@@ -1,7 +1,14 @@
 "use client";
 
 import { clsx } from "clsx";
-import { useEffect, useRef, useState, type ComponentPropsWithoutRef, type CSSProperties } from "react";
+import {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type ComponentPropsWithoutRef,
+  type CSSProperties,
+} from "react";
 
 export interface TextBannerProps extends Omit<
   ComponentPropsWithoutRef<"div">,
@@ -27,7 +34,8 @@ const styles = `
     font-family: inherit;
     font-size: clamp(1.25rem, 3.5vw, 2.5rem);
     font-weight: 700;
-    letter-spacing: -0.04em;
+    /* Display tracking: tight for large type, but capitals need more air than lowercase. */
+    letter-spacing: -0.02em;
     line-height: 1;
     text-transform: uppercase;
   }
@@ -108,7 +116,9 @@ export function TextBanner({
   ...props
 }: TextBannerProps) {
   const rootRef = useRef<HTMLDivElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
   const unitRef = useRef<HTMLDivElement>(null);
+  const directionRef = useRef(direction);
   const [layout, setLayout] = useState({ copies: 1, unitWidth: 0 });
   const safeSpeed = Number.isFinite(speed) ? Math.max(0, speed) : 80;
   const visibleItems = items.filter((item) => item.trim().length > 0);
@@ -134,6 +144,18 @@ export function TextBanner({
     return () => observer.disconnect();
   }, [hasItems]);
 
+  useLayoutEffect(() => {
+    if (directionRef.current === direction) return;
+    directionRef.current = direction;
+    // Flipping animation-direction mirrors the loop's progress, which would make the text jump.
+    // Seek to the mirrored time so the reversal starts from the position already on screen.
+    for (const animation of trackRef.current?.getAnimations() ?? []) {
+      const duration = Number(animation.effect?.getTiming().duration);
+      const time = Number(animation.currentTime);
+      if (duration > 0 && Number.isFinite(time)) animation.currentTime = duration - (time % duration);
+    }
+  }, [direction]);
+
   if (!hasItems) return null;
 
   return (
@@ -154,7 +176,7 @@ export function TextBanner({
     >
       <style>{styles}</style>
       <span className="sr-only">{visibleItems.join(" · ")}</span>
-      <div className="a1ui-text-banner-track" aria-hidden="true" dir="ltr">
+      <div ref={trackRef} className="a1ui-text-banner-track" aria-hidden="true" dir="ltr">
         {[0, 1].map((group) => (
           <div key={group} className="a1ui-text-banner-group">
             {Array.from({ length: layout.copies }, (_, copy) => (

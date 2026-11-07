@@ -96,3 +96,20 @@ test("reduced motion shows each phrase once and restarts when the preference cha
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await expect(track).toHaveCSS("animation-play-state", "running");
 });
+
+test("changing direction reverses from the current position without a jump", async ({ page }) => {
+  const banner = page.locator('.text-banner-demo [data-slot="text-banner"]');
+  const track = banner.locator(".a1ui-text-banner-track");
+  await page.getByRole("button", { name: "Pause", exact: true }).click();
+  await expect(track).toHaveCSS("animation-play-state", "paused");
+  // Park the loop away from its midpoint, where a mirrored position would be indistinguishable.
+  await track.evaluate(async (element) => {
+    const animation = element.getAnimations()[0];
+    await animation.ready;
+    animation.currentTime = Number(animation.effect!.getTiming().duration) * 0.2;
+  });
+  const before = (await track.boundingBox())!.x;
+  await page.getByRole("button", { name: "Change direction to left", exact: true }).click();
+  await expect(track).toHaveCSS("animation-direction", "reverse");
+  expect(Math.abs((await track.boundingBox())!.x - before)).toBeLessThan(1);
+});

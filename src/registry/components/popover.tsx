@@ -17,6 +17,10 @@ import {
 const TRIGGER_RADIUS = 18;
 const PANEL_RADIUS = 16;
 
+// A translucent material for the floating panel, solid when the system asks for less transparency.
+const MATERIAL =
+  "bg-popover/80 backdrop-blur-xl backdrop-saturate-150 [@media(prefers-reduced-transparency:reduce)]:bg-popover [@media(prefers-reduced-transparency:reduce)]:backdrop-blur-none";
+
 type PopoverContextValue = {
   open: boolean;
   morph: boolean;
@@ -33,8 +37,9 @@ function usePopover(part: string) {
   return context;
 }
 
-function spring(seconds: number, bounce = 0.2): Transition {
-  return seconds === 0 ? { duration: 0 } : { type: "spring", visualDuration: seconds, bounce };
+// Critically damped: opening, closing, and morphing settle without overshoot.
+function spring(seconds: number): Transition {
+  return seconds === 0 ? { duration: 0 } : { type: "spring", visualDuration: seconds, bounce: 0 };
 }
 
 export interface PopoverProps {
@@ -124,9 +129,9 @@ export function PopoverTrigger({ className, children, ...props }: PopoverTrigger
           data-slot="popover-surface"
           layoutId={popover.seconds === 0 ? undefined : `${popover.surfaceId}-surface`}
           layoutCrossfade={false}
-          transition={spring(popover.seconds, 0.15)}
+          transition={spring(popover.seconds)}
           style={{ borderRadius: TRIGGER_RADIUS }}
-          className="bg-background border-border pointer-events-none absolute inset-0 -z-10 border shadow-sm"
+          className="bg-popover border-border pointer-events-none absolute inset-0 -z-10 border shadow-sm"
         />
       )}
       <motion.span
@@ -207,7 +212,7 @@ export function PopoverContent({
                 finalFocus={finalFocus}
                 data-slot="popover-content"
                 data-morph=""
-                className={`text-foreground relative isolate w-72 max-w-[calc(100vw-2rem)] p-4 text-sm outline-none ${className ?? ""}`}
+                className={`text-popover-foreground relative isolate w-72 max-w-[calc(100vw-2rem)] p-4 text-sm outline-none ${className ?? ""}`}
                 render={
                   // Base UI keeps the popup visible only while the popup itself animates.
                   // `animate` restores opacity when reopened mid-exit; without it the panel stays invisible.
@@ -223,9 +228,9 @@ export function PopoverContent({
                   data-slot="popover-surface"
                   layoutId={seconds === 0 ? undefined : `${popover.surfaceId}-surface`}
                   layoutCrossfade={false}
-                  transition={spring(seconds, 0.15)}
+                  transition={spring(seconds)}
                   style={{ borderRadius: PANEL_RADIUS }}
-                  className="bg-background border-border pointer-events-none absolute inset-0 -z-10 border shadow-lg"
+                  className={`${MATERIAL} border-border pointer-events-none absolute inset-0 -z-10 border shadow-lg`}
                 />
                 <motion.div
                   data-slot="popover-body"
@@ -269,7 +274,7 @@ export function PopoverContent({
               initialFocus={initialFocus}
               finalFocus={finalFocus}
               data-slot="popover-content"
-              className={`bg-background text-foreground border-border w-72 max-w-[calc(100vw-2rem)] origin-(--transform-origin) rounded-xl border p-4 text-sm shadow-lg outline-none ${className ?? ""}`}
+              className={`${MATERIAL} text-popover-foreground border-border w-72 max-w-[calc(100vw-2rem)] origin-(--transform-origin) rounded-xl border p-4 text-sm shadow-lg outline-none ${className ?? ""}`}
               render={
                 <motion.div
                   initial={seconds === 0 ? false : { opacity: 0, scale: 0.88, filter: "blur(4px)" }}

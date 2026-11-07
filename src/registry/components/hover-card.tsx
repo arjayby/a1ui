@@ -174,7 +174,7 @@ export function HoverCardContent({
             <PreviewCard.Popup
               ref={staggerChildren}
               data-slot="hover-card-content"
-              className={`bg-background text-foreground border-border w-72 max-w-[calc(100vw-2rem)] origin-(--transform-origin) rounded-xl border p-4 text-sm shadow-lg outline-none ${className ?? ""}`}
+              className={`bg-popover/80 text-popover-foreground border-border [@media(prefers-reduced-transparency:reduce)]:bg-popover w-72 max-w-[calc(100vw-2rem)] origin-(--transform-origin) rounded-xl border p-4 text-sm shadow-lg backdrop-blur-xl backdrop-saturate-150 outline-none [@media(prefers-reduced-transparency:reduce)]:backdrop-blur-none ${className ?? ""}`}
               render={(popupProps, state) => {
                 const nudge = NUDGE[state.side as Side] ?? NUDGE.bottom;
                 return (
@@ -194,9 +194,7 @@ export function HoverCardContent({
                           }
                     }
                     transition={
-                      seconds === 0
-                        ? { duration: 0 }
-                        : { type: "spring", visualDuration: seconds, bounce: 0.25 }
+                      seconds === 0 ? { duration: 0 } : { type: "spring", visualDuration: seconds, bounce: 0 }
                     }
                   />
                 );

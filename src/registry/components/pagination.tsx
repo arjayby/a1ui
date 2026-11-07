@@ -110,7 +110,7 @@ export interface PaginationProps {
 }
 
 const controlClass =
-  "focus-visible:ring-ring/30 relative inline-flex h-8 min-w-8 cursor-pointer items-center justify-center gap-1 rounded-md px-1.5 text-sm font-medium tabular-nums whitespace-nowrap outline-none transition-colors select-none focus-visible:ring-3 sm:h-9 sm:min-w-9 sm:px-2";
+  "focus-visible:ring-ring/30 relative inline-flex h-8 min-w-8 cursor-pointer items-center justify-center gap-1 rounded-md px-1.5 text-sm font-medium tabular-nums whitespace-nowrap outline-none transition-[color,background-color,scale] duration-100 ease-out select-none focus-visible:ring-3 motion-safe:active:scale-[0.96] sm:h-9 sm:min-w-9 sm:px-2";
 
 const enterVariants = {
   hidden: (direction: number) => ({ opacity: 0, x: direction * 12, scale: 0.8 }),
@@ -167,7 +167,7 @@ export function Pagination({
 
   const seconds = reducedMotion ? 0 : Number.isFinite(duration) ? Math.max(0, duration) : 0.35;
   const transition: Transition =
-    seconds === 0 ? { duration: 0 } : { type: "spring", visualDuration: seconds, bounce: 0.15 };
+    seconds === 0 ? { duration: 0 } : { type: "spring", visualDuration: seconds, bounce: 0 };
   const fade: Transition = seconds === 0 ? { duration: 0 } : { duration: seconds * 0.6, ease: "easeOut" };
 
   // A disabled previous or next control drops focus, so hand it to the current page instead.

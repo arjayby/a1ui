@@ -15,7 +15,12 @@ type TabsContextValue = {
   direction: number;
   transition: Transition;
   reducedMotion: boolean;
+  /** True when the duration is zero or the user prefers reduced motion. */
+  instant: boolean;
 };
+
+// Triggers shrink the moment they are pressed and settle back without overshoot on release.
+const PRESS: Transition = { type: "spring", visualDuration: 0.2, bounce: 0 };
 
 const TabsContext = createContext<TabsContextValue | null>(null);
 
@@ -56,12 +61,21 @@ export function Tabs({
   const current = value ?? internalValue;
   const visualDuration = reducedMotion ? 0 : Number.isFinite(duration) ? Math.max(0, duration) : 0.35;
   const transition: Transition =
-    visualDuration === 0 ? { duration: 0 } : { type: "spring", visualDuration, bounce: 0.18 };
+    visualDuration === 0 ? { duration: 0 } : { type: "spring", visualDuration, bounce: 0 };
 
   return (
     <LayoutGroup id={id}>
       <TabsContext.Provider
-        value={{ value: current, hovered, setHovered, variant, direction, transition, reducedMotion }}
+        value={{
+          value: current,
+          hovered,
+          setHovered,
+          variant,
+          direction,
+          transition,
+          reducedMotion,
+          instant: visualDuration === 0,
+        }}
       >
         <TabsPrimitive.Root
           data-slot="tabs"
@@ -127,6 +141,7 @@ export function TabsTrigger({ value, disabled, className, children }: TabsTrigge
       disabled={disabled}
       data-slot="tabs-trigger"
       onPointerEnter={() => tabs.setHovered(value)}
+      render={<motion.button whileTap={tabs.instant ? undefined : { scale: 0.97 }} transition={PRESS} />}
       className={`data-active:text-foreground hover:text-foreground focus-visible:ring-ring/30 relative inline-flex h-full cursor-pointer items-center justify-center gap-1.5 rounded-md px-3 text-sm font-medium whitespace-nowrap transition-colors outline-none select-none focus-visible:ring-3 disabled:pointer-events-none disabled:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0 ${className ?? ""}`}
     >
       <AnimatePresence>

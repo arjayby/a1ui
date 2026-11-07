@@ -35,6 +35,19 @@ describe("TagInput", () => {
     expect(screen.getByText("design is already added.")).toBeInTheDocument();
   });
 
+  it("outlines the tag a draft would duplicate while typing", () => {
+    render(<TagInput label="Topics" defaultValue={["Design", "Motion"]} />);
+    const input = screen.getByRole("textbox", { name: "Topics" });
+    const design = screen.getByText("Design").closest('[data-slot="tag-input-tag"]');
+
+    fireEvent.change(input, { target: { value: "desi" } });
+    expect(design).not.toHaveAttribute("data-duplicate");
+    fireEvent.change(input, { target: { value: " design" } });
+    expect(design).toHaveAttribute("data-duplicate", "true");
+    fireEvent.change(input, { target: { value: "" } });
+    expect(design).not.toHaveAttribute("data-duplicate");
+  });
+
   it("highlights the last tag on the first Backspace and removes it on the second", () => {
     render(<TagInput label="Topics" defaultValue={["Design", "Motion"]} />);
     const input = screen.getByRole("textbox", { name: "Topics" });

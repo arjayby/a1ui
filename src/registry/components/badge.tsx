@@ -32,8 +32,9 @@ export interface BadgeProps {
   className?: string;
 }
 
-const springOrInstant = (visualDuration: number, bounce: number) =>
-  visualDuration > 0 ? ({ type: "spring", visualDuration, bounce } as const) : { duration: 0 };
+// Critically damped: discrete count changes settle without overshoot.
+const springOrInstant = (visualDuration: number) =>
+  visualDuration > 0 ? ({ type: "spring", visualDuration, bounce: 0 } as const) : { duration: 0 };
 
 const toCount = (count: number | undefined) =>
   count === undefined || !Number.isFinite(count) ? undefined : Math.max(0, Math.floor(count));
@@ -115,7 +116,7 @@ function BadgeBody({
 }) {
   const [scope, animate] = useAnimate<HTMLSpanElement>();
   const played = useRef(pops);
-  const pop = springOrInstant(seconds * 0.75, 0.5);
+  const pop = springOrInstant(seconds * 0.75);
 
   useEffect(() => {
     // Mounting already pops in, so only a later rise from zero replays it.
@@ -125,7 +126,7 @@ function BadgeBody({
     const controls = animate(
       scope.current,
       { scale: [0.6, 1], opacity: [0, 1] },
-      springOrInstant(seconds * 0.75, 0.5),
+      springOrInstant(seconds * 0.75),
     );
     return () => controls.stop();
   }, [animate, pops, scope, seconds]);
@@ -166,7 +167,7 @@ function BadgeBody({
 function Counter({ display, direction, seconds }: { display: string; direction: 1 | -1; seconds: number }) {
   const row = useRef<HTMLSpanElement>(null);
   const [width, setWidth] = useState<number | "auto">("auto");
-  const roll = springOrInstant(seconds, 0.15);
+  const roll = springOrInstant(seconds);
 
   useLayoutEffect(() => {
     const element = row.current;

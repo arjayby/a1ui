@@ -51,16 +51,16 @@ export function TagInputExample() {
 
 ## API reference
 
-| Prop            | Type                       | Default      | Description                                                                             |
-| --------------- | -------------------------- | ------------ | --------------------------------------------------------------------------------------- |
-| `label`         | `ReactNode`                | Required     | Visible label linked to the text input.                                                 |
-| `value`         | `string[]`                 | Uncontrolled | Current tags. Blank and duplicate entries are dropped.                                  |
-| `defaultValue`  | `string[]`                 | `[]`         | Initial uncontrolled tags.                                                              |
-| `onValueChange` | `(tags: string[]) => void` | None         | Called with the full list after each add or removal. Controlled usage requires `value`. |
-| `max`           | `number`                   | None         | Most tags allowed. Shows a count next to the label.                                     |
-| `description`   | `ReactNode`                | None         | Hint shown under the field and linked with `aria-describedby`.                          |
-| `placeholder`   | `string`                   | None         | Placeholder for the text input, hidden when the field is full.                          |
-| `name`          | `string`                   | None         | Field name; each tag is submitted as its own value.                                     |
-| `disabled`      | `boolean`                  | `false`      | Prevents adding and removing tags.                                                      |
-| `id`            | `string`                   | Generated    | Id of the text input.                                                                   |
-| `className`     | `string`                   | None         | Additional root classes.                                                                |
+| Prop            | Type                       | Default      | Description                                                                                                       |
+| --------------- | -------------------------- | ------------ | ----------------------------------------------------------------------------------------------------------------- |
+| `label`         | `ReactNode`                | Required     | Visible label linked to the text input.                                                                           |
+| `value`         | `string[]`                 | Uncontrolled | Current tags. Blank and duplicate entries are dropped, and a tag the draft would repeat is outlined while typing. |
+| `defaultValue`  | `string[]`                 | `[]`         | Initial uncontrolled tags.                                                                                        |
+| `onValueChange` | `(tags: string[]) => void` | None         | Called with the full list after each add or removal. Controlled usage requires `value`.                           |
+| `max`           | `number`                   | None         | Most tags allowed. Shows a count next to the label.                                                               |
+| `description`   | `ReactNode`                | None         | Hint shown under the field and linked with `aria-describedby`.                                                    |
+| `placeholder`   | `string`                   | None         | Placeholder for the text input, hidden when the field is full.                                                    |
+| `name`          | `string`                   | None         | Field name; each tag is submitted as its own value.                                                               |
+| `disabled`      | `boolean`                  | `false`      | Prevents adding and removing tags.                                                                                |
+| `id`            | `string`                   | Generated    | Id of the text input.                                                                                             |
+| `className`     | `string`                   | None         | Additional root classes.                                                                                          |

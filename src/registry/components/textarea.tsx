@@ -149,6 +149,17 @@ export function Textarea({
     };
   }, []);
 
+  // The error reveal is a layout change that can reverse mid-flight, so it springs without overshoot.
+  const reveal =
+    seconds === 0
+      ? { duration: 0 }
+      : {
+          type: "spring" as const,
+          visualDuration: seconds,
+          bounce: 0,
+          opacity: { duration: seconds * 0.9, ease: [0.2, 0, 0, 1] as const },
+        };
+
   const [counterScope, animateCounter] = useAnimate<HTMLSpanElement>();
   const shake = useCallback(() => {
     if (seconds === 0 || !counterScope.current) return;
@@ -283,7 +294,7 @@ export function Textarea({
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: seconds * 0.9, ease: [0.2, 0, 0, 1] }}
+              transition={reveal}
             >
               <motion.div
                 id={errorId}
@@ -292,7 +303,7 @@ export function Textarea({
                 initial={{ y: -6 }}
                 animate={{ y: 0 }}
                 exit={{ y: -6 }}
-                transition={{ duration: seconds * 0.9, ease: [0.2, 0, 0, 1] }}
+                transition={reveal}
               >
                 {error}
               </motion.div>
@@ -317,7 +328,7 @@ function RollingNumber({ value, seconds }: { value: number; seconds: number }) {
           className="flex flex-col"
           initial={false}
           animate={{ y: `${-digit * 10}%` }}
-          transition={seconds ? { type: "spring", visualDuration: seconds, bounce: 0.2 } : { duration: 0 }}
+          transition={seconds ? { type: "spring", visualDuration: seconds, bounce: 0 } : { duration: 0 }}
         >
           {DIGITS.map((option) => (
             <span key={option} className="h-[1lh]">

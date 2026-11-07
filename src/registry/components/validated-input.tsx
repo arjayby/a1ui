@@ -108,7 +108,7 @@ export function ValidatedInput({
               initial={reducedMotion ? false : { opacity: 0, scale: 0.5, filter: "blur(4px)" }}
               animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
               exit={reducedMotion ? { opacity: 0, transition: { duration: 0 } } : { opacity: 0, scale: 0.5 }}
-              transition={{ type: "spring", duration: reducedMotion ? 0 : 0.3, bounce: 0.3 }}
+              transition={{ type: "spring", duration: reducedMotion ? 0 : 0.3, bounce: 0 }}
             >
               <CheckIcon weight="bold" className="size-4" />
             </motion.span>

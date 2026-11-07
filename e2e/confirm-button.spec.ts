@@ -37,13 +37,15 @@ test("the label and success check animate with blur without resizing the button"
   await button.focus();
   await page.keyboard.down("Enter");
   const samples = await button.evaluate(async (element) => {
-    const initialWidth = element.getBoundingClientRect().width;
+    // Layout width: the press scale while holding is a transform, not a resize.
+    const layoutWidth = () => (element as HTMLElement).offsetWidth;
+    const initialWidth = layoutWidth();
     let stableWidth = true;
     let labelAnimated = false;
     let iconAnimated = false;
     const started = performance.now();
     while (performance.now() - started < 1800) {
-      stableWidth &&= Math.abs(element.getBoundingClientRect().width - initialWidth) < 0.1;
+      stableWidth &&= Math.abs(layoutWidth() - initialWidth) < 0.1;
       for (const label of element.querySelectorAll('[data-slot="confirm-button-label"] > span')) {
         labelAnimated ||= !["none", "blur(0px)"].includes(getComputedStyle(label).filter);
       }
@@ -92,8 +94,11 @@ for (const direction of ["right", "up", "left", "down"]) {
     const vertical = direction === "up" || direction === "down";
     expect(vertical ? progress.y : progress.x).toBeGreaterThan(0.4);
     expect(vertical ? progress.y : progress.x).toBeLessThan(0.6);
-    const box = await button.boundingBox();
-    if (!box) throw new Error("Expected visible button");
+    // Layout size: the press scale while holding shrinks the bounding box, not the fill's origin.
+    const box = await button.evaluate((element) => ({
+      width: (element as HTMLElement).offsetWidth,
+      height: (element as HTMLElement).offsetHeight,
+    }));
     const [originX, originY] = progress.origin.split(" ").map(parseFloat);
     if (direction === "right") expect(originX).toBe(0);
     if (direction === "left") expect(originX).toBeCloseTo(box.width - 2, 0);

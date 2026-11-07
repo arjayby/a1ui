@@ -135,6 +135,13 @@ function seconds(duration: number | undefined, fallback: number) {
   return duration !== undefined && Number.isFinite(duration) ? Math.max(0, duration) : fallback;
 }
 
+// Critically damped physics spring matching Motion's `visualDuration` mapping. Unlike a
+// duration-based spring it keeps the cap's velocity when a quick tap reverses mid-press.
+function capSpring(visualDuration: number) {
+  const omega = (2 * Math.PI) / (visualDuration * 1.2);
+  return { type: "spring", stiffness: omega * omega, damping: 2 * omega } as const;
+}
+
 export interface KbdProps extends Omit<ComponentPropsWithoutRef<"kbd">, "children"> {
   /** Visible label. Defaults to the platform label for `listen`, such as ⌘ or Ctrl for `mod`. */
   children?: ReactNode;
@@ -235,12 +242,7 @@ export function Kbd({
   }, [report, id, active]);
   useEffect(() => () => remove?.(id), [remove, id]);
 
-  const transition =
-    time === 0
-      ? { duration: 0 }
-      : active
-        ? ({ type: "spring", visualDuration: time / 3, bounce: 0 } as const)
-        : ({ type: "spring", visualDuration: time, bounce: 0.5 } as const);
+  const transition = time === 0 ? { duration: 0 } : capSpring(active ? time / 3 : time);
 
   return (
     <kbd

@@ -1,8 +1,27 @@
 "use client";
 
 import { Slider as SliderPrimitive } from "@base-ui/react/slider";
-import { motion, useReducedMotion } from "motion/react";
-import { useState } from "react";
+import {
+  animate,
+  motion,
+  useMotionValue,
+  useReducedMotion,
+  useTransform,
+  type Transition,
+} from "motion/react";
+import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
+
+// Critically damped (about a 0.3s response), so the knob and track settle without wobbling.
+// Written as stiffness and damping because Motion drops `velocity` on duration-based springs,
+// and both the stretch release and the stop catch hand the spring a velocity.
+const SETTLE: Transition = { type: "spring", stiffness: 305, damping: 35 };
+// Scale velocity handed to the knob when it catches a stop: it swells about 20% and settles back.
+const CATCH_VELOCITY = 9;
+
+/** Apple's rubber band: the further past the end, the less the track follows. */
+function rubberBand(overshoot: number, dimension: number) {
+  return (overshoot * dimension * 0.55) / (dimension + 0.55 * Math.abs(overshoot));
+}
 
 export interface SliderProps {
   label: string;
@@ -41,6 +60,14 @@ export function Slider({
 }: SliderProps) {
   const [internalValue, setInternalValue] = useState(defaultValue);
   const reducedMotion = useReducedMotion();
+  // Past either end the track stretches toward the pointer instead of stopping dead.
+  const stretch = useMotionValue(0);
+  const trackWidth = useMotionValue(1);
+  const trackScale = useTransform(() => 1 + Math.abs(stretch.get()) / trackWidth.get());
+  const trackOrigin = useTransform(() => (stretch.get() < 0 ? 1 : 0));
+  const knobScale = useMotionValue(1);
+  const stopDrag = useRef<(() => void) | null>(null);
+  useEffect(() => () => stopDrag.current?.(), []);
   if (!Number.isFinite(min) || !Number.isFinite(max) || max <= min) {
     throw new Error("Slider requires finite min and max values with max greater than min.");
   }
@@ -53,6 +80,43 @@ export function Slider({
     .filter((stop) => Number.isFinite(stop) && stop >= min && stop <= max)
     .sort((a, b) => a - b);
   const activeStop = markers.find((stop) => stop === position);
+
+  function trackOvershoot(event: ReactPointerEvent<HTMLDivElement>) {
+    if (disabled || reducedMotion || event.button !== 0) return;
+    const control = event.currentTarget;
+    const doc = control.ownerDocument;
+    const pointerId = event.pointerId;
+    // Base UI keeps the thumb under the point where it was grabbed, so the stretch does too.
+    const thumb = (event.target as Element).closest('[data-slot="slider-thumb"]')?.getBoundingClientRect();
+    const grabOffset = thumb ? event.clientX - (thumb.left + thumb.width / 2) : 0;
+    stopDrag.current?.();
+    stretch.stop();
+    const move = (moveEvent: PointerEvent) => {
+      if (moveEvent.pointerId !== pointerId) return;
+      const { left, right, width } = control.getBoundingClientRect();
+      if (width <= 0) return;
+      const center = moveEvent.clientX - grabOffset;
+      const overshoot = center < left ? center - left : center > right ? center - right : 0;
+      trackWidth.set(width);
+      stretch.set(rubberBand(overshoot, width));
+    };
+    const stop = () => {
+      doc.removeEventListener("pointermove", move);
+      doc.removeEventListener("pointerup", release);
+      doc.removeEventListener("pointercancel", release);
+      stopDrag.current = null;
+    };
+    // The spring picks up the stretch's release velocity on its way back.
+    function release(releaseEvent: PointerEvent) {
+      if (releaseEvent.pointerId !== pointerId) return;
+      stop();
+      animate(stretch, 0, SETTLE);
+    }
+    doc.addEventListener("pointermove", move);
+    doc.addEventListener("pointerup", release);
+    doc.addEventListener("pointercancel", release);
+    stopDrag.current = stop;
+  }
 
   return (
     <SliderPrimitive.Root
@@ -76,6 +140,10 @@ export function Slider({
           if (nearest !== undefined && Math.abs(nearest - next) <= snapDistance) next = nearest;
         }
         if (next === position) return;
+        // Catching a stop kicks the knob's scale, which swells and settles from wherever it is.
+        if (!reducedMotion && markers.includes(next)) {
+          animate(knobScale, 1, { ...SETTLE, velocity: CATCH_VELOCITY });
+        }
         if (value === undefined) setInternalValue(next);
         onValueChange?.(next);
       }}
@@ -89,9 +157,13 @@ export function Slider({
       <div className="px-3">
         <SliderPrimitive.Control
           data-slot="slider-control"
+          onPointerDown={trackOvershoot}
           className="relative flex h-11 w-full touch-pan-y items-center select-none data-disabled:cursor-not-allowed"
         >
-          <SliderPrimitive.Track className="bg-muted relative h-1.5 w-full rounded-full">
+          <SliderPrimitive.Track
+            render={<motion.div style={{ scaleX: trackScale, originX: trackOrigin }} />}
+            className="bg-muted relative h-1.5 w-full rounded-full"
+          >
             <SliderPrimitive.Indicator className="bg-foreground rounded-full" />
             <div aria-hidden="true" className="pointer-events-none absolute inset-0">
               {markers.map((stop) => (
@@ -102,7 +174,7 @@ export function Slider({
                   className="bg-muted-foreground/60 data-active:bg-foreground absolute top-[calc(100%+10px)] h-1 w-px origin-top -translate-x-1/2"
                   style={{ left: `${((stop - min) / (max - min)) * 100}%` }}
                   animate={{ scaleY: stop === activeStop ? 1.5 : 1 }}
-                  transition={{ duration: reducedMotion ? 0 : 0.12 }}
+                  transition={reducedMotion ? { duration: 0 } : SETTLE}
                 />
               ))}
             </div>
@@ -114,12 +186,10 @@ export function Slider({
             className="relative flex size-11 cursor-grab items-center justify-center rounded-full outline-none data-disabled:cursor-not-allowed data-dragging:cursor-grabbing"
           >
             <motion.span
-              key={activeStop ?? "free"}
               aria-hidden="true"
               data-slot="slider-knob"
               className="border-border bg-background dark:bg-foreground relative grid size-5 place-items-center rounded-full border shadow-sm"
-              animate={{ scale: activeStop !== undefined && !reducedMotion ? [1, 1.22, 0.96, 1] : 1 }}
-              transition={{ duration: reducedMotion ? 0 : 0.24 }}
+              style={{ x: stretch, scale: knobScale }}
             >
               <span className="bg-foreground dark:bg-background h-2 w-0.5 rounded-full opacity-60" />
             </motion.span>

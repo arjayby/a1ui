@@ -43,6 +43,6 @@ export function IconToggleExample() {
 | `pressed`         | `boolean`                                | Uncontrolled | Current state when controlled by the caller.                                                                                |
 | `defaultPressed`  | `boolean`                                | `false`      | Initial state when uncontrolled.                                                                                            |
 | `onPressedChange` | `(pressed: boolean) => void`             | None         | Called with the next state on activation. Controlled usage requires the caller to update `pressed`.                         |
-| `duration`        | `number`                                 | `0.3`        | Morph duration in seconds. Zero switches instantly.                                                                         |
+| `duration`        | `number`                                 | `0.3`        | Morph spring time in seconds, without overshoot. A second click reverses from the current shape. Zero switches instantly.   |
 | `disabled`        | `boolean`                                | `false`      | Prevents activation.                                                                                                        |
 | `className`       | `string`                                 | None         | Additional button classes.                                                                                                  |

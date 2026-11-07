@@ -40,6 +40,35 @@ const theme = {
 const interactiveSelector =
   "a,button,input,select,textarea,[contenteditable]:not([contenteditable='false']),[role='button'],[role='slider']";
 
+type Gesture = {
+  kind: "pending" | "swiping";
+  pointerId: number;
+  x: number;
+  y: number;
+  /** The card under the pointer and its drag offset when it was grabbed. */
+  id: string;
+  origin: number;
+  samples: { x: number; time: number }[];
+};
+
+type Offset = { x: number; velocity: number; frame: number };
+
+/** Degrees of tilt per pixel of horizontal drag, so the card leans the way it is pulled. */
+const tilt = 0.04;
+/** Where a release would come to rest, using Apple's scroll deceleration rate (0.998). */
+const project = (velocity: number) => ((velocity / 1000) * 0.998) / (1 - 0.998);
+// The released card settles on a spring with a 0.35s response and a little
+// bounce (damping ratio 0.85). It only ever runs after a drag hands it momentum.
+const stiffness = ((2 * Math.PI) / (0.35 * 1.2)) ** 2;
+const damping = 2 * 0.85 * Math.sqrt(stiffness);
+
+function releaseVelocity(samples: Gesture["samples"]) {
+  const last = samples[samples.length - 1];
+  const first = samples.find((sample) => last.time - sample.time <= 100) ?? last;
+  const elapsed = last.time - first.time;
+  return elapsed > 0 ? ((last.x - first.x) / elapsed) * 1000 : 0;
+}
+
 export function PeelStack({
   items,
   activeId,
@@ -54,12 +83,9 @@ export function PeelStack({
 }: PeelStackProps) {
   const viewportId = useId();
   const viewportRef = useRef<HTMLDivElement>(null);
-  const gestureRef = useRef<{
-    kind: "pending" | "swiping";
-    pointerId: number;
-    x: number;
-    y: number;
-  } | null>(null);
+  const gestureRef = useRef<Gesture | null>(null);
+  const cardsRef = useRef(new Map<string, HTMLDivElement>());
+  const offsetsRef = useRef(new Map<string, Offset>());
   const [selectedId, setSelectedId] = useState(defaultActiveId ?? items[0]?.id);
   const controlled = activeId !== undefined;
   const currentIndex = Math.max(
@@ -75,6 +101,69 @@ export function PeelStack({
   // Keep the selection attached to its item when the list is reordered. Once
   // an uncontrolled selection is removed, start from the new first item.
   if (!controlled && selectedId !== current?.id) setSelectedId(current?.id);
+
+  // The drag offset lives in the card's `translate` and `rotate` properties, on
+  // top of the stacked `transform`, so the finger and the stack never fight.
+  const paintOffset = useCallback((id: string, x: number) => {
+    const card = cardsRef.current.get(id);
+    if (!card) return;
+    card.style.translate = x ? `${x}px 0` : "";
+    card.style.rotate = x ? `${x * tilt}deg` : "";
+  }, []);
+
+  const holdOffset = useCallback(
+    (id: string, x: number) => {
+      const offset = offsetsRef.current.get(id);
+      if (offset?.frame) cancelAnimationFrame(offset.frame);
+      offsetsRef.current.set(id, { x, velocity: 0, frame: 0 });
+      paintOffset(id, x);
+    },
+    [paintOffset],
+  );
+
+  const settleOffset = useCallback(
+    (id: string, velocity: number) => {
+      const offset = offsetsRef.current.get(id);
+      if (!offset) return;
+      if (offset.frame) cancelAnimationFrame(offset.frame);
+      if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) {
+        offsetsRef.current.delete(id);
+        paintOffset(id, 0);
+        return;
+      }
+      offset.velocity = velocity;
+      let previous: number | null = null;
+      const step = (time: number) => {
+        const elapsed = previous === null ? 0 : Math.min((time - previous) / 1000, 0.064);
+        previous = time;
+        for (let remaining = elapsed; remaining > 0; remaining -= 1 / 240) {
+          const delta = Math.min(remaining, 1 / 240);
+          offset.velocity += (-stiffness * offset.x - damping * offset.velocity) * delta;
+          offset.x += offset.velocity * delta;
+        }
+        if (Math.abs(offset.x) < 0.5 && Math.abs(offset.velocity) < 20) {
+          offsetsRef.current.delete(id);
+          paintOffset(id, 0);
+          return;
+        }
+        paintOffset(id, offset.x);
+        offset.frame = requestAnimationFrame(step);
+      };
+      offset.frame = requestAnimationFrame(step);
+    },
+    [paintOffset],
+  );
+
+  useEffect(() => {
+    const offsets = offsetsRef.current;
+    return () => offsets.forEach((offset) => cancelAnimationFrame(offset.frame));
+  }, []);
+
+  const cancelGesture = useCallback(() => {
+    const gesture = gestureRef.current;
+    resetGesture();
+    if (gesture) settleOffset(gesture.id, 0);
+  }, [resetGesture, settleOffset]);
 
   useEffect(() => {
     const focused = document.activeElement;
@@ -137,11 +226,17 @@ export function PeelStack({
             (event.target instanceof Element && event.target.closest(interactiveSelector))
           )
             return;
+          // Catch a card that is still settling exactly where it is on screen.
+          const origin = offsetsRef.current.get(current.id)?.x ?? 0;
+          if (origin) holdOffset(current.id, origin);
           gestureRef.current = {
             kind: "pending",
             pointerId: event.pointerId,
             x: event.clientX,
             y: event.clientY,
+            id: current.id,
+            origin,
+            samples: [{ x: event.clientX, time: event.timeStamp }],
           };
         }}
         onPointerMove={(event) => {
@@ -149,9 +244,13 @@ export function PeelStack({
           if (!gesture || event.pointerId !== gesture.pointerId) return;
           const x = Math.abs(event.clientX - gesture.x);
           const y = Math.abs(event.clientY - gesture.y);
+          gesture.samples = [
+            ...gesture.samples.filter((sample) => event.timeStamp - sample.time <= 100),
+            { x: event.clientX, time: event.timeStamp },
+          ];
           if (gesture.kind === "pending") {
             if (y >= 8 && y > x * 1.25) {
-              resetGesture();
+              cancelGesture();
               return;
             }
             if (x < 8 || x <= y * 1.25) return;
@@ -160,6 +259,8 @@ export function PeelStack({
             event.currentTarget.setPointerCapture(event.pointerId);
           }
           event.preventDefault();
+          // Track the finger 1:1 from the grab point once the swipe is committed.
+          holdOffset(gesture.id, gesture.origin + event.clientX - gesture.x);
           const selection = event.currentTarget.ownerDocument.getSelection();
           if (selection?.anchorNode && event.currentTarget.contains(selection.anchorNode)) {
             selection.removeAllRanges();
@@ -174,13 +275,23 @@ export function PeelStack({
           }
           const x = event.clientX - gesture.x;
           const y = event.clientY - gesture.y;
-          if (Math.abs(x) >= 36 && Math.abs(x) > Math.abs(y) * 1.25) {
-            select(currentIndex + (x < 0 ? 1 : -1));
+          // Only a committed swipe carries momentum, so a jittery tap cannot flick.
+          const velocity =
+            gesture.kind === "swiping"
+              ? releaseVelocity([...gesture.samples, { x: event.clientX, time: event.timeStamp }])
+              : 0;
+          // Choose from where the release is heading, not where it stopped, and
+          // let a flick back toward the start cancel the swipe.
+          const projected = x + project(velocity);
+          const reversing = Math.abs(velocity) > 150 && Math.sign(velocity) !== Math.sign(x);
+          settleOffset(gesture.id, velocity);
+          if (!reversing && Math.abs(projected) >= 36 && Math.abs(x) > Math.abs(y) * 1.25) {
+            select(currentIndex + (projected < 0 ? 1 : -1));
           }
         }}
-        onPointerCancel={resetGesture}
+        onPointerCancel={cancelGesture}
         onLostPointerCapture={(event) => {
-          if (event.target === event.currentTarget) resetGesture();
+          if (event.target === event.currentTarget) cancelGesture();
         }}
         onDragStart={(event) => {
           if (!(event.target instanceof Element && event.target.closest(interactiveSelector))) {
@@ -209,6 +320,10 @@ export function PeelStack({
               aria-label={`${item.title}, ${index + 1} of ${items.length}`}
               aria-hidden={active ? undefined : true}
               inert={active ? undefined : true}
+              ref={(card) => {
+                if (card) cardsRef.current.set(item.id, card);
+                else cardsRef.current.delete(item.id);
+              }}
               data-peel-stack-card={item.id}
               data-active={active}
               className={cn(
@@ -263,7 +378,7 @@ export function PeelStack({
               aria-controls={viewportId}
               disabled={items.length < 2}
               onClick={() => select(currentIndex + direction)}
-              className="grid size-11 cursor-pointer place-items-center rounded-md border border-[var(--peel-stack-border)] bg-[var(--peel-stack-paper)] transition-colors hover:bg-[var(--peel-stack-shade)] focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-[var(--peel-stack-foreground)] disabled:cursor-default disabled:opacity-30 motion-reduce:transition-none"
+              className="grid size-11 cursor-pointer place-items-center rounded-md border border-[var(--peel-stack-border)] bg-[var(--peel-stack-paper)] transition-[background-color,scale] duration-150 ease-out hover:bg-[var(--peel-stack-shade)] focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-[var(--peel-stack-foreground)] enabled:active:bg-[var(--peel-stack-shade)] disabled:cursor-default disabled:opacity-30 motion-safe:enabled:active:scale-[0.96] motion-reduce:transition-none"
             >
               <svg
                 aria-hidden="true"

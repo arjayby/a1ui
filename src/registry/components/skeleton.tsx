@@ -31,6 +31,9 @@ const SkeletonContext = createContext<SkeletonContextValue | null>(null);
 
 // Shimmer bands repeat every SPAN pixels of page space, so one band crosses a card at a time.
 const SPAN = 1000;
+// Longest loop, in seconds. Slower sweeps and pulses drift toward the 0.2 Hz sway that is most
+// likely to cause motion discomfort, so longer cycles are capped here.
+const MAX_CYCLE = 2.5;
 const EASE = [0.22, 1, 0.36, 1] as const;
 const HIDDEN = { opacity: 0, filter: "blur(8px)" };
 const SHOWN = { opacity: 1, filter: "blur(0px)", transitionEnd: { filter: "none" } };
@@ -64,7 +67,7 @@ function sync(placeholder: Placeholder) {
   placeholder.animation?.cancel();
   placeholder.animation = undefined;
   if (typeof shape.animate !== "function") return;
-  const period = settings.cycle * 1000;
+  const period = Math.min(settings.cycle, MAX_CYCLE) * 1000;
 
   let animation: Animation;
   if (settings.animation === "pulse") {

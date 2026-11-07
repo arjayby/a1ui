@@ -16,9 +16,12 @@ const DECK_SIZE = 3;
 const PEEK = 12;
 /** Space between toasts once the deck fans out, in pixels. */
 const GAP = 10;
-/** Drag distance or speed that dismisses a toast. */
+/** How far a released toast must be headed, in pixels, to dismiss it. */
 const SWIPE_DISTANCE = 72;
-const SWIPE_VELOCITY = 480;
+/** Scroll-like deceleration used to project where a flicked toast would coast to. */
+const DECELERATION = 0.998;
+/** Release speeds below this, in pixels per second, count as holding still. */
+const REST_SPEED = 50;
 
 const CHECK = "M6.5 10.5 L9 13 L13.75 7.5";
 const CROSS = "M7.5 7.5 L12.5 12.5 M12.5 7.5 L7.5 12.5";
@@ -139,7 +142,9 @@ function ToastItem({
   const ref = useRef<HTMLDivElement>(null);
   const { close } = ToastPrimitive.useToastManager();
   const ending = toast.transitionStatus === "ending";
-  const [swipe, setSwipe] = useState(0);
+  // Direction (-1 or 1) and release speed of a swipe that dismissed the toast.
+  const [swiped, setSwiped] = useState({ direction: 0, velocity: 0 });
+  const swipe = swiped.direction;
   // A closing toast keeps the slot it had so it leaves from where it was.
   const [slot, setSlot] = useState({ index: 0, offset: 0, zIndex });
   if (layout && (slot.index !== layout.index || slot.offset !== layout.offset || slot.zIndex !== zIndex)) {
@@ -159,7 +164,7 @@ function ToastItem({
   // Up the screen for a bottom deck, down for a top one.
   const away = top ? 1 : -1;
   const spring: Transition =
-    seconds === 0 ? { duration: 0 } : { type: "spring", visualDuration: seconds, bounce: 0.2 };
+    seconds === 0 ? { duration: 0 } : { type: "spring", visualDuration: seconds, bounce: 0 };
 
   return (
     <ToastPrimitive.Root
@@ -193,22 +198,42 @@ function ToastItem({
             data-index={index}
             data-swiped={swipe ? (swipe > 0 ? "right" : "left") : undefined}
             style={{ ...(style as object), zIndex: slot.zIndex, transformOrigin: top ? "bottom" : "top" }}
-            className={`border-border bg-background text-foreground focus-visible:ring-ring/30 absolute inset-x-0 cursor-grab rounded-xl border shadow-lg outline-none select-none focus-visible:ring-3 active:cursor-grabbing ${top ? "top-0" : "bottom-0"} ${hidden ? "pointer-events-none" : ""} after:absolute after:inset-x-0 after:h-2.5 ${top ? "after:bottom-full" : "after:top-full"}`}
+            className={`border-border bg-popover/80 text-popover-foreground focus-visible:ring-ring/30 [@media(prefers-reduced-transparency:reduce)]:bg-popover absolute inset-x-0 cursor-grab rounded-xl border shadow-lg backdrop-blur-xl backdrop-saturate-150 outline-none select-none focus-visible:ring-3 active:cursor-grabbing [@media(prefers-reduced-transparency:reduce)]:backdrop-blur-none ${top ? "top-0" : "bottom-0"} ${hidden ? "pointer-events-none" : ""} after:absolute after:inset-x-0 after:h-2.5 ${top ? "after:bottom-full" : "after:top-full"}`}
             initial={{ x: 0, y: -away * 72, scale: 1, opacity: 0, height: toast.height ?? "auto" }}
             animate={ending ? exit : resting}
             transition={
               ending
-                ? { duration: exitSeconds, ease: [0.32, 0.72, 0, 1] }
+                ? {
+                    duration: exitSeconds,
+                    ease: [0.32, 0.72, 0, 1],
+                    // A swiped toast keeps the speed it was thrown with as it flies out. Motion drops
+                    // `velocity` on time-defined springs, so this one is critically damped physics
+                    // with a natural period of `exitSeconds`.
+                    ...(swipe && exitSeconds > 0
+                      ? {
+                          x: {
+                            type: "spring",
+                            stiffness: ((2 * Math.PI) / exitSeconds) ** 2,
+                            damping: (4 * Math.PI) / exitSeconds,
+                            velocity: swiped.velocity,
+                          },
+                        }
+                      : {}),
+                  }
                 : { ...spring, opacity: { duration: seconds * 0.5 } }
             }
             drag={ending || behind ? false : "x"}
             dragSnapToOrigin
             dragElastic={0.5}
             onDragEnd={(_: unknown, info: PanInfo) => {
-              const distance = Math.abs(info.offset.x);
-              const speed = Math.abs(info.velocity.x);
-              if (distance < SWIPE_DISTANCE && speed < SWIPE_VELOCITY) return;
-              setSwipe(Math.sign(speed >= SWIPE_VELOCITY ? info.velocity.x : info.offset.x) || 1);
+              // Project where the toast would coast to, then let the release direction decide:
+              // a toast let go while heading back toward its slot springs home.
+              const velocity = info.velocity.x;
+              const projected = info.offset.x + ((velocity / 1000) * DECELERATION) / (1 - DECELERATION);
+              const direction = Math.sign(projected);
+              const heading = Math.abs(velocity) < REST_SPEED ? direction : Math.sign(velocity);
+              if (Math.abs(projected) < SWIPE_DISTANCE || heading !== direction) return;
+              setSwiped({ direction, velocity });
               close(toast.id);
             }}
           />

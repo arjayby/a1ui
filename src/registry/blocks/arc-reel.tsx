@@ -144,8 +144,16 @@ export function ArcReel({ items, initialIndex = 0, ariaLabel = "Arc Reel", class
       draw();
     };
 
-    const finishReducedMotionDrag = () => {
-      if (window.matchMedia(motionQuery).matches) api.scrollTo(api.selectedScrollSnap(), true);
+    const finishDrag = () => {
+      if (window.matchMedia(motionQuery).matches) {
+        api.scrollTo(api.selectedScrollSnap(), true);
+        return;
+      }
+      // Free dragging has already projected the release momentum into the
+      // scroll target. Settle on the card nearest that projected landing point
+      // so a flick chooses its card without stopping between two of them. The
+      // scroll body keeps the release velocity through the re-target.
+      engine.scrollTo.distance(0, true);
     };
 
     const syncControls = () => {
@@ -159,7 +167,7 @@ export function ArcReel({ items, initialIndex = 0, ariaLabel = "Arc Reel", class
       .on("settle", syncControls)
       .on("pointerDown", syncControls)
       .on("reInit", measure)
-      .on("pointerUp", finishReducedMotionDrag);
+      .on("pointerUp", finishDrag);
 
     return () => {
       api
@@ -167,7 +175,7 @@ export function ArcReel({ items, initialIndex = 0, ariaLabel = "Arc Reel", class
         .off("settle", syncControls)
         .off("pointerDown", syncControls)
         .off("reInit", measure)
-        .off("pointerUp", finishReducedMotionDrag);
+        .off("pointerUp", finishDrag);
     };
   }, [api, items, copyCount, slideCount]);
 
@@ -291,7 +299,7 @@ export function ArcReel({ items, initialIndex = 0, ariaLabel = "Arc Reel", class
           aria-controls={viewportId}
           disabled={items.length < 2}
           onClick={() => step("previous")}
-          className="grid size-11 shrink-0 cursor-pointer place-items-center rounded-sm transition-colors hover:bg-[var(--arc-reel-image)] focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-[var(--arc-reel-accent)] disabled:cursor-default disabled:opacity-25 motion-reduce:transition-none"
+          className="grid size-11 shrink-0 cursor-pointer place-items-center rounded-sm transition-[background-color,scale] duration-150 ease-out hover:bg-[var(--arc-reel-image)] focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-[var(--arc-reel-accent)] disabled:cursor-default disabled:opacity-25 motion-safe:enabled:active:scale-[0.96] motion-reduce:transition-none motion-reduce:enabled:active:bg-[var(--arc-reel-image)]"
         >
           <svg
             aria-hidden="true"
@@ -334,7 +342,7 @@ export function ArcReel({ items, initialIndex = 0, ariaLabel = "Arc Reel", class
           aria-controls={viewportId}
           disabled={items.length < 2}
           onClick={() => step("next")}
-          className="grid size-11 shrink-0 cursor-pointer place-items-center rounded-sm transition-colors hover:bg-[var(--arc-reel-image)] focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-[var(--arc-reel-accent)] disabled:cursor-default disabled:opacity-25 motion-reduce:transition-none"
+          className="grid size-11 shrink-0 cursor-pointer place-items-center rounded-sm transition-[background-color,scale] duration-150 ease-out hover:bg-[var(--arc-reel-image)] focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-[var(--arc-reel-accent)] disabled:cursor-default disabled:opacity-25 motion-safe:enabled:active:scale-[0.96] motion-reduce:transition-none motion-reduce:enabled:active:bg-[var(--arc-reel-image)]"
         >
           <svg
             aria-hidden="true"

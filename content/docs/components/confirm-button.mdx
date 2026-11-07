@@ -59,6 +59,6 @@ export function ConfirmButtonExample() {
 | `direction`          | `"right" \| "left" \| "up" \| "down"` | `"right"`           | Direction the fill travels toward.                                                                                      |
 | `duration`           | `number`                              | `1.5`               | Required hold time and fill duration in seconds.                                                                        |
 | `animation`          | `"blur" \| "slide" \| "flip"`         | `"blur"`            | Text and check icon transitions, matching Copy Button.                                                                  |
-| `transitionDuration` | `number`                              | `0.2`               | Text and icon transition time in seconds, independent of `duration`.                                                    |
+| `transitionDuration` | `number`                              | `0.2`               | Text and icon transition time in seconds, independent of `duration`. Movement settles on a spring of the same length.   |
 | `disabled`           | `boolean`                             | `false`             | Prevents starting a hold and cancels an active hold.                                                                    |
 | `className`          | `string`                              | None                | Additional button classes. Overrides the default `w-40` width and can set `--confirm-fill` to customize the fill color. |

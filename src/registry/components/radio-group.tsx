@@ -61,7 +61,7 @@ export function RadioGroup({
   const current = value === undefined ? internalValue : value;
   const visualDuration = reducedMotion ? 0 : Number.isFinite(duration) ? Math.max(0, duration) : 0.35;
   const transition: Transition =
-    visualDuration === 0 ? { duration: 0 } : { type: "spring", visualDuration, bounce: 0.22 };
+    visualDuration === 0 ? { duration: 0 } : { type: "spring", visualDuration, bounce: 0 };
 
   // Scope the shared layoutId so several groups on one page never trade dots.
   return (
@@ -132,7 +132,7 @@ export function RadioGroupItem({
       render={
         <motion.span
           whileTap={disabled || group.instant ? undefined : { scale: 0.86 }}
-          transition={{ type: "spring", visualDuration: 0.2, bounce: 0.5 }}
+          transition={{ type: "spring", visualDuration: 0.2, bounce: 0 }}
         />
       }
       className={`border-border bg-background data-checked:border-foreground focus-visible:ring-ring/30 relative inline-grid size-[18px] shrink-0 cursor-pointer place-items-center rounded-full border shadow-xs transition-colors duration-150 outline-none focus-visible:ring-3 data-disabled:cursor-not-allowed ${label ? "mt-px" : `data-disabled:opacity-50 ${className ?? ""}`}`}

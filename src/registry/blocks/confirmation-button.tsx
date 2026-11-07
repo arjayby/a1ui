@@ -24,6 +24,20 @@ export interface ConfirmationButtonProps {
   style?: CSSProperties;
 }
 
+// Apple's default spring: critically damped (damping 1.0) with a 0.35s response.
+const RESPONSE = 0.35;
+// A release must reach the end. A throw does not confirm, so a confirmation always needs a deliberate drag.
+const COMMIT_AT = 0.95;
+// Releasing while pulling back faster than this (track widths per second) cancels even at the end.
+const PULL_BACK = -0.5;
+
+const prefersReducedMotion = () =>
+  typeof window.matchMedia === "function" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+// Past either end the handle resists instead of stopping dead, giving way at most `limit` pixels.
+const rubberband = (overshoot: number, limit: number) =>
+  (overshoot * limit * 0.55) / (limit + 0.55 * Math.abs(overshoot));
+
 const theme = {
   "--confirmation-background": "var(--background, #f7f7f5)",
   "--confirmation-foreground": "var(--foreground, #222320)",
@@ -47,8 +61,13 @@ export function ConfirmationButton({
   const rootRef = useRef<HTMLDivElement>(null);
   const laneRef = useRef<HTMLDivElement>(null);
   const handleRef = useRef<HTMLButtonElement>(null);
-  const dragRef = useRef<{ pointerId: number; grabOffset: number } | null>(null);
+  const dragRef = useRef<{
+    pointerId: number;
+    grabOffset: number;
+    samples: { time: number; progress: number }[];
+  } | null>(null);
   const progressRef = useRef(0);
+  const springRef = useRef(0);
   const lockedRef = useRef(false);
   const mountedRef = useRef(false);
   const [state, setState] = useState<"idle" | "pending" | "confirmed" | "error">("idle");
@@ -59,6 +78,49 @@ export function ConfirmationButton({
   function moveTo(progress: number) {
     progressRef.current = progress;
     rootRef.current?.style.setProperty("--confirmation-progress", String(progress));
+  }
+
+  function stopSpring() {
+    cancelAnimationFrame(springRef.current);
+  }
+
+  // Springs from the handle's current position and velocity, so a release or a re-grab never jumps.
+  function springTo(target: number, velocity = 0) {
+    stopSpring();
+    const from = progressRef.current - target;
+    if (prefersReducedMotion() || (from === 0 && velocity === 0)) {
+      moveTo(target);
+      return;
+    }
+    const omega = (2 * Math.PI) / RESPONSE;
+    // Never carry the handle past the track, or past where a rubber-banded drag let go.
+    const low = Math.min(0, progressRef.current);
+    const high = Math.max(1, progressRef.current);
+    const start = performance.now();
+    function step(now: number) {
+      const t = Math.max(0, now - start) / 1000;
+      const decay = Math.exp(-omega * t);
+      const offset = (from + (velocity + omega * from) * t) * decay;
+      const speed = (velocity - omega * (velocity + omega * from) * t) * decay;
+      // The ends are walls: a fast release settles against them instead of passing through, and
+      // otherwise the spring rests once it is within a fraction of a pixel.
+      const crossed = from !== 0 && Math.sign(offset) !== Math.sign(from);
+      if (crossed || (Math.abs(offset) < 0.0005 && Math.abs(speed) < 0.01)) {
+        moveTo(target);
+        return;
+      }
+      moveTo(Math.min(high, Math.max(low, target + offset)));
+      springRef.current = requestAnimationFrame(step);
+    }
+    springRef.current = requestAnimationFrame(step);
+  }
+
+  // Track widths per second over the last 100ms of the drag; zero if the pointer had stopped.
+  function releaseVelocity(samples: { time: number; progress: number }[], now: number) {
+    const last = samples.at(-1);
+    if (!last || now - last.time > 50) return 0;
+    const first = samples.find((sample) => last.time - sample.time <= 100) ?? last;
+    return last.time > first.time ? ((last.progress - first.progress) / (last.time - first.time)) * 1000 : 0;
   }
 
   function releaseDrag() {
@@ -73,13 +135,14 @@ export function ConfirmationButton({
   function cancelDrag() {
     if (!dragRef.current) return;
     releaseDrag();
-    moveTo(0);
+    springTo(0);
   }
 
   useEffect(() => {
     mountedRef.current = true;
     return () => {
       mountedRef.current = false;
+      cancelAnimationFrame(springRef.current);
     };
   }, []);
 
@@ -88,11 +151,11 @@ export function ConfirmationButton({
     if (disabled) cancelDisabledDrag();
   }, [disabled]);
 
-  async function confirm() {
+  async function confirm(velocity = 0) {
     if (unavailable || lockedRef.current) return;
     lockedRef.current = true;
     releaseDrag();
-    moveTo(1);
+    springTo(1, velocity);
     setState("pending");
     try {
       await onConfirm();
@@ -100,18 +163,37 @@ export function ConfirmationButton({
     } catch {
       if (mountedRef.current) {
         lockedRef.current = false;
-        moveTo(0);
+        springTo(0);
         setState("error");
       }
     }
   }
 
+  // Layout sizes, so the pressed handle's scale doesn't skew the 1:1 tracking.
+  function measure(handle: HTMLButtonElement) {
+    const lane = laneRef.current!;
+    return {
+      left: lane.getBoundingClientRect().left,
+      travel: lane.clientWidth - handle.offsetWidth,
+      edge: lane.offsetLeft,
+    };
+  }
+
   function movePointer(event: PointerEvent<HTMLButtonElement>) {
     const drag = dragRef.current;
     if (!drag || drag.pointerId !== event.pointerId || unavailable) return;
-    const lane = laneRef.current!.getBoundingClientRect();
-    const travel = lane.width - event.currentTarget.getBoundingClientRect().width;
-    moveTo(travel > 0 ? Math.min(1, Math.max(0, (event.clientX - lane.left - drag.grabOffset) / travel)) : 0);
+    const { left, travel, edge } = measure(event.currentTarget);
+    if (travel <= 0) return moveTo(0);
+    const position = event.clientX - left - drag.grabOffset;
+    const resisted =
+      position < 0
+        ? rubberband(position, edge)
+        : position > travel
+          ? travel + rubberband(position - travel, edge)
+          : position;
+    moveTo(resisted / travel);
+    drag.samples.push({ time: event.timeStamp, progress: progressRef.current });
+    if (drag.samples.length > 8) drag.samples.shift();
   }
 
   const currentLabel = state === "confirmed" ? confirmedLabel : state === "pending" ? pendingLabel : label;
@@ -142,7 +224,7 @@ export function ConfirmationButton({
         >
           <span className="truncate">{currentLabel}</span>
         </span>
-        <div ref={laneRef} className="pointer-events-none absolute inset-1.5">
+        <div ref={laneRef} className="@container pointer-events-none absolute inset-1.5">
           <button
             ref={handleRef}
             type="button"
@@ -153,17 +235,15 @@ export function ConfirmationButton({
             aria-busy={state === "pending"}
             disabled={disabled}
             className={cn(
-              "pointer-events-auto absolute top-0 flex aspect-square h-full touch-none items-center justify-center rounded-[14px] transition-[left,transform,background-color,color] duration-300 ease-out outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--confirmation-foreground)] motion-reduce:transition-none [&_svg]:size-4",
+              "pointer-events-auto absolute top-0 left-0 flex aspect-square h-full touch-none items-center justify-center rounded-[14px] transition-[background-color,color,scale] duration-200 ease-out outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--confirmation-foreground)] motion-reduce:transition-none [&_svg]:size-4",
               complete
                 ? "cursor-default bg-[var(--confirmation-background)] text-[var(--confirmation-foreground)]"
                 : "cursor-grab bg-[var(--confirmation-foreground)] text-[var(--confirmation-background)]",
-              dragging && "cursor-grabbing transition-none",
+              // The press lands instantly and springs back on release.
+              dragging && "cursor-grabbing transition-none motion-safe:scale-[0.96]",
               disabled && "cursor-not-allowed",
             )}
-            style={{
-              left: "calc(var(--confirmation-progress) * 100%)",
-              transform: "translateX(calc(var(--confirmation-progress) * -100%))",
-            }}
+            style={{ translate: "calc(var(--confirmation-progress) * (100cqw - 100%)) 0" }}
             onPointerDown={(event) => {
               if (
                 unavailable ||
@@ -175,11 +255,13 @@ export function ConfirmationButton({
                 return;
               event.preventDefault();
               event.currentTarget.focus({ preventScroll: true });
-              // A new gesture starts at the left, even during the return animation.
-              moveTo(0);
+              // Catch the handle wherever it is, even mid-return, and keep the grab point under the pointer.
+              stopSpring();
+              const { left, travel } = measure(event.currentTarget);
               dragRef.current = {
                 pointerId: event.pointerId,
-                grabOffset: event.clientX - event.currentTarget.getBoundingClientRect().left,
+                grabOffset: event.clientX - left - progressRef.current * Math.max(0, travel),
+                samples: [],
               };
               event.currentTarget.setPointerCapture(event.pointerId);
               setDragging(true);
@@ -187,12 +269,15 @@ export function ConfirmationButton({
             }}
             onPointerMove={movePointer}
             onPointerUp={(event) => {
-              if (dragRef.current?.pointerId !== event.pointerId) return;
+              const drag = dragRef.current;
+              if (drag?.pointerId !== event.pointerId) return;
               movePointer(event);
-              const reachedEnd = progressRef.current >= 0.95;
+              const velocity = releaseVelocity(drag.samples, event.timeStamp);
               releaseDrag();
-              if (reachedEnd) void confirm();
-              else moveTo(0);
+              if (progressRef.current >= COMMIT_AT && velocity > PULL_BACK) void confirm(velocity);
+              // Only momentum toward the start carries over: a throw toward the end would look like it
+              // confirmed when it can't.
+              else springTo(0, Math.min(0, velocity));
             }}
             onPointerCancel={(event) => {
               if (dragRef.current?.pointerId === event.pointerId) cancelDrag();

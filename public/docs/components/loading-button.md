@@ -76,6 +76,6 @@ export function LoadingButtonExample() {
 | `errorLabel`   | `string`                         | `"Try again"`  | Button label and live announcement after failure.                                                               |
 | `icon`         | `ReactNode`                      | Arrow right    | Idle icon. Loading shows a spinner, and success shows a checkmark.                                              |
 | `animation`    | `"blur" \| "slide" \| "flip"`    | `"slide"`      | Blur, slide, or flip transitions for the icon and label.                                                        |
-| `duration`     | `number`                         | `0.2`          | Transition time in seconds. Zero switches instantly.                                                            |
+| `duration`     | `number`                         | `0.2`          | Fade time in seconds; movement settles on a spring of the same length. Zero switches instantly.                 |
 | `disabled`     | `boolean`                        | `false`        | Prevents starting the action. The button also disables itself during loading and success.                       |
 | `className`    | `string`                         | None           | Additional classes for the button. Override `w-32` to change its fixed width.                                   |

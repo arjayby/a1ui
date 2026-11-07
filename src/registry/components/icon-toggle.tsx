@@ -1,7 +1,14 @@
 "use client";
 
-import { motion, useReducedMotion } from "motion/react";
-import { useState } from "react";
+import {
+  animate,
+  motion,
+  useMotionValue,
+  useReducedMotion,
+  useTransform,
+  type MotionValue,
+} from "motion/react";
+import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 
@@ -50,6 +57,27 @@ export function IconToggle({
   const active = pressed ?? internalPressed;
   const reducedMotion = useReducedMotion();
   const transitionDuration = reducedMotion ? 0 : Number.isFinite(duration) ? Math.max(0, duration) : 0.3;
+  // One 0–1 progress drives every path, so a quick second click reverses from the shape on screen
+  // and keeps its velocity instead of restarting a fixed curve.
+  const progress = useMotionValue(active ? 1 : 0);
+
+  useEffect(() => {
+    const target = active ? 1 : 0;
+    if (transitionDuration === 0) {
+      progress.jump(target);
+      return;
+    }
+    // Motion drops velocity on duration-based springs, so use the physics spring that
+    // `visualDuration` maps to (critically damped) and hand it the current velocity.
+    const omega = (2 * Math.PI) / (transitionDuration * 1.2);
+    const controls = animate(progress, target, {
+      type: "spring",
+      stiffness: omega * omega,
+      damping: 2 * omega,
+      velocity: progress.getVelocity(),
+    });
+    return () => controls.stop();
+  }, [active, progress, transitionDuration]);
 
   return (
     <Button
@@ -60,7 +88,7 @@ export function IconToggle({
       aria-label={label}
       aria-pressed={active}
       disabled={disabled}
-      className={className}
+      className={`transition-[color,background-color,border-color,box-shadow,scale] motion-safe:active:scale-[0.97] ${className ?? ""}`}
       onClick={() => {
         const next = !active;
         if (pressed === undefined) setInternalPressed(next);
@@ -78,14 +106,14 @@ export function IconToggle({
         className="size-5"
       >
         {paths.map(([off, on], index) => (
-          <motion.path
-            key={index}
-            initial={false}
-            animate={{ d: active ? on : off }}
-            transition={{ type: "tween", duration: transitionDuration, ease: [0.4, 0, 0.2, 1] }}
-          />
+          <MorphPath key={index} progress={progress} off={off} on={on} />
         ))}
       </svg>
     </Button>
   );
+}
+
+function MorphPath({ progress, off, on }: { progress: MotionValue<number>; off: string; on: string }) {
+  const d = useTransform(progress, [0, 1], [off, on]);
+  return <motion.path d={d} />;
 }

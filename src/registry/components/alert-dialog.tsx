@@ -100,7 +100,7 @@ export function AlertDialogContent({
   const [shaking, setShaking] = useState(false);
   const { seconds } = dialog;
   const enter: Transition =
-    seconds === 0 ? { duration: 0 } : { type: "spring", visualDuration: seconds, bounce: 0.28 };
+    seconds === 0 ? { duration: 0 } : { type: "spring", visualDuration: seconds, bounce: 0 };
   const exit: Transition = { duration: seconds * 0.6, ease: [0.4, 0, 1, 1] };
   const transition = dialog.open ? enter : exit;
 

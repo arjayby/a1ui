@@ -1,7 +1,7 @@
 "use client";
 
 import { CheckIcon } from "@phosphor-icons/react";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { AnimatePresence, animate, motion, useReducedMotion } from "motion/react";
 import { useEffect, useEffectEvent, useId, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -26,6 +26,13 @@ const animations = {
 
 const visible = { opacity: 1, scale: 1, rotate: 0, rotateX: 0, y: 0, filter: "blur(0px)" };
 
+// Movement settles on a critically damped spring; opacity and blur fade over the same time.
+function swapTransition(seconds: number) {
+  if (seconds === 0) return { duration: 0 };
+  const fade = { type: "tween", duration: seconds } as const;
+  return { type: "spring", visualDuration: seconds, bounce: 0, opacity: fade, filter: fade } as const;
+}
+
 export interface ConfirmButtonProps {
   onConfirm: () => void;
   label?: string;
@@ -46,6 +53,9 @@ type Hold = { kind: "pointer"; pointerId: number } | { kind: "keyboard"; key: st
 
 const origins = { right: "left", left: "right", up: "bottom", down: "top" };
 
+// Finger jitter at the edge shouldn't cancel a hold; dragging clearly away still does.
+const POINTER_SLOP = 10;
+
 export function ConfirmButton({
   onConfirm,
   label = "Hold to confirm",
@@ -62,6 +72,8 @@ export function ConfirmButton({
   const fillRef = useRef<HTMLSpanElement>(null);
   const holdRef = useRef<Hold | null>(null);
   const frameRef = useRef(0);
+  const progressRef = useRef(0);
+  const drainRef = useRef<{ stop: () => void } | null>(null);
   const confirmedRef = useRef(false);
   const resetTimeoutRef = useRef(0);
   const [state, setState] = useState<"idle" | "holding" | "confirmed">("idle");
@@ -77,9 +89,31 @@ export function ConfirmButton({
   const holdDuration = Number.isFinite(duration) && duration > 0 ? duration : 1.5;
 
   function setProgress(progress: number) {
+    progressRef.current = progress;
     if (fillRef.current) {
       fillRef.current.style.transform = `${vertical ? "scaleY" : "scaleX"}(${progress})`;
     }
+  }
+
+  function stopDrain() {
+    drainRef.current?.stop();
+    drainRef.current = null;
+  }
+
+  // Releasing early drains the fill from where it is, so the cancel reads as the hold letting go.
+  function drain() {
+    stopDrain();
+    if (reducedMotion || progressRef.current === 0) {
+      setProgress(0);
+      return;
+    }
+    drainRef.current = animate(progressRef.current, 0, {
+      type: "spring",
+      visualDuration: 0.3,
+      bounce: 0,
+      onUpdate: setProgress,
+      onComplete: () => setProgress(0),
+    });
   }
 
   function cancel() {
@@ -94,7 +128,7 @@ export function ConfirmButton({
         setState("idle");
       }, 2000);
     } else {
-      setProgress(0);
+      drain();
       setState("idle");
     }
     if (hold.kind === "pointer" && buttonRef.current?.hasPointerCapture(hold.pointerId)) {
@@ -107,6 +141,14 @@ export function ConfirmButton({
     cancelHold();
   }, [disabled, duration, direction]);
 
+  const clearFill = useEffectEvent(() => {
+    stopDrain();
+    setProgress(0);
+  });
+  useEffect(() => {
+    clearFill();
+  }, [direction]);
+
   useEffect(() => {
     function onBlur() {
       cancelHold();
@@ -118,6 +160,7 @@ export function ConfirmButton({
     document.addEventListener("visibilitychange", onVisibilityChange);
     return () => {
       cancelAnimationFrame(frameRef.current);
+      drainRef.current?.stop();
       window.clearTimeout(resetTimeoutRef.current);
       window.removeEventListener("blur", onBlur);
       document.removeEventListener("visibilitychange", onVisibilityChange);
@@ -127,14 +170,17 @@ export function ConfirmButton({
   function start(hold: Hold) {
     if (disabled || holdRef.current || confirmedRef.current) return;
     holdRef.current = hold;
-    setProgress(0);
+    stopDrain();
+    // A press during the drain picks the fill up where it is, but still needs the full hold time.
+    const from = progressRef.current;
     setState("holding");
     const started = performance.now();
     function tick(now: number) {
       if (holdRef.current !== hold) return;
-      const progress = Math.min(1, (now - started) / (holdDuration * 1000));
+      const elapsed = Math.min(1, (now - started) / (holdDuration * 1000));
+      const progress = from + (1 - from) * elapsed;
       setProgress(progress);
-      if (progress >= 1) {
+      if (elapsed >= 1) {
         confirmedRef.current = true;
         setState("confirmed");
         onConfirm();
@@ -160,7 +206,7 @@ export function ConfirmButton({
         aria-label={currentLabel}
         aria-describedby={`${id}-instructions`}
         disabled={disabled}
-        className={`relative isolate w-40 touch-none overflow-hidden select-none ${className ?? ""}`}
+        className={`relative isolate w-40 touch-none overflow-hidden transition-[color,background-color,border-color,box-shadow,scale] select-none motion-safe:data-[state=holding]:scale-[0.97] ${className ?? ""}`}
         onPointerDown={(event) => {
           if (disabled || holdRef.current || confirmedRef.current || !event.isPrimary || event.button !== 0)
             return;
@@ -182,10 +228,10 @@ export function ConfirmButton({
           if (holdRef.current?.kind !== "pointer" || holdRef.current.pointerId !== event.pointerId) return;
           const bounds = event.currentTarget.getBoundingClientRect();
           if (
-            event.clientX < bounds.left ||
-            event.clientX > bounds.right ||
-            event.clientY < bounds.top ||
-            event.clientY > bounds.bottom
+            event.clientX < bounds.left - POINTER_SLOP ||
+            event.clientX > bounds.right + POINTER_SLOP ||
+            event.clientY < bounds.top - POINTER_SLOP ||
+            event.clientY > bounds.bottom + POINTER_SLOP
           )
             cancel();
         }}
@@ -227,7 +273,7 @@ export function ConfirmButton({
                   data-slot="confirm-button-icon"
                   className="inline-flex size-4 shrink-0 items-center justify-center text-[var(--status-success,#15803d)]"
                   variants={{ hidden: preset.icon.initial, visible, exit: preset.icon.exit }}
-                  transition={{ type: "tween", duration: contentDuration }}
+                  transition={swapTransition(contentDuration)}
                 >
                   <CheckIcon size={14} className="size-3.5" weight="bold" />
                 </motion.span>
@@ -239,7 +285,7 @@ export function ConfirmButton({
                 <motion.span
                   className="col-start-1 row-start-1 whitespace-nowrap"
                   variants={{ hidden: preset.label.initial, visible, exit: preset.label.exit }}
-                  transition={{ type: "tween", duration: contentDuration }}
+                  transition={swapTransition(contentDuration)}
                 >
                   {currentLabel}
                 </motion.span>

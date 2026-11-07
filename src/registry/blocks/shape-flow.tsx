@@ -8,7 +8,16 @@ import {
   type PreparedTextWithSegments,
 } from "@chenglou/pretext";
 import { clsx } from "clsx";
-import { useEffect, useId, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent } from "react";
+import {
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEvent,
+  type PointerEvent,
+} from "react";
 
 export type ShapeFlowProps = {
   text: string;
@@ -64,25 +73,44 @@ const duckRows = duckArt.map((row, index) => ({
   y: 4 + index * cellHeight,
   width: row.trim().length * cellWidth,
 }));
-// Reserve the full bob and tilt so moving glyphs never touch the paragraph.
-const floatPadding = 3;
+// Reserve room for the lifted duck so its glyphs never touch the paragraph while held.
+const liftPadding = 3;
+// The duck lifts the moment it is pressed and settles back without overshoot on release.
 const duckStyles = `
   [data-slot="shape-flow-duck"] {
     transform-origin: 50% 50%;
-    animation: a1ui-shape-flow-float 4s ease-in-out infinite;
+    transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
   }
   [data-slot="shape-flow-handle"][data-dragging="true"] [data-slot="shape-flow-duck"] {
-    animation-play-state: paused;
-  }
-  @keyframes a1ui-shape-flow-float {
-    0%, 100% { transform: translateY(1px) rotate(-1deg); }
-    50% { transform: translateY(-1px) rotate(1deg); }
+    transform: scale(1.04);
+    transition-duration: 120ms;
   }
   @media (prefers-reduced-motion: reduce) {
-    [data-slot="shape-flow-duck"] { animation: none; }
+    [data-slot="shape-flow-duck"] { transition: none; }
+    [data-slot="shape-flow-handle"][data-dragging="true"] [data-slot="shape-flow-duck"] {
+      transform: none;
+      opacity: 0.75;
+    }
   }
 `;
+// A flick hands its velocity to a lightly damped spring (damping 0.8, response 0.4s) that
+// settles on the momentum-projected point, as a thrown object would.
+const settleResponse = 0.4;
+const settleDamping = 0.8;
+const deceleration = 0.998;
+const velocityWindow = 100;
+const maxVelocity = 8000;
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
+const project = (velocity: number) => ((velocity / 1000) * deceleration) / (1 - deceleration);
+// Past an edge the duck follows with growing resistance instead of stopping dead.
+const rubberband = (overshoot: number, dimension: number) =>
+  (overshoot * dimension * 0.55) / (dimension + 0.55 * Math.abs(overshoot));
+const soften = (value: number, travel: number, dimension: number) => {
+  const edge = clamp(value, 0, 1);
+  return travel > 0 && dimension > 0 ? edge + rubberband((value - edge) * travel, dimension) / travel : edge;
+};
+const prefersReducedMotion = () =>
+  typeof window.matchMedia === "function" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const positive = (value: number, fallback: number) =>
   Number.isFinite(value) && value > 0 ? value : fallback;
 
@@ -97,7 +125,17 @@ export function ShapeFlow({
   className,
 }: ShapeFlowProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const dragRef = useRef<{ id: number; x: number; y: number; left: number; top: number } | null>(null);
+  const dragRef = useRef<{
+    id: number;
+    x: number;
+    y: number;
+    left: number;
+    top: number;
+    samples: { x: number; y: number; time: number }[];
+    position: { x: number; y: number };
+  } | null>(null);
+  const settleFrameRef = useRef(0);
+  const geometryRef = useRef({ travelX: 0, travelY: 0 });
   const instructionsId = useId();
   const duckGradientId = useId();
   const [width, setWidth] = useState(0);
@@ -158,10 +196,10 @@ export function ShapeFlow({
         const bandBottom = (y + leading + spacing - (centerY - halfExtent)) / scale;
         const blocked: [number, number][] = [];
         for (const row of duckRows) {
-          if (row.y + cellHeight + floatPadding < bandTop || row.y - floatPadding > bandBottom) continue;
+          if (row.y + cellHeight + liftPadding < bandTop || row.y - liftPadding > bandBottom) continue;
           blocked.push([
-            clamp(centerX - halfExtent + (row.x - floatPadding) * scale - spacing, 0, width),
-            clamp(centerX - halfExtent + (row.x + row.width + floatPadding) * scale + spacing, 0, width),
+            clamp(centerX - halfExtent + (row.x - liftPadding) * scale - spacing, 0, width),
+            clamp(centerX - halfExtent + (row.x + row.width + liftPadding) * scale + spacing, 0, width),
           ]);
         }
         blocked.sort((a, b) => a[0] - b[0]);
@@ -203,10 +241,67 @@ export function ShapeFlow({
   const travelY = Math.max(0, (flow?.height ?? areaHeight) - halfExtent * 2);
   const centerY = halfExtent + position.y * travelY;
 
+  useLayoutEffect(() => {
+    geometryRef.current = { travelX, travelY };
+  });
+
+  useEffect(() => () => cancelAnimationFrame(settleFrameRef.current), []);
+
+  function stopSettling() {
+    cancelAnimationFrame(settleFrameRef.current);
+    settleFrameRef.current = 0;
+  }
+
+  // Animate from the on-screen position toward the projected resting point, carrying the
+  // release velocity (normalized units per second) so there is no seam between drag and spring.
+  function settle(from: { x: number; y: number }, velocity: { x: number; y: number }) {
+    stopSettling();
+    const omega = (2 * Math.PI) / settleResponse;
+    const axes = (["x", "y"] as const).map((axis) => ({
+      axis,
+      value: from[axis],
+      velocity: velocity[axis],
+      target: clamp(from[axis] + project(velocity[axis]), 0, 1),
+    }));
+    let previous: number | null = null;
+    const step = (now: number) => {
+      const elapsed = previous === null ? 1 / 60 : Math.min(0.064, (now - previous) / 1000);
+      previous = now;
+      const substeps = Math.max(1, Math.ceil(elapsed * 240));
+      const dt = elapsed / substeps;
+      const { travelX: currentX, travelY: currentY } = geometryRef.current;
+      let resting = true;
+      for (const state of axes) {
+        for (let index = 0; index < substeps; index += 1) {
+          const acceleration =
+            -omega * omega * (state.value - state.target) - 2 * settleDamping * omega * state.velocity;
+          state.velocity += acceleration * dt;
+          state.value += state.velocity * dt;
+        }
+        const travel = state.axis === "x" ? currentX : currentY;
+        const scale = Math.max(1, travel);
+        if (Math.abs(state.value - state.target) * scale > 0.5 || Math.abs(state.velocity) * scale > 10) {
+          resting = false;
+        }
+      }
+      const [x, y] = axes;
+      if (resting) {
+        settleFrameRef.current = 0;
+        setPosition({ x: x.target, y: y.target });
+        return;
+      }
+      setPosition({ x: soften(x.value, currentX, halfExtent), y: soften(y.value, currentY, halfExtent) });
+      settleFrameRef.current = requestAnimationFrame(step);
+    };
+    settleFrameRef.current = requestAnimationFrame(step);
+  }
+
   function startDrag(event: PointerEvent<HTMLButtonElement>) {
     if (!event.isPrimary || event.button !== 0 || dragRef.current) return;
     const bounds = containerRef.current?.getBoundingClientRect();
     if (!bounds) return;
+    // Catch a settling duck where it is on screen, keeping the offset from where it was grabbed.
+    stopSettling();
     event.currentTarget.setPointerCapture(event.pointerId);
     dragRef.current = {
       id: event.pointerId,
@@ -214,6 +309,8 @@ export function ShapeFlow({
       y: event.clientY - bounds.top - centerY,
       left: bounds.left,
       top: bounds.top,
+      samples: [{ x: event.clientX, y: event.clientY, time: event.timeStamp }],
+      position,
     };
     setDragging(true);
   }
@@ -221,19 +318,45 @@ export function ShapeFlow({
   function moveDrag(event: PointerEvent<HTMLButtonElement>) {
     const drag = dragRef.current;
     if (!drag || drag.id !== event.pointerId) return;
-    setPosition({
-      x: travelX ? clamp((event.clientX - drag.left - drag.x - halfExtent) / travelX, 0, 1) : 0.5,
-      y: travelY ? clamp((event.clientY - drag.top - drag.y - halfExtent) / travelY, 0, 1) : 0.5,
-    });
+    drag.samples.push({ x: event.clientX, y: event.clientY, time: event.timeStamp });
+    while (drag.samples.length > 2 && event.timeStamp - drag.samples[0].time > velocityWindow) {
+      drag.samples.shift();
+    }
+    const edge = prefersReducedMotion()
+      ? (value: number) => clamp(value, 0, 1)
+      : (value: number, travel: number) => soften(value, travel, halfExtent);
+    drag.position = {
+      x: travelX ? edge((event.clientX - drag.left - drag.x - halfExtent) / travelX, travelX) : 0.5,
+      y: travelY ? edge((event.clientY - drag.top - drag.y - halfExtent) / travelY, travelY) : 0.5,
+    };
+    setPosition(drag.position);
   }
 
   function endDrag(event: PointerEvent<HTMLButtonElement>) {
-    if (dragRef.current?.id !== event.pointerId) return;
+    const drag = dragRef.current;
+    if (drag?.id !== event.pointerId) return;
     dragRef.current = null;
     setDragging(false);
     if (event.currentTarget.hasPointerCapture(event.pointerId)) {
       event.currentTarget.releasePointerCapture(event.pointerId);
     }
+    if (prefersReducedMotion()) {
+      setPosition({ x: clamp(drag.position.x, 0, 1), y: clamp(drag.position.y, 0, 1) });
+      return;
+    }
+    // Only a release carries momentum. A cancelled gesture just eases back inside the bounds.
+    const recent = drag.samples.filter((sample) => event.timeStamp - sample.time <= velocityWindow);
+    const first = recent[0];
+    const last = recent[recent.length - 1];
+    const seconds = first && last ? (last.time - first.time) / 1000 : 0;
+    const velocity = (distance: number, travel: number) =>
+      event.type === "pointerup" && seconds > 0 && travel > 0
+        ? clamp(distance / seconds, -maxVelocity, maxVelocity) / travel
+        : 0;
+    settle(drag.position, {
+      x: velocity(last ? last.x - first.x : 0, travelX),
+      y: velocity(last ? last.y - first.y : 0, travelY),
+    });
   }
 
   function moveWithKeyboard(event: KeyboardEvent<HTMLButtonElement>) {
@@ -245,12 +368,14 @@ export function ShapeFlow({
     };
     if (event.key === "Home") {
       event.preventDefault();
+      stopSettling();
       setPosition(initialPosition);
       return;
     }
     const direction = directions[event.key];
     if (!direction) return;
     event.preventDefault();
+    stopSettling();
     const step = event.shiftKey ? 32 : 8;
     setPosition((current) => ({
       x: clamp(current.x + (direction[0] * step) / (travelX || 1), 0, 1),

@@ -175,7 +175,7 @@ export function SelectTrigger({ className, children, ...props }: SelectTriggerPr
             transition={
               select.seconds === 0
                 ? { duration: 0 }
-                : { type: "spring", visualDuration: select.seconds, bounce: 0.3 }
+                : { type: "spring", visualDuration: select.seconds, bounce: 0 }
             }
           />
         }
@@ -215,7 +215,7 @@ export function SelectValue({ placeholder, children, className }: SelectValuePro
         ? children(value)
         : (entries(select.items).find((item) => item.value === value)?.label ?? value);
   const transition: Transition =
-    seconds === 0 ? { duration: 0 } : { type: "spring", visualDuration: seconds * 0.8, bounce: 0.15 };
+    seconds === 0 ? { duration: 0 } : { type: "spring", visualDuration: seconds * 0.8, bounce: 0 };
 
   // Both labels share one grid cell so the old one slides out while the new one slides in.
   return (
@@ -272,12 +272,20 @@ export function SelectContent({
   const id = useId();
   const { seconds } = select;
   const variants: Variants = {
-    closed: { opacity: 0, scale: 0.92, transition: { duration: seconds * 0.6, ease: [0.4, 0, 1, 1] } },
+    // Closing shrinks back toward the trigger along the same path it opened on.
+    closed: {
+      opacity: 0,
+      scale: 0.92,
+      transition: {
+        scale: { type: "spring", visualDuration: seconds * 0.6, bounce: 0 },
+        opacity: { duration: seconds * 0.6, ease: [0.4, 0, 1, 1] },
+      },
+    },
     open: {
       opacity: 1,
       scale: 1,
       transition: {
-        scale: { type: "spring", visualDuration: seconds, bounce: 0.25 },
+        scale: { type: "spring", visualDuration: seconds, bounce: 0 },
         opacity: { duration: seconds * 0.5 },
         staggerChildren: Math.min(0.02, seconds / 15),
         delayChildren: seconds * 0.1,
@@ -298,7 +306,8 @@ export function SelectContent({
         <SelectPrimitive.Popup
           {...props}
           data-slot="select-content"
-          className={`border-border bg-background text-foreground isolate max-h-(--available-height) min-w-(--anchor-width) origin-(--transform-origin) overflow-y-auto overscroll-contain rounded-lg border p-1 shadow-lg outline-none ${className ?? ""}`}
+          // A translucent material floats over the page; it turns solid for reduced transparency.
+          className={`border-border bg-popover/80 text-popover-foreground [@media(prefers-reduced-transparency:reduce)]:bg-popover isolate max-h-(--available-height) min-w-(--anchor-width) origin-(--transform-origin) overflow-y-auto overscroll-contain rounded-lg border p-1 shadow-lg backdrop-blur-xl backdrop-saturate-150 outline-none [@media(prefers-reduced-transparency:reduce)]:backdrop-blur-none ${className ?? ""}`}
           render={(popupProps) => (
             <LayoutGroup id={id}>
               <motion.div
@@ -335,7 +344,7 @@ export function SelectItem({ value, disabled, label, className, children }: Sele
   const select = useSelect("SelectItem");
   const { seconds } = select;
   const highlightTransition: Transition =
-    seconds === 0 ? { duration: 0 } : { type: "spring", visualDuration: seconds, bounce: 0.15 };
+    seconds === 0 ? { duration: 0 } : { type: "spring", visualDuration: seconds, bounce: 0 };
 
   return (
     <SelectPrimitive.Item

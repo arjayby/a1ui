@@ -7,6 +7,10 @@ import { TextScramble } from "@/registry/blocks/text-scramble";
 
 const phrases = ["MAKE IT CLEAR.", "MAKE IT COUNT.", "MAKE IT YOURS."];
 
+// Site press feedback: scale down the instant the pointer goes down, spring back on release.
+const pressable =
+  "transition-transform duration-(--ease-spring-snappy-duration) ease-(--ease-spring-snappy) active:scale-[0.96] active:duration-75 active:ease-(--ease-press) motion-reduce:transition-none motion-reduce:active:scale-100 motion-reduce:active:opacity-60";
+
 export function TextScramblePreview() {
   return (
     <div className="not-prose demo-frame text-scramble-preview">
@@ -37,7 +41,7 @@ export function TextScrambleDemo() {
         </div>
       </div>
       <div className="not-prose demo-caption text-scramble-demo-controls">
-        <button type="button" onClick={randomizePhrase}>
+        <button type="button" className={pressable} onClick={randomizePhrase}>
           <Shuffle aria-hidden="true" />
           Randomize phrase
         </button>

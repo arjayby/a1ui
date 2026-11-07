@@ -26,6 +26,17 @@ const animations = {
 
 const visible = { opacity: 1, scale: 1, rotate: 0, rotateX: 0, y: 0, filter: "blur(0px)" };
 
+// Movement settles on a critically damped spring; opacity and blur fade over the same time.
+function swapTransition(seconds: number) {
+  if (seconds === 0) return { duration: 0 };
+  const fade = { type: "tween", duration: seconds } as const;
+  return { type: "spring", visualDuration: seconds, bounce: 0, opacity: fade, filter: fade } as const;
+}
+
+// Feedback lands on pointer-down; the click still commits on release over the button.
+const pressClasses =
+  "transition-[color,background-color,border-color,box-shadow,scale] motion-safe:active:scale-[0.97]";
+
 export interface CopyButtonProps {
   value: string;
   label?: string;
@@ -87,7 +98,7 @@ export function CopyButton({
         aria-busy={state === "copying"}
         disabled={disabled || state === "copying" || copied}
         onClick={copy}
-        className={className}
+        className={`${pressClasses} ${className ?? ""}`}
       >
         <span aria-hidden="true" className="relative grid size-4 shrink-0 place-items-center">
           <AnimatePresence initial={false}>
@@ -97,7 +108,7 @@ export function CopyButton({
               initial={reducedMotion ? false : preset.icon.initial}
               animate={visible}
               exit={reducedMotion ? visible : preset.icon.exit}
-              transition={{ type: "tween", duration: transitionDuration }}
+              transition={swapTransition(transitionDuration)}
             >
               {copied ? (
                 <CheckIcon size={14} className="size-3.5" weight="bold" />
@@ -120,7 +131,7 @@ export function CopyButton({
               initial={reducedMotion ? false : preset.label.initial}
               animate={visible}
               exit={reducedMotion ? visible : preset.label.exit}
-              transition={{ type: "tween", duration: transitionDuration }}
+              transition={swapTransition(transitionDuration)}
             >
               {buttonLabel}
             </motion.span>

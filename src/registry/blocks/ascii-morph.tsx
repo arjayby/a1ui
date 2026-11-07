@@ -242,14 +242,15 @@ export function AsciiMorph({
       data-state="idle"
       role={interactive ? undefined : "img"}
       aria-label={interactive ? undefined : `ASCII ${names[current]}`}
-      className={clsx("text-foreground relative isolate w-full", className)}
+      className={clsx("group/ascii-morph text-foreground relative isolate w-full", className)}
       style={style}
     >
+      {/* Pressing the stage gives way at once; the morph itself starts on release. */}
       <svg
         data-slot="ascii-morph-art"
         viewBox="0 0 480 400"
         aria-hidden="true"
-        className="pointer-events-none block size-full select-none"
+        className="pointer-events-none block size-full transition-[scale,opacity] duration-150 ease-out select-none motion-safe:group-has-[>button:active]/ascii-morph:scale-[0.97] motion-reduce:transition-none motion-reduce:group-has-[>button:active]/ascii-morph:opacity-70"
         style={{ aspectRatio: "6 / 5" }}
       >
         <g

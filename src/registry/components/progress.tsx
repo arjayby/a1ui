@@ -77,7 +77,7 @@ export function Progress({
       fill.jump(percent);
       return;
     }
-    const controls = animate(fill, percent, { type: "spring", visualDuration: seconds, bounce: 0.12 });
+    const controls = animate(fill, percent, { type: "spring", visualDuration: seconds, bounce: 0 });
     return () => controls.stop();
   }, [fill, percent, seconds]);
 
@@ -96,7 +96,9 @@ export function Progress({
       {label}
     </ProgressPrimitive.Label>
   );
-  const sweep = seconds > 0 ? Math.max(seconds, 0.4) * 2.5 : 0;
+  // Loops last 1 to 2.5 seconds, so a long duration never slows them toward the 0.2 Hz sway
+  // that is most likely to cause motion discomfort.
+  const sweep = seconds > 0 ? Math.min(Math.max(seconds, 0.4) * 2.5, 2.5) : 0;
 
   return (
     <ProgressPrimitive.Root
@@ -361,7 +363,7 @@ function RollingText({ text, seconds }: { text: string; seconds: number }) {
           initial={false}
           animate={{ y: `${-digit}em` }}
           transition={
-            seconds ? { type: "spring", visualDuration: seconds * 0.8, bounce: 0.2 } : { duration: 0 }
+            seconds ? { type: "spring", visualDuration: seconds * 0.8, bounce: 0 } : { duration: 0 }
           }
         >
           {DIGITS.map((option) => (

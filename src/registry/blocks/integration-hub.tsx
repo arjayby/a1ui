@@ -115,10 +115,20 @@ const styles = `
     text-align: start;
     font: inherit;
     box-shadow: 0 1px 2px #0000000d;
-    transition: border-color 180ms ease, box-shadow 180ms ease, opacity 180ms ease;
+    transition:
+      border-color 180ms ease,
+      box-shadow 180ms ease,
+      opacity 180ms ease,
+      transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
   }
   [data-slot="integration-hub"] button.a1ui-hub-card {
     cursor: pointer;
+    touch-action: manipulation;
+  }
+  /* Press lands on pointer-down; release eases back without overshoot. */
+  [data-slot="integration-hub"] button.a1ui-hub-card:active {
+    transform: scale(0.97);
+    transition-duration: 180ms, 180ms, 180ms, 80ms;
   }
   [data-slot="integration-hub"] button.a1ui-hub-card:hover,
   [data-slot="integration-hub"] .a1ui-hub-card[aria-pressed="true"] {
@@ -269,7 +279,10 @@ const styles = `
       padding: 14px 5px;
     }
     [data-slot="integration-hub"] .a1ui-hub-product-icon { width: 26px; height: 26px; }
-    [data-slot="integration-hub"] .a1ui-hub-product-name { font-size: clamp(14px, 4.2cqi, 18px); }
+    [data-slot="integration-hub"] .a1ui-hub-product-name {
+      font-size: clamp(14px, 4.2cqi, 18px);
+      letter-spacing: -0.01em;
+    }
     [data-slot="integration-hub"] .a1ui-hub-product-description,
     [data-slot="integration-hub"] .a1ui-hub-product-status { display: none; }
   }
@@ -277,6 +290,7 @@ const styles = `
     [data-slot="integration-hub"] .a1ui-hub-pulse { animation: none; opacity: 0; }
     [data-slot="integration-hub"] .a1ui-hub-card,
     [data-slot="integration-hub"] .a1ui-hub-connection { transition: none; }
+    [data-slot="integration-hub"] button.a1ui-hub-card:active { transform: none; opacity: 0.7; }
   }
 `;
 

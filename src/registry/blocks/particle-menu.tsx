@@ -664,11 +664,13 @@ function ParticleMenuEntry({
       >
         <path ref={pathRef} d={restingPath} fill="currentColor" />
       </svg>
-      <span className="text-xs leading-none font-medium tracking-tight uppercase">{item.label}</span>
+      <span className="text-xs leading-none font-medium tracking-wide uppercase">{item.label}</span>
     </>
   );
+  // Pressing dims the item the moment the pointer goes down, like a highlighted menu row. With
+  // reduced motion the sigil stays still, so hover dims it slightly instead of scattering it.
   const className =
-    "text-foreground flex cursor-pointer flex-col items-center gap-2 rounded-sm bg-transparent px-3 pt-1 pb-4 font-sans no-underline outline-offset-4 select-none focus-visible:outline-1 focus-visible:outline-current";
+    "text-foreground flex cursor-pointer flex-col items-center gap-2 rounded-sm bg-transparent px-3 pt-1 pb-4 font-sans no-underline outline-offset-4 transition-opacity duration-150 select-none focus-visible:outline-1 focus-visible:outline-current active:opacity-60 active:duration-0 motion-reduce:hover:opacity-75 motion-reduce:active:opacity-60";
 
   return (
     <li ref={itemRef}>

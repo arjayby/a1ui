@@ -35,7 +35,13 @@ async function expectReadableFlow(flow: Locator) {
   expect(result.overflows).toBe(false);
 }
 
-test("text follows the ASCII duck silhouette and idle motion respects reduced motion", async ({ page }) => {
+async function duckScale(handle: Locator) {
+  return handle
+    .locator('[data-slot="shape-flow-duck"]')
+    .evaluate((element) => new DOMMatrix(getComputedStyle(element).transform).a);
+}
+
+test("text follows the ASCII duck silhouette and the duck rests without looping motion", async ({ page }) => {
   await page.goto("/blocks/shape-flow");
   const flow = page.locator('[data-slot="shape-flow"]');
   await expect(flow).toHaveAttribute("data-state", "ready");
@@ -53,8 +59,10 @@ test("text follows the ASCII duck silhouette and idle motion respects reduced mo
     });
   });
   expect(besideHead).toBe(true);
+  // No slow idle oscillation: the duck only moves when someone moves it.
   const duck = flow.locator('[data-slot="shape-flow-duck"]');
-  await expect(duck).toHaveCSS("animation-name", "a1ui-shape-flow-float");
+  await expect(duck).toHaveCSS("animation-name", "none");
+  await expect(duck).toHaveCSS("transform", "none");
   await expectReadableFlow(flow);
   await page.emulateMedia({ reducedMotion: "reduce" });
   await expect(duck).toHaveCSS("animation-name", "none");
@@ -76,12 +84,59 @@ test("dragging reflows every word around the duck and releases pointer capture",
     steps: 12,
   });
   await expect(handle).toHaveAttribute("data-dragging", "true");
-  await expect(handle.locator('[data-slot="shape-flow-duck"]')).toHaveCSS("animation-play-state", "paused");
+  await expect.poll(() => duckScale(handle)).toBeCloseTo(1.04, 2);
   await page.mouse.up();
   await expect(handle).toHaveAttribute("data-dragging", "false");
   await expect(handle).toHaveCSS("outline-style", "none");
   expect((await handle.boundingBox())!.x).toBeLessThan(before!.x - 60);
   expect(await flow.locator('[data-slot="shape-flow-line"]').allTextContents()).not.toEqual(initialLines);
+  await expectReadableFlow(flow);
+  await expect.poll(() => duckScale(handle)).toBe(1);
+  // The released duck settles inside the paragraph, however hard it was thrown.
+  await expect(async () => {
+    const duck = (await handle.boundingBox())!;
+    const bounds = (await flow.boundingBox())!;
+    expect(duck.x).toBeGreaterThanOrEqual(bounds.x - 0.5);
+    expect(duck.y).toBeGreaterThanOrEqual(bounds.y - 0.5);
+    expect(duck.x + duck.width).toBeLessThanOrEqual(bounds.x + bounds.width + 0.5);
+    expect(duck.y + duck.height).toBeLessThanOrEqual(bounds.y + bounds.height + 0.5);
+  }).toPass();
+  await expectReadableFlow(flow);
+});
+
+test("a flick carries the duck past the release point, then reduced motion drops it in place", async ({
+  page,
+}) => {
+  await page.goto("/blocks/shape-flow");
+  const flow = page.locator('[data-slot="shape-flow"]');
+  await expect(flow).toHaveAttribute("data-state", "ready");
+  const handle = flow.getByRole("button", { name: "Move duck" });
+  await handle.scrollIntoViewIfNeeded();
+
+  const throwDuck = async (distance: number) => {
+    const start = (await handle.boundingBox())!;
+    const x = start.x + start.width / 2;
+    const y = start.y + start.height / 2;
+    await page.mouse.move(x, y);
+    await page.mouse.down();
+    await page.mouse.move(x + distance, y, { steps: 4 });
+    const released = (await handle.boundingBox())!.x;
+    await page.mouse.up();
+    // Let any momentum play out before measuring where the duck came to rest.
+    await page.waitForTimeout(1200);
+    return { released, rested: (await handle.boundingBox())!.x };
+  };
+
+  const flick = await throwDuck(-60);
+  expect(flick.rested).toBeLessThan(flick.released - 10);
+  await expectReadableFlow(flow);
+
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await handle.focus();
+  await page.keyboard.press("Home");
+  const still = await throwDuck(60);
+  expect(still.rested).toBeCloseTo(still.released, 0);
+  expect(await duckScale(handle)).toBe(1);
   await expectReadableFlow(flow);
 });
 
@@ -174,7 +229,7 @@ test("touch dragging and cancellation release the duck", async ({ browser }) => 
     touchPoints: [{ x: x - 30, y: y + 35 }],
   });
   await expect(handle).toHaveAttribute("data-dragging", "true");
-  await expect(handle.locator('[data-slot="shape-flow-duck"]')).toHaveCSS("animation-play-state", "paused");
+  await expect.poll(() => duckScale(handle)).toBeCloseTo(1.04, 2);
   expect((await handle.boundingBox())!.x).toBeLessThan(before!.x - 20);
   await session.send("Input.dispatchTouchEvent", { type: "touchCancel", touchPoints: [] });
   await expect(handle).toHaveAttribute("data-dragging", "false");

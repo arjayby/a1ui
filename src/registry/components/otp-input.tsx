@@ -126,7 +126,7 @@ export function OtpInput({
                   layoutId={highlightId}
                   data-slot="otp-input-highlight"
                   className={`pointer-events-none absolute -inset-px rounded-md border ${invalid ? "border-destructive ring-destructive/25" : "border-ring ring-ring/30"} ring-3`}
-                  transition={{ type: "spring", duration: reducedMotion ? 0 : 0.3, bounce: 0.2 }}
+                  transition={{ type: "spring", duration: reducedMotion ? 0 : 0.3, bounce: 0 }}
                 />
               )}
               <AnimatePresence initial={false}>

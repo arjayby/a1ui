@@ -77,7 +77,7 @@ export function SelectExample() {
 
 ## API reference
 
-The list scales open from the trigger while its items fade in one after another. One highlight travels between the hovered or keyboard-highlighted items, the selected item's check draws itself in, and the trigger text slides toward the new value. With `alignItemWithTrigger`, Base UI places the list over the trigger so the selected item sits on top of the trigger text, and the list grows out from that item. This applies to mouse input only. Keyboard and touch, or a trigger close to the viewport edge, open the list below instead.
+The list scales open from the trigger while its items fade in one after another. One highlight travels between the hovered or keyboard-highlighted items, the selected item's check draws itself in, and the trigger text slides toward the new value. The list is a translucent `popover` surface that blurs the page behind it, and it turns solid when the user prefers reduced transparency. With `alignItemWithTrigger`, Base UI places the list over the trigger so the selected item sits on top of the trigger text, and the list grows out from that item. This applies to mouse input only. Keyboard and touch, or a trigger close to the viewport edge, open the list below instead.
 
 ### Select
 

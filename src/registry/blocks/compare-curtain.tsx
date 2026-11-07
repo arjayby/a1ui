@@ -43,7 +43,8 @@ export function CompareCurtain({
   style,
 }: CompareCurtainProps) {
   const stageRef = useRef<HTMLDivElement>(null);
-  const activePointerRef = useRef<number | null>(null);
+  const knobRef = useRef<HTMLSpanElement>(null);
+  const dragRef = useRef<{ pointerId: number; x: number; value: number } | null>(null);
   const [internalValue, setInternalValue] = useState(defaultValue);
   const [dragging, setDragging] = useState(false);
   const position = clamp(value ?? internalValue);
@@ -56,16 +57,31 @@ export function CompareCurtain({
     onValueChange?.(bounded);
   };
 
+  const stretchKnob = (overshoot: number) => {
+    const knob = knobRef.current;
+    if (knob) knob.style.transform = overshoot ? `translateX(${overshoot}px)` : "";
+  };
+
   const updateFromPointer = (event: PointerEvent<HTMLDivElement>) => {
+    const drag = dragRef.current;
     const bounds = stageRef.current?.getBoundingClientRect();
-    if (!bounds || bounds.width <= 0) return;
-    update(Math.round(((event.clientX - bounds.left) / bounds.width) * 100));
+    if (!drag || !bounds || bounds.width <= 0) return;
+    // Move by the pointer's travel from where the handle was grabbed, so the
+    // divider keeps its offset from the pointer instead of jumping under it.
+    const next = drag.value + ((event.clientX - drag.x) / bounds.width) * 100;
+    // Past either edge, the knob follows with growing resistance instead of
+    // stopping dead. The value itself stays within 0–100.
+    const overshoot = ((next < 0 ? next : next > 100 ? next - 100 : 0) / 100) * bounds.width;
+    const resistance = 0.55;
+    stretchKnob((overshoot * bounds.width * resistance) / (bounds.width + resistance * Math.abs(overshoot)));
+    update(Math.round(next));
   };
 
   const finishDrag = (event: PointerEvent<HTMLDivElement>) => {
-    if (activePointerRef.current !== event.pointerId) return;
-    activePointerRef.current = null;
+    if (dragRef.current?.pointerId !== event.pointerId) return;
+    dragRef.current = null;
     setDragging(false);
+    stretchKnob(0);
     if (event.currentTarget.hasPointerCapture(event.pointerId)) {
       event.currentTarget.releasePointerCapture(event.pointerId);
     }
@@ -149,23 +165,31 @@ export function CompareCurtain({
           style={{ left: `clamp(22px, ${position}%, calc(100% - 22px))` }}
           onKeyDown={onKeyDown}
           onPointerDown={(event) => {
-            if (disabled || event.button !== 0 || activePointerRef.current !== null) return;
+            if (disabled || event.button !== 0 || dragRef.current !== null) return;
             event.preventDefault();
             event.currentTarget.focus({ preventScroll: true });
-            activePointerRef.current = event.pointerId;
+            dragRef.current = { pointerId: event.pointerId, x: event.clientX, value: position };
             event.currentTarget.setPointerCapture(event.pointerId);
             setDragging(true);
-            updateFromPointer(event);
           }}
           onPointerMove={(event) => {
-            if (activePointerRef.current === event.pointerId) updateFromPointer(event);
+            if (dragRef.current?.pointerId === event.pointerId) updateFromPointer(event);
           }}
           onPointerUp={finishDrag}
           onPointerCancel={finishDrag}
           onLostPointerCapture={finishDrag}
         >
           <span
-            className="border-foreground bg-background text-foreground pointer-events-none absolute top-1/2 left-1/2 grid size-8 -translate-1/2 place-items-center rounded-full border shadow-sm"
+            ref={knobRef}
+            className={cn(
+              "border-foreground bg-background text-foreground pointer-events-none absolute top-1/2 left-1/2 grid size-8 -translate-1/2 place-items-center rounded-full border shadow-sm",
+              // The knob answers the press at once and tracks any edge stretch
+              // directly, then settles back on release. Reduced motion drops the
+              // press scale and the return travel.
+              dragging
+                ? "motion-reduce:bg-muted transition-[scale] duration-100 ease-out motion-safe:scale-[0.96] motion-reduce:transition-none"
+                : "transition-[scale,transform] duration-300 ease-[cubic-bezier(0.25,1,0.5,1)] motion-reduce:transition-none",
+            )}
             aria-hidden="true"
           >
             <svg

@@ -78,7 +78,7 @@ export function Checkbox({
       render={
         <motion.span
           whileTap={disabled || seconds === 0 ? undefined : { scale: 0.86 }}
-          transition={{ type: "spring", visualDuration: 0.2, bounce: 0.5 }}
+          transition={{ type: "spring", visualDuration: 0.2, bounce: 0 }}
         />
       }
       className={`border-border bg-background text-background data-checked:border-foreground data-checked:bg-foreground data-indeterminate:border-foreground data-indeterminate:bg-foreground focus-visible:ring-ring/30 relative inline-grid size-[18px] shrink-0 cursor-pointer place-items-center rounded-[5px] border shadow-xs transition-colors duration-150 outline-none focus-visible:ring-3 data-disabled:cursor-not-allowed ${label ? "mt-px" : `data-disabled:opacity-50 ${className ?? ""}`}`}

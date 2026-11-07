@@ -136,7 +136,7 @@ export function PasswordInput({
             if (!reducedMotion) animate(scope.current, { x: [0, -6, 6, -4, 4, 0] }, { duration: 0.36 });
           }}
         />
-        <button
+        <motion.button
           type="button"
           aria-label={visible ? "Hide password" : "Show password"}
           aria-controls={id}
@@ -147,6 +147,9 @@ export function PasswordInput({
           // Keeps focus and the caret in the input while toggling.
           onPointerDown={(event) => event.preventDefault()}
           onClick={() => setVisible((current) => !current)}
+          // Squashes on press, before the click commits the toggle.
+          whileTap={reducedMotion ? undefined : { scale: 0.88 }}
+          transition={{ type: "spring", visualDuration: 0.15, bounce: 0 }}
         >
           <AnimatePresence initial={false} mode="popLayout">
             <motion.span
@@ -155,7 +158,7 @@ export function PasswordInput({
               initial={reducedMotion ? false : { opacity: 0, scale: 0.6, filter: "blur(4px)" }}
               animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
               exit={reducedMotion ? { opacity: 0, transition: { duration: 0 } } : { opacity: 0, scale: 0.6 }}
-              transition={{ type: "spring", duration: reducedMotion ? 0 : 0.25, bounce: 0.2 }}
+              transition={{ type: "spring", duration: reducedMotion ? 0 : 0.25, bounce: 0 }}
             >
               {visible ? (
                 <EyeSlashIcon aria-hidden="true" className="size-4" />
@@ -164,7 +167,7 @@ export function PasswordInput({
               )}
             </motion.span>
           </AnimatePresence>
-        </button>
+        </motion.button>
       </div>
       <Popover.Root open={open} onOpenChange={setOpen}>
         {/* The meter is the trigger: hovering, focusing, or clicking it opens the strength and requirements. */}
@@ -212,7 +215,7 @@ export function PasswordInput({
               initialFocus={false}
               finalFocus={false}
               data-slot="password-input-popover"
-              className="bg-card text-foreground ring-foreground/10 w-64 max-w-[calc(100vw-2rem)] origin-(--transform-origin) rounded-md p-3 text-sm shadow-md ring-1 transition-[opacity,scale,filter] duration-150 data-ending-style:scale-95 data-ending-style:opacity-0 data-ending-style:blur-xs data-starting-style:scale-95 data-starting-style:opacity-0 data-starting-style:blur-xs motion-reduce:transition-none"
+              className="bg-popover/80 text-popover-foreground ring-foreground/10 [@media(prefers-reduced-transparency:reduce)]:bg-popover w-64 max-w-[calc(100vw-2rem)] origin-(--transform-origin) rounded-md p-3 text-sm shadow-md ring-1 backdrop-blur-xl backdrop-saturate-150 transition-[opacity,scale,filter] duration-150 data-ending-style:scale-95 data-ending-style:opacity-0 data-ending-style:blur-xs data-starting-style:scale-95 data-starting-style:opacity-0 data-starting-style:blur-xs motion-reduce:transition-none [@media(prefers-reduced-transparency:reduce)]:backdrop-blur-none"
             >
               <div className="flex items-center justify-between gap-3">
                 <Popover.Title className="text-muted-foreground text-xs font-medium">Strength</Popover.Title>
@@ -245,7 +248,7 @@ export function PasswordInput({
                                 ? { opacity: 0, transition: { duration: 0 } }
                                 : { opacity: 0, scale: 0.5 }
                             }
-                            transition={{ type: "spring", duration: reducedMotion ? 0 : 0.3, bounce: 0.3 }}
+                            transition={{ type: "spring", duration: reducedMotion ? 0 : 0.3, bounce: 0 }}
                           >
                             {met ? (
                               <CheckIcon weight="bold" className="size-3.5 text-(--status-success)" />

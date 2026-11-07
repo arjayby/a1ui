@@ -69,6 +69,22 @@ describe("CompareCurtain", () => {
     expect(handle).toHaveAttribute("aria-valuenow", "0");
   });
 
+  it("keeps the grab offset and stretches the knob past an edge until release", () => {
+    renderCurtain();
+    const handle = screen.getByRole("slider");
+    const knob = handle.querySelector("span")!;
+    fireEvent.pointerDown(handle, { clientX: 310, button: 0, pointerId: 1 });
+    expect(handle).toHaveAttribute("aria-valuenow", "50");
+    fireEvent.pointerMove(handle, { clientX: 350, pointerId: 1 });
+    expect(handle).toHaveAttribute("aria-valuenow", "60");
+    expect(knob.style.transform).toBe("");
+    fireEvent.pointerMove(handle, { clientX: 600, pointerId: 1 });
+    expect(handle).toHaveAttribute("aria-valuenow", "100");
+    expect(knob.style.transform).toMatch(/^translateX\(\d/);
+    fireEvent.pointerUp(handle, { pointerId: 1 });
+    expect(knob.style.transform).toBe("");
+  });
+
   it("supports arrow, page, and boundary keys in controlled mode", () => {
     const onValueChange = vi.fn();
     const { rerender } = renderCurtain({ value: 40, onValueChange });

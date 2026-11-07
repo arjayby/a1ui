@@ -7,6 +7,10 @@ import { TextBanner } from "@/registry/blocks/text-banner";
 
 const items = ["a1ui", "Components"];
 
+// Site press feedback: scale down the instant the pointer goes down, spring back on release.
+const pressable =
+  "transition-transform duration-(--ease-spring-snappy-duration) ease-(--ease-spring-snappy) active:scale-[0.96] active:duration-75 active:ease-(--ease-press) motion-reduce:transition-none motion-reduce:active:scale-100 motion-reduce:active:opacity-60";
+
 export function TextBannerPreview() {
   return (
     <div className="not-prose demo-frame text-banner-preview">
@@ -29,13 +33,19 @@ export function TextBannerDemo() {
       <div className="not-prose demo-caption text-banner-demo-controls">
         <button
           type="button"
+          className={pressable}
           onClick={() => setDirection((current) => (current === "right" ? "left" : "right"))}
           aria-label={`Change direction to ${direction === "right" ? "left" : "right"}`}
         >
           {direction === "right" ? <ArrowRight aria-hidden="true" /> : <ArrowLeft aria-hidden="true" />}
           {direction === "right" ? "Left to right" : "Right to left"}
         </button>
-        <button type="button" onClick={() => setPaused((current) => !current)} aria-pressed={paused}>
+        <button
+          type="button"
+          className={pressable}
+          onClick={() => setPaused((current) => !current)}
+          aria-pressed={paused}
+        >
           {paused ? <Play aria-hidden="true" /> : <Pause aria-hidden="true" />}
           {paused ? "Resume" : "Pause"}
         </button>

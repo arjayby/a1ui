@@ -30,8 +30,9 @@ test("morphs persistent paths in both directions and handles interruption", asyn
   await page.keyboard.press("Space");
   await expect(button).toHaveAttribute("aria-pressed", "false");
   await expect(button.locator("path").first()).toHaveAttribute("d", /^M17\.25 12 C/);
-  expect((await button.boundingBox())?.width).toBe(result.bounds.width);
-  expect((await button.boundingBox())?.height).toBe(result.bounds.height);
+  // Space presses the button like a pointer does, so let the press scale settle before measuring.
+  await expect.poll(async () => (await button.boundingBox())?.width).toBeCloseTo(result.bounds.width, 1);
+  await expect.poll(async () => (await button.boundingBox())?.height).toBeCloseTo(result.bounds.height, 1);
   await expect(button.locator("svg")).toHaveCount(1);
 });
 

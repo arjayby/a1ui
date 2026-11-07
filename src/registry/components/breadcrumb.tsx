@@ -83,7 +83,7 @@ const useCanMeasure = () =>
 const listClass = "flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground";
 const itemClass = "inline-flex min-w-0 items-center gap-1.5";
 const linkClass =
-  "truncate rounded-sm transition-colors outline-none hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/30";
+  "truncate rounded-sm transition-colors outline-none hover:text-foreground active:opacity-60 focus-visible:ring-3 focus-visible:ring-ring/30";
 const pageClass = "truncate font-semibold text-foreground";
 
 function clampRange(count: number, before: number, after: number): Range | null {
@@ -224,7 +224,7 @@ export function Breadcrumb({
   }, [expanded]);
 
   const spring: Transition =
-    seconds === 0 ? { duration: 0 } : { type: "spring", visualDuration: seconds, bounce: 0.15 };
+    seconds === 0 ? { duration: 0 } : { type: "spring", visualDuration: seconds, bounce: 0 };
   const stagger = seconds * 0.15;
   const segmentVariants: Variants = {
     hidden: ({ reveal }: Custom) => ({ opacity: 0, x: reveal ? -8 : 16 }),
@@ -325,7 +325,7 @@ export function Breadcrumb({
                     type="button"
                     data-slot="breadcrumb-ellipsis"
                     aria-label={`Show ${hiddenCount} hidden ${hiddenCount === 1 ? "page" : "pages"}`}
-                    className="hover:bg-muted hover:text-foreground focus-visible:ring-ring/30 inline-flex h-6 min-w-6 items-center justify-center rounded-md transition-colors outline-none focus-visible:ring-3"
+                    className="hover:bg-muted hover:text-foreground active:bg-muted focus-visible:ring-ring/30 inline-flex h-6 min-w-6 items-center justify-center rounded-md transition-[color,background-color,scale] duration-100 ease-out outline-none focus-visible:ring-3 motion-safe:active:scale-90"
                     onClick={() => {
                       if (collapsible) pendingFocus.current = collapsible.before;
                       setExpanded(true);

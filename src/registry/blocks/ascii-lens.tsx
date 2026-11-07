@@ -257,12 +257,10 @@ export function AsciiLens({
         if (!canInteract()) return;
         const bounds = root.getBoundingClientRect();
         if (!bounds.width || !bounds.height || !width || !height) return;
-        lens.targetX = clamp(((clientX - bounds.left) * width) / bounds.width, 0, width);
-        lens.targetY = clamp(((clientY - bounds.top) * height) / bounds.height, 0, height);
-        if (!lens.active) {
-          lens.x = lens.targetX;
-          lens.y = lens.targetY;
-        }
+        // The lens stays under the pointer 1:1. Only its opening and closing,
+        // and keyboard steps, ease toward their targets.
+        lens.x = lens.targetX = clamp(((clientX - bounds.left) * width) / bounds.width, 0, width);
+        lens.y = lens.targetY = clamp(((clientY - bounds.top) * height) / bounds.height, 0, height);
         lens.active = true;
         schedule();
       },

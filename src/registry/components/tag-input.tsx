@@ -64,6 +64,8 @@ export function TagInput({
   const full = max !== undefined && tags.length >= max;
   const lastTag = tags.at(-1);
   const highlighted = armed && lastTag !== undefined ? lastTag : undefined;
+  // Warns while typing: the tag the draft would duplicate is outlined before Enter is pressed.
+  const duplicate = tags.find((tag) => tag.toLowerCase() === draft.trim().toLowerCase());
   const descriptionId = description ? `${id}-description` : undefined;
   const countId = max !== undefined ? `${id}-count` : undefined;
 
@@ -135,37 +137,42 @@ export function TagInput({
           <AnimatePresence initial={false} mode="popLayout">
             {tags.map((tag, index) => {
               const active = tag === highlighted;
+              const repeated = tag === duplicate;
               return (
                 <motion.li
                   key={tag.toLowerCase()}
                   layout={!reducedMotion}
                   data-slot="tag-input-tag"
                   data-highlighted={active || undefined}
-                  className={`flex h-6 max-w-full min-w-0 items-center gap-0.5 rounded-sm pr-0.5 pl-2 text-xs font-medium ring-1 transition-colors ${active ? "bg-destructive/15 text-destructive ring-destructive" : "bg-muted text-foreground ring-transparent"}`}
+                  data-duplicate={repeated || undefined}
+                  className={`flex h-6 max-w-full min-w-0 items-center gap-0.5 rounded-sm pr-0.5 pl-2 text-xs font-medium ring-1 transition-colors ${active ? "bg-destructive/15 text-destructive ring-destructive" : repeated ? "bg-muted text-foreground ring-ring" : "bg-muted text-foreground ring-transparent"}`}
                   initial={reducedMotion ? false : { opacity: 0, scale: 0.8, filter: "blur(4px)" }}
                   animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
                   exit={
                     reducedMotion ? { opacity: 0, transition: { duration: 0 } } : { opacity: 0, scale: 0.8 }
                   }
-                  transition={{ type: "spring", duration: reducedMotion ? 0 : 0.3, bounce: 0.2 }}
+                  transition={{ type: "spring", duration: reducedMotion ? 0 : 0.3, bounce: 0 }}
                 >
                   <span className="truncate">{tag}</span>
-                  <button
+                  <motion.button
                     type="button"
                     tabIndex={-1}
                     aria-label={`Remove ${tag}`}
                     data-slot="tag-input-remove"
                     disabled={disabled}
-                    className="hover:bg-foreground/10 grid size-5 shrink-0 place-items-center rounded-xs opacity-60 transition-opacity hover:opacity-100 disabled:pointer-events-none"
+                    className="hover:bg-foreground/10 active:bg-foreground/15 grid size-5 shrink-0 place-items-center rounded-xs opacity-60 transition-opacity hover:opacity-100 active:opacity-100 disabled:pointer-events-none"
                     // Keeps focus in the text input so typing can continue after a removal.
                     onPointerDown={(event) => event.preventDefault()}
                     onClick={() => {
                       remove(index);
                       inputRef.current?.focus();
                     }}
+                    // Squashes on press; the tag is removed only when the click commits.
+                    whileTap={reducedMotion ? undefined : { scale: 0.85 }}
+                    transition={{ type: "spring", visualDuration: 0.15, bounce: 0 }}
                   >
                     <XIcon aria-hidden="true" weight="bold" className="size-3" />
-                  </button>
+                  </motion.button>
                 </motion.li>
               );
             })}

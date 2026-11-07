@@ -20,6 +20,10 @@ type Align = "start" | "center" | "end";
 
 const EASE = "cubic-bezier(0.22, 1, 0.36, 1)";
 
+// Reduced transparency swaps the translucent material for a solid surface.
+const SOLID =
+  "[@media(prefers-reduced-transparency:reduce)]:bg-popover [@media(prefers-reduced-transparency:reduce)]:backdrop-blur-none";
+
 export interface TooltipContentProps {
   /** Preferred side of the trigger. Flips to stay in view. */
   side?: Side;
@@ -323,7 +327,7 @@ function TooltipSurface({
           id={id}
           role="tooltip"
           data-slot="tooltip-content"
-          className={`bg-foreground text-background relative h-(--popup-height,auto) w-(--popup-width,auto) max-w-[min(20rem,var(--available-width))] origin-(--transform-origin) rounded-md text-xs font-medium shadow-md transition-[width,height] duration-(--tooltip-duration) ease-(--tooltip-ease) outline-none data-instant:transition-none ${className ?? ""}`}
+          className={`bg-popover/80 text-popover-foreground relative h-(--popup-height,auto) backdrop-blur-xl backdrop-saturate-150 ${SOLID} w-(--popup-width,auto) max-w-[min(20rem,var(--available-width))] origin-(--transform-origin) rounded-md text-xs font-medium shadow-md transition-[width,height] duration-(--tooltip-duration) ease-(--tooltip-ease) outline-none data-instant:transition-none ${className ?? ""}`}
           render={(props, state) => {
             const hidden = { opacity: 0, scale: 0.88, ...nudge(state.side) };
             const instant = seconds === 0 || state.instant === "dismiss";
@@ -338,7 +342,7 @@ function TooltipSurface({
                     : {
                         type: "spring",
                         visualDuration: seconds,
-                        bounce: 0.3,
+                        bounce: 0,
                         opacity: { duration: seconds * (state.open ? 0.5 : 0.7), ease: "easeOut" },
                       }
                 }
@@ -349,7 +353,7 @@ function TooltipSurface({
           {arrow && (
             <TooltipPrimitive.Arrow
               data-slot="tooltip-arrow"
-              className="bg-foreground absolute size-2.5 rotate-45 rounded-[2px] transition-[left,top] duration-(--tooltip-duration) ease-(--tooltip-ease) data-instant:transition-none data-[side=bottom]:-top-1 data-[side=inline-end]:-left-1 data-[side=inline-start]:-right-1 data-[side=left]:-right-1 data-[side=right]:-left-1 data-[side=top]:-bottom-1"
+              className={`bg-popover/80 [@media(prefers-reduced-transparency:reduce)]:bg-popover absolute size-2.5 rotate-45 rounded-[2px] transition-[left,top] duration-(--tooltip-duration) ease-(--tooltip-ease) data-instant:transition-none data-[side=bottom]:-top-[5px] data-[side=bottom]:[clip-path:polygon(0_0,100%_0,0_100%)] data-[side=inline-end]:-left-[5px] data-[side=inline-end]:[clip-path:polygon(0_0,100%_100%,0_100%)] data-[side=inline-start]:-right-[5px] data-[side=inline-start]:[clip-path:polygon(0_0,100%_0,100%_100%)] data-[side=left]:-right-[5px] data-[side=left]:[clip-path:polygon(0_0,100%_0,100%_100%)] data-[side=right]:-left-[5px] data-[side=right]:[clip-path:polygon(0_0,100%_100%,0_100%)] data-[side=top]:-bottom-[5px] data-[side=top]:[clip-path:polygon(100%_0,100%_100%,0_100%)]`}
             />
           )}
           {/* The viewport keeps the outgoing text while the new text slides in from the side the
