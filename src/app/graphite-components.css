@@ -104,22 +104,6 @@
     outline-offset: 2px;
     box-shadow: none;
   }
-  /* Depth: filled and outline buttons sit above the surface; ghost buttons stay flat. */
-  .ui-button:not([data-variant="ghost"]),
-  .ui-icon-button {
-    box-shadow: var(--shadow-button);
-  }
-  .ui-button:not([data-variant="ghost"]):is(:hover, [data-preview-state="hover"]),
-  .ui-icon-button:hover {
-    box-shadow: var(--shadow-button-hover);
-  }
-  .ui-button:not([data-variant="ghost"]):is(:active, [data-preview-state="active"]),
-  .ui-icon-button:active {
-    box-shadow: var(--shadow-button);
-  }
-  .ui-button:disabled {
-    box-shadow: none;
-  }
   /* Fields take the macOS focus ring: a tinted border plus a soft halo. */
   .ui-input:focus-visible {
     border-color: var(--ring);
