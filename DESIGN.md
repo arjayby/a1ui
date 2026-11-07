@@ -10,6 +10,7 @@ The source is the **Graphite** design system in Claude Design ([artifact](https:
 | ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
 | Token source (matches Claude Design)                              | [`docs/graphite/tokens.json`](docs/graphite/tokens.json)                                                           |
 | Generated token CSS: light in `:root`, dark in `.dark`            | [`src/app/graphite-tokens.css`](src/app/graphite-tokens.css)                                                       |
+| Apple layer: overrides on top of the generated tokens             | [`src/app/apple-tokens.css`](src/app/apple-tokens.css)                                                             |
 | Tailwind, shadcn and Fumadocs role mapping, plus local extensions | [`src/app/globals.css`](src/app/globals.css)                                                                       |
 | Component styles (`.ui-*`)                                        | [`src/app/graphite-components.css`](src/app/graphite-components.css)                                               |
 | React components                                                  | `src/components/ui/<name>.tsx`                                                                                     |
@@ -24,6 +25,18 @@ The source is the **Graphite** design system in Claude Design ([artifact](https:
 - Registry blocks and components keep their own styles so they install cleanly into any shadcn theme.
 
 The neutral, surface, border, sidebar and danger colours were updated on November 6, 2026 from a supplied shadcn theme, in this repository and in Claude Design; primary, accent, ring, chart and status colours are unchanged. To change a token, edit `docs/graphite/tokens.json` (or re-export it from Claude Design) and regenerate `src/app/graphite-tokens.css` to match; do not hand-edit values in the CSS.
+
+## Apple layer
+
+Since November 7, 2026 the site runs an Apple layer on top of Graphite, following Apple's interface guidelines (the `apple-design` skill in `.claude/skills`). [`src/app/apple-tokens.css`](src/app/apple-tokens.css) loads right after `graphite-tokens.css` and redefines the tokens below; everything else, including spacing, still comes from Graphite. Where this section and the Graphite sections that follow disagree, this section wins.
+
+- **Type:** the system font (`-apple-system`, so SF Pro with optical sizing on Apple platforms; Inter elsewhere) for both `--font-sans` and `--font-heading`, and `ui-monospace`/SF Mono before DM Mono for code. Headings are semibold or bold. Tracking is size-specific: `--tracking-display` (-0.022em) for large titles, `--tracking-title` and `--tracking-headline` for section titles, `--tracking-body` (-0.006em) for 14px text, 0 at 12px and below. Eyebrows are 12px semibold sans, not uppercase mono.
+- **Colour:** Apple's neutrals (`#f5f5f7` page and `#fff` raised surfaces in light; true black and `#1c1c1e` in dark) with system blue as the single tint: `--primary` is `#0071e3` in both themes (white text, 4.7:1), `--link` is `#0066cc` / `#2997ff`, and `--ring` is system blue. State colours are Apple's system green, orange and red.
+- **Shape and depth:** `radius-xs` 6, `sm` 10, `md` 12, `lg` 18, `xl` 24, `--radius-pill` for buttons. Depth is a soft shadow (`--shadow-card`, `--shadow-card-hover`, `--shadow-overlay`) and `--hairline` replaces most dividers. Docs content sits on a raised `card` surface beside a `background` sidebar; demos, code and catalog tiles sit in recessed `background` wells.
+- **Materials:** the landing nav, docs toolbar, mobile sidebar, popovers, menus, tooltips and toasts are translucent (`--material`, `--material-thick` with `backdrop-filter`). The toolbar hairline fades in only once the page scrolls (a scroll-driven animation where supported). Modal dialogs and the mobile sidebar dim the page; floating layers do not.
+- **Motion:** springs sampled into CSS `linear()` curves: `--ease-spring` (damping 1.0, response 0.4s), `--ease-spring-snappy` (1.0, 0.3s) and `--ease-spring-bounce` (0.8, 0.4s, for momentum only), each with a matching `-duration`. Press feedback lands on pointer-down (`scale(0.96)` on site buttons, `0.985` on tiles) and springs back on release. Demo stages are excluded, so registry components look exactly as they install. Overlays scale in from their trigger, and sheets and toasts leave the way they came.
+- **Accessibility:** under `prefers-reduced-motion` the page reveal becomes a 200ms cross-fade and overlays only fade; `prefers-reduced-transparency` makes materials solid; `prefers-contrast: more` strengthens borders, hairlines and secondary text.
+- **Registry components** still read only the shared shadcn tokens, so they pick up the new neutrals and tint but keep their own geometry and motion. The site's `ui-menu` and `ui-menu-item` classes are shared with the registry Dropdown Menu, so they keep a muted highlight and leave reduced-motion opt-outs to the component.
 
 ## Overview
 

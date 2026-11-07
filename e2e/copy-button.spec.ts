@@ -42,7 +42,7 @@ for (const animation of ["blur", "slide", "flip"]) {
     await page.getByRole("menuitem", { name: animation, exact: true }).click();
     const button = page.locator(`.demo-frame [data-slot="copy-button"][data-animation="${animation}"]`);
     await expect(button).toHaveAccessibleName("Copy");
-    await expect(button).toHaveCSS("font-family", "Inter, system-ui, sans-serif");
+    await expect(button).toHaveCSS("font-family", '-apple-system, "system-ui", Inter, system-ui, sans-serif');
     await expect(button).toHaveAttribute("data-size", "default");
     await expect(button).toHaveClass(/ui-button/);
     const width = (await button.boundingBox())?.width;

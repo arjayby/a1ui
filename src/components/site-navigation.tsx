@@ -61,7 +61,7 @@ function SearchButton() {
     <Button
       variant="secondary"
       aria-label="Search documentation"
-      className="text-muted-foreground w-9 justify-center px-0 sm:w-56 sm:justify-between sm:px-3"
+      className="docs-search"
       onClick={() => {
         setOpenMobile(false);
         setOpenSearch(true);
@@ -69,7 +69,7 @@ function SearchButton() {
     >
       <span className="flex items-center gap-2">
         <MagnifyingGlassIcon aria-hidden="true" className="size-4" />
-        <span className="hidden sm:inline">Search...</span>
+        <span className="hidden sm:inline">Search</span>
       </span>
       <kbd className="hidden text-xs sm:inline">⌘ K</kbd>
     </Button>
@@ -87,11 +87,11 @@ export function DocsHeader() {
     (pathname === "/agents" ? "Install with an agent" : pathname === "/components" ? "Components" : "Blocks");
 
   return (
-    <header className="bg-background border-border sticky top-0 z-20 flex min-h-14 shrink-0 items-center gap-2 border-b px-3 md:rounded-t-2xl md:px-4">
+    <header className="docs-header">
       <SidebarTrigger className="shrink-0" />
       <Separator orientation="vertical" className="mr-1 min-h-4 self-center" />
       <Breadcrumb className="min-w-0 flex-1">
-        <BreadcrumbList className="flex-nowrap gap-2 text-xs">
+        <BreadcrumbList className="flex-nowrap gap-1.5 text-[13px]">
           <BreadcrumbItem className="hidden md:inline-flex">
             <BreadcrumbLink render={<Link href="/" />}>Documentation</BreadcrumbLink>
           </BreadcrumbItem>

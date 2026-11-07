@@ -29,7 +29,7 @@ for (const animation of ["blur", "slide", "flip"]) {
     await expect(button).toHaveAttribute("data-state", "success");
     await expect(button).toHaveAttribute("aria-busy", "false");
     await expect(button).toHaveText("Submitted");
-    await expect(button).toHaveCSS("color", "rgb(166, 185, 139)");
+    await expect(button).toHaveCSS("color", "rgb(48, 209, 88)");
     await expect(button).toHaveCSS("background-color", idleBackground);
     await expect(button).toBeDisabled();
     await expect(page.getByRole("status").filter({ hasText: "Submitted" })).toBeAttached();

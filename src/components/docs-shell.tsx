@@ -11,7 +11,7 @@ export function DocsShell({ children }: { children: ReactNode }) {
     <SidebarProvider className="docs-shell">
       <HydrationMarker />
       <AppSidebar />
-      <SidebarInset className="docs-main md:ring-border min-w-0 md:ring-1">
+      <SidebarInset className="docs-main min-w-0">
         <DocsHeader />
         <DocsPageTransition>{children}</DocsPageTransition>
       </SidebarInset>

@@ -19,7 +19,10 @@ for (const width of [1440, 390, 320]) {
     const preview = card.locator(".particle-menu-preview");
     await expect(preview.locator("span")).toHaveText(labels);
     for (const label of await preview.locator("span").all()) {
-      await expect(label).toHaveCSS("font-family", "Inter, system-ui, sans-serif");
+      await expect(label).toHaveCSS(
+        "font-family",
+        '-apple-system, "system-ui", Inter, system-ui, sans-serif',
+      );
     }
     const bounds = await preview.boundingBox();
     if (!bounds) throw new Error("Particle Menu preview has no visible bounds");
@@ -54,7 +57,10 @@ test.describe("particle menu demo", () => {
     test(`${label} scatters on hover and gradually returns after leaving`, async ({ page }) => {
       const menu = page.getByRole("navigation", { name: "Particle menu demo" });
       const button = menu.getByRole("button", { name: label, exact: true });
-      await expect(button).toHaveCSS("font-family", "Inter, system-ui, sans-serif");
+      await expect(button).toHaveCSS(
+        "font-family",
+        '-apple-system, "system-ui", Inter, system-ui, sans-serif',
+      );
       const path = button.locator("path");
       const resting = await path.getAttribute("d");
       expect(resting).toBeTruthy();

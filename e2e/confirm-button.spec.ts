@@ -57,7 +57,7 @@ test("the label and success check animate with blur without resizing the button"
   expect(samples).toEqual({ stableWidth: true, labelAnimated: true, iconAnimated: true });
   await expect(button).toHaveText("Confirmed");
   await expect(button.locator('[data-slot="confirm-button-icon"] svg')).toHaveCount(1);
-  await expect(button.locator('[data-slot="confirm-button-icon"]')).toHaveCSS("color", "rgb(166, 185, 139)");
+  await expect(button.locator('[data-slot="confirm-button-icon"]')).toHaveCSS("color", "rgb(48, 209, 88)");
   await expect(button).toHaveText("Hold to confirm");
   await expect(button.locator("svg")).toHaveCount(0);
 });
@@ -112,7 +112,7 @@ for (const direction of ["right", "up", "left", "down"]) {
     await page.clock.runFor(1850);
     await expect(button).toHaveText("Confirmed");
     await expect(fill).toBeHidden();
-    await expect(label).toHaveCSS("color", "rgb(166, 185, 139)");
+    await expect(label).toHaveCSS("color", "rgb(48, 209, 88)");
     await expect(button).toHaveCSS("color", idleStyles.color);
     await expect(button).toHaveCSS("background-color", holdingBackground);
     await page.clock.runFor(2000);

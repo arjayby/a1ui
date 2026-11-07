@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRightIcon, ArrowUpRightIcon, CodeIcon, StackIcon } from "@phosphor-icons/react/ssr";
+import { ArrowUpRightIcon, CaretRightIcon } from "@phosphor-icons/react/ssr";
 
 import { AgentInstall } from "@/components/agent-install";
 import { ArcReelPreview } from "@/components/block-demos/arc-reel-demo";
@@ -61,25 +61,23 @@ export default function HomePage() {
       <a className="landing-skip" href="#main">
         Skip to content
       </a>
-      <header className="landing-header landing-width">
-        <Link href="/" className="landing-brand" aria-label="a1ui home">
-          <span className="brand-mark" aria-hidden="true" />
-          a1ui
-          <span className="landing-brand-divider" aria-hidden="true">
-            /
-          </span>
-          <span className="landing-brand-caption">Animated React UI</span>
-        </Link>
-        <nav aria-label="Main navigation">
-          <Link href="/components">Components</Link>
-          <Link href="/blocks">Blocks</Link>
-          <Link href="/agents" className="landing-guide-link">
-            Get started <ArrowUpRightIcon aria-hidden="true" />
+      <header className="landing-header">
+        <div className="landing-header-inner landing-width">
+          <Link href="/" className="landing-brand" aria-label="a1ui home">
+            <span className="brand-mark" aria-hidden="true" />
+            a1ui
           </Link>
-        </nav>
-        <div className="landing-header-actions">
-          <GitHubLink />
-          <ThemeButton />
+          <nav aria-label="Main navigation">
+            <Link href="/components">Components</Link>
+            <Link href="/blocks">Blocks</Link>
+            <Link href="/agents" className="landing-guide-link">
+              Get started
+            </Link>
+          </nav>
+          <div className="landing-header-actions">
+            <GitHubLink />
+            <ThemeButton />
+          </div>
         </div>
       </header>
 
@@ -98,11 +96,11 @@ export default function HomePage() {
             animation.
           </p>
           <div className="landing-hero-actions">
-            <Link href="/components" className="ui-button">
-              Explore components <ArrowRightIcon aria-hidden="true" />
+            <Link href="/components" className="ui-button landing-cta">
+              Explore components
             </Link>
-            <Link href="/blocks" className="ui-button" data-variant="outline">
-              Browse blocks <StackIcon aria-hidden="true" />
+            <Link href="/blocks" className="landing-chevron-link">
+              Browse blocks <CaretRightIcon aria-hidden="true" weight="bold" />
             </Link>
           </div>
           <p className="landing-hero-note">Built with Framer Motion and distributed via shadcn</p>
@@ -111,9 +109,7 @@ export default function HomePage() {
         <section aria-labelledby="components-heading" className="landing-components">
           <div className="landing-section-heading">
             <h2 id="components-heading">Micro-interactions</h2>
-            <span className="landing-section-note">
-              Try them <ArrowUpRightIcon aria-hidden="true" />
-            </span>
+            <span className="landing-section-note">Try them right here.</span>
           </div>
           <div className="landing-playground">
             <article className="landing-specimen landing-spiral">
@@ -178,8 +174,8 @@ export default function HomePage() {
           </div>
           <div className="landing-section-footer">
             <p>The small moments, animated.</p>
-            <Link href="/components">
-              All {components.length} components <ArrowRightIcon aria-hidden="true" />
+            <Link href="/components" className="landing-chevron-link">
+              All {components.length} components <CaretRightIcon aria-hidden="true" weight="bold" />
             </Link>
           </div>
         </section>
@@ -218,17 +214,15 @@ export default function HomePage() {
           </div>
           <div className="landing-section-footer">
             <p>A few favorites.</p>
-            <Link href="/blocks">
-              All {blocks.length} blocks <ArrowRightIcon aria-hidden="true" />
+            <Link href="/blocks" className="landing-chevron-link">
+              All {blocks.length} blocks <CaretRightIcon aria-hidden="true" weight="bold" />
             </Link>
           </div>
         </section>
 
         <section className="landing-start" aria-labelledby="start-heading">
           <div>
-            <p className="landing-eyebrow">
-              <CodeIcon aria-hidden="true" /> Get started
-            </p>
+            <p className="landing-eyebrow">Get started</p>
             <h2 id="start-heading">Copy and paste. Or ask your agent.</h2>
             <p>
               Every component comes with its source. Paste it into your project,
@@ -236,14 +230,14 @@ export default function HomePage() {
             </p>
             <AgentInstall />
           </div>
-          <Link href="/agents" className="ui-button" data-variant="outline">
-            Get started <ArrowRightIcon aria-hidden="true" />
+          <Link href="/agents" className="ui-button landing-cta">
+            Get started
           </Link>
         </section>
       </main>
 
       <footer className="landing-footer landing-width">
-        <Link href="/" className="font-heading text-lg">
+        <Link href="/" className="font-heading text-base font-semibold">
           <span className="brand-mark" aria-hidden="true" />
           a1ui
         </Link>
