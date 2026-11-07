@@ -247,6 +247,10 @@
   --shadow-tab: 0 1px 2px rgb(0 0 0 / 0.06), 0 2px 6px rgb(0 0 0 / 0.08);
   --shadow-card-hover:
     0 0 0 0.5px rgb(0 0 0 / 0.06), 0 2px 4px rgb(0 0 0 / 0.04), 0 12px 32px rgb(0 0 0 / 0.08);
+  --shadow-button:
+    inset 0 1px 0 rgb(255 255 255 / 0.2), 0 1px 2px rgb(0 0 0 / 0.12), 0 2px 6px rgb(0 0 0 / 0.08);
+  --shadow-button-hover:
+    inset 0 1px 0 rgb(255 255 255 / 0.2), 0 2px 4px rgb(0 0 0 / 0.12), 0 6px 14px rgb(0 0 0 / 0.1);
 }
 
 /* Dark theme. */
@@ -305,6 +309,10 @@
   --hairline: rgb(255 255 255 / 0.1);
   --shadow-tab: 0 1px 2px rgb(0 0 0 / 0.3), 0 0 0 0.5px rgb(255 255 255 / 0.06);
   --shadow-card-hover: 0 0 0 1px rgb(255 255 255 / 0.12), 0 12px 32px rgb(0 0 0 / 0.5);
+  --shadow-button:
+    inset 0 1px 0 rgb(255 255 255 / 0.14), 0 1px 2px rgb(0 0 0 / 0.5), 0 2px 8px rgb(0 0 0 / 0.35);
+  --shadow-button-hover:
+    inset 0 1px 0 rgb(255 255 255 / 0.18), 0 2px 4px rgb(0 0 0 / 0.5), 0 8px 18px rgb(0 0 0 / 0.45);
 }
 
 /* Reduced transparency: materials go solid and drop the blur. */
