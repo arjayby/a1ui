@@ -322,6 +322,7 @@ export function ArcReel({ items, initialIndex = 0, ariaLabel = "Arc Reel", class
           </span>
           <input
             ref={sliderRef}
+            id={`${viewportId}-scrubber`}
             type="range"
             min={0}
             max={Math.max(1, items.length - 1)}

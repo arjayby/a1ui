@@ -64,6 +64,7 @@ export function DialogDemo() {
               <label className="grid gap-1.5 text-sm font-medium">
                 Project name
                 <input
+                  name="project-name"
                   className={fieldClass}
                   value={name}
                   onChange={(event) => setName(event.target.value)}

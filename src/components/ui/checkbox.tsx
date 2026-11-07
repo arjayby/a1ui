@@ -1,6 +1,6 @@
 "use client";
 
-import type { ComponentProps } from "react";
+import { useId, type ComponentProps } from "react";
 import { CheckIcon } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 
@@ -10,9 +10,13 @@ export function Checkbox({
   onChange,
   ...props
 }: Omit<ComponentProps<"input">, "type"> & { onCheckedChange?: (checked: boolean) => void }) {
+  // Every form field gets an id (browsers flag fields with neither an id nor a name).
+  const id = useId();
+
   return (
     <span className={cn("ui-check-target", className)}>
       <input
+        id={id}
         type="checkbox"
         data-slot="checkbox"
         onChange={(event) => {

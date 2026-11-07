@@ -14,7 +14,7 @@ const answers = { numeric: "12345678", alphanumeric: "A1B2C3D4" } satisfies Reco
 >;
 
 export function OtpInputPreview() {
-  return <OtpInput label="Verification code" length={6} defaultValue="482" />;
+  return <OtpInput label="Verification code" name="verification-code" length={6} defaultValue="482" />;
 }
 
 export function OtpInputDemo() {
@@ -31,6 +31,7 @@ export function OtpInputDemo() {
         <OtpInput
           key={`${length}-${mode}`}
           label="Verification code"
+          name="verification-code"
           length={Number(length) as 4 | 6 | 8}
           mode={mode}
           separator={separator}

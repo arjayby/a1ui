@@ -46,7 +46,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         >
           {children}
         </RootProvider>
-        <Analytics />
+        {/* Analytics only reports from production builds; in development it would load a debug
+            script from Vercel's CDN that the browser blocks, logging a failed request on every page. */}
+        {process.env.NODE_ENV === "production" ? <Analytics /> : null}
       </body>
     </html>
   );

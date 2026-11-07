@@ -1,6 +1,6 @@
 "use client";
 
-import type { ComponentProps } from "react";
+import { useId, type ComponentProps } from "react";
 import { cn } from "@/lib/utils";
 
 export function Switch({
@@ -9,9 +9,13 @@ export function Switch({
   onChange,
   ...props
 }: Omit<ComponentProps<"input">, "type" | "role"> & { onCheckedChange?: (checked: boolean) => void }) {
+  // Every form field gets an id (browsers flag fields with neither an id nor a name).
+  const id = useId();
+
   return (
     <span className={cn("ui-switch-target", className)}>
       <input
+        id={id}
         type="checkbox"
         role="switch"
         data-slot="switch"

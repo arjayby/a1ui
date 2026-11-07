@@ -42,6 +42,7 @@ function SharePopover({ morph = true, side, duration }: { morph?: boolean; side?
         <div className="flex items-center gap-2.5">
           <input
             readOnly
+            name="project-link"
             value={displayLink}
             aria-label="Project link"
             onFocus={(event) => event.currentTarget.select()}
