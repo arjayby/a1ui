@@ -4,81 +4,6 @@
   "homepage": "http://localhost:3000",
   "items": [
     {
-      "name": "compare-curtain",
-      "type": "registry:block",
-      "title": "Compare Curtain",
-      "description": "A draggable divider that reveals two aligned images or design states.",
-      "dependencies": [
-        "clsx"
-      ],
-      "files": [
-        {
-          "path": "src/registry/blocks/compare-curtain.tsx",
-          "type": "registry:component",
-          "target": "components/blocks/compare-curtain.tsx"
-        }
-      ],
-      "categories": [
-        "media",
-        "comparison",
-        "interactive"
-      ],
-      "meta": {
-        "a1ui": {
-          "useCases": [
-            "Before-and-after images, design revisions, and visual product comparisons."
-          ],
-          "limitations": [
-            "Horizontal comparison only. The caller supplies aligned layers with matching dimensions."
-          ],
-          "requirements": [
-            "Requires React 19 and Tailwind CSS 4. Supply accessible descriptions for images inside each layer. The divider supports pointer, touch, and keyboard input."
-          ],
-          "docsUrl": "http://localhost:3000/docs/blocks/compare-curtain.md",
-          "registryUrl": "http://localhost:3000/r/compare-curtain.json"
-        }
-      },
-      "docs": "Read http://localhost:3000/docs/blocks/compare-curtain.md for usage, required props, and integration instructions."
-    },
-    {
-      "name": "peel-stack",
-      "type": "registry:block",
-      "title": "Peel Stack",
-      "description": "A layered paper stack that rotates through collections with buttons, arrow keys, or a swipe.",
-      "dependencies": [
-        "clsx"
-      ],
-      "files": [
-        {
-          "path": "src/registry/blocks/peel-stack.tsx",
-          "type": "registry:component",
-          "target": "components/blocks/peel-stack.tsx"
-        }
-      ],
-      "categories": [
-        "cards",
-        "carousel",
-        "interactive",
-        "animation"
-      ],
-      "meta": {
-        "a1ui": {
-          "useCases": [
-            "Layered collections, portfolio studies, and attachment cards with manual navigation."
-          ],
-          "limitations": [
-            "Shows up to three visible layers. Cards have a fixed height; increase it for long content. Demo artwork is not installed."
-          ],
-          "requirements": [
-            "Supply items with unique IDs. Uses React 19, Tailwind CSS 4, and theme tokens. Inactive cards are inert; reduced motion disables transitions."
-          ],
-          "docsUrl": "http://localhost:3000/docs/blocks/peel-stack.md",
-          "registryUrl": "http://localhost:3000/r/peel-stack.json"
-        }
-      },
-      "docs": "Read http://localhost:3000/docs/blocks/peel-stack.md for usage, required props, and integration instructions."
-    },
-    {
       "name": "ascii-morph",
       "type": "registry:block",
       "title": "ASCII Morph",
@@ -155,43 +80,6 @@
       "docs": "Read http://localhost:3000/docs/blocks/ascii-lens.md for usage, required props, and integration instructions."
     },
     {
-      "name": "integration-hub",
-      "type": "registry:block",
-      "title": "Integration Hub",
-      "description": "A connected workspace with six tools and animated pulses flowing into a central product.",
-      "dependencies": [
-        "clsx"
-      ],
-      "files": [
-        {
-          "path": "src/registry/blocks/integration-hub.tsx",
-          "type": "registry:component",
-          "target": "components/blocks/integration-hub.tsx"
-        }
-      ],
-      "categories": [
-        "integrations",
-        "animation",
-        "diagram"
-      ],
-      "meta": {
-        "a1ui": {
-          "useCases": [
-            "Product integration diagrams with up to six tools, inward pulses, and optional tool selection."
-          ],
-          "limitations": [
-            "Visualization only. No account connections, synchronization, or live activity data. Extra tools beyond six are ignored."
-          ],
-          "requirements": [
-            "Supply tools with unique IDs and a product. Icons are React nodes. Supply a pause control for automatic motion. Reduced motion retains static connections."
-          ],
-          "docsUrl": "http://localhost:3000/docs/blocks/integration-hub.md",
-          "registryUrl": "http://localhost:3000/r/integration-hub.json"
-        }
-      },
-      "docs": "Read http://localhost:3000/docs/blocks/integration-hub.md for usage, required props, and integration instructions."
-    },
-    {
       "name": "ascii-terrain",
       "type": "registry:block",
       "title": "ASCII Terrain",
@@ -266,44 +154,6 @@
         }
       },
       "docs": "Read http://localhost:3000/docs/blocks/text-banner.md for usage, required props, and integration instructions."
-    },
-    {
-      "name": "confirmation-button",
-      "type": "registry:block",
-      "title": "Confirmation Button",
-      "description": "A drag-to-confirm button with a dotted arrow, pending feedback, and a confirmed state.",
-      "dependencies": [
-        "clsx",
-        "lucide-react"
-      ],
-      "files": [
-        {
-          "path": "src/registry/blocks/confirmation-button.tsx",
-          "type": "registry:component",
-          "target": "components/blocks/confirmation-button.tsx"
-        }
-      ],
-      "categories": [
-        "button",
-        "confirmation",
-        "interactive"
-      ],
-      "meta": {
-        "a1ui": {
-          "useCases": [
-            "Deliberate confirmation actions with drag, keyboard, and asynchronous feedback."
-          ],
-          "limitations": [
-            "The app supplies the action. Dragging is left to right, and success stays visible until remount."
-          ],
-          "requirements": [
-            "Requires React 19.2 or later. Supply onConfirm. Return a promise for asynchronous work and reject it to allow retry. Change the React key to reset."
-          ],
-          "docsUrl": "http://localhost:3000/docs/blocks/confirmation-button.md",
-          "registryUrl": "http://localhost:3000/r/confirmation-button.json"
-        }
-      },
-      "docs": "Read http://localhost:3000/docs/blocks/confirmation-button.md for usage, required props, and integration instructions."
     },
     {
       "name": "shape-flow",

@@ -10,8 +10,6 @@ import { AsciiTerrainDemo } from "@/components/block-demos/ascii-terrain-demo";
 import { AsciiMorphDemo } from "@/components/block-demos/ascii-morph-demo";
 import { AsciiLensDemo } from "@/components/block-demos/ascii-lens-demo";
 import { AgentInstall, AgentRegistryConfiguration } from "@/components/agent-install";
-import { ConfirmationButtonDemo } from "@/components/block-demos/confirmation-button-demo";
-import { CompareCurtainDemo } from "@/components/block-demos/compare-curtain-demo";
 import { SectionRailDemo, SpiralTextDemo } from "@/components/block-demos";
 import { BlockSource, ComponentSource, Dependencies, Installation } from "@/components/block-docs";
 import { MenuDemo } from "@/components/component-demos/menu-demo";
@@ -50,8 +48,6 @@ import { ParticleMenuDemo } from "@/components/block-demos/particle-menu-demo";
 import { TextScrambleDemo } from "@/components/block-demos/text-scramble-demo";
 import { TextBannerDemo } from "@/components/block-demos/text-banner-demo";
 import { ShapeFlowDemo } from "@/components/block-demos/shape-flow-demo";
-import { IntegrationHubDemo } from "@/components/block-demos/integration-hub-demo";
-import { PeelStackDemo } from "@/components/block-demos/peel-stack-demo";
 
 export function getMDXComponents(components?: MDXComponents) {
   return {
@@ -97,12 +93,8 @@ export function getMDXComponents(components?: MDXComponents) {
     ValidatedInputDemo,
     TagInputDemo,
     PasswordInputDemo,
-    ConfirmationButtonDemo,
-    CompareCurtainDemo,
     Installation,
-    IntegrationHubDemo,
     ParticleMenuDemo,
-    PeelStackDemo,
     SectionRailDemo,
     ShapeFlowDemo,
     SpiralTextDemo,

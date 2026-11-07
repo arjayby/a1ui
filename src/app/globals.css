@@ -898,22 +898,22 @@ h6 {
 }
 
 /* Demo control buttons press in on pointer-down and spring back on release. */
-:is(.ascii-terrain-controls, .confirmation-button-demo-footer) button {
+.ascii-terrain-controls button {
   transition: transform var(--ease-spring-snappy-duration) var(--ease-spring-snappy);
 }
 
-:is(.ascii-terrain-controls, .confirmation-button-demo-footer) button:active:not(:disabled) {
+.ascii-terrain-controls button:active:not(:disabled) {
   transform: scale(0.96);
   transition-duration: 80ms;
   transition-timing-function: var(--ease-press);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  :is(.ascii-terrain-controls, .confirmation-button-demo-footer) button {
+  .ascii-terrain-controls button {
     transition: opacity 150ms ease;
   }
 
-  :is(.ascii-terrain-controls, .confirmation-button-demo-footer) button:active:not(:disabled) {
+  .ascii-terrain-controls button:active:not(:disabled) {
     opacity: 0.7;
     transform: none;
   }
@@ -945,60 +945,6 @@ h6 {
 
   .ascii-terrain-reduced-hint {
     display: inline;
-  }
-}
-
-.integration-hub-demo,
-.integration-hub-preview {
-  font-family: var(--font-sans);
-}
-
-.integration-hub-demo {
-  padding: clamp(1rem, 3vw, 2rem);
-}
-
-.integration-hub-demo-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
-.integration-hub-tool-logo {
-  width: 28px;
-  height: 28px;
-  object-fit: contain;
-}
-
-.dark .integration-hub-tool-logo[data-monochrome="true"] {
-  filter: brightness(0) invert(1);
-}
-
-@container (max-width: 580px) {
-  .integration-hub-tool-logo {
-    width: 24px;
-    height: 24px;
-  }
-}
-
-.catalog-preview .integration-hub-preview {
-  position: relative;
-  padding: 0;
-}
-
-.integration-hub-preview > div {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 650px;
-  transform: translate(-50%, -50%) scale(0.36);
-  transform-origin: center;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .integration-hub-demo-footer .integration-hub-demo-pause {
-    display: none;
   }
 }
 
@@ -1091,56 +1037,6 @@ h6 {
   margin: 0.75rem 0 0 !important;
   color: var(--muted-foreground);
   font-size: 12px;
-}
-
-.confirmation-button-preview {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.confirmation-button-demo {
-  display: flex;
-  min-height: 22rem;
-  flex-direction: column;
-  padding: clamp(1rem, 4vw, 2rem);
-}
-
-.confirmation-button-demo-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-}
-
-.confirmation-button-demo-stage {
-  display: flex;
-  min-height: 15rem;
-  flex: 1;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-.confirmation-button-demo-footer button {
-  display: inline-flex;
-  flex-shrink: 0;
-  align-items: center;
-  gap: 0.4rem;
-  padding-block: 0.4rem;
-  color: var(--foreground);
-  cursor: pointer;
-}
-
-.confirmation-button-demo-footer button:disabled {
-  color: var(--muted-foreground);
-  cursor: default;
-  opacity: 0.45;
-}
-
-.confirmation-button-demo-footer svg {
-  width: 0.75rem;
-  height: 0.75rem;
 }
 
 .text-banner-demo-stage,

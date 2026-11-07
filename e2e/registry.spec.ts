@@ -1,10 +1,8 @@
 import { expect, test } from "./fixtures";
 
 for (const [name, exportedComponent] of [
-  ["peel-stack", "PeelStack"],
   ["ascii-morph", "AsciiMorph"],
   ["ascii-lens", "AsciiLens"],
-  ["integration-hub", "IntegrationHub"],
   ["ascii-terrain", "AsciiTerrain"],
   ["section-rail", "SectionRail"],
   ["spiral-text", "SpiralText"],
@@ -12,7 +10,6 @@ for (const [name, exportedComponent] of [
   ["text-scramble", "TextScramble"],
   ["text-banner", "TextBanner"],
   ["shape-flow", "ShapeFlow"],
-  ["confirmation-button", "ConfirmationButton"],
 ]) {
   test(`registry serves ${name} source`, async ({ request }) => {
     const response = await request.get(`/r/${name}.json`);

@@ -5,7 +5,7 @@ import { ArrowUpRightIcon, CaretRightIcon } from "@phosphor-icons/react/ssr";
 import { AgentInstall } from "@/components/agent-install";
 import { ArcReelPreview } from "@/components/block-demos/arc-reel-demo";
 import { AsciiTerrainPreview } from "@/components/block-demos/ascii-terrain-demo";
-import { PeelStackPreview } from "@/components/block-demos/peel-stack-demo";
+import { ShapeFlowPreview } from "@/components/block-demos/shape-flow-demo";
 import { LoadingButtonPreview } from "@/components/component-demos/loading-button-demo";
 import { SliderPreview } from "@/components/component-demos/slider-demo";
 import { HydrationMarker } from "@/components/hydration-marker";
@@ -49,7 +49,7 @@ const structuredData = [
 
 const featuredBlocks = [
   { slug: "arc-reel", Preview: ArcReelPreview, detail: "A new perspective on the carousel." },
-  { slug: "peel-stack", Preview: PeelStackPreview, detail: "A little curiosity in every layer." },
+  { slug: "shape-flow", Preview: ShapeFlowPreview, detail: "Text that makes room for a duck." },
   { slug: "ascii-terrain", Preview: AsciiTerrainPreview, detail: "A landscape made from characters." },
 ];
 
