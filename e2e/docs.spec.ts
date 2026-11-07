@@ -74,7 +74,11 @@ test("desktop sidebar can scroll to its final block", async ({ page }) => {
   await page.goto("/blocks");
 
   const sidebar = page.locator('[data-sidebar="content"]');
-  const finalLink = page.getByRole("navigation", { name: "Blocks" }).getByRole("link").last();
+  const blocksNav = page.getByRole("navigation", { name: "Blocks" });
+  const closed = blocksNav.locator('button[aria-expanded="false"]');
+  while ((await closed.count()) > 0) await closed.first().click();
+  const finalLink = blocksNav.getByRole("link").last();
+  await expect(finalLink).toHaveText("Arc Reel");
 
   await sidebar.evaluate((element) => {
     element.scrollTop = element.scrollHeight;
@@ -106,6 +110,7 @@ test("mobile sidebar opens, navigates, closes, and restores focus", async ({ pag
   await trigger.click();
   const sidebar = page.getByRole("dialog", { name: "Documentation", exact: true });
   await expect(sidebar).toBeVisible();
+  await sidebar.getByRole("button", { name: "Text Effects", exact: true }).click();
   await sidebar.getByRole("link", { name: "Spiral Text", exact: true }).click();
   await expect(page).toHaveURL(/\/blocks\/spiral-text$/);
   await expect(sidebar).not.toBeVisible();

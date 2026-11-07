@@ -23,8 +23,33 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Menu, MenuItem } from "@/registry/components/menu";
-import { blocks } from "@/lib/block-catalog";
+import { blockCategories } from "@/lib/block-catalog";
 import { componentCategories } from "@/lib/component-catalog";
+
+type CatalogSection = {
+  title: string;
+  base: string;
+  allLabel: string;
+  categories: { title: string; items: { slug: string; title: string; isNew?: boolean }[] }[];
+};
+
+const catalogSections: CatalogSection[] = [
+  {
+    title: "Components",
+    base: "/components",
+    allLabel: "All components",
+    categories: componentCategories.map(({ title, components }) => ({ title, items: components })),
+  },
+  {
+    title: "Blocks",
+    base: "/blocks",
+    allLabel: "All blocks",
+    categories: blockCategories.map(({ title, blocks }) => ({ title, items: blocks })),
+  },
+];
+
+// Both sections can share a category title (Navigation), so open state is keyed by section too.
+const categoryKey = (section: CatalogSection, title: string) => `${section.base}/${title}`;
 
 export function AppSidebar() {
   const pathname = usePathname();
@@ -33,9 +58,11 @@ export function AppSidebar() {
 
   // Categories start closed, and the one holding the current page opens on every navigation, so
   // the sidebar always shows where you are. Others keep whatever state the reader gave them.
-  const currentCategory = componentCategories.find((category) =>
-    category.components.some(({ slug }) => pathname === `/components/${slug}`),
-  )?.title;
+  const currentCategory = catalogSections.flatMap((section) =>
+    section.categories
+      .filter((category) => category.items.some(({ slug }) => pathname === `${section.base}/${slug}`))
+      .map((category) => categoryKey(section, category.title)),
+  )[0];
   const [openCategories, setOpenCategories] = useState<string[]>(currentCategory ? [currentCategory] : []);
   const [revealed, setRevealed] = useState(currentCategory);
   if (currentCategory !== revealed) {
@@ -107,143 +134,95 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroup>
         </nav>
-        <nav aria-label="Components">
-          <SidebarGroup className="py-1">
-            <SidebarGroupLabel className="h-6">Components</SidebarGroupLabel>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  size="sm"
-                  isActive={pathname === "/components"}
-                  render={
-                    <MenuItem
-                      value="/components"
-                      render={
-                        <Link
-                          href="/components"
-                          onClick={closeMobile}
-                          aria-current={pathname === "/components" ? "page" : undefined}
-                        />
-                      }
-                    />
-                  }
-                >
-                  <span>All components</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              {componentCategories.map((category) => (
-                <Collapsible
-                  key={category.title}
-                  open={openCategories.includes(category.title)}
-                  onOpenChange={(open) =>
-                    setOpenCategories((current) =>
-                      open
-                        ? [...current, category.title]
-                        : current.filter((title) => title !== category.title),
-                    )
-                  }
-                  render={<SidebarMenuItem />}
-                >
-                  {/* A category only discloses its components, so it stays out of the menu's
-                      highlight: clicking it opens the group without marking it as the selection. */}
+        {catalogSections.map((section) => (
+          <nav key={section.base} aria-label={section.title}>
+            <SidebarGroup className="py-1">
+              <SidebarGroupLabel className="h-6">{section.title}</SidebarGroupLabel>
+              <SidebarMenu>
+                <SidebarMenuItem>
                   <SidebarMenuButton
                     size="sm"
-                    render={<CollapsibleTrigger />}
-                    className="[&[data-panel-open]>svg]:rotate-90"
+                    isActive={pathname === section.base}
+                    render={
+                      <MenuItem
+                        value={section.base}
+                        render={
+                          <Link
+                            href={section.base}
+                            onClick={closeMobile}
+                            aria-current={pathname === section.base ? "page" : undefined}
+                          />
+                        }
+                      />
+                    }
                   >
-                    <CaretRightIcon aria-hidden="true" className="transition-transform" />
-                    <span className="flex-1">{category.title}</span>
+                    <span>{section.allLabel}</span>
                   </SidebarMenuButton>
-                  <CollapsibleContent>
-                    <SidebarMenuSub className="mr-0 pr-0">
-                      {category.components.map((component) => {
-                        const href = `/components/${component.slug}`;
-                        const current = pathname === href;
-                        return (
-                          <SidebarMenuSubItem key={component.slug}>
-                            <SidebarMenuSubButton
-                              size="sm"
-                              isActive={current}
-                              render={
-                                <MenuItem
-                                  value={href}
+                </SidebarMenuItem>
+                {section.categories.map((category) => {
+                  const key = categoryKey(section, category.title);
+                  return (
+                    <Collapsible
+                      key={key}
+                      open={openCategories.includes(key)}
+                      onOpenChange={(open) =>
+                        setOpenCategories((current) =>
+                          open ? [...current, key] : current.filter((item) => item !== key),
+                        )
+                      }
+                      render={<SidebarMenuItem />}
+                    >
+                      {/* A category only discloses its pages, so it stays out of the menu's
+                          highlight: clicking it opens the group without marking it as the selection. */}
+                      <SidebarMenuButton
+                        size="sm"
+                        render={<CollapsibleTrigger />}
+                        className="[&[data-panel-open]>svg]:rotate-90"
+                      >
+                        <CaretRightIcon aria-hidden="true" className="transition-transform" />
+                        <span className="flex-1">{category.title}</span>
+                      </SidebarMenuButton>
+                      <CollapsibleContent>
+                        <SidebarMenuSub className="mr-0 pr-0">
+                          {category.items.map((item) => {
+                            const href = `${section.base}/${item.slug}`;
+                            const current = pathname === href;
+                            return (
+                              <SidebarMenuSubItem key={item.slug}>
+                                <SidebarMenuSubButton
+                                  size="sm"
+                                  isActive={current}
                                   render={
-                                    <Link
-                                      href={href}
-                                      onClick={closeMobile}
-                                      aria-current={current ? "page" : undefined}
+                                    <MenuItem
+                                      value={href}
+                                      render={
+                                        <Link
+                                          href={href}
+                                          onClick={closeMobile}
+                                          aria-current={current ? "page" : undefined}
+                                          aria-description={item.isNew ? "New block shipped" : undefined}
+                                        />
+                                      }
                                     />
                                   }
-                                />
-                              }
-                            >
-                              <span>{component.title}</span>
-                            </SidebarMenuSubButton>
-                          </SidebarMenuSubItem>
-                        );
-                      })}
-                    </SidebarMenuSub>
-                  </CollapsibleContent>
-                </Collapsible>
-              ))}
-            </SidebarMenu>
-          </SidebarGroup>
-        </nav>
-        <nav aria-label="Blocks">
-          <SidebarGroup className="py-1">
-            <SidebarGroupLabel className="h-6">Blocks</SidebarGroupLabel>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  size="sm"
-                  isActive={pathname === "/blocks"}
-                  render={
-                    <MenuItem
-                      value="/blocks"
-                      render={
-                        <Link
-                          href="/blocks"
-                          onClick={closeMobile}
-                          aria-current={pathname === "/blocks" ? "page" : undefined}
-                        />
-                      }
-                    />
-                  }
-                >
-                  <span>All blocks</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              {blocks.map((block) => {
-                const href = `/blocks/${block.slug}`;
-                const current = pathname === href;
-                return (
-                  <SidebarMenuItem key={block.slug}>
-                    <SidebarMenuButton
-                      size="sm"
-                      isActive={current}
-                      render={
-                        <MenuItem
-                          value={href}
-                          render={
-                            <Link
-                              href={href}
-                              onClick={closeMobile}
-                              aria-current={current ? "page" : undefined}
-                              aria-description={block.isNew ? "New block shipped" : undefined}
-                            />
-                          }
-                        />
-                      }
-                    >
-                      <span className="flex-1">{block.title}</span>
-                      {block.isNew ? <Badge variant="dot" className="size-1.5" aria-hidden="true" /> : null}
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
-            </SidebarMenu>
-          </SidebarGroup>
-        </nav>
+                                >
+                                  <span className="flex-1">{item.title}</span>
+                                  {item.isNew ? (
+                                    <Badge variant="dot" className="size-1.5" aria-hidden="true" />
+                                  ) : null}
+                                </SidebarMenuSubButton>
+                              </SidebarMenuSubItem>
+                            );
+                          })}
+                        </SidebarMenuSub>
+                      </CollapsibleContent>
+                    </Collapsible>
+                  );
+                })}
+              </SidebarMenu>
+            </SidebarGroup>
+          </nav>
+        ))}
       </Menu>
       <SidebarFooter className="text-muted-foreground px-5 py-4 text-xs">
         React components and ready-made blocks

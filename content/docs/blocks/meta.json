@@ -1,15 +1,19 @@
 {
   "title": "Blocks",
   "pages": [
-    "ascii-morph",
+    "---ASCII---",
     "ascii-lens",
+    "ascii-morph",
     "ascii-terrain",
-    "section-rail",
+    "---Text Effects---",
+    "shape-flow",
     "spiral-text",
-    "particle-menu",
-    "arc-reel",
-    "text-scramble",
     "text-banner",
-    "shape-flow"
+    "text-scramble",
+    "---Navigation---",
+    "particle-menu",
+    "section-rail",
+    "---Carousels---",
+    "arc-reel"
   ]
 }
