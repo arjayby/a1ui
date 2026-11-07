@@ -1,4 +1,5 @@
-import { expect, test, type Page } from "@playwright/test";
+import { type Page } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 async function open(page: Page) {
   await page.goto("/components/select");
@@ -51,6 +52,12 @@ test("one highlight travels between items and the value slides in with a drawn c
   await expect(trigger).toHaveText("Select a region");
   await page.getByRole("button", { name: /^Position:/ }).click();
   await page.getByRole("menuitem", { name: "below", exact: true }).click();
+  await expect(page.getByRole("menu")).toHaveCount(0);
+  // Playwright scrolls targets into view before clicking, and the page scrolls smoothly, so the
+  // trigger can end up anywhere. Park it near the top so "below" always has room to open below.
+  await trigger.evaluate((element) =>
+    scrollTo({ top: element.getBoundingClientRect().top + scrollY - 120, behavior: "instant" }),
+  );
   await trigger.click();
   const list = page.getByRole("listbox");
   await expect(list).toHaveCSS("opacity", "1");

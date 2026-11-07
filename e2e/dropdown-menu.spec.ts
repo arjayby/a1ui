@@ -1,6 +1,21 @@
-import { expect, test } from "@playwright/test";
+import { type Page } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 const highlight = '[data-slot="dropdown-menu-highlight"]';
+
+// In headless Chromium, the popup taking focus on open can scroll the (smoothly scrolling) page,
+// which slides the rows under a stationary pointer. Wait until the page is still before hovering.
+async function settled(page: Page) {
+  await expect
+    .poll(() =>
+      page.evaluate(async () => {
+        const before = scrollY;
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        return scrollY === before;
+      }),
+    )
+    .toBe(true);
+}
 
 test("popup fades and scales on both open and close before unmounting", async ({ page }) => {
   await page.goto("/components/dropdown-menu");
@@ -44,6 +59,7 @@ test("hover and keyboard focus move the shared highlight without activating acti
   await trigger.click();
   const menu = page.getByRole("menu", { name: "Workspace actions" });
   await expect(menu).toHaveCSS("opacity", "1");
+  await settled(page);
   await expect(menu.getByRole("menuitem")).toHaveCount(7);
   await expect(menu.getByRole("group")).toHaveCount(2);
   await expect(menu.locator("svg")).toHaveCount(0);
@@ -53,26 +69,27 @@ test("hover and keyboard focus move the shared highlight without activating acti
   const settings = menu.getByRole("menuitem", { name: "Settings", exact: true });
   await first.hover();
   await expect(first).toHaveAttribute("data-highlighted");
-  const start = await first.boundingBox();
-  const destination = await settings.boundingBox();
-  const menuBox = await menu.boundingBox();
-  if (!start || !destination || !menuBox) throw new Error("Expected visible menu geometry");
 
+  // Offsets are read relative to the menu within each frame, so page motion cannot skew them.
   const movement = menu.evaluate(async (element) => {
+    const offset = (node: Element) => node.getBoundingClientRect().y - element.getBoundingClientRect().y;
+    const rows = [...element.querySelectorAll('[role="menuitem"]')];
+    const from = offset(rows.find((row) => row.textContent?.startsWith("New project"))!);
+    const settingsRow = rows.find((row) => row.textContent?.startsWith("Settings"))!;
     const positions = [];
     const start = performance.now();
     while (performance.now() - start < 650) {
       await new Promise(requestAnimationFrame);
       for (const indicator of element.querySelectorAll('[data-slot="dropdown-menu-highlight"]')) {
-        positions.push(indicator.getBoundingClientRect().y - element.getBoundingClientRect().y);
+        positions.push(offset(indicator));
       }
     }
-    return positions;
+    return { from, to: offset(settingsRow), positions };
   });
   await settings.hover();
-  const positions = await movement;
-  expect(positions.some((y) => y > start.y - menuBox.y + 2 && y < destination.y - menuBox.y - 2)).toBe(true);
-  expect(positions.at(-1)).toBeCloseTo(destination.y - menuBox.y, 0);
+  const { from, to, positions } = await movement;
+  expect(positions.some((y) => y > from + 2 && y < to - 2)).toBe(true);
+  expect(positions.at(-1)).toBeCloseTo(to, 0);
   await expect(menu.locator(highlight)).toHaveCount(1);
   await expect(settings).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
   await expect(page.locator(".demo-frame").getByRole("status")).toBeEmpty();
@@ -119,6 +136,7 @@ test("nested menu opens with hover and keyboard, keeps its own highlight, and se
   await trigger.click();
   const parent = page.getByRole("menu", { name: "Workspace actions", exact: true });
   await expect(parent).toHaveCSS("opacity", "1");
+  await settled(page);
   const subTrigger = parent.getByRole("menuitem", { name: "Switch workspace", exact: true });
   await subTrigger.hover();
   const submenu = page.getByRole("menu", { name: "Switch workspace", exact: true });

@@ -1,4 +1,5 @@
-import { expect, test, type Locator } from "@playwright/test";
+import { type Locator } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 // Clicks inside the page, then samples one segment's opacity and horizontal offset every frame.
 function clickAndSample(target: Locator, segment: string, ms = 400) {

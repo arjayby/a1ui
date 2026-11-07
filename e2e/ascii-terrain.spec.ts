@@ -1,4 +1,5 @@
-import { expect, test, type Locator } from "@playwright/test";
+import { type Locator } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 const pixels = (canvas: Locator) => canvas.evaluate((element: HTMLCanvasElement) => element.toDataURL());
 const sampleAfter = (canvas: Locator, delay = 180) =>

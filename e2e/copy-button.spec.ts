@@ -1,8 +1,9 @@
-import { expect, test } from "@playwright/test";
+import { expect, revealed, test } from "./fixtures";
 
 test("button width and position stay fixed while copying and resetting", async ({ page, context }) => {
   await context.grantPermissions(["clipboard-read", "clipboard-write"]);
   await page.goto("/components/copy-button");
+  await revealed(page);
   const button = page.locator('.demo-frame [data-slot="copy-button"][data-animation="blur"]');
   const samples = await button.evaluate(async (element) => {
     if (!(element instanceof HTMLButtonElement)) throw new Error("Expected a button");

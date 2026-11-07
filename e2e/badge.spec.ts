@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 test("the demo shows outline badges, a centered bell, and a pulsing live dot", async ({ page }) => {
   await page.goto("/components/badge");

@@ -1,4 +1,5 @@
-import { expect, test, type Locator } from "@playwright/test";
+import { type Locator } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 async function expectReadableFlow(flow: Locator) {
   const result = await flow.evaluate((element) => {

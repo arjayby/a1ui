@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 const highlight = '[data-slot="menu-highlight"]';
 
@@ -51,6 +51,8 @@ test("focus travels between rows without selecting and returns on blur", async (
 test("sidebar keeps its highlight across selection, groups, history, and scrolling", async ({ page }) => {
   await page.goto("/components/menu");
   const sidebar = page.locator('[data-sidebar="content"]');
+  const buttons = sidebar.getByRole("button", { name: "Buttons & Actions", exact: true });
+  await buttons.click();
   const link = sidebar.getByRole("link", { name: "Copy Button", exact: true });
   await link.click();
   await expect(page).toHaveURL(/\/components\/copy-button$/);
@@ -72,8 +74,8 @@ test("sidebar keeps its highlight across selection, groups, history, and scrolli
   await sidebar.getByRole("link", { name: "Install with an agent" }).click();
   await expect(page).toHaveURL(/\/agents$/);
   await expect(sidebar.locator('[aria-current="page"]')).toHaveAttribute("data-highlighted");
-  await sidebar.getByRole("button", { name: "Toggle component navigation" }).click();
-  await sidebar.getByRole("button", { name: "Toggle component navigation" }).click();
+  await buttons.click();
+  await buttons.click();
   await expect(sidebar.locator(highlight)).toHaveCount(1);
 });
 
@@ -93,6 +95,7 @@ test("reduced motion switches instantly and mobile navigation closes after selec
   expect(positions.indicator).toBeCloseTo(positions.target, 1);
   await page.getByRole("button", { name: "Toggle Sidebar" }).click();
   const dialog = page.getByRole("dialog", { name: "Documentation" });
+  await dialog.getByRole("button", { name: "Buttons & Actions", exact: true }).click();
   await dialog.getByRole("link", { name: "Loading Button", exact: true }).click();
   await expect(page).toHaveURL(/\/components\/loading-button$/);
   await expect(dialog).not.toBeVisible();

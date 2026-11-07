@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 test("MDX prose distinguishes inline code, links, and lists", async ({ page }) => {
   await page.goto("/agents");

@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 import registry from "../registry.json" with { type: "json" };
 
 test("home showcases the library and opens the documentation", async ({ page }) => {

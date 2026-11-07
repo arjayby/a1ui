@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 test.beforeEach(async ({ page }) => {
   await page.goto("/blocks/spiral-text");
@@ -151,8 +151,17 @@ test("release starts a visible ripple within 80ms", async ({ page }) => {
   await page.mouse.down();
   await page.waitForTimeout(700);
   await page.mouse.up();
-  await page.waitForTimeout(80);
-  const opacity = await inner.evaluate((element) => Number(getComputedStyle(element).opacity));
+  // Read the ripple 80ms into its own timeline. A wall-clock wait would also measure how late a
+  // loaded machine renders, rather than when the ripple begins.
+  const opacity = await inner.evaluate((element) => {
+    const ripple = element.getAnimations().at(-1);
+    if (!ripple) return Number(getComputedStyle(element).opacity);
+    ripple.pause();
+    ripple.currentTime = 80;
+    const value = Number(getComputedStyle(element).opacity);
+    ripple.play();
+    return value;
+  });
   expect(opacity).toBeLessThan(0.9);
 });
 

@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 test("share button morphs into the panel and collapses back on close", async ({ page }) => {
   await page.goto("/components/popover");

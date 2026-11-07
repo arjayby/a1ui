@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 test("reset keeps the outgoing and incoming labels steady while the check exits", async ({ page }) => {
   await page.goto("/components/confirm-button");
@@ -188,7 +188,7 @@ test("the library links to an installable component and its API reference", asyn
   ).toHaveText("Confirm Button");
   await expect(
     page
-      .getByRole("navigation", { name: "Library" })
+      .getByRole("navigation", { name: "Components", exact: true })
       .getByRole("link", { name: "Confirm Button", exact: true }),
   ).toHaveAttribute("aria-current", "page");
   const buttons = page.locator(".component-demo-stage button");

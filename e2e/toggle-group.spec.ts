@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 test("segmented surface slides between items and follows the keyboard", async ({ page }) => {
   await page.goto("/components/toggle-group");

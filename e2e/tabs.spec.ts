@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 test("indicator glides between tabs and panels follow mouse and keyboard", async ({ page }) => {
   await page.goto("/components/tabs");

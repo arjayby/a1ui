@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 for (const animation of ["blur", "slide", "flip"]) {
   test(`${animation} waits for an async action, confirms, and resets`, async ({ page }) => {
@@ -138,7 +138,7 @@ test("the library links to an installable loading button with documentation", as
   ).toHaveText("Loading Button");
   await expect(
     page
-      .getByRole("navigation", { name: "Library" })
+      .getByRole("navigation", { name: "Components", exact: true })
       .getByRole("link", { name: "Loading Button", exact: true }),
   ).toHaveAttribute("aria-current", "page");
   await expect(page.locator('[data-slot="loading-button"]')).toHaveCount(1);

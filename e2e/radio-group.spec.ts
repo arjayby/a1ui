@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 test("one dot slides between options and arrow keys skip disabled ones", async ({ page }) => {
   await page.goto("/components/radio-group");

@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 import registry from "../registry.json" with { type: "json" };
 
 for (const { name, title, type } of registry.items) {
@@ -111,10 +111,11 @@ test("documentation shares the component geometry in both themes", async ({ page
       "font-family",
       '-apple-system, "system-ui", Inter, system-ui, sans-serif',
     );
-    await expect(page.getByRole("button", { name: "Toggle block navigation", exact: true })).toHaveCSS(
-      "font-family",
-      '-apple-system, "system-ui", Inter, system-ui, sans-serif',
-    );
+    await expect(
+      page
+        .getByRole("navigation", { name: "Components", exact: true })
+        .getByRole("button", { name: "Buttons & Actions", exact: true }),
+    ).toHaveCSS("font-family", '-apple-system, "system-ui", Inter, system-ui, sans-serif');
     await page.getByRole("button", { name: "Toggle theme" }).click();
   }
 });

@@ -1,4 +1,5 @@
-import { expect, test, type Locator, type Page } from "@playwright/test";
+import { type Locator, type Page } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 // Docs pages can shift late while the machine is busy, so wait for the target to stop moving.
 async function settledBox(locator: Locator) {

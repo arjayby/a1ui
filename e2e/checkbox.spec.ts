@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 test("check draws in, the parent tracks partial selection, and labels strike through", async ({ page }) => {
   await page.goto("/components/checkbox");

@@ -1,4 +1,5 @@
-import { expect, test, type Locator } from "@playwright/test";
+import { type Locator } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 // Clicks inside the page, then reads `read(element)` on every frame for `ms` milliseconds.
 async function sample(target: Locator, click: Locator, read: string, ms = 350) {

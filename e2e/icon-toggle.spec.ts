@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 test("morphs persistent paths in both directions and handles interruption", async ({ page }) => {
   await page.goto("/components/icon-toggle");

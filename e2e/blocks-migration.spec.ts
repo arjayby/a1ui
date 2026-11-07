@@ -1,5 +1,13 @@
-import { expect, test } from "@playwright/test";
+import { type Locator } from "@playwright/test";
+import { expect, test } from "./fixtures";
 import registry from "../registry.json" with { type: "json" };
+
+// Component categories start closed, except the one holding the current page.
+async function componentLinks(nav: Locator) {
+  const closed = nav.locator('button[aria-expanded="false"]');
+  while ((await closed.count()) > 0) await closed.first().click();
+  return (await nav.locator('a[href^="/components/"]').allTextContents()).sort((a, b) => a.localeCompare(b));
+}
 
 test("blocks and reusable components have separate catalogs on desktop and mobile", async ({ page }) => {
   await page.goto("/blocks");
@@ -11,8 +19,8 @@ test("blocks and reusable components have separate catalogs on desktop and mobil
   }
 
   await page
-    .getByRole("navigation", { name: "Library", exact: true })
-    .getByRole("link", { name: "Components", exact: true })
+    .getByRole("navigation", { name: "Components", exact: true })
+    .getByRole("link", { name: "All components", exact: true })
     .click();
   await expect(page).toHaveURL(/\/components$/);
   await expect(page.getByRole("heading", { name: "Components", exact: true })).toBeVisible();
@@ -20,31 +28,31 @@ test("blocks and reusable components have separate catalogs on desktop and mobil
   await expect(page.locator(".catalog-card")).toHaveCount(
     registry.items.filter((item) => item.type === "registry:component").length,
   );
-  const library = page.getByRole("navigation", { name: "Library", exact: true });
+  const sidebar = page.locator('[data-sidebar="content"]');
   const componentTitles = registry.items
     .filter((item) => item.type === "registry:component")
     .map((item) => item.title)
     .sort((a, b) => a.localeCompare(b));
   await expect(page.locator(".catalog-card-link")).toHaveText(componentTitles);
-  await expect(library.locator('a[href^="/components/"]')).toHaveText(componentTitles);
-  const catalogLinks = library.getByRole("link").filter({ hasText: /^(Components|Blocks)$/ });
-  await expect(catalogLinks).toHaveText(["Components", "Blocks"]);
+  expect(await componentLinks(page.getByRole("navigation", { name: "Components", exact: true }))).toEqual(
+    componentTitles,
+  );
+  const catalogLinks = sidebar.getByRole("link").filter({ hasText: /^All (components|blocks)$/ });
+  await expect(catalogLinks).toHaveText(["All components", "All blocks"]);
   await expect(page.locator('a[href="/design-system"]')).toHaveCount(0);
 
   await page.setViewportSize({ width: 390, height: 844 });
   await page.getByRole("button", { name: "Toggle Sidebar", exact: true }).click();
-  await expect(
-    page.getByRole("dialog", { name: "Documentation", exact: true }).locator('a[href^="/components/"]'),
-  ).toHaveText(componentTitles);
-  await page
-    .getByRole("dialog", { name: "Documentation", exact: true })
-    .getByRole("link", { name: "Blocks", exact: true })
-    .click();
+  const dialog = page.getByRole("dialog", { name: "Documentation", exact: true });
+  expect(await componentLinks(dialog.getByRole("navigation", { name: "Components", exact: true }))).toEqual(
+    componentTitles,
+  );
+  await dialog.getByRole("link", { name: "All blocks", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Blocks", exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Toggle Sidebar", exact: true }).click();
   await page
     .getByRole("dialog", { name: "Documentation", exact: true })
-    .getByRole("link", { name: "Components", exact: true })
+    .getByRole("link", { name: "All components", exact: true })
     .click();
   await expect(page.getByRole("heading", { name: "Components", exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "01 / Foundations" })).toHaveCount(0);

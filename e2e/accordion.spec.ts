@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 test("panels glide to their height, reverse smoothly mid-open, and keep one item open", async ({ page }) => {
   await page.goto("/components/accordion");

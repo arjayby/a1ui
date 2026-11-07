@@ -3,7 +3,7 @@
 import { CaretRightIcon, XIcon } from "@phosphor-icons/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -30,6 +30,19 @@ export function AppSidebar() {
   const pathname = usePathname();
   const { setOpenMobile } = useSidebar();
   const closeMobile = () => setOpenMobile(false);
+
+  // Categories start closed, and the one holding the current page opens on every navigation, so
+  // the sidebar always shows where you are. Others keep whatever state the reader gave them.
+  const currentCategory = componentCategories.find((category) =>
+    category.components.some(({ slug }) => pathname === `/components/${slug}`),
+  )?.title;
+  const [openCategories, setOpenCategories] = useState<string[]>(currentCategory ? [currentCategory] : []);
+  const [revealed, setRevealed] = useState(currentCategory);
+  if (currentCategory !== revealed) {
+    setRevealed(currentCategory);
+    if (currentCategory && !openCategories.includes(currentCategory))
+      setOpenCategories([...openCategories, currentCategory]);
+  }
 
   useEffect(() => {
     const closeOnSearch = (event: KeyboardEvent) => {
@@ -121,8 +134,14 @@ export function AppSidebar() {
               {componentCategories.map((category) => (
                 <Collapsible
                   key={category.title}
-                  // Closed by default, except the category holding the current page.
-                  defaultOpen={category.components.some(({ slug }) => pathname === `/components/${slug}`)}
+                  open={openCategories.includes(category.title)}
+                  onOpenChange={(open) =>
+                    setOpenCategories((current) =>
+                      open
+                        ? [...current, category.title]
+                        : current.filter((title) => title !== category.title),
+                    )
+                  }
                   render={<SidebarMenuItem />}
                 >
                   <SidebarMenuButton

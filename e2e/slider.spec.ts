@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 test("catches stops in both directions, releases them, and allows precise keyboard input", async ({
   page,

@@ -1,10 +1,11 @@
-import { expect, test } from "@playwright/test";
+import { expect, revealed, test } from "./fixtures";
 
 test("validates the email on submit without shifting the layout", async ({ page }) => {
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
   await page.goto("/components/validated-input");
   await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
+  await revealed(page);
   const frame = page.locator(".demo-frame");
   const input = frame.getByRole("textbox", { name: "Email" });
   const error = frame.locator('[data-slot="validated-input-error"]');

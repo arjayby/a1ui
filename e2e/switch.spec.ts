@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 test("thumb squashes while pressed, then springs across", async ({ page }) => {
   await page.goto("/components/switch");

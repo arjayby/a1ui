@@ -1,4 +1,5 @@
-import { expect, test, type Locator, type Page } from "@playwright/test";
+import { type Locator, type Page } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 async function open(page: Page) {
   await page.goto("/components/avatar-group");
@@ -22,10 +23,11 @@ async function settled(target: Locator) {
   return (await target.boundingBox())!;
 }
 
-// Starts recording `read(element)` on every frame for `ms` milliseconds, before the caller acts.
-async function record(page: Page, selector: string, read: string, ms: number) {
+// Starts recording `read(element)` on every frame for up to `ms` milliseconds, before the caller
+// acts. With `until`, recording stops once that value is read, so slow machines are not cut short.
+async function record(page: Page, selector: string, read: string, ms: number, until?: string) {
   await page.evaluate(
-    ({ selector, read, ms }) => {
+    ({ selector, read, ms, until }) => {
       const reader = new Function("element", `return ${read}`) as (element: Element) => string;
       const values: string[] = [];
       const began = performance.now();
@@ -33,12 +35,13 @@ async function record(page: Page, selector: string, read: string, ms: number) {
         while (performance.now() - began < ms) {
           const element = document.querySelector(selector);
           if (element) values.push(reader(element));
+          if (until !== undefined && values.at(-1) === until) break;
           await new Promise(requestAnimationFrame);
         }
         return values;
       })();
     },
-    { selector, read, ms },
+    { selector, read, ms, until },
   );
 }
 
@@ -53,9 +56,11 @@ test("avatars spring apart, lift with a label, and the chip counts up and fans o
   await expect(chip).toHaveText("+4");
 
   // Remounting the group with a new max counts the chip up from zero through every step.
-  await record(page, '.demo-frame [data-slot="avatar-group-count"]', "element.textContent", 2000);
+  await record(page, '.demo-frame [data-slot="avatar-group-count"]', "element.textContent", 6000, "+5");
   await page.getByRole("button", { name: /^Max:/ }).click();
   await page.getByRole("menuitem", { name: "3", exact: true }).click();
+  // Picking the item can scroll the chip away, and it only counts once it is on screen again.
+  await group.scrollIntoViewIfNeeded();
   const counts = await recorded(page);
   expect(counts.some((text) => ["+0", "+1", "+2", "+3", "+4"].includes(text))).toBe(true);
   expect(counts.at(-1)).toBe("+5");
@@ -69,7 +74,7 @@ test("avatars spring apart, lift with a label, and the chip counts up and fans o
   const shift = (element: Element) => new DOMMatrix(getComputedStyle(element).transform).e;
   await expect(second).toHaveCSS("margin-left", "-12px");
   await expect(second).toHaveCSS("transform", "none");
-  const ada = group.getByRole("img", { name: "Ada Lovelace" });
+  const ada = group.getByRole("img", { name: "Ashen Warden" });
   await group.scrollIntoViewIfNeeded();
   const box = await settled(ada);
   const center = { x: box.x + box.width / 2, y: box.y + box.height / 2 };
@@ -93,7 +98,7 @@ test("avatars spring apart, lift with a label, and the chip counts up and fans o
   expect(shifts.some((x) => x > 1 && x < 15)).toBe(true);
   await expect.poll(() => second.evaluate(shift)).toBe(16);
   await expect.poll(() => items.nth(2).evaluate(shift)).toBe(32);
-  await expect(ada.locator('[data-slot="avatar-label"]')).toHaveText("Ada Lovelace");
+  await expect(ada.locator('[data-slot="avatar-label"]')).toHaveText("Ashen Warden");
   await expect
     .poll(() => ada.evaluate((element) => new DOMMatrix(getComputedStyle(element).transform).f))
     .toBe(-4);
@@ -130,7 +135,7 @@ test("reduced motion on mobile spreads instantly and keeps keyboard labels", asy
   const chip = group.getByRole("button", { name: "Show 4 more" });
   await expect(chip).toHaveText("+4");
 
-  const ada = group.getByRole("img", { name: "Ada Lovelace" });
+  const ada = group.getByRole("img", { name: "Ashen Warden" });
   await ada.focus();
   await expect(group).toHaveAttribute("data-expanded", "true");
   await expect(group.locator('> [data-slot="avatar-group-item"]').nth(1)).toHaveCSS(
@@ -140,7 +145,7 @@ test("reduced motion on mobile spreads instantly and keeps keyboard labels", asy
   await expect(ada.locator('[data-slot="avatar-label"]')).toHaveCSS("opacity", "1");
   await expect(ada).toHaveCSS("transform", "none");
 
-  for (const name of ["Grace Hopper", "Alan Turing", "Katherine Johnson"]) {
+  for (const name of ["Hollow Seer", "Thornback", "Pale Regent"]) {
     await page.waitForTimeout(120);
     await page.keyboard.press("Tab");
     const avatar = group.getByRole("img", { name });
@@ -160,7 +165,7 @@ test("reduced motion on mobile spreads instantly and keeps keyboard labels", asy
 
   await page.waitForTimeout(120);
   await page.keyboard.press("Tab");
-  await expect(tray.getByRole("img", { name: "Margaret Hamilton" })).toBeFocused();
+  await expect(tray.getByRole("img", { name: "Gravecaller" })).toBeFocused();
   await page.waitForTimeout(120);
   await page.keyboard.press("Escape");
   await expect(chip).toBeFocused();

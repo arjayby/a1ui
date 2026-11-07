@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 const scenarios = [
   {
@@ -54,12 +54,16 @@ for (const scenario of scenarios) {
     const source = container.getByRole(scenario.role, { name: scenario.from, exact: true });
     const target = container.getByRole(scenario.role, { name: scenario.to, exact: true });
     await source.focus();
+    // Measure both boxes in the same frame: the page may still be settling its reveal or a scroll.
     await expect
-      .poll(async () => {
-        const item = await source.boundingBox();
-        const highlight = await source.locator('[data-slot$="-highlight"]').boundingBox();
-        return item && highlight ? Math.abs(item.y - highlight.y) : Infinity;
-      })
+      .poll(() =>
+        source.evaluate((item) => {
+          const highlight = item.querySelector('[data-slot$="-highlight"]');
+          return highlight
+            ? Math.abs(item.getBoundingClientRect().y - highlight.getBoundingClientRect().y)
+            : Infinity;
+        }),
+      )
       .toBeLessThan(0.5);
 
     const result = await target.evaluate(async (target, fromText) => {

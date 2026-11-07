@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 test("rates the password, marks unmet rules on submit, and toggles visibility", async ({ page }) => {
   const errors: string[] = [];

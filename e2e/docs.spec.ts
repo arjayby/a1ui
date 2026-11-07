@@ -1,4 +1,5 @@
-import { expect, test, type Page } from "@playwright/test";
+import { type Page } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 // Resolves once the page has stopped scrolling, so smooth jumps have finished.
 function settledScroll(page: Page) {
@@ -156,42 +157,47 @@ for (const method of ["button", "shortcut"]) {
   });
 }
 
-test("on-page menu jumps straight to the clicked section and then follows scrolling", async ({ page }) => {
-  await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto("/components/menu");
-  await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
-  const toc = page.getByRole("navigation", { name: "On this page" });
-  await expect(toc.getByRole("link", { name: "Demo" })).toHaveAttribute("aria-current", "location");
+test.describe("smooth scrolling", () => {
+  // This test checks that a smooth jump never marks the sections it passes through.
+  test.use({ smoothScroll: true });
 
-  // Record every item the menu marks current, so a jump that passes through other sections fails.
-  await page.evaluate(() => {
-    const nav = document.querySelector(".docs-toc nav")!;
-    const seen: string[] = [];
-    Object.assign(window, { tocSeen: seen });
-    new MutationObserver(() => {
-      const current = nav.querySelector("[aria-current]")?.textContent;
-      if (current && seen.at(-1) !== current) seen.push(current);
-    }).observe(nav, { subtree: true, attributes: true, attributeFilter: ["aria-current"] });
+  test("on-page menu jumps straight to the clicked section and then follows scrolling", async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto("/components/menu");
+    await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
+    const toc = page.getByRole("navigation", { name: "On this page" });
+    await expect(toc.getByRole("link", { name: "Demo" })).toHaveAttribute("aria-current", "location");
+
+    // Record every item the menu marks current, so a jump that passes through other sections fails.
+    await page.evaluate(() => {
+      const nav = document.querySelector(".docs-toc nav")!;
+      const seen: string[] = [];
+      Object.assign(window, { tocSeen: seen });
+      new MutationObserver(() => {
+        const current = nav.querySelector("[aria-current]")?.textContent;
+        if (current && seen.at(-1) !== current) seen.push(current);
+      }).observe(nav, { subtree: true, attributes: true, attributeFilter: ["aria-current"] });
+    });
+    for (const [name, id] of [
+      ["API reference", "api-reference"],
+      ["Installation", "installation"],
+      ["Code", "code"],
+      ["Demo", "demo"],
+    ]) {
+      await toc.getByRole("link", { name, exact: true }).click();
+      await settledScroll(page);
+      await expect(page.locator(`#${id}`)).toBeInViewport();
+      await expect(page).toHaveURL(new RegExp(`#${id}$`));
+      expect(
+        await page.evaluate(() => (window as unknown as { tocSeen: string[] }).tocSeen.splice(0)),
+        `jumping to ${name}`,
+      ).toEqual([name]);
+    }
+
+    await page.mouse.move(400, 400);
+    await page.mouse.wheel(0, 800);
+    await expect(toc.getByRole("link", { name: "Dependencies" })).toHaveAttribute("aria-current", "location");
   });
-  for (const [name, id] of [
-    ["API reference", "api-reference"],
-    ["Installation", "installation"],
-    ["Code", "code"],
-    ["Demo", "demo"],
-  ]) {
-    await toc.getByRole("link", { name, exact: true }).click();
-    await settledScroll(page);
-    await expect(page.locator(`#${id}`)).toBeInViewport();
-    await expect(page).toHaveURL(new RegExp(`#${id}$`));
-    expect(
-      await page.evaluate(() => (window as unknown as { tocSeen: string[] }).tocSeen.splice(0)),
-      `jumping to ${name}`,
-    ).toEqual([name]);
-  }
-
-  await page.mouse.move(400, 400);
-  await page.mouse.wheel(0, 800);
-  await expect(toc.getByRole("link", { name: "Dependencies" })).toHaveAttribute("aria-current", "location");
 });
 
 test("on-page menu highlight follows the page after the window regains focus", async ({ page }) => {
@@ -208,8 +214,11 @@ test("on-page menu highlight follows the page after the window regains focus", a
   await settledScroll(page);
 
   await page.mouse.move(400, 400);
-  await page.mouse.wheel(0, -5000);
+  // Wheel exactly back to the top. Chromium animates wheel scrolls itself, and a delta past the
+  // top keeps that animation running while clamped at 0, where it would drag the next jump back.
+  await page.mouse.wheel(0, -(await page.evaluate(() => scrollY)));
   await expect(toc.getByRole("link", { name: "Demo" })).toHaveAttribute("aria-current", "location");
+  await settledScroll(page);
   // Switching apps and back blurs, then refocuses, whatever element had focus.
   await page.evaluate(() => {
     const focused = document.activeElement as HTMLElement | null;

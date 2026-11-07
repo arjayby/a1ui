@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 test("adds tags, removes them with Backspace twice, and respects the limit", async ({ page }) => {
   const errors: string[] = [];
