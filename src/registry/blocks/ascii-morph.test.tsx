@@ -4,6 +4,16 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { AsciiMorph } from "./ascii-morph";
 
+// Motion's frame loop captures requestAnimationFrame when it loads, so route it through a
+// stand-in installed before imports that each test points at its own manual queue.
+const frames = vi.hoisted(() => {
+  const target = {
+    request: (callback: FrameRequestCallback) => setTimeout(callback, 16) as unknown as number,
+  };
+  globalThis.requestAnimationFrame = (callback) => target.request(callback);
+  return target;
+});
+
 let pending: Map<number, FrameRequestCallback>;
 let now: number;
 let setReduced: (value: boolean) => void;
@@ -37,11 +47,12 @@ beforeEach(() => {
   now = 0;
   let id = 0;
   disconnect = vi.fn();
-  vi.stubGlobal("requestAnimationFrame", (callback: FrameRequestCallback) => {
+  frames.request = (callback) => {
     pending.set(++id, callback);
     return id;
-  });
-  vi.stubGlobal("cancelAnimationFrame", (key: number) => pending.delete(key));
+  };
+  // Motion times frames with performance.now(), so keep it on the manual clock.
+  vi.spyOn(performance, "now").mockImplementation(() => now);
   motionEvents = new EventTarget();
   removeMotionListener = vi.fn(motionEvents.removeEventListener.bind(motionEvents));
   const motion = {
@@ -68,6 +79,8 @@ beforeEach(() => {
 
 afterEach(() => {
   cleanup();
+  // Let Motion's shared loop drain its last requested frame so the next test starts idle.
+  for (let i = 0; i < 4 && pending.size; i++) frame();
   vi.restoreAllMocks();
   vi.unstubAllGlobals();
 });
@@ -138,22 +151,48 @@ describe("AsciiMorph", () => {
     expect(onShapeChange).toHaveBeenLastCalledWith("flower");
   });
 
-  it("switches instantly under reduced motion, including a live preference change", () => {
+  it("cross-fades in place under reduced motion, including a live preference change", async () => {
+    // Motion reports a finished fade through a promise, so let microtasks run between frames.
+    async function play(milliseconds: number) {
+      for (let i = 0; i < milliseconds; i += 17) {
+        frame();
+        await act(async () => {});
+      }
+    }
     render(<AsciiMorph />);
-    fireEvent.click(screen.getByRole("button"));
+    const control = screen.getByRole("button");
+    const art = document.querySelector<SVGGElement>("svg g")!;
+    fireEvent.click(control);
     advance(100);
+    const travelling = positions();
     setReduced(true);
+    // The glyphs fade out where they are instead of jumping or travelling on.
+    await play(51);
+    expect(positions()).toEqual(travelling);
+    expect(Number(art.style.opacity)).toBeGreaterThan(0);
+    expect(Number(art.style.opacity)).toBeLessThan(1);
+    await play(300);
     const flower = positions();
+    expect(flower).not.toEqual(travelling);
+    expect(art.style.opacity).toBe("1");
     expect(pending.size).toBe(0);
-    fireEvent.click(screen.getByRole("button"));
+
+    // A new shape swaps in unseen at the fade's midpoint.
+    fireEvent.click(control);
+    expect(positions()).toEqual(flower);
+    await play(51);
+    expect(positions()).toEqual(flower);
+    await play(300);
     const monogram = positions();
     expect(monogram).not.toEqual(flower);
-    advance(200);
+    expect(art.style.opacity).toBe("1");
+    await play(200);
     expect(positions()).toEqual(monogram);
     expect(pending.size).toBe(0);
+
     setReduced(false);
     expect(pending.size).toBe(0);
-    fireEvent.click(screen.getByRole("button"));
+    fireEvent.click(control);
     expect(positions()).toEqual(monogram);
     advance(200);
     expect(positions()).not.toEqual(monogram);
@@ -176,6 +215,8 @@ describe("AsciiMorph", () => {
     const hidden = vi.spyOn(document, "hidden", "get").mockReturnValue(true);
     act(() => document.dispatchEvent(new Event("visibilitychange")));
     const stopped = positions();
+    frame();
+    expect(positions()).toEqual(stopped);
     expect(pending.size).toBe(0);
     hidden.mockReturnValue(false);
     act(() => document.dispatchEvent(new Event("visibilitychange")));
@@ -194,6 +235,7 @@ describe("AsciiMorph", () => {
     advance(100);
     expect(pending.size).toBe(1);
     unmount();
+    frame();
     expect(pending.size).toBe(0);
     expect(disconnect).toHaveBeenCalledTimes(2);
     expect(removeMotionListener).toHaveBeenCalledTimes(2);

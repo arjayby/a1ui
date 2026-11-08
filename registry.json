@@ -8,7 +8,7 @@
       "type": "registry:block",
       "title": "ASCII Morph",
       "description": "A cloud of characters that morphs into a globe, a flower, and an A1 monogram.",
-      "dependencies": ["clsx"],
+      "dependencies": ["clsx", "motion"],
       "files": [
         {
           "path": "src/registry/blocks/ascii-morph.tsx",
@@ -26,7 +26,7 @@
             "Three built-in silhouettes only: globe, flower, and A1. Does not convert images or arbitrary text into ASCII."
           ],
           "requirements": [
-            "React and Tailwind CSS. Uses SVG, requestAnimationFrame, matchMedia, and IntersectionObserver. Reduced motion switches shapes instantly. No automatic animation or pause control is needed."
+            "React, Tailwind CSS, and Motion. Uses SVG, matchMedia, and IntersectionObserver. Reduced motion cross-fades between shapes in place. No automatic animation or pause control is needed."
           ]
         }
       }

@@ -22,6 +22,7 @@ bun: bunx --bun shadcn@latest add http://localhost:3000/r/ascii-morph.json --yes
 ## Dependencies
 
 - `clsx`
+- `motion`
 
 ## Code
 
@@ -49,7 +50,7 @@ export function AsciiMorphExample() {
 | `shape`         | `"globe" \| "flower" \| "a1"`      | Uncontrolled           | Controlled destination. Update it in `onShapeChange` to accept user input.                                                 |
 | `defaultShape`  | `AsciiMorphShape`                  | `"globe"`              | Initial shape when uncontrolled. Read once on mount.                                                                       |
 | `onShapeChange` | `(shape: AsciiMorphShape) => void` | None                   | Called when a click or key requests another shape.                                                                         |
-| `duration`      | `number`                           | `1600`                 | Approximate settling time in milliseconds. Clamped to 400–4000. Spring velocity and travel distance affect the exact time. |
+| `duration`      | `number`                           | `1200`                 | Approximate settling time in milliseconds. Clamped to 400–4000. Spring velocity and travel distance affect the exact time. |
 | `interactive`   | `boolean`                          | `true`                 | Enables the button and animated transitions. Set to `false` for a static illustration that follows `shape`.                |
 | `ariaLabel`     | `string`                           | `"Change ASCII shape"` | Accessible name of the button.                                                                                             |
 | `className`     | `string`                           | None                   | Outer layout classes. The illustration fills its container with a 6:5 aspect ratio by default.                             |
