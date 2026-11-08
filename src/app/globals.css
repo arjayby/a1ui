@@ -216,13 +216,17 @@ h6 {
   height: 32px;
 }
 
+/* The sidebar takes the raised card colour and the main pane sits on the page grey. */
 .docs-shell {
+  --sidebar: var(--card);
   min-height: 100dvh;
 }
 
+/* Wells (catalog cards, demos, code, tables) take the main pane's own colour. */
 .docs-main {
+  --well: var(--background);
   min-width: 0;
-  background: var(--card);
+  background: var(--background);
 }
 
 @media (min-width: 48rem) {
@@ -232,7 +236,8 @@ h6 {
   }
 }
 
-/* Translucent toolbar: content scrolls beneath; the edge only appears once it does. */
+/* Translucent toolbar in the main pane's colour: content scrolls beneath; the edge
+   only appears once it does. */
 .docs-header {
   position: sticky;
   top: 0;
@@ -245,10 +250,16 @@ h6 {
   padding-inline: 12px;
   border-top-left-radius: inherit;
   border-top-right-radius: inherit;
-  background: var(--material-thick);
+  background: color-mix(in srgb, var(--background) 82%, transparent);
   -webkit-backdrop-filter: blur(var(--material-blur)) saturate(var(--material-saturate));
   backdrop-filter: blur(var(--material-blur)) saturate(var(--material-saturate));
   box-shadow: 0 0.5px 0 var(--hairline);
+}
+
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  .docs-header {
+    background: var(--background);
+  }
 }
 
 @supports (animation-timeline: scroll()) {
@@ -715,6 +726,7 @@ h6 {
   min-width: 40rem;
   border-collapse: collapse;
   margin: 0;
+  background: transparent;
   font-size: var(--text-xs);
 }
 
@@ -749,6 +761,7 @@ h6 {
   border: 0.5px solid var(--hairline);
   border-radius: var(--radius-md);
   padding: 0;
+  background: var(--well);
   box-shadow: none;
 }
 
