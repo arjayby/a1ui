@@ -3,6 +3,16 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { AsciiTerrain } from "./ascii-terrain";
 
+// Motion's frame loop captures requestAnimationFrame when it loads, so route it through a
+// stand-in installed before imports that each test points at its own manual queue.
+const frames = vi.hoisted(() => {
+  const target = {
+    request: (callback: FrameRequestCallback) => setTimeout(callback, 16) as unknown as number,
+  };
+  globalThis.requestAnimationFrame = (callback) => target.request(callback);
+  return target;
+});
+
 let pending: Map<number, FrameRequestCallback>;
 let now: number;
 let painted: [string, number, number][];
@@ -28,11 +38,12 @@ beforeEach(() => {
   pending = new Map();
   let nextId = 0;
   disconnected = vi.fn();
-  vi.stubGlobal("requestAnimationFrame", (callback: FrameRequestCallback) => {
+  frames.request = (callback) => {
     pending.set(++nextId, callback);
     return nextId;
-  });
-  vi.stubGlobal("cancelAnimationFrame", (id: number) => pending.delete(id));
+  };
+  // Motion times frames with performance.now(), so keep it on the manual clock.
+  vi.spyOn(performance, "now").mockImplementation(() => now);
   vi.stubGlobal(
     "PointerEvent",
     class extends MouseEvent {
@@ -99,6 +110,8 @@ beforeEach(() => {
 
 afterEach(() => {
   cleanup();
+  // Let Motion's shared loop drain its last requested frame so the next test starts idle.
+  for (let index = 0; index < 4 && pending.size; index++) advance(17);
   vi.restoreAllMocks();
   vi.unstubAllGlobals();
 });
@@ -224,6 +237,7 @@ describe("AsciiTerrain", () => {
     setReduced(false);
     expect(pending.size).toBe(1);
     unmount();
+    advance(17);
     expect(pending.size).toBe(0);
     expect(disconnected).toHaveBeenCalledTimes(2);
   });

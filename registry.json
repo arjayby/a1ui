@@ -62,7 +62,7 @@
       "type": "registry:block",
       "title": "ASCII Terrain",
       "description": "A landscape made of characters, with rolling hills, pointer sculpting, and click ripples.",
-      "dependencies": ["clsx"],
+      "dependencies": ["clsx", "motion"],
       "files": [
         {
           "path": "src/registry/blocks/ascii-terrain.tsx",

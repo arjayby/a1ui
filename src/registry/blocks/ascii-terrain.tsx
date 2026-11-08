@@ -1,6 +1,7 @@
 "use client";
 
 import { clsx } from "clsx";
+import { cancelFrame, frame, keyframes, spring, type FrameData, type KeyframeGenerator } from "motion";
 import { useEffect, useId, useRef, type CSSProperties } from "react";
 
 export type AsciiTerrainProps = {
@@ -18,6 +19,9 @@ export type AsciiTerrainProps = {
 
 type Point = { x: number; z: number; screenX: number; screenY: number; baseY: number };
 type Ripple = { x: number; z: number; started: number; released?: number };
+// A value that follows a target with a Motion generator, advanced on the terrain's own clock
+// so pausing, scrolling offscreen, or hiding the tab freezes it exactly where it was.
+type Follower = { value: number; target: number; elapsed: number; generator: KeyframeGenerator<number> };
 type Controls = {
   sync: () => void;
   move: (x: number, y: number) => void;
@@ -33,6 +37,42 @@ const smoothstep = (value: number) => {
   const progress = clamp(value, 0, 1);
   return progress * progress * (3 - 2 * progress);
 };
+// Critically damped, so the hill glides to the pointer and carries momentum without overshoot.
+const hoverSpring = { stiffness: 64, damping: 16, mass: 1, restDelta: 0.0001, restSpeed: 0.001 };
+// The hill rises and settles with an exponential ease, normalized to finish in 750ms.
+const strengthDuration = 750;
+const settle = (progress: number) => (1 - Math.exp(-6 * progress)) / (1 - Math.exp(-6));
+
+function follower(value: number, generator: KeyframeGenerator<number>): Follower {
+  return { value, target: value, elapsed: 0, generator };
+}
+function advance(follow: Follower, milliseconds: number) {
+  follow.elapsed += milliseconds;
+  follow.value = follow.generator.next(follow.elapsed).value;
+}
+function springTo(follow: Follower, target: number) {
+  if (target === follow.target) return;
+  // Retargeting keeps the current velocity so a moving hill curves toward its new spot.
+  const velocity = follow.generator.velocity?.(follow.elapsed) ?? 0;
+  follow.generator = spring({ ...hoverSpring, keyframes: [follow.value, target], velocity });
+  follow.target = target;
+  follow.elapsed = 0;
+}
+function springJump(follow: Follower, value: number) {
+  follow.generator = spring({ ...hoverSpring, keyframes: [value, value] });
+  follow.value = follow.target = value;
+  follow.elapsed = 0;
+}
+function settleTo(follow: Follower, target: number) {
+  if (target === follow.target) return;
+  follow.generator = keyframes({
+    keyframes: [follow.value, target],
+    duration: strengthDuration,
+    ease: settle,
+  });
+  follow.target = target;
+  follow.elapsed = 0;
+}
 
 export function AsciiTerrain({
   cellSize = 10,
@@ -72,8 +112,7 @@ export function AsciiTerrain({
 
     const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
     let visible = false;
-    let frame = 0;
-    let lastFrame = 0;
+    let running = false;
     let width = 0;
     let viewHeight = 0;
     let color = "";
@@ -81,15 +120,19 @@ export function AsciiTerrain({
     let points: Point[] = [];
     let ripples: Ripple[] = [];
     const pointer = {
-      x: 0,
-      z: 0,
+      x: follower(0, spring({ ...hoverSpring, keyframes: [0, 0] })),
+      z: follower(0, spring({ ...hoverSpring, keyframes: [0, 0] })),
+      strength: follower(0, keyframes({ keyframes: [0, 0], duration: strengthDuration })),
       targetX: 0,
       targetZ: 0,
-      velocityX: 0,
-      velocityZ: 0,
-      strength: 0,
-      active: false,
     };
+    const aim = (x: number, z: number) => {
+      pointer.targetX = x;
+      pointer.targetZ = z;
+      springTo(pointer.x, x);
+      springTo(pointer.z, z);
+    };
+    const activate = (active: boolean) => settleTo(pointer.strength, active ? 1 : 0);
 
     const canMove = () => !pausedRef.current && !motion.matches && !root.closest("[inert]");
     const canAnimate = () => visible && !document.hidden && canMove() && width > 0 && viewHeight > 0;
@@ -124,8 +167,8 @@ export function AsciiTerrain({
         const depth = (z + 1) / 2;
         // Pick against the base landscape so a raised hill cannot move its own target.
         point.baseY = viewHeight * (0.28 + depth * 0.56 - level * 0.25);
-        const distance = Math.hypot(x - pointer.x, z - pointer.z);
-        level += Math.exp(-distance * distance * 10) * pointer.strength * 0.65;
+        const distance = Math.hypot(x - pointer.x.value, z - pointer.z.value);
+        level += Math.exp(-distance * distance * 10) * pointer.strength.value * 0.65;
         for (const wave of waves) {
           const front = Math.hypot(x - wave.x, z - wave.z) - wave.radius;
           level += Math.cos(front * 13) * Math.exp(-front * front * 5) * wave.strength;
@@ -142,45 +185,40 @@ export function AsciiTerrain({
       canvas.dataset.ready = "true";
     }
 
-    function tick(now: number) {
-      frame = 0;
-      if (!canAnimate()) return;
-      const delta = lastFrame ? Math.min((now - lastFrame) / 1000, 0.08) : 0;
-      lastFrame = now;
-      timeRef.current += delta;
-      // A critically damped spring carries momentum through pointer changes.
-      // The exact solution keeps the response the same at different refresh rates.
-      const decay = Math.exp(-8 * delta);
-      const offsetX = pointer.x - pointer.targetX;
-      const offsetZ = pointer.z - pointer.targetZ;
-      const springX = pointer.velocityX + 8 * offsetX;
-      const springZ = pointer.velocityZ + 8 * offsetZ;
-      pointer.x = pointer.targetX + (offsetX + springX * delta) * decay;
-      pointer.z = pointer.targetZ + (offsetZ + springZ * delta) * decay;
-      pointer.velocityX = (pointer.velocityX - springX * 8 * delta) * decay;
-      pointer.velocityZ = (pointer.velocityZ - springZ * 8 * delta) * decay;
-      pointer.strength += ((pointer.active ? 1 : 0) - pointer.strength) * (1 - Math.exp(-delta * 8));
+    // Runs in Motion's render step, after any other Motion animations update this frame.
+    function tick({ delta }: FrameData) {
+      if (!canAnimate()) return stop();
+      // Motion clamps long gaps between frames, so a stalled tab cannot fling the terrain forward.
+      timeRef.current += delta / 1000;
+      // Motion's generators are analytic, so the response is the same at any refresh rate.
+      advance(pointer.x, delta);
+      advance(pointer.z, delta);
+      advance(pointer.strength, delta);
       ripples = ripples.filter(
         (ripple) =>
           timeRef.current - ripple.started < 4 &&
           (ripple.released === undefined || timeRef.current - ripple.released < 0.24),
       );
       draw();
-      frame = requestAnimationFrame(tick);
+    }
+
+    function stop() {
+      if (running) cancelFrame(tick);
+      running = false;
     }
 
     function sync() {
-      if (frame) cancelAnimationFrame(frame);
-      frame = 0;
-      lastFrame = 0;
+      stop();
       if (motion.matches) {
-        pointer.strength = 0;
-        pointer.active = false;
+        pointer.strength = follower(0, keyframes({ keyframes: [0, 0], duration: strengthDuration }));
         ripples = [];
       }
       root!.dataset.motion = motion.matches ? "reduced" : pausedRef.current ? "paused" : "running";
       draw();
-      if (canAnimate()) frame = requestAnimationFrame(tick);
+      if (canAnimate()) {
+        frame.render(tick, true);
+        running = true;
+      }
     }
 
     function resize() {
@@ -233,34 +271,32 @@ export function AsciiTerrain({
           }
         }
         if (nearest) {
-          pointer.targetX = nearest.x;
-          pointer.targetZ = nearest.z;
-          if (pointer.strength < 0.001) {
-            pointer.x = pointer.targetX;
-            pointer.z = pointer.targetZ;
-            pointer.velocityX = pointer.velocityZ = 0;
+          if (pointer.strength.value < 0.001) {
+            // A hill rising from flat ground appears under the pointer instead of sliding in.
+            springJump(pointer.x, nearest.x);
+            springJump(pointer.z, nearest.z);
           }
-          pointer.active = true;
+          aim(nearest.x, nearest.z);
+          activate(true);
         }
       },
       leave() {
-        pointer.active = false;
+        activate(false);
       },
       key(key) {
         if (!interactive || !canMove()) return;
         if (key === "Escape") {
-          pointer.active = false;
+          activate(false);
           return;
         }
-        pointer.active = true;
-        if (key === "Home") {
-          pointer.targetX = 0;
-          pointer.targetZ = 0;
-        }
-        if (key === "ArrowLeft") pointer.targetX = clamp(pointer.targetX - 0.12, -0.9, 0.9);
-        if (key === "ArrowRight") pointer.targetX = clamp(pointer.targetX + 0.12, -0.9, 0.9);
-        if (key === "ArrowUp") pointer.targetZ = clamp(pointer.targetZ - 0.12, -0.9, 0.9);
-        if (key === "ArrowDown") pointer.targetZ = clamp(pointer.targetZ + 0.12, -0.9, 0.9);
+        activate(true);
+        let { targetX: x, targetZ: z } = pointer;
+        if (key === "Home") x = z = 0;
+        if (key === "ArrowLeft") x = clamp(x - 0.12, -0.9, 0.9);
+        if (key === "ArrowRight") x = clamp(x + 0.12, -0.9, 0.9);
+        if (key === "ArrowUp") z = clamp(z - 0.12, -0.9, 0.9);
+        if (key === "ArrowDown") z = clamp(z + 0.12, -0.9, 0.9);
+        aim(x, z);
       },
       ripple() {
         if (!interactive || !canMove()) return;
@@ -292,7 +328,7 @@ export function AsciiTerrain({
     document.fonts?.addEventListener("loadingdone", appearance);
     window.addEventListener("resize", resize);
     return () => {
-      if (frame) cancelAnimationFrame(frame);
+      stop();
       resizeObserver.disconnect();
       intersectionObserver.disconnect();
       themeObserver.disconnect();

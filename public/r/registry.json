@@ -85,7 +85,8 @@
       "title": "ASCII Terrain",
       "description": "A landscape made of characters, with rolling hills, pointer sculpting, and click ripples.",
       "dependencies": [
-        "clsx"
+        "clsx",
+        "motion"
       ],
       "files": [
         {

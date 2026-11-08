@@ -22,6 +22,7 @@ bun: bunx --bun shadcn@latest add http://localhost:3000/r/ascii-terrain.json --y
 ## Dependencies
 
 - `clsx`
+- `motion`
 
 ## Code
 
