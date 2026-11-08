@@ -47,7 +47,7 @@ test("the agent entry point leads to every installable item and Markdown guide",
 
 test("copy prompts support both discovery and a chosen block", async ({ page, context }) => {
   await context.grantPermissions(["clipboard-read", "clipboard-write"]);
-  await page.goto("/");
+  await page.goto("/agents");
   await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
   const copyButton = page.getByRole("button", { name: "Copy prompt for agent" });
   const idleWidth = await copyButton.evaluate((element) => element.getBoundingClientRect().width);

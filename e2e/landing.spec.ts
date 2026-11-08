@@ -1,55 +1,42 @@
 import { expect, test } from "./fixtures";
-import registry from "../registry.json" with { type: "json" };
 
-test("home showcases the library and opens the documentation", async ({ page }) => {
+test("home introduces the library and its menu opens each section", async ({ page }) => {
   await page.goto("/");
   await expect(page).toHaveTitle("a1ui — Animated React components and blocks");
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Animated Reactcomponents and blocks.");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+    "a1ui — Animated React components and blocks",
+  );
   await expect(page.locator('[data-sidebar="sidebar"]')).toHaveCount(0);
-  await expect(page.locator(".landing-block-card")).toHaveCount(5);
-  for (const item of registry.items) {
-    const link = page.locator(
-      `main a[href="/${item.type === "registry:block" ? "blocks" : "components"}/${item.name}"]`,
-    );
-    if ((await link.count()) > 0) await expect(link.first()).toBeVisible();
-  }
-  await page.getByRole("link", { name: "Explore components", exact: true }).click();
+  const menu = page.getByRole("navigation", { name: "Main navigation" });
+  await expect(menu.getByRole("link")).toHaveText(["Components", "Blocks", "For agents", "GitHub"], {
+    ignoreCase: true,
+  });
+  await expect(menu.getByRole("link", { name: "For agents" })).toHaveAttribute("href", "/agents");
+  await expect(menu.getByRole("link", { name: "GitHub" })).toHaveAttribute(
+    "href",
+    "https://github.com/arjayby/a1ui",
+  );
+
+  await menu.getByRole("link", { name: "Components", exact: true }).click();
   await expect(page).toHaveURL(/\/components$/);
   await expect(page.getByRole("heading", { name: "Components", exact: true })).toBeVisible();
   await page.getByRole("link", { name: "a1ui Documentation" }).click();
   await expect(page.getByRole("heading", { level: 1 })).toContainText("Animated React");
-  await page.getByRole("link", { name: "Browse blocks", exact: true }).click();
+  await page
+    .getByRole("navigation", { name: "Main navigation" })
+    .getByRole("link", { name: "Blocks", exact: true })
+    .click();
   await expect(page).toHaveURL(/\/blocks$/);
   await expect(page.getByRole("heading", { name: "Blocks", exact: true })).toBeVisible();
 });
 
-test("landing component previews respond to input", async ({ page, context }) => {
-  await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+test("the monogram morphs when clicked", async ({ page }) => {
   await page.goto("/");
   await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
-  await page.getByRole("button", { name: "Copy text", exact: true }).click();
-  await expect(page.getByRole("button", { name: "Copied", exact: true })).toBeVisible();
-  expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(
-    "Animated React components and blocks.",
-  );
-  const toggle = page.getByRole("button", { name: "Toggle preview icon" });
-  await toggle.click();
-  await expect(toggle).toHaveAttribute("aria-pressed", "true");
-  const slider = page.getByRole("slider", { name: "Intensity" });
-  await slider.focus();
-  await page.keyboard.press("ArrowRight");
-  await expect(slider).not.toHaveAttribute("aria-valuenow", "50");
-  await page.getByRole("button", { name: "Submit", exact: true }).click();
-  await expect(page.getByRole("button", { name: "Submitted", exact: true })).toBeVisible();
-  const terrain = page.getByRole("group", { name: "Interactive ASCII terrain" });
-  await expect(terrain).toHaveAttribute("data-motion", "running");
-  await terrain
-    .getByRole("button", { name: "Interact with terrain" })
-    .click({ position: { x: 320, y: 160 } });
-  await page.getByRole("button", { name: "Pause terrain" }).click();
-  await expect(terrain).toHaveAttribute("data-motion", "paused");
-  await page.getByRole("button", { name: "Resume terrain" }).click();
-  await expect(terrain).toHaveAttribute("data-motion", "running");
+  const art = page.locator('.landing-card [data-slot="ascii-morph"]');
+  await expect(art).toHaveAttribute("data-shape", "a1");
+  await page.getByRole("button", { name: "Morph the a1ui monogram" }).click();
+  await expect(art).toHaveAttribute("data-shape", "globe");
 });
 
 for (const width of [1440, 390, 320]) {
@@ -61,14 +48,12 @@ for (const width of [1440, 390, 320]) {
     for (const theme of ["dark", "light"]) {
       await expect(page.locator("html")).toHaveClass(new RegExp(theme));
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
-      await expect(
-        page
-          .getByRole("navigation", { name: "Main navigation" })
-          .getByRole("link", { name: "Blocks", exact: true }),
-      ).toBeVisible();
-      const terrain = page.locator(".landing-stage-art canvas");
-      await terrain.scrollIntoViewIfNeeded();
-      await expect(terrain).toHaveAttribute("data-ready", "true");
+      const menu = page.getByRole("navigation", { name: "Main navigation" });
+      for (const name of ["Components", "Blocks", "For agents", "GitHub"]) {
+        const link = menu.getByRole("link", { name, exact: true });
+        await link.scrollIntoViewIfNeeded();
+        await expect(link).toBeVisible();
+      }
       await page.getByRole("button", { name: "Toggle theme" }).click();
     }
   });
