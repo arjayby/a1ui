@@ -72,7 +72,7 @@ test("resizes without overflow and repaints inherited colors while paused", asyn
     }).toPass();
   }
   const before = await pixels(page.locator("canvas"));
-  await page.getByRole("button", { name: "Toggle theme" }).filter({ visible: true }).click();
+  await page.getByRole("switch", { name: "Dark theme" }).filter({ visible: true }).click();
   await expect.poll(() => pixels(page.locator("canvas"))).not.toBe(before);
 });
 

@@ -54,7 +54,7 @@ for (const width of [1440, 390, 320]) {
         await link.scrollIntoViewIfNeeded();
         await expect(link).toBeVisible();
       }
-      await page.getByRole("button", { name: "Toggle theme" }).click();
+      await page.getByRole("switch", { name: "Dark theme" }).click();
     }
   });
 }

@@ -116,6 +116,6 @@ test("documentation shares the component geometry in both themes", async ({ page
         .getByRole("navigation", { name: "Components", exact: true })
         .getByRole("button", { name: "Buttons & Actions", exact: true }),
     ).toHaveCSS("font-family", "Inter, system-ui, sans-serif");
-    await page.getByRole("button", { name: "Toggle theme" }).click();
+    await page.getByRole("switch", { name: "Dark theme" }).click();
   }
 });

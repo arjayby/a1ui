@@ -2,9 +2,10 @@
 
 import { useSearchContext } from "fumadocs-ui/contexts/search";
 import { useTheme } from "fumadocs-ui/provider/base";
-import { GithubLogoIcon, MoonIcon, MagnifyingGlassIcon, SunIcon } from "@phosphor-icons/react";
+import { GithubLogoIcon, MagnifyingGlassIcon, MoonIcon, SunIcon } from "@phosphor-icons/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState, useSyncExternalStore } from "react";
 
 import {
   Breadcrumb,
@@ -17,6 +18,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
+import { Switch } from "@/registry/components/switch";
 import registry from "../../registry.json";
 
 export function GitHubLink() {
@@ -36,20 +38,36 @@ export function GitHubLink() {
   );
 }
 
-export function ThemeButton() {
+const subscribeNever = () => () => {};
+const themeIcons = {
+  checked: <MoonIcon weight="fill" />,
+  unchecked: <SunIcon weight="fill" />,
+};
+
+export function ThemeSwitch() {
   const { resolvedTheme, setTheme } = useTheme();
+  // The theme is only known on the client. Render the unchecked sun while hydrating so the markup
+  // matches the server, then jump to the real state and only animate later changes.
+  const hydrated = useSyncExternalStore(
+    subscribeNever,
+    () => true,
+    () => false,
+  );
+  const [animated, setAnimated] = useState(false);
+  useEffect(() => {
+    if (!hydrated) return;
+    const frame = requestAnimationFrame(() => setAnimated(true));
+    return () => cancelAnimationFrame(frame);
+  }, [hydrated]);
 
   return (
-    <Button
-      variant="ghost"
-      size="icon"
-      aria-label="Toggle theme"
-      title="Toggle theme"
-      onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-    >
-      <MoonIcon aria-hidden="true" className="size-4 dark:hidden" />
-      <SunIcon aria-hidden="true" className="hidden size-4 dark:block" />
-    </Button>
+    <Switch
+      aria-label="Dark theme"
+      checked={hydrated && resolvedTheme === "dark"}
+      onCheckedChange={(dark) => setTheme(dark ? "dark" : "light")}
+      thumbIcons={themeIcons}
+      duration={animated ? 0.3 : 0}
+    />
   );
 }
 
@@ -114,7 +132,7 @@ export function DocsHeader() {
       <div className="flex shrink-0 items-center gap-1">
         <SearchButton />
         <GitHubLink />
-        <ThemeButton />
+        <ThemeSwitch />
       </div>
     </header>
   );

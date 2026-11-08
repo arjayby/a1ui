@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 import { HydrationMarker } from "@/components/hydration-marker";
-import { ThemeButton } from "@/components/site-navigation";
+import { ThemeSwitch } from "@/components/site-navigation";
 import { blocks } from "@/lib/block-catalog";
 import { components } from "@/lib/component-catalog";
 import { absoluteUrl, JsonLd, repositoryUrl, siteDescription, siteName } from "@/lib/seo";
@@ -60,7 +60,7 @@ export default function HomePage() {
           <span>
             {components.length} components · {blocks.length} blocks
           </span>
-          <ThemeButton />
+          <ThemeSwitch />
         </footer>
       </article>
 

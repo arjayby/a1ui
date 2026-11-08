@@ -51,11 +51,6 @@
   font-size: 12px;
   font-variant-numeric: tabular-nums;
 }
-.landing-card-footer .ui-button[data-size="icon"] {
-  width: 28px;
-  min-height: 28px;
-  margin-right: -6px;
-}
 
 .landing-menu ul {
   gap: 40px 56px;

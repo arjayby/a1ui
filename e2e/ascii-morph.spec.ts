@@ -124,7 +124,7 @@ test("honors live reduced motion and keeps both theme and responsive geometry", 
     expect(await coordinates(art)).toEqual(monogram);
   }
   const beforeColor = await art.locator("g").evaluate((node) => getComputedStyle(node).fill);
-  await page.getByRole("button", { name: "Toggle theme" }).click();
+  await page.getByRole("switch", { name: "Dark theme" }).click();
   await expect
     .poll(() => art.locator("g").evaluate((node) => getComputedStyle(node).fill))
     .not.toBe(beforeColor);
