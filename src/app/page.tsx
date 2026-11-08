@@ -20,12 +20,12 @@ import { LoadingButtonPreview } from "@/components/component-demos/loading-butto
 import { SliderPreview } from "@/components/component-demos/slider-demo";
 import { SwitchPreview } from "@/components/component-demos/switch-demo";
 import { HydrationMarker } from "@/components/hydration-marker";
+import { LandingTerrain } from "@/components/landing-terrain";
 import { GitHubLink, ThemeButton } from "@/components/site-navigation";
 import { blocks } from "@/lib/block-catalog";
 import { componentCategories, components } from "@/lib/component-catalog";
 import { absoluteUrl, JsonLd, repositoryUrl, siteDescription, siteName } from "@/lib/seo";
 import { getSiteUrl } from "@/lib/site-url.mjs";
-import { AsciiTerrain } from "@/registry/blocks/ascii-terrain";
 import { CopyButton } from "@/registry/components/copy-button";
 import { IconToggle } from "@/registry/components/icon-toggle";
 
@@ -157,19 +157,7 @@ export default function HomePage() {
         </section>
 
         <section className="landing-stage" aria-labelledby="playground-heading">
-          {/* Not inert: the terrain stops animating and ignores input inside inert subtrees. */}
-          <div className="landing-stage-art">
-            <AsciiTerrain
-              cellSize={12}
-              amplitude={1.2}
-              speed={1}
-              ariaLabel="Interactive ASCII terrain"
-              className="landing-terrain"
-            />
-          </div>
-          <p className="landing-stage-hint landing-width" aria-hidden="true">
-            Move to shape. Click to ripple.
-          </p>
+          <LandingTerrain />
           <div className="landing-window landing-width">
             <div className="landing-window-bar">
               <h2 id="playground-heading">Playground</h2>

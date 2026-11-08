@@ -35,9 +35,7 @@ test("draws, pauses in place, resumes, and creates a new landscape", async ({ pa
   expect(await sampleAfter(canvas)).not.toBe(regenerated);
 });
 
-test("reduced motion is static through pointer and keyboard input and can be changed live", async ({
-  page,
-}) => {
+test("reduced motion highlights input without animating and can be changed live", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await expect(page.locator('[data-slot="ascii-terrain"]')).toHaveAttribute("data-motion", "reduced");
   const canvas = page.locator("canvas");
@@ -46,8 +44,12 @@ test("reduced motion is static through pointer and keyboard input and can be cha
   await control.click({ position: { x: 150, y: 150 } });
   await control.press("ArrowRight");
   await control.press("Enter");
-  expect(await sampleAfter(canvas)).toBe(stopped);
-  await expect(page.getByText("Static terrain. Reduced motion is on.")).toBeVisible();
+  const highlighted = await pixels(canvas);
+  expect(highlighted).not.toBe(stopped);
+  expect(await sampleAfter(canvas)).toBe(highlighted);
+  await control.press("Escape");
+  expect(await pixels(canvas)).toBe(stopped);
+  await expect(page.getByText("Reduced motion is on. Point to highlight.")).toBeVisible();
   await page.emulateMedia({ reducedMotion: "no-preference" });
   expect(await sampleAfter(canvas)).not.toBe(stopped);
 });

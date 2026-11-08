@@ -48,6 +48,11 @@ beforeEach(() => {
     "PointerEvent",
     class extends MouseEvent {
       isPrimary = true;
+      pointerType: string;
+      constructor(type: string, init?: MouseEventInit & { pointerType?: string }) {
+        super(type, init);
+        this.pointerType = init?.pointerType ?? "mouse";
+      }
     },
   );
   const events = new EventTarget();
@@ -154,7 +159,8 @@ describe("AsciiTerrain", () => {
     fireEvent.pointerMove(control, { clientX: 580, clientY: 170 });
     advance(34);
     const jump = Math.max(...painted.map((point, index) => Math.abs(point[2] - before[index][2])));
-    expect(jump).toBeLessThan(8);
+    // A hill that teleported would move glyphs by its full height, about 62px here.
+    expect(jump).toBeLessThan(20);
     advance(500);
     expect(painted).not.toEqual(before);
   });
@@ -169,6 +175,41 @@ describe("AsciiTerrain", () => {
     expect(jump).toBeLessThan(4);
     advance(300);
     expect(painted).not.toEqual(before);
+  });
+
+  it("ripples on mouse press but waits for a tap on touch", () => {
+    render(<AsciiTerrain speed={0} />);
+    const control = screen.getByRole("button");
+    advance(100);
+    const flat = [...painted];
+    // Starting to scroll on touch must not disturb the terrain.
+    fireEvent.pointerDown(control, { pointerType: "touch", button: 0, clientX: 400, clientY: 230 });
+    advance(200);
+    expect(painted).toEqual(flat);
+    fireEvent.click(control, { detail: 1, clientX: 400, clientY: 230 });
+    advance(200);
+    expect(painted).not.toEqual(flat);
+    advance(5000);
+    const settled = [...painted];
+    fireEvent.pointerDown(control, { pointerType: "mouse", button: 0, clientX: 300, clientY: 200 });
+    advance(200);
+    expect(painted).not.toEqual(settled);
+  });
+
+  it("highlights in place under reduced motion without scheduling frames", () => {
+    render(<AsciiTerrain speed={0} />);
+    const control = screen.getByRole("button");
+    advance(100);
+    setReduced(true);
+    const still = [...painted];
+    fireEvent.pointerMove(control, { clientX: 400, clientY: 230 });
+    expect(painted.map(([, x, y]) => [x, y])).toEqual(still.map(([, x, y]) => [x, y]));
+    expect(painted.map(([glyph]) => glyph)).not.toEqual(still.map(([glyph]) => glyph));
+    fireEvent.keyDown(control, { key: "Escape" });
+    expect(painted).toEqual(still);
+    expect(pending.size).toBeLessThanOrEqual(1);
+    advance(17);
+    expect(pending.size).toBe(0);
   });
 
   it("updates interaction motion on every display frame", () => {

@@ -300,20 +300,62 @@
   height: 100%;
   color: var(--subtle-foreground);
 }
-/* Sits over the terrain without catching the pointer meant for it. */
+/* Sits over the terrain without catching the pointer meant for it, except on the pause control. */
 .landing-stage-hint {
   position: relative;
+  display: flex;
   max-width: 960px;
-  margin-block: -28px 12px;
+  min-height: 24px;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0 12px;
+  margin-block: -36px 12px;
   color: var(--muted-foreground);
   font-family: var(--font-mono);
   font-size: 12px;
-  text-align: right;
   pointer-events: none;
 }
+.landing-stage-hint-reduced {
+  display: none;
+}
+.landing-stage-pause {
+  display: inline-flex;
+  min-height: 24px;
+  align-items: center;
+  gap: 6px;
+  margin-inline-end: -6px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  padding-inline: 6px;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  pointer-events: auto;
+}
+.landing-stage-pause:hover {
+  color: var(--foreground);
+}
+.landing-stage-pause:active {
+  opacity: 0.7;
+}
+.landing-stage-pause:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 0;
+}
+.landing-stage-pause svg {
+  width: 12px;
+  height: 12px;
+}
+/* Reduced motion keeps the terrain still, so there is nothing to pause. */
 @media (prefers-reduced-motion: reduce) {
-  .landing-stage-hint {
-    visibility: hidden;
+  .landing-stage-hint-motion,
+  .landing-stage-pause {
+    display: none;
+  }
+  .landing-stage-hint-reduced {
+    display: inline;
   }
 }
 .landing-window {

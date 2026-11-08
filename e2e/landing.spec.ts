@@ -46,6 +46,10 @@ test("landing component previews respond to input", async ({ page, context }) =>
   await terrain
     .getByRole("button", { name: "Interact with terrain" })
     .click({ position: { x: 320, y: 160 } });
+  await page.getByRole("button", { name: "Pause terrain" }).click();
+  await expect(terrain).toHaveAttribute("data-motion", "paused");
+  await page.getByRole("button", { name: "Resume terrain" }).click();
+  await expect(terrain).toHaveAttribute("data-motion", "running");
 });
 
 for (const width of [1440, 390, 320]) {

@@ -24,7 +24,7 @@ export function AsciiTerrainDemo() {
       </div>
       <div className="not-prose demo-caption ascii-terrain-footer">
         <span className="ascii-terrain-hint">Move to shape. Click to ripple.</span>
-        <span className="ascii-terrain-reduced-hint">Static terrain. Reduced motion is on.</span>
+        <span className="ascii-terrain-reduced-hint">Reduced motion is on. Point to highlight.</span>
         <div className="ascii-terrain-controls">
           <button type="button" onClick={() => setSeed((value) => value + 1)}>
             <RotateCcw aria-hidden="true" /> New terrain
