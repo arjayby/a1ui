@@ -12,8 +12,7 @@ import "./landing.css";
 
 export const metadata: Metadata = {
   title: { absolute: "a1ui — Animated React components and blocks" },
-  description:
-    "Animated React components and blocks. Copy and paste them, or install them with your agent. From restrained micro-interactions to flashy animation.",
+  description: "Animated React components and blocks. Copy and paste them, or install them with your agent.",
   alternates: { canonical: "/" },
 };
 
@@ -56,13 +55,10 @@ export default function HomePage() {
           <AsciiMorph defaultShape="a1" ariaLabel="Morph the a1ui monogram" />
         </div>
         <h1>a1ui — Animated React components and blocks</h1>
-        <p>
-          Copy and paste them, or install them with your agent. From restrained micro-interactions to flashy
-          animation.
-        </p>
+        <p>Copy and paste them, or install them with your agent.</p>
         <footer className="landing-card-footer">
           <span>
-            {components.length} components · {blocks.length} blocks · MIT
+            {components.length} components · {blocks.length} blocks
           </span>
           <ThemeButton />
         </footer>
