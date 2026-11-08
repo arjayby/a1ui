@@ -203,6 +203,7 @@
       "type": "registry:block",
       "title": "Particle Menu",
       "description": "Grainy symbols that scatter around your pointer and spring back into place.",
+      "dependencies": ["motion"],
       "files": [
         {
           "path": "src/registry/blocks/particle-menu.tsx",

@@ -21,7 +21,7 @@ bun: bunx --bun shadcn@latest add http://localhost:3000/r/particle-menu.json --y
 
 ## Dependencies
 
-None.
+- `motion`
 
 ## Code
 

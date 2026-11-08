@@ -1,8 +1,13 @@
 "use client";
 
+import { cancelFrame, frame, spring, type FrameData, type KeyframeGenerator } from "motion";
 import { useEffect, useMemo, useRef } from "react";
 
-export type ParticleShape = "grace" | "runes" | "ashes" | "oaths";
+/** Grainy sigils filled with fine particles. */
+export type GrainShape = "grace" | "runes" | "ashes" | "oaths";
+/** Bold, abstract dot-matrix glyphs drawn as chunky strokes of packed dots. */
+export type MatrixShape = "burst" | "gate" | "knot" | "seed";
+export type ParticleShape = GrainShape | MatrixShape;
 
 export interface ParticleMenuItem {
   id: string;
@@ -31,7 +36,7 @@ function noise(seed: number) {
 }
 
 // Sigil silhouettes and precomputed scanlines for their particle fill.
-const GLYPHS: Record<ParticleShape, { path: string; rows: number[][] }> = {
+const GLYPHS: Record<GrainShape, { path: string; rows: number[][] }> = {
   grace: {
     path: [
       "M41 47a19 21 0 1 1 38 0a19 21 0 1 1 -38 0Z M42.9 47a17.1 19.1 0 1 0 34.2 0a17.1 19.1 0 1 0 -34.2 0Z",
@@ -472,9 +477,115 @@ const GLYPHS: Record<ParticleShape, { path: string; rows: number[][] }> = {
   },
 };
 
-function createSymbol(shape: ParticleShape): Point[] {
+// Dot-matrix glyphs are polylines in the 120-unit box. Dots sit along each stroke at a pitch well
+// under their diameter, so they pack into chunky, bumpy-edged pills. Most strokes are doubled into
+// two parallel rows; a one-point stroke is a lone accent dot.
+type Stroke = [number, number][];
+const DOT_RADIUS = 3.4;
+const DOT_PITCH = 4.6;
+
+const dot = (x: number, y: number): Stroke => [[x, y]];
+const line = (x1: number, y1: number, x2: number, y2: number): Stroke => [
+  [x1, y1],
+  [x2, y2],
+];
+function arc(cx: number, cy: number, r: number, from: number, to: number): Stroke {
+  const steps = Math.max(2, Math.ceil((Math.abs(to - from) * r) / 2));
+  return Array.from({ length: steps + 1 }, (_, i) => {
+    const angle = ((from + ((to - from) * i) / steps) * Math.PI) / 180;
+    return [cx + Math.cos(angle) * r, cy + Math.sin(angle) * r];
+  });
+}
+/** Offsets a stroke into parallel rows, one dot pitch apart, centred on the original. */
+function thick(stroke: Stroke, rows = 2): Stroke[] {
+  return Array.from({ length: rows }, (_, row) => {
+    const offset = (row - (rows - 1) / 2) * DOT_PITCH;
+    return stroke.map(([x, y], i): [number, number] => {
+      const [px, py] = stroke[Math.max(0, i - 1)];
+      const [nx, ny] = stroke[Math.min(stroke.length - 1, i + 1)];
+      const length = Math.hypot(nx - px, ny - py) || 1;
+      return [x - ((ny - py) / length) * offset, y + ((nx - px) / length) * offset];
+    });
+  });
+}
+function rays(count: number, inner: number[], outer: number[]): Stroke[] {
+  return Array.from({ length: count }, (_, i) => {
+    const angle = (i / count) * Math.PI * 2 - Math.PI / 2;
+    const from = inner[i % inner.length];
+    const to = outer[i % outer.length];
+    return line(
+      60 + Math.cos(angle) * from,
+      60 + Math.sin(angle) * from,
+      60 + Math.cos(angle) * to,
+      60 + Math.sin(angle) * to,
+    );
+  }).flatMap((ray) => thick(ray));
+}
+
+const MATRIX: Record<MatrixShape, Stroke[]> = {
+  burst: [dot(60, 60), arc(60, 60, 4.5, 0, 360), ...rays(8, [17, 21], [40, 31])],
+  gate: [
+    ...thick([...line(34, 96, 34, 58), ...arc(60, 58, 26, 180, 360), ...line(86, 58, 86, 96)]),
+    ...thick(line(50, 66, 70, 66)),
+    dot(60, 80),
+    dot(60, 90),
+  ],
+  // A three-petal rose curve (r = cos 3θ) with one petal pointing up and a dot between each pair.
+  knot: [
+    ...thick(
+      Array.from({ length: 121 }, (_, i): [number, number] => {
+        const theta = (i / 120) * Math.PI;
+        const r = Math.cos(3 * theta) * 36;
+        return [60 + r * Math.cos(theta - Math.PI / 2), 60 + r * Math.sin(theta - Math.PI / 2)];
+      }),
+    ),
+    ...[90, 210, 330].map((degrees) =>
+      dot(60 + Math.cos((degrees * Math.PI) / 180) * 34, 60 + Math.sin((degrees * Math.PI) / 180) * 34),
+    ),
+  ],
+  seed: [
+    ...thick(arc(75.6, 60, 35.6, 244, 116)),
+    ...thick(arc(44.4, 60, 35.6, -64, 64)),
+    ...thick(line(60, 50, 60, 70)),
+    dot(60, 17),
+    dot(60, 103),
+  ],
+};
+
+function createMatrix(shape: MatrixShape): Point[] {
   const points: Point[] = [];
-  for (const [y, ...spans] of GLYPHS[shape].rows) {
+  const add = (x: number, y: number) => {
+    if (points.some((point) => Math.hypot(point.x - x, point.y - y) < DOT_PITCH * 0.7)) return;
+    const seed = points.length * 17 + Math.round(x * 7 + y * 13);
+    points.push({
+      x: x + (noise(seed) - 0.5) * 0.6,
+      y: y + (noise(seed + 91) - 0.5) * 0.6,
+      size: DOT_RADIUS * (0.84 + noise(seed + 182) * 0.28),
+    });
+  };
+  for (const stroke of MATRIX[shape]) {
+    if (stroke.length === 1) add(...stroke[0]);
+    let carry = 0;
+    for (let i = 1; i < stroke.length; i++) {
+      const [x0, y0] = stroke[i - 1];
+      const [x1, y1] = stroke[i];
+      const length = Math.hypot(x1 - x0, y1 - y0);
+      // Carry the leftover distance across vertices so the pitch stays even around corners.
+      for (let distance = carry; distance <= length; distance += DOT_PITCH) {
+        const t = length ? distance / length : 0;
+        add(x0 + (x1 - x0) * t, y0 + (y1 - y0) * t);
+      }
+      carry = DOT_PITCH - ((length - carry) % DOT_PITCH);
+      if (carry >= DOT_PITCH) carry = 0;
+    }
+  }
+  return points;
+}
+
+function createSymbol(shape: ParticleShape): Point[] {
+  if (shape in MATRIX) return createMatrix(shape as MatrixShape);
+  const points: Point[] = [];
+  for (const [y, ...spans] of GLYPHS[shape as GrainShape].rows) {
     for (let span = 0; span < spans.length; span += 2) {
       for (let x = spans[span]; x <= spans[span + 1]; x += 1) {
         const seed = y * 131 + x;
@@ -500,6 +611,45 @@ function createSymbol(shape: ParticleShape): Point[] {
   }
   return points;
 }
+
+// Each grain is a damped spring toward a target. Springs are linear, so a grain released from an
+// offset with some velocity follows offset × settle(t) + velocity × kick(t). Two shared Motion
+// spring generators per phase give those curves, so thousands of grains need no generator of
+// their own, and grains retargeted together share one set of exponentials and sines per frame.
+type Basis = { settle: KeyframeGenerator<number>; kick: KeyframeGenerator<number> };
+function basis(physics: { stiffness: number; damping: number }): Basis {
+  // Tight rest thresholds, since these curves are scaled by offsets of up to ~70 units.
+  const precise = { ...physics, mass: 1, restDelta: 1e-6, restSpeed: 1e-5 };
+  return {
+    settle: spring({ ...precise, keyframes: [1, 0] }),
+    kick: spring({ ...precise, keyframes: [0, 0], velocity: 1 }),
+  };
+}
+// Respond quickly to the pointer with a slight liquid give (damping ratio 0.8, response ~0.38s),
+// then let the grains drift home slowly and without overshoot after leaving (damping ratio 1.24).
+const SCATTER = basis({ stiffness: 267.6, damping: 26.17 });
+const RETURN = basis({ stiffness: 13.35, damping: 9.05 });
+// A grain counts as home once it is within this distance and slower than this speed (units/s).
+// 0.15 units is about a seventh of a pixel at the default size, so the snap home is invisible.
+const REST_DISTANCE = 0.15;
+const REST_SPEED = 1.8;
+// A moving pointer hands grains in its reach this share of its velocity, so a swipe pushes them
+// along its path. Pointer speed is capped (units/s) so a fast flick stays a nudge.
+const FLICK = 0.5;
+const MAX_POINTER_SPEED = 600;
+// Pointer samples further apart than this (ms) are treated as a fresh start, not a swipe.
+const FLICK_WINDOW = 100;
+
+type Grain = Point & {
+  /** Target, offset from it, and velocity at the last retarget, and time since then in ms. */
+  targetX: number;
+  targetY: number;
+  offsetX: number;
+  offsetY: number;
+  velocityX: number;
+  velocityY: number;
+  elapsed: number;
+};
 
 function dotPath(points: Point[]) {
   return points
@@ -533,29 +683,48 @@ function ParticleMenuEntry({
     if (!control || !svg || !path) return;
 
     const preference = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const particles = points.map((point) => ({ ...point, vx: 0, vy: 0 }));
-    const pointer = { x: CENTER, y: CENTER };
+    const grains: Grain[] = points.map((point) => ({
+      ...point,
+      targetX: point.x,
+      targetY: point.y,
+      offsetX: 0,
+      offsetY: 0,
+      velocityX: 0,
+      velocityY: 0,
+      elapsed: 0,
+    }));
+    const pointer = { x: CENTER, y: CENTER, velocityX: 0, velocityY: 0, time: -Infinity };
     let active = false;
-    let frame = 0;
-    let previousTime = 0;
+    let running = false;
+    let curves = RETURN;
 
-    const reset = () => {
-      cancelAnimationFrame(frame);
-      frame = 0;
-      previousTime = 0;
-      particles.forEach((particle, index) => Object.assign(particle, points[index], { vx: 0, vy: 0 }));
-      path.setAttribute("d", restingPath);
+    const settleAt = (grain: Grain) => curves.settle.next(grain.elapsed).value;
+    const kickAt = (grain: Grain) => curves.kick.next(grain.elapsed).value;
+    const speedAt = (grain: Grain, offset: number, velocity: number) =>
+      offset * curves.settle.velocity!(grain.elapsed) + velocity * curves.kick.velocity!(grain.elapsed);
+
+    // Aim a grain at a new target from where it is now, keeping its current velocity.
+    const retarget = (grain: Grain, targetX: number, targetY: number) => {
+      const velocityX = speedAt(grain, grain.offsetX, grain.velocityX);
+      const velocityY = speedAt(grain, grain.offsetY, grain.velocityY);
+      Object.assign(grain, {
+        targetX,
+        targetY,
+        offsetX: grain.x - targetX,
+        offsetY: grain.y - targetY,
+        velocityX,
+        velocityY,
+        elapsed: 0,
+      });
     };
 
-    const draw = (time: number) => {
-      // Normalize the spring to a 60 Hz timestep, including high-refresh displays.
-      const step = previousTime ? Math.min((time - previousTime) / 16.667, 2) : 1;
-      previousTime = time;
-      // Respond quickly to the pointer, then let the grains drift home after leaving.
-      const spring = active ? 0.085 : 0.004;
-      const damping = Math.pow(active ? 0.76 : 0.86, step);
-      let movement = 0;
-      particles.forEach((particle, index) => {
+    // Where each grain should sit for the current pointer: pushed away from it, with a slight
+    // tangential twist that gives the scatter a curling, liquid movement. A moving pointer also
+    // hands its velocity to the grains it passes, which then spring back to those targets.
+    const aim = (pushX = 0, pushY = 0) => {
+      const next = active ? SCATTER : RETURN;
+      const phaseChanged = next !== curves;
+      grains.forEach((grain, index) => {
         const home = points[index];
         const dx = home.x - pointer.x;
         const dy = home.y - pointer.y;
@@ -563,58 +732,121 @@ function ParticleMenuEntry({
         const influence = active ? Math.pow(Math.max(0, 1 - distance / radius), 2) : 0;
         const angle = distance > 0.01 ? Math.atan2(dy, dx) : noise(index) * TAU;
         const displacement = influence * 36 * strength;
-        // A slight tangential force gives the grain a curling, liquid movement.
         const targetX = home.x + (Math.cos(angle) - Math.sin(angle) * 0.35) * displacement;
         const targetY = home.y + (Math.sin(angle) + Math.cos(angle) * 0.35) * displacement;
-        particle.vx = (particle.vx + (targetX - particle.x) * spring * step) * damping;
-        particle.vy = (particle.vy + (targetY - particle.y) * spring * step) * damping;
-        particle.x += particle.vx * step;
-        particle.y += particle.vy * step;
-        movement = Math.max(
-          movement,
-          Math.abs(targetX - particle.x),
-          Math.abs(targetY - particle.y),
-          Math.abs(particle.vx),
-          Math.abs(particle.vy),
-        );
+        const push = influence > 0 && (pushX !== 0 || pushY !== 0);
+        if (phaseChanged || push || targetX !== grain.targetX || targetY !== grain.targetY) {
+          // The velocity carries over from the current curves before switching phase.
+          retarget(grain, targetX, targetY);
+        }
+        if (push) {
+          grain.velocityX += influence * pushX * FLICK * strength;
+          grain.velocityY += influence * pushY * FLICK * strength;
+        }
       });
+      curves = next;
+    };
 
-      path.setAttribute("d", dotPath(particles));
-      if (movement > 0.03) {
-        frame = requestAnimationFrame(draw);
-      } else {
-        frame = 0;
-        previousTime = 0;
-        if (!active) reset();
+    const stop = () => {
+      if (running) cancelFrame(draw);
+      running = false;
+    };
+
+    const reset = () => {
+      stop();
+      curves = RETURN;
+      grains.forEach((grain, index) =>
+        Object.assign(grain, points[index], {
+          targetX: points[index].x,
+          targetY: points[index].y,
+          offsetX: 0,
+          offsetY: 0,
+          velocityX: 0,
+          velocityY: 0,
+          elapsed: 0,
+        }),
+      );
+      path.setAttribute("d", restingPath);
+    };
+
+    // Runs in Motion's render step. Motion caps long frame gaps, so a stall cannot fling grains.
+    const draw = ({ delta }: FrameData) => {
+      let moving = false;
+      for (const grain of grains) {
+        grain.elapsed += delta;
+        const settle = settleAt(grain);
+        const kick = kickAt(grain);
+        grain.x = grain.targetX + grain.offsetX * settle + grain.velocityX * kick;
+        grain.y = grain.targetY + grain.offsetY * settle + grain.velocityY * kick;
+        if (
+          !moving &&
+          (Math.abs(grain.x - grain.targetX) > REST_DISTANCE ||
+            Math.abs(grain.y - grain.targetY) > REST_DISTANCE ||
+            Math.abs(speedAt(grain, grain.offsetX, grain.velocityX)) > REST_SPEED ||
+            Math.abs(speedAt(grain, grain.offsetY, grain.velocityY)) > REST_SPEED)
+        ) {
+          moving = true;
+        }
       }
+
+      path.setAttribute("d", dotPath(grains));
+      if (moving) return;
+      stop();
+      // Snap the settled grains to their exact homes so the sigil's silhouette is restored.
+      if (!active) reset();
     };
 
     const wake = () => {
-      if (strength > 0 && !frame && !preference.matches && !document.hidden)
-        frame = requestAnimationFrame(draw);
+      if (strength > 0 && !running && !preference.matches && !document.hidden) {
+        frame.render(draw, true);
+        running = true;
+      }
+    };
+
+    const steer = (pushX = 0, pushY = 0) => {
+      if (strength <= 0 || preference.matches || document.hidden) return;
+      aim(pushX, pushY);
+      wake();
     };
 
     const move = (event: PointerEvent) => {
       const bounds = svg.getBoundingClientRect();
       if (!bounds.width || !bounds.height) return;
-      pointer.x = ((event.clientX - bounds.left) / bounds.width) * 120;
-      pointer.y = ((event.clientY - bounds.top) / bounds.height) * 120;
+      const x = ((event.clientX - bounds.left) / bounds.width) * 120;
+      const y = ((event.clientY - bounds.top) / bounds.height) * 120;
+      const now = performance.now();
+      const elapsed = now - pointer.time;
+      if (elapsed > FLICK_WINDOW) {
+        pointer.velocityX = pointer.velocityY = 0;
+      } else if (elapsed > 0) {
+        // Blend with the last sample so one jittery event cannot fling the grains.
+        let velocityX = ((x - pointer.x) / elapsed) * 1000;
+        let velocityY = ((y - pointer.y) / elapsed) * 1000;
+        const speed = Math.hypot(velocityX, velocityY);
+        if (speed > MAX_POINTER_SPEED) {
+          velocityX *= MAX_POINTER_SPEED / speed;
+          velocityY *= MAX_POINTER_SPEED / speed;
+        }
+        pointer.velocityX = (pointer.velocityX + velocityX) / 2;
+        pointer.velocityY = (pointer.velocityY + velocityY) / 2;
+      }
+      Object.assign(pointer, { x, y, time: now });
       active = true;
-      wake();
+      steer(pointer.velocityX, pointer.velocityY);
     };
 
     const focus = () => {
       if (!control.matches(":focus-visible")) return;
-      pointer.x = CENTER;
-      pointer.y = CENTER;
+      Object.assign(pointer, { x: CENTER, y: CENTER, time: -Infinity });
       active = true;
-      wake();
+      steer();
     };
 
     const leave = () => {
       active = false;
-      if (control.matches(":focus-visible")) focus();
-      wake();
+      pointer.time = -Infinity;
+      if (control.matches(":focus-visible")) return focus();
+      steer();
     };
 
     const endTouch = (event: PointerEvent) => {
@@ -623,7 +855,7 @@ function ParticleMenuEntry({
 
     const motionChanged = () => {
       if (preference.matches) reset();
-      else wake();
+      else steer();
     };
     const visibilityChanged = () => {
       active = false;

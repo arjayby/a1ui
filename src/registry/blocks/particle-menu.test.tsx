@@ -1,7 +1,14 @@
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ParticleMenu } from "./particle-menu";
+
+// Motion's frame loop captures requestAnimationFrame when it loads. Route it through a stand-in
+// installed before imports that looks up setTimeout on each call, so fake timers drive it.
+vi.hoisted(() => {
+  globalThis.requestAnimationFrame = (callback) =>
+    setTimeout(() => callback(performance.now()), 16) as unknown as number;
+});
 
 const items = [{ id: "grace", label: "Grace", shape: "grace" as const }];
 
@@ -9,7 +16,10 @@ describe("ParticleMenu", () => {
   let preference: EventTarget & { matches: boolean };
 
   beforeEach(() => {
-    vi.useFakeTimers();
+    // Motion times frames with performance.now(), so fake it along with the timers.
+    vi.useFakeTimers({
+      toFake: ["setTimeout", "clearTimeout", "setInterval", "clearInterval", "Date", "performance"],
+    });
     preference = Object.assign(new EventTarget(), { matches: false });
     vi.stubGlobal("matchMedia", () => preference);
     vi.spyOn(SVGSVGElement.prototype, "getBoundingClientRect").mockReturnValue({
@@ -26,6 +36,9 @@ describe("ParticleMenu", () => {
   });
 
   afterEach(() => {
+    cleanup();
+    // Let Motion's shared loop drain its last requested frame so the next test starts idle.
+    act(() => vi.advanceTimersByTime(100));
     vi.restoreAllMocks();
     vi.unstubAllGlobals();
     vi.useRealTimers();
@@ -36,7 +49,7 @@ describe("ParticleMenu", () => {
     act(() => vi.advanceTimersByTime(1500));
   }
 
-  it.each(["grace", "runes", "ashes", "oaths"] as const)(
+  it.each(["grace", "runes", "ashes", "oaths", "burst", "gate", "knot", "seed"] as const)(
     "%s responds to the pointer, returns gradually, and restores its exact silhouette",
     (shape) => {
       const { unmount } = render(<ParticleMenu items={[{ ...items[0], shape }]} />);
@@ -63,6 +76,33 @@ describe("ParticleMenu", () => {
       unmount();
     },
   );
+
+  it("pushes grains along a quick pointer flick but not a slow move to the same spot", () => {
+    const after = (gap: number) => {
+      const { unmount } = render(<ParticleMenu items={items} />);
+      const control = screen.getByRole("button", { name: "Grace" });
+      move(control, 50, 60);
+      fireEvent(control, new MouseEvent("pointermove", { clientX: 50, clientY: 60 }));
+      act(() => vi.advanceTimersByTime(gap));
+      fireEvent(control, new MouseEvent("pointermove", { clientX: 56, clientY: 60 }));
+      act(() => vi.advanceTimersByTime(80));
+      const xs = [
+        ...control
+          .querySelector("path")!
+          .getAttribute("d")!
+          .matchAll(/M(-?[\d.]+)/g),
+      ].map((match) => Number(match[1]));
+      unmount();
+      act(() => vi.advanceTimersByTime(100));
+      return xs;
+    };
+    // Same start and end point: only the pointer's speed differs, and the flick moves grains right.
+    const slow = after(500);
+    const flicked = after(16);
+    const pushed = Math.max(...flicked.map((x, index) => x - slow[index]));
+    expect(pushed).toBeGreaterThan(1);
+    expect(Math.min(...flicked.map((x, index) => x - slow[index]))).toBeGreaterThan(-0.1);
+  });
 
   it("cancels movement immediately when the motion preference changes", () => {
     const { unmount } = render(<ParticleMenu items={items} />);
@@ -101,6 +141,8 @@ describe("ParticleMenu", () => {
     act(() => vi.advanceTimersByTime(32));
     expect(vi.getTimerCount()).toBeGreaterThan(0);
     unmount();
+    // Motion's shared loop runs one empty frame after the last animation stops.
+    act(() => vi.advanceTimersByTime(17));
     expect(vi.getTimerCount()).toBe(0);
   });
 
