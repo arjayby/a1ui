@@ -151,6 +151,21 @@ describe("AsciiMorph", () => {
     expect(onShapeChange).toHaveBeenLastCalledWith("flower");
   });
 
+  it("cycles only through the listed shapes", () => {
+    render(<AsciiMorph defaultShape="a1" shapes={["a1", "logo"]} />);
+    const control = screen.getByRole("button");
+    const monogram = positions();
+    fireEvent.click(control);
+    expect(screen.getByRole("status")).toHaveTextContent("a1ui logo");
+    advance(3000);
+    const logo = positions();
+    expect(logo).not.toEqual(monogram);
+    fireEvent.click(control);
+    expect(screen.getByRole("status")).toHaveTextContent("a1 monogram");
+    fireEvent.keyDown(control, { key: "ArrowLeft" });
+    expect(screen.getByRole("status")).toHaveTextContent("a1ui logo");
+  });
+
   it("cross-fades in place under reduced motion, including a live preference change", async () => {
     // Motion reports a finished fade through a promise, so let microtasks run between frames.
     async function play(milliseconds: number) {

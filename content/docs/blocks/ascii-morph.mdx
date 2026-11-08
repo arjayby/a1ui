@@ -1,6 +1,6 @@
 ---
 title: ASCII Morph
-description: A cloud of characters that morphs into a globe, a flower, and an A1 monogram.
+description: A cloud of characters that morphs into a globe, a flower, and an a1 monogram.
 ---
 
 ## Demo
@@ -36,13 +36,14 @@ export function AsciiMorphExample() {
 
 ## API reference
 
-| Prop            | Type                               | Default                | Description                                                                                                                |
-| --------------- | ---------------------------------- | ---------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| `shape`         | `"globe" \| "flower" \| "a1"`      | Uncontrolled           | Controlled destination. Update it in `onShapeChange` to accept user input.                                                 |
-| `defaultShape`  | `AsciiMorphShape`                  | `"globe"`              | Initial shape when uncontrolled. Read once on mount.                                                                       |
-| `onShapeChange` | `(shape: AsciiMorphShape) => void` | None                   | Called when a click or key requests another shape.                                                                         |
-| `duration`      | `number`                           | `1200`                 | Approximate settling time in milliseconds. Clamped to 400–4000. Spring velocity and travel distance affect the exact time. |
-| `interactive`   | `boolean`                          | `true`                 | Enables the button and animated transitions. Set to `false` for a static illustration that follows `shape`.                |
-| `ariaLabel`     | `string`                           | `"Change ASCII shape"` | Accessible name of the button.                                                                                             |
-| `className`     | `string`                           | None                   | Outer layout classes. The illustration fills its container with a 6:5 aspect ratio by default.                             |
-| `style`         | `CSSProperties`                    | None                   | Outer inline styles, including a custom height or color.                                                                   |
+| Prop            | Type                                    | Default                     | Description                                                                                                                |
+| --------------- | --------------------------------------- | --------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `shape`         | `"globe" \| "flower" \| "a1" \| "logo"` | Uncontrolled                | Controlled destination. Update it in `onShapeChange` to accept user input.                                                 |
+| `defaultShape`  | `AsciiMorphShape`                       | `"globe"`                   | Initial shape when uncontrolled. Read once on mount.                                                                       |
+| `shapes`        | `readonly AsciiMorphShape[]`            | `["globe", "flower", "a1"]` | Shapes a click or arrow key cycles through, in order.                                                                      |
+| `onShapeChange` | `(shape: AsciiMorphShape) => void`      | None                        | Called when a click or key requests another shape.                                                                         |
+| `duration`      | `number`                                | `1200`                      | Approximate settling time in milliseconds. Clamped to 400–4000. Spring velocity and travel distance affect the exact time. |
+| `interactive`   | `boolean`                               | `true`                      | Enables the button and animated transitions. Set to `false` for a static illustration that follows `shape`.                |
+| `ariaLabel`     | `string`                                | `"Change ASCII shape"`      | Accessible name of the button.                                                                                             |
+| `className`     | `string`                                | None                        | Outer layout classes. The illustration fills its container with a 6:5 aspect ratio by default.                             |
+| `style`         | `CSSProperties`                         | None                        | Outer inline styles, including a custom height or color.                                                                   |

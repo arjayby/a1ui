@@ -52,7 +52,7 @@ export default function HomePage() {
 
       <article className="landing-card">
         <div className="landing-card-art">
-          <AsciiMorph defaultShape="a1" ariaLabel="Morph the a1ui monogram" />
+          <AsciiMorph defaultShape="a1" shapes={["a1", "logo"]} ariaLabel="Morph the a1ui monogram" />
         </div>
         <h1>a1ui — Animated React components and blocks</h1>
         <p>Copy and paste them, or install them with your agent.</p>

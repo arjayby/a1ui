@@ -7,7 +7,7 @@
       "name": "ascii-morph",
       "type": "registry:block",
       "title": "ASCII Morph",
-      "description": "A cloud of characters that morphs into a globe, a flower, and an A1 monogram.",
+      "description": "A cloud of characters that morphs into a globe, a flower, and an a1 monogram.",
       "dependencies": [
         "clsx",
         "motion"
@@ -31,7 +31,7 @@
             "Interactive ASCII illustrations for landing pages, portfolios, and identity studies."
           ],
           "limitations": [
-            "Three built-in silhouettes only: globe, flower, and A1. Does not convert images or arbitrary text into ASCII."
+            "Four built-in silhouettes only: globe, flower, a1, and the a1ui logo. Does not convert images or arbitrary text into ASCII."
           ],
           "requirements": [
             "React, Tailwind CSS, and Motion. Uses SVG, matchMedia, and IntersectionObserver. Reduced motion cross-fades between shapes in place. No automatic animation or pause control is needed."

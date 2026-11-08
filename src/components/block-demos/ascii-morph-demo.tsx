@@ -4,8 +4,12 @@ import { useState } from "react";
 
 import { AsciiMorph, type AsciiMorphShape } from "@/registry/blocks/ascii-morph";
 
-const labels = { globe: "Globe", flower: "Flower", a1: "A1 monogram" };
-const numbers = { globe: 1, flower: 2, a1: 3 };
+const shapes: AsciiMorphShape[] = ["globe", "flower", "a1"];
+const labels: Partial<Record<AsciiMorphShape, string>> = {
+  globe: "Globe",
+  flower: "Flower",
+  a1: "a1 monogram",
+};
 
 export function AsciiMorphPreview() {
   return (
@@ -21,10 +25,10 @@ export function AsciiMorphDemo() {
   return (
     <>
       <div className="not-prose demo-frame ascii-morph-demo">
-        <AsciiMorph onShapeChange={setShape} />
+        <AsciiMorph shapes={shapes} onShapeChange={setShape} />
       </div>
       <p className="demo-caption text-center" aria-hidden="true">
-        Click to morph · {numbers[shape]}/3 {labels[shape]}
+        Click to morph · {shapes.indexOf(shape) + 1}/{shapes.length} {labels[shape]}
       </p>
     </>
   );

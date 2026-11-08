@@ -42,7 +42,7 @@ test("renders without hydration errors and cycles with click, Enter, Space, and 
   await control.press("ArrowLeft");
   await expect(root).toHaveAttribute("data-shape", "a1");
   await expect(control).toBeFocused();
-  await expect(root.getByRole("status")).toHaveText("A1 monogram");
+  await expect(root.getByRole("status")).toHaveText("a1 monogram");
   expect(errors).toEqual([]);
 });
 

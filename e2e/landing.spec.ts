@@ -36,7 +36,9 @@ test("the monogram morphs when clicked", async ({ page }) => {
   const art = page.locator('.landing-card [data-slot="ascii-morph"]');
   await expect(art).toHaveAttribute("data-shape", "a1");
   await page.getByRole("button", { name: "Morph the a1ui monogram" }).click();
-  await expect(art).toHaveAttribute("data-shape", "globe");
+  await expect(art).toHaveAttribute("data-shape", "logo");
+  await page.getByRole("button", { name: "Morph the a1ui monogram" }).click();
+  await expect(art).toHaveAttribute("data-shape", "a1");
 });
 
 for (const width of [1440, 390, 320]) {

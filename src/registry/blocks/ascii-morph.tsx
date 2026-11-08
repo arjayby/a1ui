@@ -4,11 +4,13 @@ import { clsx } from "clsx";
 import { animate, cancelFrame, frame, spring, type FrameData, type KeyframeGenerator } from "motion";
 import { useEffect, useId, useRef, useState, type CSSProperties } from "react";
 
-export type AsciiMorphShape = "globe" | "flower" | "a1";
+export type AsciiMorphShape = "globe" | "flower" | "a1" | "logo";
 
 export type AsciiMorphProps = {
   shape?: AsciiMorphShape;
   defaultShape?: AsciiMorphShape;
+  /** Shapes a click or arrow key cycles through, in order. Defaults to globe, flower and a1. */
+  shapes?: readonly AsciiMorphShape[];
   onShapeChange?: (shape: AsciiMorphShape) => void;
   /** Approximate settling time in milliseconds, clamped to 400–4000. Defaults to 1200. */
   duration?: number;
@@ -21,8 +23,8 @@ export type AsciiMorphProps = {
 type Point = { x: number; y: number };
 /** Position, plus the offset from the target and velocity (units/s) at the last retarget. */
 type Particle = Point & { ox: number; oy: number; vx: number; vy: number };
-const order: AsciiMorphShape[] = ["globe", "flower", "a1"];
-const names = { globe: "Globe", flower: "Flower", a1: "A1 monogram" };
+const defaultOrder: readonly AsciiMorphShape[] = ["globe", "flower", "a1"];
+const names = { globe: "Globe", flower: "Flower", a1: "a1 monogram", logo: "a1ui logo" };
 const glyphs = "01.:+*#@";
 const count = 512;
 const tau = Math.PI * 2;
@@ -31,6 +33,7 @@ function makeShapes(): Record<AsciiMorphShape, Point[]> {
   const globe: Point[] = [];
   const flower: Point[] = [];
   const monogram: Point[] = [];
+  const logo: Point[] = [];
   // Three meridians and the rim, tilted together around the globe's axis.
   for (const width of [0.24, 0.57, 0.83, 1]) {
     for (let i = 0; i < 78; i++) {
@@ -66,17 +69,48 @@ function makeShapes(): Record<AsciiMorphShape, Point[]> {
     const radius = Math.sqrt(i / 80) * 25;
     flower.push({ x: 240 + Math.cos(angle) * radius, y: 200 + Math.sin(angle) * radius });
   }
-  // Sample a block A and a slab-serif 1 on a monospace grid.
-  for (let y = 0; y < 25; y++) {
-    for (let x = 0; x < 43; x++) {
-      const a =
-        (Math.abs(x - (11 - y * 0.4)) < 2.5 ||
-          Math.abs(x - (13 + y * 0.4)) < 2.5 ||
-          (y >= 14 && y <= 17 && x >= 5 && x <= 19)) &&
-        x < 25;
-      const one =
-        (x >= 32 && x <= 36) || (y < 5 && x >= 28 + (4 - y) && x < 32) || (y >= 21 && x >= 28 && x <= 40);
-      if (a || one) monogram.push({ x: 91 + x * 7, y: 94 + y * 9 });
+  // Sample a double-story a and a slab-serif 1 on a monospace grid. Cells are 7 × 9 units, so
+  // u and v below measure the glyphs in stage units from their top-left corner.
+  const ellipse = (u: number, v: number, cx: number, cy: number, rx: number, ry: number) =>
+    ((u - cx) / rx) ** 2 + ((v - cy) / ry) ** 2 <= 1;
+  const ring = (u: number, v: number, cx: number, cy: number, rx: number, ry: number, weight: number) =>
+    ellipse(u, v, cx, cy, rx, ry) && !ellipse(u, v, cx, cy, rx - weight, ry - weight);
+  // Rectangles reach half a cell past their outer cells, so the 18-unit radius trims just the corners.
+  const box = (u: number, v: number, left: number, top: number, right: number, bottom: number) => {
+    const dx = Math.max(left + 18 - u, u - right + 18, 0);
+    const dy = Math.max(top + 18 - v, v - bottom + 18, 0);
+    return u >= left && u <= right && v >= top && v <= bottom && dx * dx + dy * dy <= 18 * 18;
+  };
+  // Within 12 units of the 1's flag, a segment sloping down to the left from the stem.
+  const flag = (u: number, v: number) => {
+    const t = Math.max(0, Math.min(1, ((180 - u) * 33 + (v - 12) * 19) / (33 * 33 + 19 * 19)));
+    return (u - 180 + t * 33) ** 2 + (v - 12 - t * 19) ** 2 <= 12 * 12;
+  };
+  for (let y = 0; y < 19; y++) {
+    for (let x = 0; x < 36; x++) {
+      const u = x * 7;
+      const v = y * 9;
+      const stem = box(u, v, 82, 80, 116, 166);
+      const shoulder = v <= 94 && u >= 14 && ring(u, v, 56, 94, 56, 36, 26);
+      const bowl = u <= 90 && ring(u, v, 54, 131, 54, 32, 22);
+      const one = box(u, v, 171, -4, 207, 166) || flag(u, v) || box(u, v, 136, 138, 242, 166);
+      if (stem || shoulder || bowl || one) monogram.push({ x: 117.5 + u, y: 119 + v });
+    }
+  }
+  // Sample the a1ui mark: four rounded squares around a four-pointed star cut out of the middle.
+  // The 256-unit artwork maps onto 26 × 20 cells, fewer than the particle count, so none stay empty.
+  for (let y = 0; y < 20; y++) {
+    for (let x = 0; x < 26; x++) {
+      const u = ((x + 0.5) / 26) * 256;
+      const v = ((y + 0.5) / 20) * 256;
+      // Distance outside the quadrant's square, inset by its 20-unit corner radius.
+      const dx = Math.max(20 - (u % 128), (u % 128) - 108, 0);
+      const dy = Math.max(20 - (v % 128), (v % 128) - 108, 0);
+      const star =
+        Math.abs(u - 128) < 64 &&
+        Math.abs(v - 128) < 64 &&
+        [64, 192].every((cx) => [64, 192].every((cy) => (u - cx) ** 2 + (v - cy) ** 2 > 64 * 64));
+      if (dx * dx + dy * dy <= 400 && !star) logo.push({ x: 152.5 + x * 7, y: 114.5 + y * 9 });
     }
   }
   // Each shape keeps exactly the same particles. Coprime permutations make
@@ -86,7 +120,12 @@ function makeShapes(): Record<AsciiMorphShape, Point[]> {
       { length: count },
       (_, i) => points[Math.floor((((i * stride) % count) / count) * points.length)],
     );
-  return { globe: sample(globe, 1), flower: sample(flower, 197), a1: sample(monogram, 307) };
+  return {
+    globe: sample(globe, 1),
+    flower: sample(flower, 197),
+    a1: sample(monogram, 307),
+    logo: sample(logo, 209),
+  };
 }
 
 const shapes = makeShapes();
@@ -121,6 +160,7 @@ function springsFor(settlingTime: number): Curves {
 export function AsciiMorph({
   shape,
   defaultShape = "globe",
+  shapes: order = defaultOrder,
   onShapeChange,
   duration = 1200,
   interactive = true,
