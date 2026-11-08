@@ -300,6 +300,22 @@
   height: 100%;
   color: var(--subtle-foreground);
 }
+/* Sits over the terrain without catching the pointer meant for it. */
+.landing-stage-hint {
+  position: relative;
+  max-width: 960px;
+  margin-block: -28px 12px;
+  color: var(--muted-foreground);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  text-align: right;
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .landing-stage-hint {
+    visibility: hidden;
+  }
+}
 .landing-window {
   position: relative;
   max-width: 960px;

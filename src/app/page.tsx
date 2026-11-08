@@ -157,15 +157,19 @@ export default function HomePage() {
         </section>
 
         <section className="landing-stage" aria-labelledby="playground-heading">
-          <div className="landing-stage-art" inert aria-hidden="true">
+          {/* Not inert: the terrain stops animating and ignores input inside inert subtrees. */}
+          <div className="landing-stage-art">
             <AsciiTerrain
-              interactive={false}
               cellSize={12}
               amplitude={1.2}
-              speed={0.6}
+              speed={1}
+              ariaLabel="Interactive ASCII terrain"
               className="landing-terrain"
             />
           </div>
+          <p className="landing-stage-hint landing-width" aria-hidden="true">
+            Move to shape. Click to ripple.
+          </p>
           <div className="landing-window landing-width">
             <div className="landing-window-bar">
               <h2 id="playground-heading">Playground</h2>

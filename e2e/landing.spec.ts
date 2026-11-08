@@ -41,6 +41,11 @@ test("landing component previews respond to input", async ({ page, context }) =>
   await expect(slider).not.toHaveAttribute("aria-valuenow", "50");
   await page.getByRole("button", { name: "Submit", exact: true }).click();
   await expect(page.getByRole("button", { name: "Submitted", exact: true })).toBeVisible();
+  const terrain = page.getByRole("group", { name: "Interactive ASCII terrain" });
+  await expect(terrain).toHaveAttribute("data-motion", "running");
+  await terrain
+    .getByRole("button", { name: "Interact with terrain" })
+    .click({ position: { x: 320, y: 160 } });
 });
 
 for (const width of [1440, 390, 320]) {
