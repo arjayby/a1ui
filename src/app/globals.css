@@ -125,7 +125,7 @@
   --color-fd-primary-foreground: var(--on-primary);
   --color-fd-secondary: var(--secondary);
   --color-fd-secondary-foreground: var(--secondary-foreground);
-  /* Fumadocs uses accent for neutral hover fills; Graphite's accent is the blue tint. */
+  /* Fumadocs uses accent for neutral hover fills; Graphite's accent is the solid ink. */
   --color-fd-accent: var(--muted);
   --color-fd-accent-foreground: var(--foreground);
   --color-fd-ring: var(--ring);
@@ -143,7 +143,7 @@
     font-size: var(--text-xs);
   }
 
-  /* A system-blue focus ring that hugs the control's own shape. */
+  /* An ink focus ring that hugs the control's own shape. */
   a:focus-visible,
   button:focus-visible,
   select:focus-visible {
@@ -534,7 +534,7 @@ h6 {
 }
 
 .catalog-card:has(.catalog-card-link:hover) .catalog-card-link svg {
-  color: var(--link);
+  color: var(--accent);
   transform: translate(2px, -2px);
 }
 

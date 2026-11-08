@@ -46,6 +46,22 @@
         "url": "https://claude.ai/artifact/9MqfgLG4LdqrErKqj4Xnxk",
         "version": "1793903447-21e7"
       }
+    },
+    {
+      "date": "2026-11-08",
+      "scope": "colour",
+      "tokens": [
+        "accent",
+        "accent-foreground",
+        "ring",
+        "ring-halo",
+        "sidebar-primary",
+        "sidebar-primary-foreground",
+        "sidebar-ring"
+      ],
+      "removed": ["link"],
+      "from": "monochrome chrome: accent, ring and sidebar-primary/ring set to ink; blue kept only in chart-1 to chart-5",
+      "publishedTo": null
     }
   ]
 }
