@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
   Sidebar,
-  SidebarFooter,
   SidebarGroup,
   SidebarGroupLabel,
   SidebarHeader,
@@ -224,9 +223,6 @@ export function AppSidebar() {
           </nav>
         ))}
       </Menu>
-      <SidebarFooter className="text-muted-foreground px-5 py-4 text-xs">
-        React components and ready-made blocks
-      </SidebarFooter>
     </Sidebar>
   );
 }
