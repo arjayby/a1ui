@@ -48,8 +48,15 @@ export function SiteNavigation() {
 
 | Prop        | Type                 | Default           | Description                                                              |
 | ----------- | -------------------- | ----------------- | ------------------------------------------------------------------------ |
-| `items`     | `ParticleMenuItem[]` | Required          | Items with a unique `id`, visible `label`, and `shape`.                  |
+| `items`     | `ParticleMenuItem[]` | Required          | Items with a unique `id`, visible `label`, and `shape` (see below).      |
 | `ariaLabel` | `string`             | `"Particle menu"` | Accessible name for the navigation.                                      |
 | `strength`  | `number`             | `1`               | Particle displacement, clamped between `0` and `2`.                      |
 | `radius`    | `number`             | `38`              | Pointer influence in the 120-unit symbol, clamped between `10` and `70`. |
 | `className` | `string`             | None              | Layout classes for the navigation container.                             |
+
+### Shapes
+
+| Shape                               | Style                                                     |
+| ----------------------------------- | --------------------------------------------------------- |
+| `grace`, `runes`, `ashes`, `oaths`  | Grainy sigils filled with fine particles.                 |
+| `ring`, `lattice`, `halo`, `spiral` | Bold dot-matrix glyphs built from overlapping round dots. |

@@ -49,7 +49,7 @@ describe("ParticleMenu", () => {
     act(() => vi.advanceTimersByTime(1500));
   }
 
-  it.each(["grace", "runes", "ashes", "oaths", "burst", "gate", "knot", "seed"] as const)(
+  it.each(["grace", "runes", "ashes", "oaths", "ring", "lattice", "halo", "spiral"] as const)(
     "%s responds to the pointer, returns gradually, and restores its exact silhouette",
     (shape) => {
       const { unmount } = render(<ParticleMenu items={[{ ...items[0], shape }]} />);
