@@ -65,6 +65,10 @@
   /* Recessed well behind demos, code and catalog tiles. Light reuses the page grey;
      dark lifts it off true black so it reads as a soft inset inside the card. */
   --well: var(--background);
+  /* Wells share the page colour, so a ring and a soft drop give them their edge. */
+  --well-edge: 0 0 0 1px var(--border), 0 1px 2px rgb(0 0 0 / 0.04);
+  /* Header rows and other bands that need to read as a separate strip inside a well. */
+  --well-band: color-mix(in srgb, var(--foreground) 3%, transparent);
   /* Code highlighting is not part of Graphite; these hues stay a local addition. */
   --syntax-keyword: #983e34;
   --syntax-string: #45602e;
@@ -99,6 +103,8 @@
 
 .dark {
   --well: #232325;
+  --well-edge: 0 0 0 1px var(--border);
+  --well-band: color-mix(in srgb, var(--foreground) 5%, transparent);
   --syntax-keyword: #d19480;
   --syntax-string: #abc19a;
   --syntax-function: #9baec5;
@@ -446,7 +452,7 @@ h6 {
   margin-top: var(--space-48);
 }
 
-/* Tiles sit on a grey well inside the white page, like grouped content. */
+/* Tiles share the page colour; the edge ring sets them apart and hover lifts them. */
 .catalog-card {
   position: relative;
   display: flex;
@@ -455,7 +461,7 @@ h6 {
   padding: 0;
   border-radius: var(--radius-lg);
   background: var(--well);
-  box-shadow: none;
+  box-shadow: var(--well-edge);
   transition:
     transform var(--ease-spring-duration) var(--ease-spring),
     box-shadow 200ms var(--ease-press);
@@ -463,6 +469,7 @@ h6 {
 
 .catalog-card:has(.catalog-card-link:hover) {
   transform: scale(1.012);
+  box-shadow: 0 0 0 1px var(--border), var(--shadow-card-hover);
 }
 
 /* Instant on pointer-down; the spring carries it back on release. */
@@ -483,6 +490,7 @@ h6 {
   overflow: hidden;
   border-top-left-radius: inherit;
   border-top-right-radius: inherit;
+  border-bottom: 1px solid var(--hairline);
   pointer-events: none;
 }
 
@@ -725,6 +733,7 @@ h6 {
   width: 100%;
   min-width: 40rem;
   border-collapse: collapse;
+  border: 0;
   margin: 0;
   background: transparent;
   font-size: var(--text-xs);
@@ -733,13 +742,17 @@ h6 {
 .docs-article-body th,
 .docs-article-body td {
   padding: 14px var(--space-16);
+  /* Fumadocs prose draws 1px column rules; rows alone carry the structure here. */
+  border-inline: 0;
+  border-top: 0;
   border-bottom: 0.5px solid var(--hairline);
   text-align: left;
   vertical-align: top;
 }
 
 .docs-article-body th {
-  background: var(--well);
+  border-bottom-color: var(--border);
+  background: var(--well-band);
   color: var(--muted-foreground);
   font-size: 12px;
   font-weight: 600;
@@ -758,11 +771,11 @@ h6 {
   min-width: 0;
   overflow: auto;
   margin-block: var(--space-16);
-  border: 0.5px solid var(--hairline);
+  border: 0;
   border-radius: var(--radius-md);
   padding: 0;
   background: var(--well);
-  box-shadow: none;
+  box-shadow: var(--well-edge);
 }
 
 .docs-table tr:last-child td {
@@ -773,7 +786,7 @@ h6 {
   border: 0;
   border-radius: var(--radius-md);
   background: var(--well);
-  box-shadow: none;
+  box-shadow: var(--well-edge);
 }
 
 .docs-tabs {
@@ -782,6 +795,7 @@ h6 {
   border: 0;
   border-radius: var(--radius-lg);
   background: var(--well);
+  box-shadow: var(--well-edge);
 }
 
 .docs-tabs > [data-slot="tabs-list"] {
@@ -803,6 +817,7 @@ h6 {
 
 .docs-article-body .demo-frame {
   border-radius: var(--radius-lg);
+  box-shadow: var(--well-edge);
 }
 
 /* Demos sit in a recessed grey well, so the component is the brightest thing in it. */
