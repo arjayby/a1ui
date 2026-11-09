@@ -1,18 +1,14 @@
-import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { AgentInstall } from "@/components/agent-install";
 import { DocsToc } from "@/components/docs-toc";
 import { getMDXComponents } from "@/components/mdx";
 import { Badge } from "@/components/ui/badge";
+import { componentMetadata } from "@/lib/doc-metadata";
 import { componentsGroup, docStructuredData, JsonLd } from "@/lib/seo";
 import { source } from "@/lib/source";
 
-export const metadata: Metadata = {
-  title: "Hover Card",
-  description: "A link preview card that springs out from its trigger and staggers its contents in.",
-  alternates: { canonical: "/components/hover-card" },
-};
+export const metadata = componentMetadata("hover-card");
 
 export default function HoverCardPage() {
   const page = source.getPage(["components", "hover-card"]);

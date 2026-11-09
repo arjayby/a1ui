@@ -17,12 +17,15 @@ import { ShapeFlowPreview } from "@/components/block-demos/shape-flow-demo";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription } from "@/components/ui/card";
 import { blocks } from "@/lib/block-catalog";
+import { blocksGroup, collectionStructuredData, JsonLd, pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Blocks",
-  description: "Ready-made React compositions inspired by designs found online.",
-  alternates: { canonical: "/blocks" },
-};
+const description = "Ready-made React compositions inspired by designs found online.";
+
+export const metadata: Metadata = pageMetadata({
+  title: "Animated React blocks",
+  description: `${blocks.length} ready-made animated React blocks, from ASCII art to text effects and navigation, inspired by designs found online and installed as editable source.`,
+  path: "/blocks",
+});
 
 const previews: Record<string, ComponentType> = {
   "ascii-morph": AsciiMorphPreview,
@@ -40,10 +43,11 @@ const previews: Record<string, ComponentType> = {
 export default function BlocksPage() {
   return (
     <div className="page-frame">
+      <JsonLd data={collectionStructuredData({ group: blocksGroup, description, items: blocks })} />
       <header>
         <p className="graphite-eyebrow">a1ui / Block library</p>
         <h1 className="page-heading">Blocks</h1>
-        <p className="page-description">Ready-made React compositions inspired by designs found online.</p>
+        <p className="page-description">{description}</p>
         <AgentInstall />
       </header>
 

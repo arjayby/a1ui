@@ -2,13 +2,15 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { getMDXComponents } from "@/components/mdx";
+import { pageMetadata } from "@/lib/seo";
 import { source } from "@/lib/source";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Install with an agent",
-  description: "Let your coding agent choose, install, and integrate an a1ui block.",
-  alternates: { canonical: "/agents" },
-};
+  description:
+    "Let your coding agent choose, install, and integrate a1ui components and blocks through the shadcn registry, llms.txt, and Markdown guides.",
+  path: "/agents",
+});
 
 export default function AgentsPage() {
   const page = source.getPage(["agents"]);

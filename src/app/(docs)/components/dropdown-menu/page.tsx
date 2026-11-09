@@ -1,18 +1,14 @@
-import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { AgentInstall } from "@/components/agent-install";
 import { DocsToc } from "@/components/docs-toc";
 import { getMDXComponents } from "@/components/mdx";
 import { Badge } from "@/components/ui/badge";
+import { componentMetadata } from "@/lib/doc-metadata";
 import { componentsGroup, docStructuredData, JsonLd } from "@/lib/seo";
 import { source } from "@/lib/source";
 
-export const metadata: Metadata = {
-  title: "Dropdown Menu",
-  description: "A shadcn dropdown with open and close transitions and a traveling highlight.",
-  alternates: { canonical: "/components/dropdown-menu" },
-};
+export const metadata = componentMetadata("dropdown-menu");
 
 export default function DropdownMenuPage() {
   const page = source.getPage(["components", "dropdown-menu"]);

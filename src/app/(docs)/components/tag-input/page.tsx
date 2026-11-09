@@ -1,19 +1,14 @@
-import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { AgentInstall } from "@/components/agent-install";
 import { DocsToc } from "@/components/docs-toc";
 import { getMDXComponents } from "@/components/mdx";
 import { Badge } from "@/components/ui/badge";
+import { componentMetadata } from "@/lib/doc-metadata";
 import { componentsGroup, docStructuredData, JsonLd } from "@/lib/seo";
 import { source } from "@/lib/source";
 
-export const metadata: Metadata = {
-  title: "Tag Input",
-  description:
-    "A text field that collects multiple tags, with a two-step Backspace removal and an optional limit.",
-  alternates: { canonical: "/components/tag-input" },
-};
+export const metadata = componentMetadata("tag-input");
 
 export default function TagInputPage() {
   const page = source.getPage(["components", "tag-input"]);

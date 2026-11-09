@@ -52,6 +52,23 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* The 404 page reuses the card on its own. */
+.landing-single {
+  grid-template-columns: minmax(0, 300px);
+}
+.landing-card-links {
+  display: flex;
+  gap: 12px;
+}
+.landing-card-links a {
+  color: var(--foreground);
+  text-decoration: none;
+}
+.landing-card-links a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 .landing-menu ul {
   gap: 40px 56px;
 }
@@ -74,9 +91,11 @@
   }
 }
 @media (max-width: 760px) {
+  .landing:not(.landing-single) {
+    align-content: start;
+  }
   .landing {
     grid-template-columns: minmax(0, 300px);
-    align-content: start;
     gap: 40px;
     padding: 16px 16px 48px;
   }

@@ -1,19 +1,14 @@
-import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { AgentInstall } from "@/components/agent-install";
 import { DocsToc } from "@/components/docs-toc";
 import { getMDXComponents } from "@/components/mdx";
 import { Badge } from "@/components/ui/badge";
+import { componentMetadata } from "@/lib/doc-metadata";
 import { componentsGroup, docStructuredData, JsonLd } from "@/lib/seo";
 import { source } from "@/lib/source";
 
-export const metadata: Metadata = {
-  title: "Pagination",
-  description:
-    "Page numbers with an active surface that slides between pages and a window of numbers that reflows as it moves.",
-  alternates: { canonical: "/components/pagination" },
-};
+export const metadata = componentMetadata("pagination");
 
 export default function PaginationPage() {
   const page = source.getPage(["components", "pagination"]);

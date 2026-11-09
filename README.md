@@ -40,7 +40,7 @@ pnpm build
 
 `pnpm dev` and `pnpm build` generate the registry and agent guides. Run `pnpm registry:build` after changing registry content while the dev server is running. Use `pnpm test:e2e` for browser tests and `pnpm test:consumer` to verify installation in a separate Next.js app.
 
-Before deploying, set `NEXT_PUBLIC_SITE_URL` to the site's public origin and run `pnpm build`. This sets the public URLs used in install commands, copied prompts, and registry metadata.
+Before deploying, set `NEXT_PUBLIC_SITE_URL` to the site's public origin and run `pnpm build`. This sets the public URLs used in install commands, copied prompts, registry metadata, canonical URLs, the sitemap, and share cards. On Vercel, the project's production domain is used when the variable is unset.
 
 ## License
 

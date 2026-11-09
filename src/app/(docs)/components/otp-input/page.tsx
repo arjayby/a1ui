@@ -1,19 +1,14 @@
-import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { AgentInstall } from "@/components/agent-install";
 import { DocsToc } from "@/components/docs-toc";
 import { getMDXComponents } from "@/components/mdx";
 import { Badge } from "@/components/ui/badge";
+import { componentMetadata } from "@/lib/doc-metadata";
 import { componentsGroup, docStructuredData, JsonLd } from "@/lib/seo";
 import { source } from "@/lib/source";
 
-export const metadata: Metadata = {
-  title: "OTP Input",
-  description:
-    "A one-time code field with 4, 6, or 8 slots, a traveling focus highlight, and characters that rise into place.",
-  alternates: { canonical: "/components/otp-input" },
-};
+export const metadata = componentMetadata("otp-input");
 
 export default function OtpInputPage() {
   const page = source.getPage(["components", "otp-input"]);

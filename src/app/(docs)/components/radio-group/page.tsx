@@ -1,19 +1,14 @@
-import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { AgentInstall } from "@/components/agent-install";
 import { DocsToc } from "@/components/docs-toc";
 import { getMDXComponents } from "@/components/mdx";
 import { Badge } from "@/components/ui/badge";
+import { componentMetadata } from "@/lib/doc-metadata";
 import { componentsGroup, docStructuredData, JsonLd } from "@/lib/seo";
 import { source } from "@/lib/source";
 
-export const metadata: Metadata = {
-  title: "Radio Group",
-  description:
-    "A radio group whose single dot slides from option to option, with a card variant whose highlighted border glides between cards.",
-  alternates: { canonical: "/components/radio-group" },
-};
+export const metadata = componentMetadata("radio-group");
 
 export default function RadioGroupPage() {
   const page = source.getPage(["components", "radio-group"]);

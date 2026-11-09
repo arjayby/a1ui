@@ -37,12 +37,15 @@ import { ValidatedInputPreview } from "@/components/component-demos/validated-in
 import { TagInputPreview } from "@/components/component-demos/tag-input-demo";
 import { PasswordInputPreview } from "@/components/component-demos/password-input-demo";
 import { components } from "@/lib/component-catalog";
+import { collectionStructuredData, componentsGroup, JsonLd, pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Components",
-  description: "Animated components built with Motion, with live previews and editable source.",
-  alternates: { canonical: "/components" },
-};
+const description = "Animated components built with Motion, with live previews and editable source.";
+
+export const metadata: Metadata = pageMetadata({
+  title: "Animated React components",
+  description: `${components.length} animated React components built with Motion and Tailwind CSS, with live previews and editable source you install with the shadcn CLI.`,
+  path: "/components",
+});
 
 const previews: Record<string, ReactNode> = {
   "dropdown-menu": <DropdownMenuPreview />,
@@ -82,12 +85,11 @@ const previews: Record<string, ReactNode> = {
 export default function ComponentsPage() {
   return (
     <div className="page-frame">
+      <JsonLd data={collectionStructuredData({ group: componentsGroup, description, items: components })} />
       <header>
         <p className="graphite-eyebrow">a1ui / Component library</p>
         <h1 className="page-heading">Components</h1>
-        <p className="page-description">
-          Animated components built with Motion, with live previews and editable source.
-        </p>
+        <p className="page-description">{description}</p>
       </header>
       <div className="catalog-grid">
         {components.map((component) => (

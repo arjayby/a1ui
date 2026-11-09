@@ -1,19 +1,14 @@
-import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { AgentInstall } from "@/components/agent-install";
 import { DocsToc } from "@/components/docs-toc";
 import { getMDXComponents } from "@/components/mdx";
 import { Badge } from "@/components/ui/badge";
+import { componentMetadata } from "@/lib/doc-metadata";
 import { componentsGroup, docStructuredData, JsonLd } from "@/lib/seo";
 import { source } from "@/lib/source";
 
-export const metadata: Metadata = {
-  title: "Avatar Group",
-  description:
-    "Overlapping avatars that spring apart on hover, lift with a name label, and fan extra people out of a counting +N chip.",
-  alternates: { canonical: "/components/avatar-group" },
-};
+export const metadata = componentMetadata("avatar-group");
 
 export default function AvatarGroupPage() {
   const page = source.getPage(["components", "avatar-group"]);

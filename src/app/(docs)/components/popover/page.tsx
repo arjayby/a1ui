@@ -1,19 +1,14 @@
-import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { AgentInstall } from "@/components/agent-install";
 import { DocsToc } from "@/components/docs-toc";
 import { getMDXComponents } from "@/components/mdx";
 import { Badge } from "@/components/ui/badge";
+import { componentMetadata } from "@/lib/doc-metadata";
 import { componentsGroup, docStructuredData, JsonLd } from "@/lib/seo";
 import { source } from "@/lib/source";
 
-export const metadata: Metadata = {
-  title: "Popover",
-  description:
-    "A popover that springs out of its trigger, or morphs the trigger button itself into the panel.",
-  alternates: { canonical: "/components/popover" },
-};
+export const metadata = componentMetadata("popover");
 
 export default function PopoverPage() {
   const page = source.getPage(["components", "popover"]);

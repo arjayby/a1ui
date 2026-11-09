@@ -1,19 +1,14 @@
-import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { AgentInstall } from "@/components/agent-install";
 import { DocsToc } from "@/components/docs-toc";
 import { getMDXComponents } from "@/components/mdx";
 import { Badge } from "@/components/ui/badge";
+import { componentMetadata } from "@/lib/doc-metadata";
 import { componentsGroup, docStructuredData, JsonLd } from "@/lib/seo";
 import { source } from "@/lib/source";
 
-export const metadata: Metadata = {
-  title: "Dialog",
-  description:
-    "A modal dialog that grows out of the button that opened it and shrinks back into it, over a blurred backdrop.",
-  alternates: { canonical: "/components/dialog" },
-};
+export const metadata = componentMetadata("dialog");
 
 export default function DialogPage() {
   const page = source.getPage(["components", "dialog"]);

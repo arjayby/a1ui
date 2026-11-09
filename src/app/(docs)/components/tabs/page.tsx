@@ -1,19 +1,14 @@
-import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { AgentInstall } from "@/components/agent-install";
 import { DocsToc } from "@/components/docs-toc";
 import { getMDXComponents } from "@/components/mdx";
 import { Badge } from "@/components/ui/badge";
+import { componentMetadata } from "@/lib/doc-metadata";
 import { componentsGroup, docStructuredData, JsonLd } from "@/lib/seo";
 import { source } from "@/lib/source";
 
-export const metadata: Metadata = {
-  title: "Tabs",
-  description:
-    "Tabs with a spring indicator that slides between triggers, a hover highlight, and direction-aware panels.",
-  alternates: { canonical: "/components/tabs" },
-};
+export const metadata = componentMetadata("tabs");
 
 export default function TabsPage() {
   const page = source.getPage(["components", "tabs"]);

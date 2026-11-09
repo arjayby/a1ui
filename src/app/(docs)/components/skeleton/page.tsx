@@ -1,19 +1,14 @@
-import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { AgentInstall } from "@/components/agent-install";
 import { DocsToc } from "@/components/docs-toc";
 import { getMDXComponents } from "@/components/mdx";
 import { Badge } from "@/components/ui/badge";
+import { componentMetadata } from "@/lib/doc-metadata";
 import { componentsGroup, docStructuredData, JsonLd } from "@/lib/seo";
 import { source } from "@/lib/source";
 
-export const metadata: Metadata = {
-  title: "Skeleton",
-  description:
-    "Loading placeholders that shimmer in sync, then blur the real content into place without a layout jump.",
-  alternates: { canonical: "/components/skeleton" },
-};
+export const metadata = componentMetadata("skeleton");
 
 export default function SkeletonPage() {
   const page = source.getPage(["components", "skeleton"]);

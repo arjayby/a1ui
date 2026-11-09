@@ -1,19 +1,14 @@
-import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { AgentInstall } from "@/components/agent-install";
 import { DocsToc } from "@/components/docs-toc";
 import { getMDXComponents } from "@/components/mdx";
 import { Badge } from "@/components/ui/badge";
+import { componentMetadata } from "@/lib/doc-metadata";
 import { componentsGroup, docStructuredData, JsonLd } from "@/lib/seo";
 import { source } from "@/lib/source";
 
-export const metadata: Metadata = {
-  title: "Toast",
-  description:
-    "Toasts that stack as a deck, fan out on hover, and swipe away, with a loading state that morphs into success.",
-  alternates: { canonical: "/components/toast" },
-};
+export const metadata = componentMetadata("toast");
 
 export default function ToastPage() {
   const page = source.getPage(["components", "toast"]);

@@ -1,19 +1,14 @@
-import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { AgentInstall } from "@/components/agent-install";
 import { DocsToc } from "@/components/docs-toc";
 import { getMDXComponents } from "@/components/mdx";
 import { Badge } from "@/components/ui/badge";
+import { componentMetadata } from "@/lib/doc-metadata";
 import { componentsGroup, docStructuredData, JsonLd } from "@/lib/seo";
 import { source } from "@/lib/source";
 
-export const metadata: Metadata = {
-  title: "Password Input",
-  description:
-    "A password field that requires a strong password, with a strength meter that opens its requirements on hover, and a show/hide toggle.",
-  alternates: { canonical: "/components/password-input" },
-};
+export const metadata = componentMetadata("password-input");
 
 export default function PasswordInputPage() {
   const page = source.getPage(["components", "password-input"]);

@@ -2,12 +2,13 @@ import type { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/next";
 import { RootProvider } from "fumadocs-ui/provider/next";
 
-import { siteDescription, siteName, siteUrl } from "@/lib/seo";
+import { author, sharedOpenGraph, siteDescription, siteName, siteUrl } from "@/lib/seo";
 
 import "./globals.css";
 
-// Pages set their own title, description, and canonical path. Open Graph and
-// Twitter cards take each page's title and description from those fields.
+// Pages set their own title, description, canonical path, and Open Graph URL through
+// pageMetadata in lib/seo.tsx. Open Graph and Twitter cards take each page's title and
+// description from those fields.
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
@@ -16,8 +17,8 @@ export const metadata: Metadata = {
   },
   description: siteDescription,
   applicationName: siteName,
-  authors: [{ name: "Arjay Bayona", url: "https://github.com/arjayby" }],
-  creator: "Arjay Bayona",
+  authors: [author],
+  creator: author.name,
   keywords: [
     "React components",
     "animated components",
@@ -25,12 +26,10 @@ export const metadata: Metadata = {
     "Tailwind CSS",
     "shadcn registry",
     "UI blocks",
+    "React animation",
+    "copy and paste components",
   ],
-  openGraph: {
-    type: "website",
-    siteName,
-    locale: "en_US",
-  },
+  openGraph: sharedOpenGraph,
   twitter: {
     card: "summary_large_image",
   },

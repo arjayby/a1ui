@@ -1,18 +1,14 @@
-import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { AgentInstall } from "@/components/agent-install";
 import { DocsToc } from "@/components/docs-toc";
 import { getMDXComponents } from "@/components/mdx";
 import { Badge } from "@/components/ui/badge";
+import { componentMetadata } from "@/lib/doc-metadata";
 import { componentsGroup, docStructuredData, JsonLd } from "@/lib/seo";
 import { source } from "@/lib/source";
 
-export const metadata: Metadata = {
-  title: "Confirm Button",
-  description: "A hold-to-confirm button with a directional color fill and configurable hold duration.",
-  alternates: { canonical: "/components/confirm-button" },
-};
+export const metadata = componentMetadata("confirm-button");
 
 export default function ConfirmButtonPage() {
   const page = source.getPage(["components", "confirm-button"]);

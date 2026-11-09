@@ -1,19 +1,14 @@
-import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { AgentInstall } from "@/components/agent-install";
 import { DocsToc } from "@/components/docs-toc";
 import { getMDXComponents } from "@/components/mdx";
 import { Badge } from "@/components/ui/badge";
+import { componentMetadata } from "@/lib/doc-metadata";
 import { componentsGroup, docStructuredData, JsonLd } from "@/lib/seo";
 import { source } from "@/lib/source";
 
-export const metadata: Metadata = {
-  title: "Toggle Group",
-  description:
-    "A segmented control whose surface slides between items, or chips that pop in with a check when pressed.",
-  alternates: { canonical: "/components/toggle-group" },
-};
+export const metadata = componentMetadata("toggle-group");
 
 export default function ToggleGroupPage() {
   const page = source.getPage(["components", "toggle-group"]);

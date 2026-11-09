@@ -1,19 +1,14 @@
-import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { AgentInstall } from "@/components/agent-install";
 import { DocsToc } from "@/components/docs-toc";
 import { getMDXComponents } from "@/components/mdx";
 import { Badge } from "@/components/ui/badge";
+import { componentMetadata } from "@/lib/doc-metadata";
 import { componentsGroup, docStructuredData, JsonLd } from "@/lib/seo";
 import { source } from "@/lib/source";
 
-export const metadata: Metadata = {
-  title: "Kbd",
-  description:
-    "A keycap that sinks and springs back when its key is pressed, with platform-aware labels and combos that pulse when held.",
-  alternates: { canonical: "/components/kbd" },
-};
+export const metadata = componentMetadata("kbd");
 
 export default function KbdPage() {
   const page = source.getPage(["components", "kbd"]);

@@ -1,18 +1,14 @@
-import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { AgentInstall } from "@/components/agent-install";
 import { DocsToc } from "@/components/docs-toc";
 import { getMDXComponents } from "@/components/mdx";
 import { Badge } from "@/components/ui/badge";
+import { componentMetadata } from "@/lib/doc-metadata";
 import { componentsGroup, docStructuredData, JsonLd } from "@/lib/seo";
 import { source } from "@/lib/source";
 
-export const metadata: Metadata = {
-  title: "Slider",
-  description: "A slider with magnetic stops that catch the thumb and pulse as you slide through them.",
-  alternates: { canonical: "/components/slider" },
-};
+export const metadata = componentMetadata("slider");
 
 export default function SliderPage() {
   const page = source.getPage(["components", "slider"]);

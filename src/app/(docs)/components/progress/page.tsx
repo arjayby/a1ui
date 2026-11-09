@@ -1,19 +1,14 @@
-import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { AgentInstall } from "@/components/agent-install";
 import { DocsToc } from "@/components/docs-toc";
 import { getMDXComponents } from "@/components/mdx";
 import { Badge } from "@/components/ui/badge";
+import { componentMetadata } from "@/lib/doc-metadata";
 import { componentsGroup, docStructuredData, JsonLd } from "@/lib/seo";
 import { source } from "@/lib/source";
 
-export const metadata: Metadata = {
-  title: "Progress",
-  description:
-    "A progress bar, ring, or step row whose fill springs to each value while the percentage rolls like a counter.",
-  alternates: { canonical: "/components/progress" },
-};
+export const metadata = componentMetadata("progress");
 
 export default function ProgressPage() {
   const page = source.getPage(["components", "progress"]);

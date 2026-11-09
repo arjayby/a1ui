@@ -4,17 +4,26 @@ import { HydrationMarker } from "@/components/hydration-marker";
 import { ThemeSwitch } from "@/components/site-navigation";
 import { blocks } from "@/lib/block-catalog";
 import { components } from "@/lib/component-catalog";
-import { absoluteUrl, JsonLd, repositoryUrl, siteDescription, siteName } from "@/lib/seo";
+import {
+  absoluteUrl,
+  author,
+  JsonLd,
+  pageMetadata,
+  repositoryUrl,
+  siteDescription,
+  siteName,
+  siteTitle,
+} from "@/lib/seo";
 import { AsciiMorph } from "@/registry/blocks/ascii-morph";
 import { ParticleMenu, type ParticleMenuItem } from "@/registry/blocks/particle-menu";
 
 import "./landing.css";
 
-export const metadata: Metadata = {
-  title: { absolute: "a1ui — Animated React components and blocks" },
-  description: "Animated React components and blocks. Copy and paste them, or install them with your agent.",
-  alternates: { canonical: "/" },
-};
+export const metadata: Metadata = pageMetadata({
+  title: { absolute: siteTitle },
+  description: siteDescription,
+  path: "/",
+});
 
 const structuredData = [
   {
@@ -33,7 +42,7 @@ const structuredData = [
     codeRepository: repositoryUrl,
     programmingLanguage: ["TypeScript", "React"],
     license: "https://opensource.org/licenses/MIT",
-    author: { "@type": "Person", name: "Arjay Bayona", url: "https://github.com/arjayby" },
+    author: { "@type": "Person", ...author },
   },
 ];
 
@@ -54,7 +63,7 @@ export default function HomePage() {
         <div className="landing-card-art">
           <AsciiMorph defaultShape="a1" shapes={["a1", "logo"]} ariaLabel="Morph the a1ui monogram" />
         </div>
-        <h1>a1ui — Animated React components and blocks</h1>
+        <h1>{siteTitle}</h1>
         <p>Copy and paste them, or install them with your agent.</p>
         <footer className="landing-card-footer">
           <span>

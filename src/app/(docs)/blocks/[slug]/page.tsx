@@ -6,6 +6,7 @@ import { getMDXComponents } from "@/components/mdx";
 import { AgentInstall } from "@/components/agent-install";
 import { Badge } from "@/components/ui/badge";
 import { blocks, getBlock } from "@/lib/block-catalog";
+import { blockMetadata } from "@/lib/doc-metadata";
 import { blocksGroup, docStructuredData, JsonLd } from "@/lib/seo";
 import { source } from "@/lib/source";
 
@@ -49,13 +50,7 @@ export function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: PageProps<"/blocks/[slug]">): Promise<Metadata> {
-  const { slug } = await params;
-  const block = getBlock(slug);
-  if (!block) notFound();
-
-  return {
-    title: block.title,
-    description: block.description,
-    alternates: { canonical: `/blocks/${block.slug}` },
-  };
+  const metadata = blockMetadata((await params).slug);
+  if (!metadata) notFound();
+  return metadata;
 }

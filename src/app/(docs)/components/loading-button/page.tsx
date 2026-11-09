@@ -1,18 +1,14 @@
-import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { AgentInstall } from "@/components/agent-install";
 import { DocsToc } from "@/components/docs-toc";
 import { getMDXComponents } from "@/components/mdx";
 import { Badge } from "@/components/ui/badge";
+import { componentMetadata } from "@/lib/doc-metadata";
 import { componentsGroup, docStructuredData, JsonLd } from "@/lib/seo";
 import { source } from "@/lib/source";
 
-export const metadata: Metadata = {
-  title: "Loading Button",
-  description: "A loading button with animated feedback for async actions and network requests.",
-  alternates: { canonical: "/components/loading-button" },
-};
+export const metadata = componentMetadata("loading-button");
 
 export default function LoadingButtonPage() {
   const page = source.getPage(["components", "loading-button"]);

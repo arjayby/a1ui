@@ -1,19 +1,14 @@
-import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { AgentInstall } from "@/components/agent-install";
 import { DocsToc } from "@/components/docs-toc";
 import { getMDXComponents } from "@/components/mdx";
 import { Badge } from "@/components/ui/badge";
+import { componentMetadata } from "@/lib/doc-metadata";
 import { componentsGroup, docStructuredData, JsonLd } from "@/lib/seo";
 import { source } from "@/lib/source";
 
-export const metadata: Metadata = {
-  title: "Breadcrumb",
-  description:
-    "A breadcrumb trail whose middle collapses into an expandable ellipsis, with segments that slide in and out as you navigate.",
-  alternates: { canonical: "/components/breadcrumb" },
-};
+export const metadata = componentMetadata("breadcrumb");
 
 export default function BreadcrumbPage() {
   const page = source.getPage(["components", "breadcrumb"]);
