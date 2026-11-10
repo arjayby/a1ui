@@ -1,6 +1,6 @@
 # Skeleton
 
-Loading placeholders that shimmer in sync, then blur the real content into place without a layout jump.
+Loading placeholders that shimmer in sync, then swap to the real content on a soft spring, with no flash on fast loads and no layout jump.
 
 See [agent setup instructions](http://localhost:3000/llms.txt) before installation. Import paths in examples assume the @/components/animated path; adapt them to the target project's components.json.
 
@@ -60,17 +60,19 @@ export function ProfileCard({ user }: { user?: { name: string; bio: string } }) 
 
 ### Skeleton
 
-| Prop           | Type                                  | Default     | Description                                                                                                                                          |
-| -------------- | ------------------------------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `loading`      | `boolean`                             | `true`      | Shows the placeholder and sets `aria-busy`. When it turns false, the children blur and fade in while the placeholder fades out.                      |
-| `fallback`     | `ReactNode`                           | None        | Placeholder layout shown while loading. Without it, one block covers the children, which keep their size but stay hidden and inert.                  |
-| `children`     | `ReactNode`                           | None        | Real content. Without children or a fallback, Skeleton renders a single placeholder shape sized by `className`.                                      |
-| `loadingLabel` | `string`                              | `"Loading"` | Visually hidden text announced while loading.                                                                                                        |
-| `duration`     | `number`                              | `0.5`       | Reveal time in seconds. The wrapper holds the larger height, then eases to the content height. Zero swaps instantly.                                 |
-| `animation`    | `"shimmer" \| "pulse" \| "none"`      | `"shimmer"` | A band that sweeps across every placeholder in sync, a shared opacity pulse, or no motion. Nested placeholders inherit it.                           |
-| `direction`    | `"right" \| "left" \| "down" \| "up"` | `"right"`   | Which way the shimmer band travels. Nested placeholders inherit it.                                                                                  |
-| `cycle`        | `number`                              | `1.6`       | Seconds for one shimmer sweep or pulse, up to 2.5 so the loop never slows into a sway. Placeholders share the page clock, so neighbors stay in step. |
-| `className`    | `string`                              | None        | Classes on the wrapper, or the size and radius of a single shape.                                                                                    |
+| Prop           | Type                                  | Default     | Description                                                                                                                                                                                     |
+| -------------- | ------------------------------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `loading`      | `boolean`                             | `true`      | Shows the placeholder and sets `aria-busy`. When it turns false, the children settle in from a slight blur and scale while the placeholder softens out. Turning it back on swaps the other way. |
+| `fallback`     | `ReactNode`                           | None        | Placeholder layout shown while loading. Without it, one block covers the children, which keep their size but stay hidden and inert.                                                             |
+| `children`     | `ReactNode`                           | None        | Real content. Without children or a fallback, Skeleton renders a single placeholder shape sized by `className`.                                                                                 |
+| `loadingLabel` | `string`                              | `"Loading"` | Visually hidden text announced while loading.                                                                                                                                                   |
+| `duration`     | `number`                              | `0.4`       | Seconds the swap spring takes to settle. The wrapper holds the larger height, then springs to the new one. Zero swaps instantly.                                                                |
+| `delay`        | `number`                              | `0.12`      | Seconds to wait before the placeholder appears. A load that finishes sooner never shows it, and a reload keeps the old content up until then. Server-rendered placeholders skip the wait.       |
+| `minVisible`   | `number`                              | `0.38`      | Shortest time in seconds the placeholder stays up once it has appeared, so a load that ends right after cannot make it flicker.                                                                 |
+| `animation`    | `"shimmer" \| "pulse" \| "none"`      | `"shimmer"` | A band that sweeps across every placeholder in sync, a shared opacity pulse, or no motion. Nested placeholders inherit it.                                                                      |
+| `direction`    | `"right" \| "left" \| "down" \| "up"` | `"right"`   | Which way the shimmer band travels. Nested placeholders inherit it.                                                                                                                             |
+| `cycle`        | `number`                              | `1.6`       | Seconds for one shimmer sweep or pulse, up to 2.5 so the loop never slows into a sway. Placeholders share the page clock, so neighbors stay in step.                                            |
+| `className`    | `string`                              | None        | Classes on the wrapper, or the size and radius of a single shape.                                                                                                                               |
 
 ### SkeletonText
 

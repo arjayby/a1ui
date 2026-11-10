@@ -1067,7 +1067,7 @@
       "name": "skeleton",
       "type": "registry:component",
       "title": "Skeleton",
-      "description": "Loading placeholders that shimmer in sync, then blur the real content into place without a layout jump.",
+      "description": "Loading placeholders that shimmer in sync, then swap to the real content on a soft spring, with no flash on fast loads and no layout jump.",
       "dependencies": ["motion"],
       "files": [
         {
@@ -1086,7 +1086,7 @@
             "The shimmer runs on the Web Animations API and is lined up by page position, measured when placeholders mount or resize; a placeholder that moves without resizing keeps its old alignment. A wrapper without a fallback covers its children with one block, so the children need a size while loading."
           ],
           "requirements": [
-            "React 19, Tailwind CSS 4, Motion, and theme colors. Wrap content in Skeleton with loading, and pass fallback for a custom placeholder layout. The wrapper sets aria-busy and announces loadingLabel. Reduced motion removes the shimmer and pulse and swaps to the content instantly."
+            "React 19, Tailwind CSS 4, Motion, and theme colors. Wrap content in Skeleton with loading, and pass fallback for a custom placeholder layout. The wrapper sets aria-busy and announces loadingLabel. The placeholder waits out delay before it appears and then stays for at least minVisible; a server-rendered placeholder shows at once. Reduced motion removes the shimmer and pulse and swaps to the content instantly."
           ]
         }
       }

@@ -99,6 +99,65 @@ describe("Skeleton", () => {
     expect(screen.getByRole("button", { name: "Open report" })).toBeInTheDocument();
   });
 
+  it("keeps the placeholder up for a minimum time once it has appeared", () => {
+    vi.useFakeTimers();
+    try {
+      const { rerender } = render(
+        <Skeleton loading fallback={<SkeletonText />} duration={0}>
+          <p>Ada Lovelace</p>
+        </Skeleton>,
+      );
+      const wrapper = document.querySelector('[data-slot="skeleton"]')!;
+      act(() => void vi.advanceTimersByTime(120));
+
+      rerender(
+        <Skeleton loading={false} fallback={<SkeletonText />} duration={0}>
+          <p>Ada Lovelace</p>
+        </Skeleton>,
+      );
+      expect(wrapper).toHaveAttribute("data-state", "loading");
+      expect(wrapper).toHaveAttribute("aria-busy", "true");
+      expect(screen.queryByText("Ada Lovelace")).toBeNull();
+
+      act(() => void vi.advanceTimersByTime(379));
+      expect(wrapper).toHaveAttribute("data-state", "loading");
+      act(() => void vi.advanceTimersByTime(1));
+      expect(wrapper).toHaveAttribute("data-state", "loaded");
+      expect(screen.getByText("Ada Lovelace")).toBeVisible();
+      expect(document.querySelector('[data-slot="skeleton-placeholder"]')).toBeNull();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("keeps the content up through the delay on a reload, then swaps to the placeholder", () => {
+    vi.useFakeTimers();
+    try {
+      const { rerender } = render(
+        <Skeleton loading={false} fallback={<SkeletonText />} duration={0} delay={0.2}>
+          <p>Ada Lovelace</p>
+        </Skeleton>,
+      );
+      const wrapper = document.querySelector('[data-slot="skeleton"]')!;
+      expect(document.querySelector('[data-slot="skeleton-placeholder"]')).toBeNull();
+
+      rerender(
+        <Skeleton loading fallback={<SkeletonText />} duration={0} delay={0.2}>
+          <p>Ada Lovelace</p>
+        </Skeleton>,
+      );
+      expect(wrapper).toHaveAttribute("aria-busy", "true");
+      expect(screen.getByText("Ada Lovelace")).toBeVisible();
+      expect(document.querySelector('[data-slot="skeleton-placeholder"]')).toBeNull();
+
+      act(() => void vi.advanceTimersByTime(200));
+      expect(screen.queryByText("Ada Lovelace")).toBeNull();
+      expect(document.querySelector('[data-slot="skeleton-placeholder"]')).toBeInTheDocument();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("drops the shimmer and swaps instantly with reduced motion", async () => {
     motionPreference.reduce = true;
     const { rerender } = render(

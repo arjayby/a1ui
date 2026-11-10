@@ -28,39 +28,54 @@ function bandPhases(frame: Locator) {
   );
 }
 
-// Clicks the button, then reads the wrapper on every frame for `ms` milliseconds.
-async function sampleReveal(wrapper: Locator, button: Locator, ms: number) {
-  const handle = await button.elementHandle();
+// Waits for the wrapper to enter `state`, then reads it on every frame for `ms` milliseconds.
+function sampleSwap(wrapper: Locator, state: "loading" | "loaded", ms: number) {
   return wrapper.evaluate(
-    async (root: HTMLElement, { button, ms }) => {
-      (button as HTMLElement).click();
-      const values: { height: number; blur: number; placeholder: number | null }[] = [];
+    async (root: HTMLElement, { state, ms }) => {
+      const read = (slot: string) => {
+        const element = root.querySelector(`[data-slot="skeleton-${slot}"]`);
+        if (!element) return null;
+        const { opacity, filter, transform } = getComputedStyle(element);
+        return {
+          opacity: Number(opacity),
+          blur: filter === "none" ? 0 : Number.parseFloat(/blur\(([\d.e-]+)px\)/.exec(filter)?.[1] ?? "0"),
+          scale: transform === "none" ? 1 : new DOMMatrix(transform).a,
+        };
+      };
+      while (root.dataset.state !== state) await new Promise(requestAnimationFrame);
+      const values = [
+        {
+          height: root.getBoundingClientRect().height,
+          content: read("content"),
+          placeholder: read("placeholder"),
+        },
+      ];
       const began = performance.now();
       while (performance.now() - began < ms) {
         await new Promise(requestAnimationFrame);
-        const content = root.querySelector('[data-slot="skeleton-content"]');
-        const placeholder = root.querySelector('[data-slot="skeleton-placeholder"]');
-        const filter = content ? getComputedStyle(content).filter : "none";
         values.push({
           height: root.getBoundingClientRect().height,
-          blur: filter === "none" ? 0 : Number.parseFloat(/blur\(([\d.e-]+)px\)/.exec(filter)?.[1] ?? "0"),
-          placeholder: placeholder ? Number(getComputedStyle(placeholder).opacity) : null,
+          content: read("content"),
+          placeholder: read("placeholder"),
         });
       }
       return values;
     },
-    { button: handle, ms },
+    { state, ms },
   );
 }
 
-test("placeholders shimmer as one band, then the content blurs in and the height eases", async ({ page }) => {
+test("placeholders shimmer as one band, then swap with the content on a loop", async ({ page }) => {
   const frame = await openDemo(page);
   const wrapper = frame.locator('[data-slot="skeleton"]');
+  await expect(wrapper).toHaveAttribute("data-state", "loading");
   await expect(wrapper).toHaveAttribute("aria-busy", "true");
-  await expect(wrapper.locator(".sr-only")).toHaveText("Loading profile");
+  await expect(wrapper.locator(".sr-only")).toHaveText("Loading");
+  // The demo runs by itself; there is nothing to press.
+  await expect(frame.locator(".component-demo-stage").getByRole("button")).toHaveCount(0);
 
-  // Avatar, two header bars, and three text lines all sit on the same band, and it moves.
-  await expect(frame.locator('[data-slot="skeleton-shimmer"]')).toHaveCount(6);
+  // All three lines sit on the same band, and it moves.
+  await expect(frame.locator('[data-slot="skeleton-shimmer"]')).toHaveCount(3);
   const first = await bandPhases(frame);
   expect(new Set(first).size).toBe(1);
   await page.waitForTimeout(250);
@@ -69,31 +84,39 @@ test("placeholders shimmer as one band, then the content blurs in and the height
   expect(later[0]).not.toBe(first[0]);
 
   const loadingHeight = (await wrapper.boundingBox())!.height;
-  const frames = await sampleReveal(wrapper, frame.getByRole("button", { name: "Finish loading" }), 900);
-  await expect(wrapper).toHaveAttribute("data-state", "loaded");
+  const reveal = await sampleSwap(wrapper, "loaded", 1200);
   await expect(wrapper).not.toHaveAttribute("aria-busy");
   await expect(wrapper.locator('[data-slot="skeleton-placeholder"]')).toHaveCount(0);
-  await expect(wrapper.getByText("Ada Lovelace")).toBeVisible();
-  const contentHeight = (await wrapper.boundingBox())!.height;
-  expect(contentHeight).toBeLessThan(loadingHeight - 4);
+  await expect(wrapper.getByText(/^a1ui is a collection/)).toBeVisible();
 
-  // Mid-reveal the content is partly blurred while the placeholder is partly faded.
-  expect(frames.some(({ blur }) => blur > 1 && blur < 7)).toBe(true);
+  // Mid-swap the content is still soft and slightly small while the placeholder blurs away.
+  expect(reveal.some(({ content }) => content && content.blur > 0.5 && content.blur < 3.5)).toBe(true);
+  expect(reveal.some(({ content }) => content && content.scale > 0.99 && content.scale < 1)).toBe(true);
   expect(
-    frames.some(({ placeholder }) => placeholder !== null && placeholder > 0.1 && placeholder < 0.9),
+    reveal.some(({ placeholder }) => placeholder && placeholder.opacity > 0.1 && placeholder.opacity < 0.9),
   ).toBe(true);
-  // The wrapper holds the taller placeholder height, then eases down without jumping.
-  expect(frames[0]!.height).toBeCloseTo(loadingHeight, 0);
-  expect(frames.some(({ height }) => height < loadingHeight - 1 && height > contentHeight + 1)).toBe(true);
-  for (let index = 1; index < frames.length; index++) {
-    expect(frames[index]!.height).toBeLessThanOrEqual(frames[index - 1]!.height + 0.5);
-  }
+  expect(reveal.some(({ placeholder }) => placeholder && placeholder.blur > 0.3)).toBe(true);
+  expect(reveal.at(-1)!.content).toEqual({ opacity: 1, blur: 0, scale: 1 });
+  // The placeholder has a bar for each line of the paragraph, so the wrapper keeps its height.
+  for (const { height } of reveal) expect(Math.abs(height - loadingHeight)).toBeLessThan(1);
+
+  // With nothing pressed the demo reloads: the content stays up briefly, then swaps back.
+  const reload = await sampleSwap(wrapper, "loading", 1200);
+  expect(reload[0]!.content).toEqual({ opacity: 1, blur: 0, scale: 1 });
+  expect(reload[0]!.placeholder).toBeNull();
+  expect(reload.some(({ content }) => content && content.opacity > 0.1 && content.opacity < 0.9)).toBe(true);
+  expect(
+    reload.some(({ placeholder }) => placeholder && placeholder.opacity > 0.1 && placeholder.opacity < 0.9),
+  ).toBe(true);
+  expect(reload.at(-1)!.content).toBeNull();
+  expect(reload.at(-1)!.placeholder).toEqual({ opacity: 1, blur: 0, scale: 1 });
+  for (const { height } of reload) expect(Math.abs(height - loadingHeight)).toBeLessThan(1);
 
   // Pulse fades every placeholder together.
   await page.getByRole("button", { name: /^Animation:/ }).click();
   await page.getByRole("menuitem", { name: "pulse", exact: true }).click();
-  await frame.getByRole("button", { name: "Reload" }).click();
   await expect(frame.locator('[data-slot="skeleton-shimmer"]')).toHaveCount(0);
+  await expect(wrapper).toHaveAttribute("data-state", "loading");
   const opacities = await frame.evaluate(async (root) => {
     const seen = new Set<string>();
     const began = performance.now();
@@ -110,6 +133,35 @@ test("placeholders shimmer as one band, then the content blurs in and the height
   expect(opacities).toBeGreaterThan(3);
 });
 
+test("on a narrow screen the taller content springs the height open, then closed on reload", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 320, height: 700 });
+  const frame = await openDemo(page);
+  const wrapper = frame.locator('[data-slot="skeleton"]');
+  await expect(wrapper).toHaveAttribute("data-state", "loading");
+  const loadingHeight = (await wrapper.boundingBox())!.height;
+
+  // The paragraph wraps onto more lines than the placeholder has, so the wrapper grows without jumping.
+  const reveal = await sampleSwap(wrapper, "loaded", 1200);
+  const contentHeight = reveal.at(-1)!.height;
+  expect(contentHeight).toBeGreaterThan(loadingHeight + 4);
+  expect(reveal[0]!.height).toBeCloseTo(loadingHeight, 0);
+  expect(reveal.some(({ height }) => height > loadingHeight + 1 && height < contentHeight - 1)).toBe(true);
+  for (let index = 1; index < reveal.length; index++) {
+    expect(reveal[index]!.height).toBeGreaterThanOrEqual(reveal[index - 1]!.height - 0.5);
+  }
+
+  const reload = await sampleSwap(wrapper, "loading", 1200);
+  expect(reload[0]!.height).toBeCloseTo(contentHeight, 0);
+  expect(reload.at(-1)!.height).toBeCloseTo(loadingHeight, 0);
+  expect(reload.some(({ height }) => height > loadingHeight + 1 && height < contentHeight - 1)).toBe(true);
+  for (let index = 1; index < reload.length; index++) {
+    expect(reload[index]!.height).toBeLessThanOrEqual(reload[index - 1]!.height + 0.5);
+  }
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+});
+
 test("reduced motion on mobile drops the shimmer and swaps instantly", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.emulateMedia({ reducedMotion: "reduce" });
@@ -122,13 +174,16 @@ test("reduced motion on mobile drops the shimmer and swaps instantly", async ({ 
   );
   await expect(frame.locator('[data-slot="skeleton-shimmer"]')).toHaveCount(0);
 
-  const frames = await sampleReveal(wrapper, frame.getByRole("button", { name: "Finish loading" }), 250);
-  // The first frame can land before React re-renders; after that the content is already sharp.
-  const settled = frames.slice(frames.findIndex(({ placeholder }) => placeholder === null));
-  expect(settled.length).toBeGreaterThan(frames.length - 3);
-  expect(settled.every(({ blur, placeholder }) => blur === 0 && placeholder === null)).toBe(true);
-  expect(new Set(settled.map(({ height }) => height)).size).toBe(1);
-  await expect(wrapper.getByText("Ada Lovelace")).toBeVisible();
+  const frames = await sampleSwap(wrapper, "loaded", 250);
+  // The content is sharp and the placeholder gone from the first frame of the swap.
+  expect(
+    frames.every(
+      ({ content, placeholder }) =>
+        placeholder === null && content?.opacity === 1 && content.blur === 0 && content.scale === 1,
+    ),
+  ).toBe(true);
+  expect(new Set(frames.map(({ height }) => height)).size).toBe(1);
+  await expect(wrapper.getByText(/^a1ui is a collection/)).toBeVisible();
   await expect(wrapper).not.toHaveAttribute("aria-busy");
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });

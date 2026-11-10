@@ -47,9 +47,16 @@ const SPAN = 1000;
 // Longest loop, in seconds. Slower sweeps and pulses drift toward the 0.2 Hz sway that is most
 // likely to cause motion discomfort, so longer cycles are capped here.
 const MAX_CYCLE = 2.5;
-const EASE = [0.22, 1, 0.36, 1] as const;
-const HIDDEN = { opacity: 0, filter: "blur(8px)" };
-const SHOWN = { opacity: 1, filter: "blur(0px)", transitionEnd: { filter: "none" } };
+// The two layers swap on one spring. Content settles in from a slight blur and scale while the
+// placeholder softens out, so the handover reads as one surface coming into focus.
+const CONTENT_HIDDEN = { opacity: 0, scale: 0.99, filter: "blur(4px)" };
+const CONTENT_SHOWN = { opacity: 1, scale: 1, filter: "blur(0px)", transitionEnd: { filter: "none" } };
+const PLACEHOLDER_WAITING = { opacity: 0, filter: "blur(0px)" };
+const PLACEHOLDER_SHOWN = { opacity: 1, filter: "blur(0px)", transitionEnd: { filter: "none" } };
+const PLACEHOLDER_GONE = { opacity: 0, filter: "blur(3px)" };
+const LEAVING = "pointer-events-none absolute inset-x-0 top-0";
+
+type Layer = "placeholder" | "content";
 
 const useIsomorphicLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
@@ -207,7 +214,7 @@ function Shape({
 }
 
 export interface SkeletonProps extends ShapeProps {
-  /** While true, shows the placeholder. When it turns false, the children blur and fade in. */
+  /** While true, the placeholder stands in for the children. When it turns false, the two swap. */
   loading?: boolean;
   /** Placeholder layout shown while loading, such as SkeletonText. Without it, one block covers the children. */
   fallback?: ReactNode;
@@ -215,8 +222,12 @@ export interface SkeletonProps extends ShapeProps {
   children?: ReactNode;
   /** Visually hidden text announced while loading. */
   loadingLabel?: string;
-  /** Reveal time in seconds for the blur, fade, and height change. Zero swaps instantly. */
+  /** Seconds the swap spring takes to settle, for the crossfade and the height change. Zero swaps instantly. */
   duration?: number;
+  /** Seconds to wait before the placeholder appears. A load that finishes sooner never shows it. */
+  delay?: number;
+  /** Shortest time in seconds the placeholder stays up once it has appeared, so it cannot flicker. */
+  minVisible?: number;
 }
 
 export function Skeleton({
@@ -224,7 +235,9 @@ export function Skeleton({
   fallback,
   children,
   loadingLabel = "Loading",
-  duration = 0.5,
+  duration = 0.4,
+  delay = 0.12,
+  minVisible = 0.38,
   animation,
   direction,
   cycle,
@@ -250,6 +263,8 @@ export function Skeleton({
       fallback={fallback}
       loadingLabel={loadingLabel}
       duration={duration}
+      delay={delay}
+      minVisible={minVisible}
       settings={settings}
       className={className}
       style={style}
@@ -259,12 +274,43 @@ export function Skeleton({
   );
 }
 
+function toMilliseconds(seconds: number, fallback: number) {
+  return (Number.isFinite(seconds) ? Math.max(0, seconds) : fallback) * 1000;
+}
+
+// Whether the placeholder should be painted. It waits out `delay` before appearing, so a fast load
+// never flashes it, and once up it stays for at least `minVisible`, so a load that ends just after
+// it appears does not flicker.
+function usePlaceholderTiming(loading: boolean, delay: number, minVisible: number) {
+  const hydrated = useHydrated();
+  const wait = toMilliseconds(delay, 0.12);
+  const hold = toMilliseconds(minVisible, 0.38);
+  // Server-rendered placeholders are already on screen when React hydrates, so they skip the wait.
+  const [visible, setVisible] = useState(() => loading && (!hydrated || wait === 0));
+  const shownAt = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (!visible) shownAt.current = null;
+    else if (shownAt.current === null) shownAt.current = performance.now();
+    if (loading === visible) return;
+    const timer = window.setTimeout(
+      () => setVisible(loading),
+      loading ? wait : Math.max(0, hold - (performance.now() - (shownAt.current ?? 0))),
+    );
+    return () => window.clearTimeout(timer);
+  }, [loading, visible, wait, hold]);
+
+  return visible;
+}
+
 function Reveal({
   loading,
   fallback,
   children,
   loadingLabel,
   duration,
+  delay,
+  minVisible,
   settings,
   className = "",
   style,
@@ -274,6 +320,8 @@ function Reveal({
   children: ReactNode;
   loadingLabel: string;
   duration: number;
+  delay: number;
+  minVisible: number;
   settings: SkeletonSettings;
   className?: string;
   style?: CSSProperties;
@@ -281,31 +329,48 @@ function Reveal({
   const hydrated = useHydrated();
   const prefersReducedMotion = useReducedMotion();
   const reducedMotion = hydrated && prefersReducedMotion === true;
-  const seconds = reducedMotion ? 0 : Number.isFinite(duration) ? Math.max(0, duration) : 0.5;
+  const seconds = reducedMotion ? 0 : Number.isFinite(duration) ? Math.max(0, duration) : 0.4;
+  const transition =
+    seconds === 0 ? { duration: 0 } : { type: "spring" as const, visualDuration: seconds, bounce: 0 };
+  const visible = usePlaceholderTiming(loading, delay, minVisible);
   const overlay = fallback === undefined;
   const container = useRef<HTMLDivElement>(null);
   const content = useRef<HTMLDivElement>(null);
-  const loadingRef = useRef(loading);
-  const loadingHeight = useRef(0);
-  const previous = useRef(loading);
+  const placeholder = useRef<HTMLDivElement>(null);
+  const restHeight = useRef(0);
+  const swapping = useRef(false);
   const heightAnimation = useRef<ReturnType<typeof animate> | null>(null);
-  // The placeholder stays mounted after loading ends until it has faded out.
-  const [placeholderShown, setPlaceholderShown] = useState(loading);
-  if (loading && !placeholderShown) setPlaceholderShown(true);
-  if (!loading && seconds === 0 && placeholderShown) setPlaceholderShown(false);
-  const showPlaceholder = loading || placeholderShown;
-  const showContent = !loading || overlay;
 
-  // Remember the loading height, even across resizes, so the reveal can start from it.
+  // `layer` is the one in the layout; `leaving` is the other, kept mounted until it has faded out.
+  // While a reload waits out its delay the content stays put, so `layer` only changes on a swap.
+  const [swap, setSwap] = useState<{ layer: Layer; leaving: Layer | null }>({
+    layer: loading ? "placeholder" : "content",
+    leaving: null,
+  });
+  const layer: Layer = visible ? "placeholder" : loading ? swap.layer : "content";
+  if (layer !== swap.layer) setSwap({ layer, leaving: seconds > 0 ? swap.layer : null });
+  const leaving = layer === swap.layer ? swap.leaving : null;
+  const previous = useRef(layer);
+  const busy = loading || layer === "placeholder";
+  const showContent = overlay || layer === "content" || leaving === "content";
+  const showPlaceholder = layer === "placeholder" || leaving === "placeholder";
+
+  function settle(done: Layer) {
+    setSwap((current) => (current.leaving === done ? { ...current, leaving: null } : current));
+  }
+
+  // Remember the height at rest, even across resizes, so a swap can start from it.
   useIsomorphicLayoutEffect(() => {
-    loadingRef.current = loading;
-    if (loading && container.current) loadingHeight.current = container.current.offsetHeight;
+    swapping.current = leaving !== null;
+    if (!swapping.current && !heightAnimation.current && container.current) {
+      restHeight.current = container.current.offsetHeight;
+    }
   });
   useEffect(() => {
     const element = container.current;
     if (!element || typeof ResizeObserver !== "function") return;
     const resize = new ResizeObserver(() => {
-      if (loadingRef.current) loadingHeight.current = element.offsetHeight;
+      if (!swapping.current && !heightAnimation.current) restHeight.current = element.offsetHeight;
     });
     resize.observe(element);
     return () => resize.disconnect();
@@ -313,24 +378,26 @@ function Reveal({
 
   useIsomorphicLayoutEffect(() => {
     const element = container.current;
-    const wasLoading = previous.current;
-    previous.current = loading;
-    if (!element || wasLoading === loading) return;
+    const before = previous.current;
+    previous.current = layer;
+    if (!element || before === layer) return;
+    // A swap that interrupts another starts from wherever the height had reached.
+    const from = heightAnimation.current ? element.offsetHeight : restHeight.current;
     heightAnimation.current?.stop();
     heightAnimation.current = null;
     element.style.height = "";
     element.style.overflow = "";
-    if (loading || seconds === 0 || !content.current) return;
-    // Hold the loading height, then ease to the content's own height.
-    const from = loadingHeight.current;
-    const to = content.current.offsetHeight;
+    const incoming = layer === "content" ? content.current : placeholder.current;
+    if (seconds === 0 || overlay || !incoming) return;
+    // Hold the outgoing height, then spring to the incoming layer's own height.
+    const to = incoming.offsetHeight;
     if (Math.abs(from - to) < 1) return;
     element.style.overflow = "hidden";
     element.style.height = `${from}px`;
     const controls = animate(
       element,
       { height: [`${from}px`, `${to}px`] },
-      { duration: seconds, ease: EASE, delay: to < from ? seconds * 0.3 : 0 },
+      { type: "spring", visualDuration: seconds, bounce: 0, delay: to < from ? seconds * 0.3 : 0 },
     );
     heightAnimation.current = controls;
     controls.then(() => {
@@ -338,8 +405,9 @@ function Reveal({
       heightAnimation.current = null;
       element.style.height = "";
       element.style.overflow = "";
+      restHeight.current = element.offsetHeight;
     });
-  }, [loading, seconds]);
+  }, [layer, seconds, overlay]);
   useEffect(() => () => heightAnimation.current?.stop(), []);
 
   return (
@@ -347,42 +415,45 @@ function Reveal({
       <div
         ref={container}
         data-slot="skeleton"
-        data-state={loading ? "loading" : "loaded"}
-        aria-busy={loading || undefined}
+        data-state={busy ? "loading" : "loaded"}
+        aria-busy={busy || undefined}
         className={`relative ${className}`}
         style={style}
       >
-        {loading && <span className="sr-only">{loadingLabel}</span>}
+        {busy && <span className="sr-only">{loadingLabel}</span>}
         {showContent && (
           <motion.div
             ref={content}
             data-slot="skeleton-content"
-            aria-hidden={loading || undefined}
-            inert={loading}
-            // Content that mounts during a reveal starts blurred; content there from the start does not.
-            initial={placeholderShown ? HIDDEN : false}
-            animate={loading ? HIDDEN : SHOWN}
-            transition={{ duration: loading ? 0 : seconds, ease: EASE }}
+            aria-hidden={layer !== "content" || undefined}
+            inert={layer !== "content"}
+            className={`origin-top-left ${!overlay && layer !== "content" ? LEAVING : ""}`}
+            // Content that mounts during a swap starts hidden; content there from the start does not.
+            initial={leaving === "placeholder" ? CONTENT_HIDDEN : false}
+            animate={layer === "content" ? CONTENT_SHOWN : CONTENT_HIDDEN}
+            transition={transition}
+            onAnimationComplete={(target) => {
+              if (target === CONTENT_HIDDEN) settle("content");
+            }}
           >
             {children}
           </motion.div>
         )}
         {showPlaceholder && (
           <motion.div
+            ref={placeholder}
             data-slot="skeleton-placeholder"
             aria-hidden="true"
             className={
-              overlay
-                ? "pointer-events-none absolute inset-0"
-                : loading
-                  ? undefined
-                  : "pointer-events-none absolute inset-x-0 top-0"
+              overlay ? "pointer-events-none absolute inset-0" : layer === "placeholder" ? undefined : LEAVING
             }
-            initial={false}
-            animate={{ opacity: loading ? 1 : 0 }}
-            transition={{ duration: loading ? 0 : seconds, ease: EASE }}
-            onAnimationComplete={() => {
-              if (!loadingRef.current) setPlaceholderShown(false);
+            initial={leaving === "content" ? PLACEHOLDER_WAITING : false}
+            animate={
+              layer !== "placeholder" ? PLACEHOLDER_GONE : visible ? PLACEHOLDER_SHOWN : PLACEHOLDER_WAITING
+            }
+            transition={transition}
+            onAnimationComplete={(target) => {
+              if (target === PLACEHOLDER_GONE) settle("placeholder");
             }}
           >
             {overlay ? <Shape settings={settings} className="size-full" /> : fallback}
