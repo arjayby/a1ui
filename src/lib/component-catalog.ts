@@ -12,7 +12,7 @@ const categorySlugs = [
   { title: "Buttons & Actions", slugs: ["confirm-button", "copy-button", "loading-button", "icon-toggle"] },
   {
     title: "Text Inputs",
-    slugs: ["textarea", "password-input", "validated-input", "otp-input", "tag-input"],
+    slugs: ["password-input", "validated-input", "otp-input", "tag-input"],
   },
   {
     title: "Selection Controls",
