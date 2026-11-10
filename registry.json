@@ -1204,6 +1204,34 @@
       }
     },
     {
+      "name": "swipe-row",
+      "type": "registry:component",
+      "title": "Swipe Row",
+      "description": "A list row that swipes either way to reveal actions, with a full swipe that commits the primary one.",
+      "dependencies": ["motion"],
+      "files": [
+        {
+          "path": "src/registry/components/swipe-row.tsx",
+          "type": "registry:component",
+          "target": "components/animated/swipe-row.tsx"
+        }
+      ],
+      "categories": ["list", "gesture", "interactive", "animation"],
+      "meta": {
+        "a1ui": {
+          "useCases": [
+            "Quick actions on rows of a touch-first list, such as an inbox, a task list, or a queue: delete, pin, archive, or mark as read without opening the row."
+          ],
+          "limitations": [
+            "Horizontal swipes only, and leading always means the left edge, so it does not mirror in right-to-left layouts. Every action is 72 pixels wide. The haptic tick uses navigator.vibrate, which Safari does not support. The row does not collapse its own height after a removing action; the list around it does that."
+          ],
+          "requirements": [
+            "React 19, Tailwind CSS 4, Motion, and theme colors. Give each action a label and an onAction, and put the primary action first. Set removesRow on an action that deletes the row and unmount the row in onAction. Wrap rows in SwipeRowGroup to keep one open at a time. Controlled usage requires updating open in onOpenChange. Reduced motion fades the actions in over the row instead of sliding it."
+          ]
+        }
+      }
+    },
+    {
       "name": "segmented-control",
       "type": "registry:component",
       "title": "Segmented Control",

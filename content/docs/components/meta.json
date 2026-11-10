@@ -43,6 +43,7 @@
     "avatar-group",
     "badge",
     "rolling-number",
-    "kbd"
+    "kbd",
+    "swipe-row"
   ]
 }

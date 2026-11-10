@@ -39,6 +39,7 @@ import { OtpInputPreview } from "@/components/component-demos/otp-input-demo";
 import { ValidatedInputPreview } from "@/components/component-demos/validated-input-demo";
 import { TagInputPreview } from "@/components/component-demos/tag-input-demo";
 import { PasswordInputPreview } from "@/components/component-demos/password-input-demo";
+import { SwipeRowPreview } from "@/components/component-demos/swipe-row-demo";
 import { components } from "@/lib/component-catalog";
 import { collectionStructuredData, componentsGroup, JsonLd, pageMetadata } from "@/lib/seo";
 
@@ -86,6 +87,7 @@ const previews: Record<string, ReactNode> = {
   "validated-input": <ValidatedInputPreview />,
   "tag-input": <TagInputPreview />,
   "password-input": <PasswordInputPreview />,
+  "swipe-row": <SwipeRowPreview />,
 };
 
 export default function ComponentsPage() {
