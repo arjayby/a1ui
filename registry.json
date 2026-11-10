@@ -1204,6 +1204,34 @@
       }
     },
     {
+      "name": "reorder-list",
+      "type": "registry:component",
+      "title": "Reorder List",
+      "description": "A list whose rows lift, follow the pointer, and spring apart to open the gap where the row will land.",
+      "dependencies": ["motion"],
+      "files": [
+        {
+          "path": "src/registry/components/reorder-list.tsx",
+          "type": "registry:component",
+          "target": "components/animated/reorder-list.tsx"
+        }
+      ],
+      "categories": ["list", "drag-and-drop", "interactive", "animation"],
+      "meta": {
+        "a1ui": {
+          "useCases": [
+            "Letting people put a short list in their own order, such as tasks, a queue, playlist tracks, form fields, or navigation items, by dragging or from the keyboard."
+          ],
+          "limitations": [
+            "One vertical list: no grids, horizontal lists, nesting, or dragging between lists. Every row is rendered and measured, so it is not virtualized. A flick does not throw the row further; it lands in the open gap. Rows without a handle start a touch drag after a short hold."
+          ],
+          "requirements": [
+            "React 19, Tailwind CSS 4, Motion, and theme colors. Supply a label and a render function that returns a ReorderListItem; object items need an id or getKey, and getLabel names them for screen readers. Controlled usage requires updating items in onReorder, which fires once per drop. Reduced motion keeps the drag and replaces every other move with a short fade."
+          ]
+        }
+      }
+    },
+    {
       "name": "swipe-row",
       "type": "registry:component",
       "title": "Swipe Row",
