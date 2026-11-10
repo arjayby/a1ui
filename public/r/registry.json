@@ -1485,6 +1485,44 @@
       "docs": "Read http://localhost:3000/docs/components/badge.md for usage, required props, and integration instructions."
     },
     {
+      "name": "rolling-number",
+      "type": "registry:component",
+      "title": "Rolling Number",
+      "description": "A number that rolls digit by digit to each new value, up for an increase and down for a decrease, with Intl formatting and an optional delta chip.",
+      "dependencies": [
+        "motion"
+      ],
+      "files": [
+        {
+          "path": "src/registry/components/rolling-number.tsx",
+          "type": "registry:component",
+          "target": "components/animated/rolling-number.tsx"
+        }
+      ],
+      "categories": [
+        "number",
+        "counter",
+        "data-display",
+        "animation"
+      ],
+      "meta": {
+        "a1ui": {
+          "useCases": [
+            "Live metrics, prices, balances, scores, and counters where a changing value should show which way it moved without shifting the layout."
+          ],
+          "limitations": [
+            "Display only: the caller owns the value. The visible digits cannot be selected; copying across the number copies the formatted text. The delta chip is positioned outside the number's box and does not reserve space. Slots are laid out left to right in the order Intl.NumberFormat returns them."
+          ],
+          "requirements": [
+            "React 19, Tailwind CSS 4, Motion, and theme colors. Pass locale explicitly when rendering on a server so the server and browser format alike. Set announce only for values that change rarely. Reduced motion cross-fades the digits that changed."
+          ],
+          "docsUrl": "http://localhost:3000/docs/components/rolling-number.md",
+          "registryUrl": "http://localhost:3000/r/rolling-number.json"
+        }
+      },
+      "docs": "Read http://localhost:3000/docs/components/rolling-number.md for usage, required props, and integration instructions."
+    },
+    {
       "name": "pagination",
       "type": "registry:component",
       "title": "Pagination",

@@ -35,6 +35,7 @@ import { PopoverDemo } from "@/components/component-demos/popover-demo";
 import { SelectDemo } from "@/components/component-demos/select-demo";
 import { AvatarGroupDemo } from "@/components/component-demos/avatar-group-demo";
 import { BadgeDemo } from "@/components/component-demos/badge-demo";
+import { RollingNumberDemo } from "@/components/component-demos/rolling-number-demo";
 import { PaginationDemo } from "@/components/component-demos/pagination-demo";
 import { KbdDemo } from "@/components/component-demos/kbd-demo";
 import { SkeletonDemo } from "@/components/component-demos/skeleton-demo";
@@ -85,6 +86,7 @@ export function getMDXComponents(components?: MDXComponents) {
     SelectDemo,
     AvatarGroupDemo,
     BadgeDemo,
+    RollingNumberDemo,
     PaginationDemo,
     KbdDemo,
     SkeletonDemo,

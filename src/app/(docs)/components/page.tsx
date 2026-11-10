@@ -26,6 +26,7 @@ import { PopoverPreview } from "@/components/component-demos/popover-demo";
 import { SelectPreview } from "@/components/component-demos/select-demo";
 import { AvatarGroupPreview } from "@/components/component-demos/avatar-group-demo";
 import { BadgePreview } from "@/components/component-demos/badge-demo";
+import { RollingNumberPreview } from "@/components/component-demos/rolling-number-demo";
 import { PaginationPreview } from "@/components/component-demos/pagination-demo";
 import { KbdPreview } from "@/components/component-demos/kbd-demo";
 import { SkeletonPreview } from "@/components/component-demos/skeleton-demo";
@@ -71,6 +72,7 @@ const previews: Record<string, ReactNode> = {
   select: <SelectPreview />,
   "avatar-group": <AvatarGroupPreview />,
   badge: <BadgePreview />,
+  "rolling-number": <RollingNumberPreview />,
   pagination: <PaginationPreview />,
   kbd: <KbdPreview />,
   skeleton: <SkeletonPreview />,

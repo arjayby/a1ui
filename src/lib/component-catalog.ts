@@ -24,7 +24,7 @@ const categorySlugs = [
     slugs: ["dialog", "alert-dialog", "sheet", "popover", "tooltip", "hover-card", "dropdown-menu"],
   },
   { title: "Feedback & Status", slugs: ["toast", "progress", "skeleton"] },
-  { title: "Data Display", slugs: ["badge", "avatar-group", "kbd", "accordion"] },
+  { title: "Data Display", slugs: ["badge", "rolling-number", "avatar-group", "kbd", "accordion"] },
 ] as const;
 
 const categorized = new Set<string>(categorySlugs.flatMap(({ slugs }) => slugs));
