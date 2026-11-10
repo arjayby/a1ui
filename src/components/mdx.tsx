@@ -40,6 +40,7 @@ import { KbdDemo } from "@/components/component-demos/kbd-demo";
 import { SkeletonDemo } from "@/components/component-demos/skeleton-demo";
 import { BreadcrumbDemo } from "@/components/component-demos/breadcrumb-demo";
 import { SliderDemo } from "@/components/component-demos/slider-demo";
+import { SegmentedControlDemo } from "@/components/component-demos/segmented-control-demo";
 import { OtpInputDemo } from "@/components/component-demos/otp-input-demo";
 import { ValidatedInputDemo } from "@/components/component-demos/validated-input-demo";
 import { TagInputDemo } from "@/components/component-demos/tag-input-demo";
@@ -89,6 +90,7 @@ export function getMDXComponents(components?: MDXComponents) {
     SkeletonDemo,
     BreadcrumbDemo,
     SliderDemo,
+    SegmentedControlDemo,
     OtpInputDemo,
     ValidatedInputDemo,
     TagInputDemo,

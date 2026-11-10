@@ -16,7 +16,7 @@ const categorySlugs = [
   },
   {
     title: "Selection Controls",
-    slugs: ["checkbox", "switch", "radio-group", "toggle-group", "slider", "select"],
+    slugs: ["checkbox", "switch", "radio-group", "toggle-group", "segmented-control", "slider", "select"],
   },
   { title: "Navigation", slugs: ["menu", "tabs", "breadcrumb", "pagination"] },
   {

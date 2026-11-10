@@ -1146,6 +1146,34 @@
           ]
         }
       }
+    },
+    {
+      "name": "segmented-control",
+      "type": "registry:component",
+      "title": "Segmented Control",
+      "description": "A single-choice control whose thumb you can drag or throw between options, with labels that invert as it passes through them.",
+      "dependencies": ["motion"],
+      "files": [
+        {
+          "path": "src/registry/components/segmented-control.tsx",
+          "type": "registry:component",
+          "target": "components/animated/segmented-control.tsx"
+        }
+      ],
+      "categories": ["input", "radio", "interactive", "animation"],
+      "meta": {
+        "a1ui": {
+          "useCases": [
+            "Switching between two to five views, modes, or ranges where one is always shown, such as list and board, or day, week and month."
+          ],
+          "limitations": [
+            "Horizontal and single-choice. Every segment is as wide as the widest label, so long or many labels make a wide control. Labels are drawn twice, once in each colour, so keep them to text and icons. The value is chosen on release, not while dragging."
+          ],
+          "requirements": [
+            "React 19, Tailwind CSS 4, Motion, and theme colors. Pass options with unique string values, give the control an aria-label or aria-labelledby, and give icon-only options an aria-label. Controlled usage requires updating value in onValueChange. Reduced motion cross-fades the thumb between options instead of sliding it."
+          ]
+        }
+      }
     }
   ]
 }

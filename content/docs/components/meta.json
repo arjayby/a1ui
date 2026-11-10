@@ -15,6 +15,7 @@
     "---Selection Controls---",
     "checkbox",
     "radio-group",
+    "segmented-control",
     "select",
     "slider",
     "switch",
