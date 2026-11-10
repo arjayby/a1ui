@@ -472,6 +472,33 @@
       }
     },
     {
+      "name": "wheel-picker",
+      "type": "registry:component",
+      "title": "Wheel Picker",
+      "description": "A drum-style picker that scrolls natively and selects the option at its centre, with wheels that sit side by side for times and dates.",
+      "files": [
+        {
+          "path": "src/registry/components/wheel-picker.tsx",
+          "type": "registry:component",
+          "target": "components/animated/wheel-picker.tsx"
+        }
+      ],
+      "categories": ["input", "picker", "form", "interactive", "animation"],
+      "meta": {
+        "a1ui": {
+          "useCases": [
+            "Choosing one value from a short or long ordered list, such as a time, a date, a duration or a quantity, with several wheels side by side."
+          ],
+          "limitations": [
+            "Single selection of string values in a vertical wheel with fixed-height rows; it does not loop. Haptic ticks need the Vibration API, which iOS Safari does not provide. The fade masks suit a plain surface behind the wheel."
+          ],
+          "requirements": [
+            "React 19, Tailwind CSS 4, and theme colors. No animation library. Supply label and options with unique values. Controlled usage requires updating value in onValueChange. Reduced motion flattens the drum and positions the wheel instantly."
+          ]
+        }
+      }
+    },
+    {
       "name": "stepper",
       "type": "registry:component",
       "title": "Stepper",

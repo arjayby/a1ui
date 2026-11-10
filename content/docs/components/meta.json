@@ -18,6 +18,7 @@
     "segmented-control",
     "select",
     "slider",
+    "wheel-picker",
     "stepper",
     "switch",
     "toggle-group",

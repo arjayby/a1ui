@@ -75,6 +75,7 @@ export async function ComponentSource({
     | "dropdown-menu"
     | "context-menu"
     | "slider"
+    | "wheel-picker"
     | "otp-input"
     | "validated-input"
     | "tag-input"
