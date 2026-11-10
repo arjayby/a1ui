@@ -54,6 +54,7 @@ import { TagInputDemo } from "@/components/component-demos/tag-input-demo";
 import { PasswordInputDemo } from "@/components/component-demos/password-input-demo";
 import { SwipeRowDemo } from "@/components/component-demos/swipe-row-demo";
 import { ReorderListDemo } from "@/components/component-demos/reorder-list-demo";
+import { CondensingHeaderDemo } from "@/components/block-demos/condensing-header-demo";
 import { ParticleMenuDemo } from "@/components/block-demos/particle-menu-demo";
 import { TextScrambleDemo } from "@/components/block-demos/text-scramble-demo";
 import { TextBannerDemo } from "@/components/block-demos/text-banner-demo";
@@ -72,6 +73,7 @@ export function getMDXComponents(components?: MDXComponents) {
     AsciiLensDemo,
     BlockSource,
     CommandPaletteDemo,
+    CondensingHeaderDemo,
     ComponentSource,
     Dependencies,
     MenuDemo,

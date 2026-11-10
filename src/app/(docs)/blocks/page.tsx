@@ -11,6 +11,7 @@ import { AsciiTerrainPreview } from "@/components/block-demos/ascii-terrain-demo
 import { AsciiMorphPreview } from "@/components/block-demos/ascii-morph-demo";
 import { AsciiLensPreview } from "@/components/block-demos/ascii-lens-demo";
 import { CommandPalettePreview } from "@/components/block-demos/command-palette-demo";
+import { CondensingHeaderPreview } from "@/components/block-demos/condensing-header-demo";
 import { SectionRailPreview, SpiralTextPreview } from "@/components/block-demos";
 import { ParticleMenuPreview } from "@/components/block-demos/particle-menu-demo";
 import { TextScramblePreview } from "@/components/block-demos/text-scramble-demo";
@@ -36,6 +37,7 @@ const previews: Record<string, ComponentType> = {
   "ascii-lens": AsciiLensPreview,
   "ascii-terrain": AsciiTerrainPreview,
   "section-rail": SectionRailPreview,
+  "condensing-header": CondensingHeaderPreview,
   "spiral-text": SpiralTextPreview,
   "particle-menu": ParticleMenuPreview,
   "command-palette": CommandPalettePreview,

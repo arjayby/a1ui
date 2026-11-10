@@ -300,6 +300,40 @@
       "docs": "Read http://localhost:3000/docs/blocks/section-rail.md for usage, required props, and integration instructions."
     },
     {
+      "name": "condensing-header",
+      "type": "registry:block",
+      "title": "Condensing Header",
+      "description": "A large title that condenses into a translucent bar, linked 1:1 to the scroll position.",
+      "files": [
+        {
+          "path": "src/registry/blocks/condensing-header.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/condensing-header.tsx"
+        }
+      ],
+      "categories": [
+        "navigation",
+        "header",
+        "scroll"
+      ],
+      "meta": {
+        "a1ui": {
+          "useCases": [
+            "A page or panel header with a large title, bar actions, and a search or filter row over scrolling content."
+          ],
+          "limitations": [
+            "The title is a single line of plain text. The header must be the first thing in its scroll container."
+          ],
+          "requirements": [
+            "Render it as a direct child of the scrolling content, with no clipping ancestor in between. Set scroll-padding-top on the scroller to the bar height."
+          ],
+          "docsUrl": "http://localhost:3000/docs/blocks/condensing-header.md",
+          "registryUrl": "http://localhost:3000/r/condensing-header.json"
+        }
+      },
+      "docs": "Read http://localhost:3000/docs/blocks/condensing-header.md for usage, required props, and integration instructions."
+    },
+    {
       "name": "spiral-text",
       "type": "registry:block",
       "title": "Spiral Text",
