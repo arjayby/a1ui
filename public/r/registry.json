@@ -1130,6 +1130,47 @@
       "docs": "Read http://localhost:3000/docs/components/dialog.md for usage, required props, and integration instructions."
     },
     {
+      "name": "sheet",
+      "type": "registry:component",
+      "title": "Sheet",
+      "description": "A draggable sheet with detents that tracks the pointer, throws to the nearest stop, and rubber-bands at its limit, from the bottom, left, or right edge.",
+      "dependencies": [
+        "motion",
+        "@base-ui/react"
+      ],
+      "files": [
+        {
+          "path": "src/registry/components/sheet.tsx",
+          "type": "registry:component",
+          "target": "components/animated/sheet.tsx"
+        }
+      ],
+      "categories": [
+        "sheet",
+        "drawer",
+        "overlay",
+        "modal",
+        "gesture",
+        "animation"
+      ],
+      "meta": {
+        "a1ui": {
+          "useCases": [
+            "Mobile detail views, filters, pickers, and side panels that people drag between sizes or throw away, where the sheet should follow the pointer and keep the page behind in view."
+          ],
+          "limitations": [
+            "Modal only. One popup per Sheet. Detents are fractions of the viewport, not pixel sizes. A scroll that has already started inside the sheet does not turn into a drag; lift and drag again from the top of the content. Wheel and trackpad scrolling never move the sheet. Push back scales one element you nominate, and fixed elements inside it move with it."
+          ],
+          "requirements": [
+            "React 19, Tailwind CSS 4, Motion, Base UI, and theme colors. Give every SheetContent a SheetTitle and put scrolling content in SheetBody. Reduced motion fades the sheet instead of sliding it and turns off push back. Reduced transparency and increased contrast make the surface solid."
+          ],
+          "docsUrl": "http://localhost:3000/docs/components/sheet.md",
+          "registryUrl": "http://localhost:3000/r/sheet.json"
+        }
+      },
+      "docs": "Read http://localhost:3000/docs/components/sheet.md for usage, required props, and integration instructions."
+    },
+    {
       "name": "alert-dialog",
       "type": "registry:component",
       "title": "Alert Dialog",

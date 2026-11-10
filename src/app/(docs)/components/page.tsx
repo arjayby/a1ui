@@ -18,6 +18,7 @@ import { AccordionPreview } from "@/components/component-demos/accordion-demo";
 import { ProgressPreview } from "@/components/component-demos/progress-demo";
 import { DialogPreview } from "@/components/component-demos/dialog-demo";
 import { AlertDialogPreview } from "@/components/component-demos/alert-dialog-demo";
+import { SheetPreview } from "@/components/component-demos/sheet-demo";
 import { ToastPreview } from "@/components/component-demos/toast-demo";
 import { TooltipPreview } from "@/components/component-demos/tooltip-demo";
 import { HoverCardPreview } from "@/components/component-demos/hover-card-demo";
@@ -61,6 +62,7 @@ const previews: Record<string, ReactNode> = {
   progress: <ProgressPreview />,
   dialog: <DialogPreview />,
   "alert-dialog": <AlertDialogPreview />,
+  sheet: <SheetPreview />,
   toast: <ToastPreview />,
   tooltip: <TooltipPreview />,
   "hover-card": <HoverCardPreview />,

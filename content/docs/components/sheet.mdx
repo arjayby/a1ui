@@ -1,0 +1,130 @@
+---
+title: Sheet
+description: A draggable sheet with detents that follows the pointer, throws to the nearest stop, and rubber-bands at its limit.
+---
+
+## Demo
+
+<SheetDemo />
+
+## Installation
+
+<Installation name="sheet" />
+
+## Dependencies
+
+<Dependencies name="sheet" />
+
+## Code
+
+<Tabs items={["Usage", "Source"]}>
+  <Tab value="Usage">
+
+```tsx
+import {
+  Sheet,
+  SheetBody,
+  SheetClose,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/animated/sheet";
+
+export function SheetExample() {
+  return (
+    <Sheet detents={[0.5, 1]}>
+      <SheetTrigger>Show route</SheetTrigger>
+      <SheetContent>
+        <SheetHeader>
+          <SheetTitle>T Third Street</SheetTitle>
+          <SheetDescription>Outbound to Sunnydale.</SheetDescription>
+        </SheetHeader>
+        <SheetBody>{/* Long content scrolls here. */}</SheetBody>
+        <SheetFooter>
+          <SheetClose>Done</SheetClose>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
+  );
+}
+```
+
+  </Tab>
+  <Tab value="Source">
+    <ComponentSource name="sheet" />
+  </Tab>
+</Tabs>
+
+## Behavior
+
+- **Drag.** Press anywhere on the sheet and move. It follows the pointer from the point you grabbed it. A press on a button or link still clicks, because the drag only starts once the pointer has moved a few pixels.
+- **Release.** The sheet rests at the detent nearest to where the throw would coast to, so a short flick can cross a long distance. A throw past the smallest detent dismisses it. The spring continues at the release velocity, and bounces slightly only after a flick.
+- **Limits.** Past the largest detent the sheet resists instead of stopping. With `dismissible={false}` it also resists past the smallest detent.
+- **Interrupting.** Pressing a moving sheet catches it where it is, including on its way out. Dragging from there reopens it.
+- **Scrolling.** Content inside `SheetBody` scrolls normally. A drag moves the sheet only when the content rests at its top, or has nothing left to scroll in that direction. Below the largest detent, dragging the content up grows the sheet first.
+- **Keyboard.** Escape closes. With several detents the handle is a slider: arrow keys, Home and End move between detents, and Enter, Space or a click steps to the next one.
+- **Text fields and custom controls.** A press that starts on an input, a textarea, a select, or any element marked `data-sheet-no-drag` never drags the sheet.
+
+## Push back
+
+`pushBack` scales the page behind as the sheet comes out. Mark the element that wraps your page with `data-sheet-page`, or pass a CSS selector for it. Leave the sheet's own portal outside that element, which is the default.
+
+```tsx
+<body>
+  <div data-sheet-page>{children}</div>
+</body>
+
+<Sheet pushBack>...</Sheet>
+```
+
+## Accessibility
+
+- The sheet is a modal dialog: focus is trapped inside, the page behind is inert, and focus returns to the trigger on close. `SheetTitle` names it and `SheetDescription` describes it.
+- Focus starts on the sheet itself, so a touch keyboard does not open over it. Pass `initialFocus` to start somewhere else.
+- `prefers-reduced-motion` replaces every slide and spring with a short fade and turns off push back. Dragging still follows the pointer.
+- `prefers-reduced-transparency` and `prefers-contrast: more` make the surface solid. Increased contrast also darkens its border and handle.
+
+## API reference
+
+### Sheet
+
+| Prop             | Type                            | Default      | Description                                                                                                         |
+| ---------------- | ------------------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------- |
+| `open`           | `boolean`                       | Uncontrolled | Whether the sheet is open when controlled by the caller.                                                            |
+| `defaultOpen`    | `boolean`                       | `false`      | Whether the sheet starts open when uncontrolled.                                                                    |
+| `onOpenChange`   | `(open: boolean) => void`       | None         | Called when a trigger, close button, Escape, outside press, or drag asks to change the open state.                  |
+| `side`           | `"bottom" \| "left" \| "right"` | `"bottom"`   | The edge the sheet enters from, leaves to, and is dragged toward to dismiss.                                        |
+| `detents`        | `number[]`                      | Fits content | Resting sizes as ascending fractions of the available space, such as `[0.5, 1]`. Without it the sheet fits content. |
+| `detent`         | `number`                        | Uncontrolled | Index of the active detent when controlled by the caller.                                                           |
+| `defaultDetent`  | `number`                        | `0`          | Index of the detent the sheet opens at when uncontrolled.                                                           |
+| `onDetentChange` | `(index: number) => void`       | None         | Called when a drag or the handle moves the sheet to another detent.                                                 |
+| `dismissible`    | `boolean`                       | `true`       | Close on an outside press or a drag toward the edge. Escape and close buttons always close.                         |
+| `pushBack`       | `boolean \| string`             | `false`      | Scale the page behind. `true` targets `[data-sheet-page]`; a string is a CSS selector for the element to scale.     |
+| `children`       | `ReactNode`                     | None         | A `SheetTrigger` and a `SheetContent`. A controlled sheet can leave out the trigger.                                |
+
+### SheetContent
+
+| Prop           | Type        | Default          | Description                                                                                            |
+| -------------- | ----------- | ---------------- | ------------------------------------------------------------------------------------------------------ |
+| `showHandle`   | `boolean`   | `true`           | Shows the grab handle. With several detents it is also the keyboard control that moves between them.   |
+| `handleLabel`  | `string`    | `"Resize sheet"` | Accessible name for the handle when it is a slider.                                                    |
+| `initialFocus` | `RefObject` | The sheet        | A ref to the element focused when the sheet opens.                                                     |
+| `className`    | `string`    | None             | Additional popup classes, such as `max-w-md`. Set `--sheet-gap` to change the space left at full size. |
+| `children`     | `ReactNode` | None             | Sheet contents. Include a `SheetTitle` so the sheet has an accessible name.                            |
+
+### SheetTrigger and SheetClose
+
+| Prop        | Type           | Default | Description                                                                    |
+| ----------- | -------------- | ------- | ------------------------------------------------------------------------------ |
+| `render`    | `ReactElement` | None    | Replaces the default outline button with your own element, such as a `Button`. |
+| `className` | `string`       | None    | Additional classes. With `render`, these are the only classes added.           |
+| `disabled`  | `boolean`      | `false` | Prevents the button from opening or closing the sheet.                         |
+
+### SheetHeader, SheetBody, SheetFooter, SheetTitle, and SheetDescription
+
+| Prop        | Type     | Default | Description                                                                                          |
+| ----------- | -------- | ------- | ---------------------------------------------------------------------------------------------------- |
+| `className` | `string` | None    | Additional classes. `SheetBody` is the scrolling region; the header and footer stay fixed around it. |

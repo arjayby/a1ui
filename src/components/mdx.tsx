@@ -27,6 +27,7 @@ import { AccordionDemo } from "@/components/component-demos/accordion-demo";
 import { ProgressDemo } from "@/components/component-demos/progress-demo";
 import { DialogDemo } from "@/components/component-demos/dialog-demo";
 import { AlertDialogDemo } from "@/components/component-demos/alert-dialog-demo";
+import { SheetDemo } from "@/components/component-demos/sheet-demo";
 import { ToastDemo } from "@/components/component-demos/toast-demo";
 import { TooltipDemo } from "@/components/component-demos/tooltip-demo";
 import { HoverCardDemo } from "@/components/component-demos/hover-card-demo";
@@ -75,6 +76,7 @@ export function getMDXComponents(components?: MDXComponents) {
     ProgressDemo,
     DialogDemo,
     AlertDialogDemo,
+    SheetDemo,
     ToastDemo,
     TooltipDemo,
     HoverCardDemo,

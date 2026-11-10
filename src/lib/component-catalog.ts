@@ -21,7 +21,7 @@ const categorySlugs = [
   { title: "Navigation", slugs: ["menu", "tabs", "breadcrumb", "pagination"] },
   {
     title: "Overlays",
-    slugs: ["dialog", "alert-dialog", "popover", "tooltip", "hover-card", "dropdown-menu"],
+    slugs: ["dialog", "alert-dialog", "sheet", "popover", "tooltip", "hover-card", "dropdown-menu"],
   },
   { title: "Feedback & Status", slugs: ["toast", "progress", "skeleton"] },
   { title: "Data Display", slugs: ["badge", "avatar-group", "kbd", "accordion"] },
