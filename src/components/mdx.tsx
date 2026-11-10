@@ -9,6 +9,7 @@ import { ArcReelDemo } from "@/components/block-demos/arc-reel-demo";
 import { AsciiTerrainDemo } from "@/components/block-demos/ascii-terrain-demo";
 import { AsciiMorphDemo } from "@/components/block-demos/ascii-morph-demo";
 import { AsciiLensDemo } from "@/components/block-demos/ascii-lens-demo";
+import { CommandPaletteDemo } from "@/components/block-demos/command-palette-demo";
 import { AgentInstall, AgentRegistryConfiguration } from "@/components/agent-install";
 import { SectionRailDemo, SpiralTextDemo } from "@/components/block-demos";
 import { BlockSource, ComponentSource, Dependencies, Installation } from "@/components/block-docs";
@@ -67,6 +68,7 @@ export function getMDXComponents(components?: MDXComponents) {
     AsciiMorphDemo,
     AsciiLensDemo,
     BlockSource,
+    CommandPaletteDemo,
     ComponentSource,
     Dependencies,
     MenuDemo,

@@ -9,6 +9,7 @@ import { ArcReelPreview } from "@/components/block-demos/arc-reel-demo";
 import { AsciiTerrainPreview } from "@/components/block-demos/ascii-terrain-demo";
 import { AsciiMorphPreview } from "@/components/block-demos/ascii-morph-demo";
 import { AsciiLensPreview } from "@/components/block-demos/ascii-lens-demo";
+import { CommandPalettePreview } from "@/components/block-demos/command-palette-demo";
 import { SectionRailPreview, SpiralTextPreview } from "@/components/block-demos";
 import { ParticleMenuPreview } from "@/components/block-demos/particle-menu-demo";
 import { TextScramblePreview } from "@/components/block-demos/text-scramble-demo";
@@ -34,6 +35,7 @@ const previews: Record<string, ComponentType> = {
   "section-rail": SectionRailPreview,
   "spiral-text": SpiralTextPreview,
   "particle-menu": ParticleMenuPreview,
+  "command-palette": CommandPalettePreview,
   "arc-reel": ArcReelPreview,
   "text-scramble": TextScramblePreview,
   "text-banner": TextBannerPreview,

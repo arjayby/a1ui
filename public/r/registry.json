@@ -332,6 +332,45 @@
       "docs": "Read http://localhost:3000/docs/blocks/particle-menu.md for usage, required props, and integration instructions."
     },
     {
+      "name": "command-palette",
+      "type": "registry:block",
+      "title": "Command Palette",
+      "description": "A ⌘K command palette that materialises from its trigger, with fuzzy search, a gliding highlight, and nested pages.",
+      "dependencies": [
+        "motion",
+        "@base-ui/react"
+      ],
+      "files": [
+        {
+          "path": "src/registry/blocks/command-palette.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/command-palette.tsx"
+        }
+      ],
+      "categories": [
+        "navigation",
+        "command",
+        "search",
+        "animation"
+      ],
+      "meta": {
+        "a1ui": {
+          "useCases": [
+            "A keyboard-first launcher for navigation and actions, opened from a button or with ⌘K or Ctrl+K."
+          ],
+          "limitations": [
+            "Filters the items it is given in memory; it does not fetch results. Shortcut hints on items are labels and are not bound. One palette should own the ⌘K shortcut per page."
+          ],
+          "requirements": [
+            "React 19.2, Tailwind CSS 4, Motion, Base UI, and theme colors. Give every item a stable id that is unique among its siblings. Reduced motion replaces the scale, blur, and row travel with short fades."
+          ],
+          "docsUrl": "http://localhost:3000/docs/blocks/command-palette.md",
+          "registryUrl": "http://localhost:3000/r/command-palette.json"
+        }
+      },
+      "docs": "Read http://localhost:3000/docs/blocks/command-palette.md for usage, required props, and integration instructions."
+    },
+    {
       "name": "arc-reel",
       "type": "registry:block",
       "title": "Arc Reel",

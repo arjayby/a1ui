@@ -7,6 +7,7 @@ for (const [name, exportedComponent] of [
   ["section-rail", "SectionRail"],
   ["spiral-text", "SpiralText"],
   ["particle-menu", "ParticleMenu"],
+  ["command-palette", "CommandPalette"],
   ["text-scramble", "TextScramble"],
   ["text-banner", "TextBanner"],
   ["shape-flow", "ShapeFlow"],
