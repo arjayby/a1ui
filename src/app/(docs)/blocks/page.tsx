@@ -16,6 +16,7 @@ import { ParticleMenuPreview } from "@/components/block-demos/particle-menu-demo
 import { TextScramblePreview } from "@/components/block-demos/text-scramble-demo";
 import { TextBannerPreview } from "@/components/block-demos/text-banner-demo";
 import { ShapeFlowPreview } from "@/components/block-demos/shape-flow-demo";
+import { TaskStepsPreview } from "@/components/block-demos/task-steps-demo";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription } from "@/components/ui/card";
 import { blocks } from "@/lib/block-catalog";
@@ -42,6 +43,7 @@ const previews: Record<string, ComponentType> = {
   "text-scramble": TextScramblePreview,
   "text-banner": TextBannerPreview,
   "shape-flow": ShapeFlowPreview,
+  "task-steps": TaskStepsPreview,
 };
 
 export default function BlocksPage() {

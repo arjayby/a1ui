@@ -301,6 +301,34 @@
       }
     },
     {
+      "name": "task-steps",
+      "type": "registry:block",
+      "title": "Task Steps",
+      "description": "An ordered list that narrates a long-running job, with status icons that morph in place, a live timer on each step, and logs that open while a step runs.",
+      "dependencies": ["motion"],
+      "files": [
+        {
+          "path": "src/registry/blocks/task-steps.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/task-steps.tsx"
+        }
+      ],
+      "categories": ["feedback", "progress", "status", "animation"],
+      "meta": {
+        "a1ui": {
+          "useCases": [
+            "Builds, deployments, imports, and agent runs where several named steps start, finish, fail, or are skipped over time."
+          ],
+          "limitations": [
+            "Display only: the caller owns each step's status. Measured times start when the block first sees a step running, so pass startedAt and durationMs for a job that began before the block mounted. Log lines are plain strings."
+          ],
+          "requirements": [
+            "React 19, Tailwind CSS 4, Motion, and theme colors including --destructive. Give every step a stable id. Reduced motion cross-fades the icons, stops the spinner, and changes panel heights at once."
+          ]
+        }
+      }
+    },
+    {
       "name": "copy-button",
       "type": "registry:component",
       "title": "Copy Button",

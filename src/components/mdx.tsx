@@ -58,6 +58,7 @@ import { ParticleMenuDemo } from "@/components/block-demos/particle-menu-demo";
 import { TextScrambleDemo } from "@/components/block-demos/text-scramble-demo";
 import { TextBannerDemo } from "@/components/block-demos/text-banner-demo";
 import { ShapeFlowDemo } from "@/components/block-demos/shape-flow-demo";
+import { TaskStepsDemo } from "@/components/block-demos/task-steps-demo";
 
 export function getMDXComponents(components?: MDXComponents) {
   return {
@@ -118,6 +119,7 @@ export function getMDXComponents(components?: MDXComponents) {
     SectionRailDemo,
     ShapeFlowDemo,
     SpiralTextDemo,
+    TaskStepsDemo,
     TextScrambleDemo,
     TextBannerDemo,
     Tab: DocsTab,
