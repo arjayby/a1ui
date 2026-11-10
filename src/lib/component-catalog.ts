@@ -16,15 +16,46 @@ const categorySlugs = [
   },
   {
     title: "Selection Controls",
-    slugs: ["checkbox", "switch", "radio-group", "toggle-group", "segmented-control", "slider", "wheel-picker", "stepper", "select"],
+    slugs: [
+      "checkbox",
+      "switch",
+      "radio-group",
+      "toggle-group",
+      "segmented-control",
+      "slider",
+      "wheel-picker",
+      "stepper",
+      "select",
+    ],
   },
   { title: "Navigation", slugs: ["menu", "tabs", "breadcrumb", "pagination"] },
   {
     title: "Overlays",
-    slugs: ["dialog", "alert-dialog", "sheet", "popover", "tooltip", "hover-card", "dropdown-menu", "context-menu"],
+    slugs: [
+      "dialog",
+      "alert-dialog",
+      "sheet",
+      "popover",
+      "tooltip",
+      "hover-card",
+      "dropdown-menu",
+      "context-menu",
+    ],
   },
   { title: "Feedback & Status", slugs: ["toast", "progress", "skeleton"] },
-  { title: "Data Display", slugs: ["badge", "rolling-number", "avatar-group", "lightbox", "kbd", "accordion", "reorder-list", "swipe-row"] },
+  {
+    title: "Data Display",
+    slugs: [
+      "badge",
+      "rolling-number",
+      "avatar-group",
+      "lightbox",
+      "kbd",
+      "accordion",
+      "reorder-list",
+      "swipe-row",
+    ],
+  },
 ] as const;
 
 const categorized = new Set<string>(categorySlugs.flatMap(({ slugs }) => slugs));

@@ -838,6 +838,42 @@
       "docs": "Read http://localhost:3000/docs/components/slider.md for usage, required props, and integration instructions."
     },
     {
+      "name": "wheel-picker",
+      "type": "registry:component",
+      "title": "Wheel Picker",
+      "description": "A drum-style picker that scrolls natively and selects the option at its centre, with wheels that sit side by side for times and dates.",
+      "files": [
+        {
+          "path": "src/registry/components/wheel-picker.tsx",
+          "type": "registry:component",
+          "target": "components/animated/wheel-picker.tsx"
+        }
+      ],
+      "categories": [
+        "input",
+        "picker",
+        "form",
+        "interactive",
+        "animation"
+      ],
+      "meta": {
+        "a1ui": {
+          "useCases": [
+            "Choosing one value from a short or long ordered list, such as a time, a date, a duration or a quantity, with several wheels side by side."
+          ],
+          "limitations": [
+            "Single selection of string values in a vertical wheel with fixed-height rows; it does not loop. Haptic ticks need the Vibration API, which iOS Safari does not provide. The fade masks suit a plain surface behind the wheel."
+          ],
+          "requirements": [
+            "React 19, Tailwind CSS 4, and theme colors. No animation library. Supply label and options with unique values. Controlled usage requires updating value in onValueChange. Reduced motion flattens the drum and positions the wheel instantly."
+          ],
+          "docsUrl": "http://localhost:3000/docs/components/wheel-picker.md",
+          "registryUrl": "http://localhost:3000/r/wheel-picker.json"
+        }
+      },
+      "docs": "Read http://localhost:3000/docs/components/wheel-picker.md for usage, required props, and integration instructions."
+    },
+    {
       "name": "stepper",
       "type": "registry:component",
       "title": "Stepper",
@@ -1944,6 +1980,82 @@
         }
       },
       "docs": "Read http://localhost:3000/docs/components/breadcrumb.md for usage, required props, and integration instructions."
+    },
+    {
+      "name": "reorder-list",
+      "type": "registry:component",
+      "title": "Reorder List",
+      "description": "A list whose rows lift, follow the pointer, and spring apart to open the gap where the row will land.",
+      "dependencies": [
+        "motion"
+      ],
+      "files": [
+        {
+          "path": "src/registry/components/reorder-list.tsx",
+          "type": "registry:component",
+          "target": "components/animated/reorder-list.tsx"
+        }
+      ],
+      "categories": [
+        "list",
+        "drag-and-drop",
+        "interactive",
+        "animation"
+      ],
+      "meta": {
+        "a1ui": {
+          "useCases": [
+            "Letting people put a short list in their own order, such as tasks, a queue, playlist tracks, form fields, or navigation items, by dragging or from the keyboard."
+          ],
+          "limitations": [
+            "One vertical list: no grids, horizontal lists, nesting, or dragging between lists. Every row is rendered and measured, so it is not virtualized. A flick does not throw the row further; it lands in the open gap. Rows without a handle start a touch drag after a short hold."
+          ],
+          "requirements": [
+            "React 19, Tailwind CSS 4, Motion, and theme colors. Supply a label and a render function that returns a ReorderListItem; object items need an id or getKey, and getLabel names them for screen readers. Controlled usage requires updating items in onReorder, which fires once per drop. Reduced motion keeps the drag and replaces every other move with a short fade."
+          ],
+          "docsUrl": "http://localhost:3000/docs/components/reorder-list.md",
+          "registryUrl": "http://localhost:3000/r/reorder-list.json"
+        }
+      },
+      "docs": "Read http://localhost:3000/docs/components/reorder-list.md for usage, required props, and integration instructions."
+    },
+    {
+      "name": "swipe-row",
+      "type": "registry:component",
+      "title": "Swipe Row",
+      "description": "A list row that swipes either way to reveal actions, with a full swipe that commits the primary one.",
+      "dependencies": [
+        "motion"
+      ],
+      "files": [
+        {
+          "path": "src/registry/components/swipe-row.tsx",
+          "type": "registry:component",
+          "target": "components/animated/swipe-row.tsx"
+        }
+      ],
+      "categories": [
+        "list",
+        "gesture",
+        "interactive",
+        "animation"
+      ],
+      "meta": {
+        "a1ui": {
+          "useCases": [
+            "Quick actions on rows of a touch-first list, such as an inbox, a task list, or a queue: delete, pin, archive, or mark as read without opening the row."
+          ],
+          "limitations": [
+            "Horizontal swipes only, and leading always means the left edge, so it does not mirror in right-to-left layouts. Every action is 72 pixels wide. The haptic tick uses navigator.vibrate, which Safari does not support. The row does not collapse its own height after a removing action; the list around it does that."
+          ],
+          "requirements": [
+            "React 19, Tailwind CSS 4, Motion, and theme colors. Give each action a label and an onAction, and put the primary action first. Set removesRow on an action that deletes the row and unmount the row in onAction. Wrap rows in SwipeRowGroup to keep one open at a time. Controlled usage requires updating open in onOpenChange. Reduced motion fades the actions in over the row instead of sliding it."
+          ],
+          "docsUrl": "http://localhost:3000/docs/components/swipe-row.md",
+          "registryUrl": "http://localhost:3000/r/swipe-row.json"
+        }
+      },
+      "docs": "Read http://localhost:3000/docs/components/swipe-row.md for usage, required props, and integration instructions."
     },
     {
       "name": "segmented-control",
