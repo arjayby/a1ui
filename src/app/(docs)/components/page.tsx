@@ -26,6 +26,7 @@ import { HoverCardPreview } from "@/components/component-demos/hover-card-demo";
 import { PopoverPreview } from "@/components/component-demos/popover-demo";
 import { SelectPreview } from "@/components/component-demos/select-demo";
 import { AvatarGroupPreview } from "@/components/component-demos/avatar-group-demo";
+import { LightboxPreview } from "@/components/component-demos/lightbox-demo";
 import { BadgePreview } from "@/components/component-demos/badge-demo";
 import { RollingNumberPreview } from "@/components/component-demos/rolling-number-demo";
 import { PaginationPreview } from "@/components/component-demos/pagination-demo";
@@ -77,6 +78,7 @@ const previews: Record<string, ReactNode> = {
   popover: <PopoverPreview />,
   select: <SelectPreview />,
   "avatar-group": <AvatarGroupPreview />,
+  lightbox: <LightboxPreview />,
   badge: <BadgePreview />,
   "rolling-number": <RollingNumberPreview />,
   pagination: <PaginationPreview />,

@@ -1091,6 +1091,34 @@
       }
     },
     {
+      "name": "lightbox",
+      "type": "registry:component",
+      "title": "Lightbox",
+      "description": "An image viewer whose thumbnail grows to fill the screen and returns to the same thumbnail, with swipe paging, pinch zoom, and drag to dismiss.",
+      "dependencies": ["motion", "@base-ui/react"],
+      "files": [
+        {
+          "path": "src/registry/components/lightbox.tsx",
+          "type": "registry:component",
+          "target": "components/animated/lightbox.tsx"
+        }
+      ],
+      "categories": ["lightbox", "image", "gallery", "overlay", "modal", "animation", "interactive"],
+      "meta": {
+        "a1ui": {
+          "useCases": [
+            "Opening photos, screenshots, or product shots from a grid or an article into a full-screen view that people can swipe through, zoom, and flick away."
+          ],
+          "limitations": [
+            "Images only, no video or embeds. Renders the current image and its two neighbours, so very long galleries page one image at a time. Thumbnails are assumed to crop with object-fit cover around their centre. Arrow keys follow left-to-right order."
+          ],
+          "requirements": [
+            "React 19.2, Tailwind CSS 4, Motion, Base UI, and theme colors. Give every image alt text, and width and height when you know them. Controlled usage requires updating open and index in their change handlers. Reduced motion cross-fades in place instead of travelling, paging, or springing."
+          ]
+        }
+      }
+    },
+    {
       "name": "badge",
       "type": "registry:component",
       "title": "Badge",

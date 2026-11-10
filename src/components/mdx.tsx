@@ -35,6 +35,7 @@ import { HoverCardDemo } from "@/components/component-demos/hover-card-demo";
 import { PopoverDemo } from "@/components/component-demos/popover-demo";
 import { SelectDemo } from "@/components/component-demos/select-demo";
 import { AvatarGroupDemo } from "@/components/component-demos/avatar-group-demo";
+import { LightboxDemo } from "@/components/component-demos/lightbox-demo";
 import { BadgeDemo } from "@/components/component-demos/badge-demo";
 import { RollingNumberDemo } from "@/components/component-demos/rolling-number-demo";
 import { PaginationDemo } from "@/components/component-demos/pagination-demo";
@@ -91,6 +92,7 @@ export function getMDXComponents(components?: MDXComponents) {
     PopoverDemo,
     SelectDemo,
     AvatarGroupDemo,
+    LightboxDemo,
     BadgeDemo,
     RollingNumberDemo,
     PaginationDemo,
