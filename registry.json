@@ -387,6 +387,34 @@
       }
     },
     {
+      "name": "context-menu",
+      "type": "registry:component",
+      "title": "Context Menu",
+      "description": "A right-click menu that grows out of the pointer, with checkbox and radio items, submenus, and a traveling highlight.",
+      "dependencies": ["motion", "@base-ui/react"],
+      "files": [
+        {
+          "path": "src/registry/components/context-menu.tsx",
+          "type": "registry:component",
+          "target": "components/animated/context-menu.tsx"
+        }
+      ],
+      "categories": ["menu", "context-menu", "overlay", "animation"],
+      "meta": {
+        "a1ui": {
+          "useCases": [
+            "Actions for the thing under the pointer: files, rows, canvas objects, and editor selections."
+          ],
+          "limitations": [
+            "A keyboard open hangs below the focused element instead of the pointer. The long press is touch only and takes half a second. Labels must sit inside a group."
+          ],
+          "requirements": [
+            "React 19, Tailwind CSS 4, Motion for React, Base UI, and theme colors. Give the trigger tabIndex={0} when nothing inside it can take focus. Reduced motion fades without scaling."
+          ]
+        }
+      }
+    },
+    {
       "name": "icon-toggle",
       "type": "registry:component",
       "title": "Icon Toggle",

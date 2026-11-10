@@ -6,6 +6,7 @@ import type { ReactNode } from "react";
 import { Card, CardContent, CardDescription } from "@/components/ui/card";
 import { MenuPreview } from "@/components/component-demos/menu-demo";
 import { DropdownMenuPreview } from "@/components/component-demos/dropdown-menu-demo";
+import { ContextMenuPreview } from "@/components/component-demos/context-menu-demo";
 import { ConfirmButtonPreview } from "@/components/component-demos/confirm-button-demo";
 import { CopyButton } from "@/registry/components/copy-button";
 import { IconToggle } from "@/registry/components/icon-toggle";
@@ -54,6 +55,7 @@ export const metadata: Metadata = pageMetadata({
 
 const previews: Record<string, ReactNode> = {
   "dropdown-menu": <DropdownMenuPreview />,
+  "context-menu": <ContextMenuPreview />,
   menu: <MenuPreview />,
   "confirm-button": <ConfirmButtonPreview />,
   "copy-button": <CopyButton value="hello@a1ui.dev" />,

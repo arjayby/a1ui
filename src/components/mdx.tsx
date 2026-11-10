@@ -14,6 +14,7 @@ import { SectionRailDemo, SpiralTextDemo } from "@/components/block-demos";
 import { BlockSource, ComponentSource, Dependencies, Installation } from "@/components/block-docs";
 import { MenuDemo } from "@/components/component-demos/menu-demo";
 import { DropdownMenuDemo } from "@/components/component-demos/dropdown-menu-demo";
+import { ContextMenuDemo } from "@/components/component-demos/context-menu-demo";
 import { ConfirmButtonDemo } from "@/components/component-demos/confirm-button-demo";
 import { CopyButtonDemo } from "@/components/component-demos/copy-button-demo";
 import { LoadingButtonDemo } from "@/components/component-demos/loading-button-demo";
@@ -68,6 +69,7 @@ export function getMDXComponents(components?: MDXComponents) {
     Dependencies,
     MenuDemo,
     DropdownMenuDemo,
+    ContextMenuDemo,
     ConfirmButtonDemo,
     CopyButtonDemo,
     LoadingButtonDemo,

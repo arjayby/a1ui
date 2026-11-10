@@ -73,6 +73,7 @@ export async function ComponentSource({
     | "confirm-button"
     | "menu"
     | "dropdown-menu"
+    | "context-menu"
     | "slider"
     | "otp-input"
     | "validated-input"
