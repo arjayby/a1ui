@@ -34,6 +34,7 @@ import { BreadcrumbPreview } from "@/components/component-demos/breadcrumb-demo"
 import { LoadingButtonPreview } from "@/components/component-demos/loading-button-demo";
 import { SliderPreview } from "@/components/component-demos/slider-demo";
 import { SegmentedControlPreview } from "@/components/component-demos/segmented-control-demo";
+import { StepperPreview } from "@/components/component-demos/stepper-demo";
 import { OtpInputPreview } from "@/components/component-demos/otp-input-demo";
 import { ValidatedInputPreview } from "@/components/component-demos/validated-input-demo";
 import { TagInputPreview } from "@/components/component-demos/tag-input-demo";
@@ -80,6 +81,7 @@ const previews: Record<string, ReactNode> = {
   "loading-button": <LoadingButtonPreview />,
   slider: <SliderPreview />,
   "segmented-control": <SegmentedControlPreview />,
+  stepper: <StepperPreview />,
   "otp-input": <OtpInputPreview />,
   "validated-input": <ValidatedInputPreview />,
   "tag-input": <TagInputPreview />,
