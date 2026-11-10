@@ -4,6 +4,34 @@
   "homepage": "http://localhost:3000",
   "items": [
     {
+      "name": "activity-pill",
+      "type": "registry:block",
+      "title": "Activity Pill",
+      "description": "A floating pill for the one thing the system is doing, which morphs from running to progress to done and expands for detail and actions.",
+      "dependencies": ["motion"],
+      "files": [
+        {
+          "path": "src/registry/blocks/activity-pill.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/activity-pill.tsx"
+        }
+      ],
+      "categories": ["feedback", "status", "progress", "animation"],
+      "meta": {
+        "a1ui": {
+          "useCases": [
+            "Showing one long-running job, such as a deploy, an upload, or an export, from start to success or failure."
+          ],
+          "limitations": [
+            "Shows one activity at a time; a new one replaces the last. It is not a queue or a notification stack, and it does not dismiss by swipe."
+          ],
+          "requirements": [
+            "React 19, Tailwind CSS 4, Motion, and theme colors including popover, primary, muted, and destructive. Render one pill near the root and drive it with useActivity or the activity prop. Reduced motion swaps size and content with a cross-fade."
+          ]
+        }
+      }
+    },
+    {
       "name": "ascii-morph",
       "type": "registry:block",
       "title": "ASCII Morph",

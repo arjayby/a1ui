@@ -1,0 +1,112 @@
+# Activity Pill
+
+A floating pill for the one thing the system is doing, which morphs from running to progress to done and expands for detail and actions.
+
+See [agent setup instructions](http://localhost:3000/llms.txt) before installation. Import paths in examples assume the @/components/blocks path; adapt them to the target project's components.json.
+
+## Demo
+
+[Interactive preview](http://localhost:3000/blocks/activity-pill)
+
+## Installation
+
+Choose the command for the target project's package manager. Run it from that project's directory.
+
+```text
+npm: npx shadcn@latest add http://localhost:3000/r/activity-pill.json --yes
+pnpm: pnpm dlx shadcn@latest add http://localhost:3000/r/activity-pill.json --yes
+yarn: yarn dlx shadcn@latest add http://localhost:3000/r/activity-pill.json --yes
+bun: bunx --bun shadcn@latest add http://localhost:3000/r/activity-pill.json --yes
+```
+
+## Dependencies
+
+- `motion`
+
+## Code
+
+
+### Usage
+
+```tsx
+"use client";
+
+import { ActivityPill, useActivity } from "@/components/blocks/activity-pill";
+
+export function Uploader() {
+  const { activity, start, update, succeed, fail, clear } = useActivity();
+
+  async function upload(file: File) {
+    const id = start({ title: "Uploading", detail: file.name });
+    try {
+      await send(file, (percent) => update({ id, value: percent }));
+      succeed({ id, title: "Uploaded" });
+    } catch {
+      fail({ id, title: "Upload failed", detail: "Check your connection and try again." });
+    }
+  }
+
+  return (
+    <>
+      <input type="file" onChange={(event) => upload(event.target.files![0])} />
+      <ActivityPill activity={activity} onDismiss={clear} onCancel={clear} />
+    </>
+  );
+}
+```
+
+
+### Source
+[Complete source and dependencies](http://localhost:3000/r/activity-pill.json). Each file's content is embedded in the registry JSON.
+
+
+
+## API reference
+
+Render one pill near the root of the app. It is hidden while `activity` is `null`, enters from the edge it is anchored to, and leaves the same way. Press it, or focus it and press Enter, to expand it; press outside or press Escape to collapse it. A success leaves after `successDuration`, and the clock waits while the pointer or keyboard focus is on the pill. An error stays until it is dismissed or retried.
+
+The shell changes size on one spring while the content cross-fades, and a change that arrives mid-morph retargets the spring from the live size. With reduced motion, the size changes at once and the content cross-fades.
+
+### ActivityPill
+
+| Prop              | Type                                             | Default        | Description                                                                               |
+| ----------------- | ------------------------------------------------ | -------------- | ----------------------------------------------------------------------------------------- |
+| `activity`        | `Activity \| null`                               | Required       | The activity to show. `null` hides the pill.                                              |
+| `position`        | `ActivityPillPosition`                           | `"top-center"` | `top-left`, `top-center`, `top-right`, `bottom-left`, `bottom-center`, or `bottom-right`. |
+| `contained`       | `boolean`                                        | `false`        | Positions the pill inside the nearest positioned ancestor instead of the window.          |
+| `successDuration` | `number`                                         | `2500`         | Milliseconds a success stays before it leaves. `0` keeps it until dismissed.              |
+| `onCancel`        | `(activity) => void`                             | None           | Adds a Cancel button while the activity is running.                                       |
+| `onRetry`         | `(activity) => void`                             | None           | Adds a Retry button after an error.                                                       |
+| `onView`          | `(activity) => void`                             | None           | Adds a View button in every state.                                                        |
+| `onDismiss`       | `(activity) => void`                             | None           | Called when a success has left on its own, or when the person presses Dismiss.            |
+| `labels`          | `{ cancel?, retry?, view?, dismiss?, details? }` | English        | Replaces the `cancel`, `retry`, `view`, `dismiss`, and `details` text.                    |
+| `className`       | `string`                                         | None           | Additional classes on the positioned wrapper.                                             |
+
+### Activity
+
+| Field    | Type                                              | Description                                                               |
+| -------- | ------------------------------------------------- | ------------------------------------------------------------------------- |
+| `status` | `"running" \| "progress" \| "success" \| "error"` | `running` is indeterminate; `progress` reads `value`.                     |
+| `title`  | `string`                                          | The short label in the pill. It is also what screen readers announce.     |
+| `detail` | `string`                                          | A longer line shown when the pill is expanded.                            |
+| `value`  | `number`                                          | Progress from 0 to 100.                                                   |
+| `id`     | `string`                                          | Identifies one run. A new id shows the pill again after it was dismissed. |
+
+### useActivity
+
+`useActivity()` holds one activity and returns it with the methods below. `createActivityController()` returns the same methods for use outside React; pass it to `useActivity(controller)` to read it in a component.
+
+| Member     | Type                            | Description                                                                             |
+| ---------- | ------------------------------- | --------------------------------------------------------------------------------------- |
+| `activity` | `Activity \| null`              | The current activity. Pass it to `ActivityPill`.                                        |
+| `start`    | `(activity \| title) => string` | Replaces whatever is showing and returns the new id. A `value` starts it as progress.   |
+| `update`   | `(patch) => void`               | Changes `title`, `detail`, or `value` in place. `value: null` returns to indeterminate. |
+| `succeed`  | `(patch \| title) => void`      | Marks the activity as done. With no activity, a title shows a success on its own.       |
+| `fail`     | `(patch \| title) => void`      | Marks the activity as failed.                                                           |
+| `clear`    | `() => void`                    | Removes the activity, which hides the pill.                                             |
+
+Pass the `id` from `start` in a patch to ignore a late result from an activity that has since been replaced.
+
+### Accessibility
+
+The pill is a button with `aria-expanded`. State changes are announced through a polite `role="status"` region, and errors through an assertive `role="alert"` region with their detail. A running activity exposes a `progressbar`, with `aria-valuenow` once it has a value. The surface turns solid under `prefers-reduced-transparency` and `prefers-contrast: more`.

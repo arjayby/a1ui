@@ -5,6 +5,7 @@ import type { ComponentType } from "react";
 
 import { AgentInstall } from "@/components/agent-install";
 
+import { ActivityPillPreview } from "@/components/block-demos/activity-pill-demo";
 import { ArcReelPreview } from "@/components/block-demos/arc-reel-demo";
 import { AsciiTerrainPreview } from "@/components/block-demos/ascii-terrain-demo";
 import { AsciiMorphPreview } from "@/components/block-demos/ascii-morph-demo";
@@ -29,6 +30,7 @@ export const metadata: Metadata = pageMetadata({
 });
 
 const previews: Record<string, ComponentType> = {
+  "activity-pill": ActivityPillPreview,
   "ascii-morph": AsciiMorphPreview,
   "ascii-lens": AsciiLensPreview,
   "ascii-terrain": AsciiTerrainPreview,

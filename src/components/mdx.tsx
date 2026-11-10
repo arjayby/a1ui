@@ -5,6 +5,7 @@ import type { ComponentProps } from "react";
 import { DocsTab, DocsTabs } from "@/components/docs-tabs";
 import { Card } from "@/components/ui/card";
 
+import { ActivityPillDemo } from "@/components/block-demos/activity-pill-demo";
 import { ArcReelDemo } from "@/components/block-demos/arc-reel-demo";
 import { AsciiTerrainDemo } from "@/components/block-demos/ascii-terrain-demo";
 import { AsciiMorphDemo } from "@/components/block-demos/ascii-morph-demo";
@@ -63,6 +64,7 @@ export function getMDXComponents(components?: MDXComponents) {
     ...defaultMdxComponents,
     AgentInstall,
     AgentRegistryConfiguration,
+    ActivityPillDemo,
     ArcReelDemo,
     AsciiTerrainDemo,
     AsciiMorphDemo,

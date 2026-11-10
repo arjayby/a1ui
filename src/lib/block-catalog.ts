@@ -28,6 +28,7 @@ const categorySlugs = [
   { title: "ASCII", slugs: ["ascii-morph", "ascii-lens", "ascii-terrain"] },
   { title: "Text Effects", slugs: ["text-scramble", "text-banner", "spiral-text", "shape-flow"] },
   { title: "Navigation", slugs: ["section-rail", "particle-menu", "command-palette"] },
+  { title: "Status", slugs: ["activity-pill"] },
   { title: "Carousels", slugs: ["arc-reel"] },
 ] as const;
 
