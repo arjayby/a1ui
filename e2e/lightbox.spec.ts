@@ -150,10 +150,8 @@ test("grows out of the thumbnail, traps focus, and returns to the thumbnail it e
   await expect(page.locator(thumbnail).first()).toHaveCSS("opacity", "0");
 
   const dialog = page.getByRole("dialog", { name: "Image viewer" });
-  await expect(dialog.getByRole("img")).toHaveAttribute("alt", "Blue ridges under a pale morning sun");
-  await expect(dialog.locator('[data-slot="lightbox-caption"]')).toHaveText(
-    "First light over the northern ridge",
-  );
+  await expect(dialog.getByRole("img")).toHaveAttribute("alt", "A four-petal chrome flower on a violet haze");
+  await expect(dialog.locator('[data-slot="lightbox-caption"]')).toHaveText("Chrome bloom");
   // Tab at a human pace: Base UI's focus guards hand focus back asynchronously.
   for (let step = 0; step < 5; step++) {
     await page.keyboard.press("Tab");
@@ -165,7 +163,10 @@ test("grows out of the thumbnail, traps focus, and returns to the thumbnail it e
   await page.keyboard.press("ArrowRight");
   await page.keyboard.press("ArrowRight");
   await expect(dialog.locator(counter)).toHaveText("3 / 6");
-  await expect(dialog.getByRole("img")).toHaveAttribute("alt", "Rose-coloured dunes below a white moon");
+  await expect(dialog.getByRole("img")).toHaveAttribute(
+    "alt",
+    "A red fox in profile, its fur streaking into motion blur",
+  );
   await settled(page);
   await expect(page.locator(thumbnail).nth(2)).toHaveAttribute("data-covered", "true");
   await expect(page.locator(thumbnail).first()).not.toHaveAttribute("data-covered");
@@ -238,6 +239,37 @@ test("reverses from the live position when interrupted, and lands on a thumbnail
   const last = closing[closing.length - 1]!;
   expect(near(centre(last.visible).y, centre(moved).y, 6)).toBe(true);
   expect(near(centre(last.visible).x, centre(moved).x, 6)).toBe(true);
+});
+
+test("opening another thumbnail mid-close grows it in place without paging across", async ({ page }) => {
+  await open(page);
+  await page.keyboard.press("Escape");
+  // Still flying home when the next thumbnail is clicked.
+  await expect.poll(async () => ((await read(page))?.box.width ?? 0) < 200).toBe(true);
+  await expect(page.locator('[data-slot="lightbox"]')).toHaveCount(1);
+
+  const target = await box(page, thumbnail, 3);
+  const frames = await record(page, 700, () =>
+    page.evaluate(() => {
+      document.querySelectorAll<HTMLElement>('.demo-frame [data-slot="lightbox-thumbnail"]')[3]!.click();
+    }),
+  );
+  const shown = frames.filter((frame) => frame !== null);
+  // The first frame sits on the clicked thumbnail, and the image only ever grows from there.
+  expect(near(centre(shown[0]!.visible).x, centre(target).x, 6)).toBe(true);
+  expect(near(centre(shown[0]!.visible).y, centre(target).y, 6)).toBe(true);
+  // Paging across would carry it sideways past the middle of the screen first.
+  const middle = page.viewportSize()!.width / 2;
+  const [low, high] = [Math.min(centre(target).x, middle) - 6, Math.max(centre(target).x, middle) + 6];
+  for (let frame = 1; frame < shown.length; frame++) {
+    expect(shown[frame]!.box.width).toBeGreaterThanOrEqual(shown[frame - 1]!.box.width - 0.5);
+    const x = centre(shown[frame]!.visible).x;
+    expect(x >= low && x <= high).toBe(true);
+  }
+  const dialog = page.getByRole("dialog", { name: "Image viewer" });
+  await expect(dialog.locator(counter)).toHaveText("4 / 6");
+  const rest = await settled(page);
+  expect(near(centre(rest.box).x, middle, 1)).toBe(true);
 });
 
 test("follows a dismiss drag 1:1, springs back from a short one, and closes on a long or fast one", async ({
@@ -349,7 +381,10 @@ test("pages by swipe with momentum, rubber-bands at the ends, and pages from the
   // A short flick pages on momentum alone.
   await flick(page, start, { x: start.x - 120, y: start.y });
   await expect(dialog.locator(counter)).toHaveText("2 / 6");
-  await expect(dialog.getByRole("img")).toHaveAttribute("alt", "Tall pine-green hills at dusk");
+  await expect(dialog.getByRole("img")).toHaveAttribute(
+    "alt",
+    "Folds of iridescent film shifting from pink to green",
+  );
   await expect.poll(async () => Math.round(await trackX())).toBe(-(viewport.width + 24));
 
   // A slow drag past half way pages too, and the buttons step back.
@@ -399,9 +434,9 @@ test("zooms on the pointer by double-click and Ctrl+wheel, and pans within the i
   // Zoomed, a drag pans 1:1 in any direction and neither pages nor dismisses.
   await page.mouse.move(point.x, point.y);
   await page.mouse.down();
-  await page.mouse.move(point.x + 60, point.y + 40, { steps: 5 });
+  await page.mouse.move(point.x - 60, point.y + 40, { steps: 5 });
   const panned = (await read(page))!;
-  expect(near(panned.box.x - zoomed.box.x, 60, 1)).toBe(true);
+  expect(near(panned.box.x - zoomed.box.x, -60, 1)).toBe(true);
   expect(near(panned.box.y - zoomed.box.y, 40, 1)).toBe(true);
   expect(panned.scrim).toBe(1);
   // Past the image's edge the pan resists, then springs back to the edge on release.
@@ -526,7 +561,10 @@ test("cross-fades in place with reduced motion, and pinches and swipes by touch"
   await page.waitForTimeout(160);
   await touch("touchEnd", []);
   await expect(dialog.locator(counter)).toHaveText("2 / 6");
-  await expect(dialog.getByRole("img")).toHaveAttribute("alt", "Tall pine-green hills at dusk");
+  await expect(dialog.getByRole("img")).toHaveAttribute(
+    "alt",
+    "Folds of iridescent film shifting from pink to green",
+  );
   await expect(page.locator('[data-slot="lightbox-slide"]:not([aria-hidden])')).toHaveCSS("opacity", "1");
 
   // Dragging down fades the viewer where it is, and a long drag closes it.

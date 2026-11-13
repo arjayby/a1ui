@@ -523,7 +523,28 @@ function LightboxViewer({
 
   // Open, close, and every release of a dismiss drag. Each animation starts from the value on
   // screen, so reversing mid-flight turns around from where the image is.
+  const shown = useRef({ open, index });
   useLayoutEffect(() => {
+    const { index, page } = latest.current;
+    const was = shown.current;
+    shown.current = { open, index };
+    // A different thumbnail clicked while the last image is still flying home: that image is
+    // already back on its thumbnail, so start over from the new one instead of paging across.
+    if (open && !was.open && was.index !== index) {
+      for (const [value, rest] of [
+        [progress, 0],
+        [fade, 0],
+        [dragX, 0],
+        [dragY, 0],
+        [zoom, 1],
+        [panX, 0],
+        [panY, 0],
+        [trackX, -index * page],
+      ] as const)
+        value.jump(rest);
+      dragToss.current = { x: 0, y: 0 };
+      trackToss.current = { velocity: 0, flick: false };
+    }
     measure();
     const toss = dragToss.current;
     dragToss.current = { x: 0, y: 0 };
@@ -560,7 +581,21 @@ function LightboxViewer({
       },
     });
     // Motion values are stable; `releases` re-runs this after each gesture.
-  }, [open, releases, reducedMotion, measure, progress, origin, fade, dragX, dragY, zoom, panX, panY]);
+  }, [
+    open,
+    releases,
+    reducedMotion,
+    measure,
+    progress,
+    origin,
+    fade,
+    dragX,
+    dragY,
+    zoom,
+    panX,
+    panY,
+    trackX,
+  ]);
 
   // Bring the track to the current image: after a swipe, a key press, a button or a new `index`.
   const settled = useRef({ index, page });
