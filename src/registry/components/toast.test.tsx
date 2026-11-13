@@ -93,4 +93,20 @@ describe("Toast", () => {
     expect(toasts[3]).toHaveClass("pointer-events-none");
     expect(toasts[0]).not.toHaveAttribute("data-limited");
   });
+
+  it("shows up to `max` toasts at once", () => {
+    const manager = createToastManager();
+    render(
+      <ToastProvider toastManager={manager} max={5} timeout={0}>
+        <Toaster contained duration={0} />
+      </ToastProvider>,
+    );
+    act(() => {
+      for (const title of ["One", "Two", "Three", "Four", "Five", "Six"]) manager.add({ title });
+    });
+    const toasts = [...document.querySelectorAll('[data-slot="toast"]')];
+    expect(toasts.filter((toast) => !toast.hasAttribute("data-limited"))).toHaveLength(5);
+    expect(toasts[5]).toHaveAttribute("data-limited");
+    expect(toasts[4]).not.toHaveClass("pointer-events-none");
+  });
 });

@@ -68,7 +68,7 @@ Set `type` to `"success"`, `"error"`, or `"loading"` to show an icon. Loading to
 | Prop           | Type           | Default | Description                                                                 |
 | -------------- | -------------- | ------- | --------------------------------------------------------------------------- |
 | `timeout`      | `number`       | `5000`  | Milliseconds before a toast closes itself. `0` keeps toasts open.           |
-| `limit`        | `number`       | `3`     | Toasts kept active at once. Older ones are marked limited and fade out.     |
+| `max`          | `number`       | `3`     | Most toasts shown at once. Older ones are marked limited and fade out.      |
 | `toastManager` | `ToastManager` | None    | A manager from `createToastManager()` for adding toasts from outside React. |
 | `children`     | `ReactNode`    | None    | The app, including the components that call `useToast()` and the Toaster.   |
 

@@ -16,6 +16,8 @@ const positions: ToastPosition[] = [
   "top-left",
 ];
 
+const maxOptions = ["1", "2", "3", "4", "5"] as const;
+
 function Triggers() {
   const toast = useToast();
 
@@ -101,10 +103,11 @@ export function ToastPreview() {
 export function ToastDemo() {
   const [position, setPosition] = useState<ToastPosition>("bottom-right");
   const [duration, setDuration] = useState(0.45);
+  const [max, setMax] = useState<(typeof maxOptions)[number]>("3");
 
   return (
     <div className="not-prose demo-frame">
-      <ToastProvider>
+      <ToastProvider max={Number(max)}>
         <div className="component-demo-stage">
           <Triggers />
         </div>
@@ -112,6 +115,7 @@ export function ToastDemo() {
       </ToastProvider>
       <div className="component-demo-controls [&_[data-slot=demo-select-trigger]]:w-36">
         <DemoSelect label="Position" value={position} options={positions} onChange={setPosition} />
+        <DemoSelect label="Max toasts" value={max} options={maxOptions} onChange={setMax} />
         <DemoDuration value={duration} onChange={setDuration} />
       </div>
     </div>

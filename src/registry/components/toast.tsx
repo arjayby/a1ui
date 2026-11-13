@@ -10,8 +10,8 @@ export type ToastPosition =
 export type ToastManager = ReturnType<typeof ToastPrimitive.createToastManager>;
 type ToastObject = ToastPrimitive.Root.ToastObject;
 
-/** Toasts visible in the collapsed deck. Older ones fade out behind them. */
-const DECK_SIZE = 3;
+/** Default number of toasts shown at once. Older ones fade out behind them. */
+const MAX_TOASTS = 3;
 /** How far each older toast peeks out from behind the one in front, in pixels. */
 const PEEK = 12;
 /** Space between toasts once the deck fans out, in pixels. */
@@ -47,8 +47,8 @@ export interface ToastProviderProps {
   children?: ReactNode;
   /** Default time in milliseconds before a toast closes itself. `0` keeps it open. */
   timeout?: number;
-  /** Toasts kept active at once. Older ones are marked limited and fade out. */
-  limit?: number;
+  /** Most toasts shown at once. Older ones are marked limited and fade out. */
+  max?: number;
   /** A manager from `createToastManager` for adding toasts outside React. */
   toastManager?: ToastManager;
 }
@@ -56,11 +56,11 @@ export interface ToastProviderProps {
 export function ToastProvider({
   children,
   timeout = 5000,
-  limit = DECK_SIZE,
+  max = MAX_TOASTS,
   toastManager,
 }: ToastProviderProps) {
   return (
-    <ToastPrimitive.Provider timeout={timeout} limit={limit} toastManager={toastManager}>
+    <ToastPrimitive.Provider timeout={timeout} limit={Math.max(1, Math.floor(max))} toastManager={toastManager}>
       {children}
     </ToastPrimitive.Provider>
   );
@@ -175,12 +175,12 @@ function ToastItem({
         const { index, offset } = slot;
         const expanded = state.expanded;
         const behind = index > 0 && !expanded;
-        const hidden = toast.limited || (behind && index >= DECK_SIZE);
+        const hidden = toast.limited;
         const height = behind ? frontHeight : toast.height;
         const resting = {
           x: 0,
           y: expanded ? away * offset : away * PEEK * index,
-          scale: behind ? 1 - index * 0.05 : 1,
+          scale: behind ? Math.max(0.75, 1 - index * 0.05) : 1,
           opacity: hidden ? 0 : 1,
           height: height ?? "auto",
         };
