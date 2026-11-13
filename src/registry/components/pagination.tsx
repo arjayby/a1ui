@@ -313,7 +313,11 @@ function PageNumber({ page }: { page: number }) {
       slot="pagination-link"
       label={`Page ${page}`}
       active={active}
-      className={active ? "text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted"}
+      className={
+        active
+          ? "text-primary-foreground forced-colors:text-[HighlightText]"
+          : "text-muted-foreground hover:text-foreground hover:bg-muted"
+      }
     >
       {active && (
         <motion.span
@@ -322,7 +326,7 @@ function PageNumber({ page }: { page: number }) {
           layoutId="pagination-active"
           initial={false}
           transition={context.transition}
-          className="border-border bg-background pointer-events-none absolute inset-0 -z-10 rounded-md border shadow-sm"
+          className="bg-primary pointer-events-none absolute inset-0 -z-10 rounded-md forced-colors:bg-[Highlight]"
         />
       )}
       {page}
