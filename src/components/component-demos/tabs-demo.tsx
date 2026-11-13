@@ -9,15 +9,38 @@ type Variant = NonNullable<TabsProps["variant"]>;
 const variants: Variant[] = ["pill", "underline"];
 
 const panels = [
-  { value: "overview", label: "Overview", stat: "12,480", detail: "Visitors this week, up 8% on last week." },
+  {
+    value: "overview",
+    label: "Overview",
+    stat: "12,480",
+    detail: "Visitors this week, up 8% on last week.",
+    rows: [],
+  },
   {
     value: "analytics",
     label: "Analytics",
     stat: "3m 42s",
     detail: "Average session length across all pages.",
+    rows: [
+      ["Pricing", "5m 10s"],
+      ["Docs", "4m 02s"],
+      ["Blog", "1m 54s"],
+    ],
   },
-  { value: "reports", label: "Reports", stat: "24", detail: "Scheduled reports sent to your team." },
-  { value: "settings", label: "Settings", stat: "3", detail: "Integrations connected to this workspace." },
+  {
+    value: "reports",
+    label: "Reports",
+    stat: "24",
+    detail: "Scheduled reports sent to your team.",
+    rows: [["Next send", "Monday, 9:00"]],
+  },
+  {
+    value: "settings",
+    label: "Settings",
+    stat: "3",
+    detail: "Integrations connected to this workspace.",
+    rows: [],
+  },
 ];
 
 export function TabsPreview() {
@@ -61,6 +84,16 @@ export function TabsDemo() {
                 <p className="text-muted-foreground text-xs">{panel.label}</p>
                 <p className="mt-1 font-mono text-2xl tabular-nums">{panel.stat}</p>
                 <p className="text-muted-foreground mt-2 text-sm">{panel.detail}</p>
+                {panel.rows.length > 0 && (
+                  <dl className="border-border mt-3 border-t pt-1 text-sm">
+                    {panel.rows.map(([name, amount]) => (
+                      <div key={name} className="flex justify-between pt-2">
+                        <dt className="text-muted-foreground">{name}</dt>
+                        <dd className="font-mono tabular-nums">{amount}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                )}
               </div>
             </TabsContent>
           ))}

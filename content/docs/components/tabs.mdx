@@ -49,14 +49,14 @@ export function TabsExample() {
 
 ### Tabs
 
-| Prop            | Type                      | Default      | Description                                                                                  |
-| --------------- | ------------------------- | ------------ | -------------------------------------------------------------------------------------------- |
-| `value`         | `string`                  | Uncontrolled | Selected tab when controlled by the caller.                                                  |
-| `defaultValue`  | `string`                  | None         | Initially selected tab when uncontrolled.                                                    |
-| `onValueChange` | `(value: string) => void` | None         | Called with the newly selected tab. Controlled usage requires the caller to update `value`.  |
-| `variant`       | `"pill" \| "underline"`   | `"pill"`     | `pill` slides a raised surface inside a muted track. `underline` slides a bar under the tab. |
-| `duration`      | `number`                  | `0.35`       | Indicator travel time in seconds. Zero moves it instantly.                                   |
-| `className`     | `string`                  | None         | Additional root classes.                                                                     |
+| Prop            | Type                      | Default      | Description                                                                                                                         |
+| --------------- | ------------------------- | ------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `value`         | `string`                  | Uncontrolled | Selected tab when controlled by the caller.                                                                                         |
+| `defaultValue`  | `string`                  | None         | Initially selected tab when uncontrolled.                                                                                           |
+| `onValueChange` | `(value: string) => void` | None         | Called with the newly selected tab. Controlled usage requires the caller to update `value`.                                         |
+| `variant`       | `"pill" \| "underline"`   | `"pill"`     | `pill` slides a raised surface inside a muted track; it can also be dragged to another tab. `underline` slides a bar under the tab. |
+| `duration`      | `number`                  | `0.35`       | Indicator travel and panel transition time in seconds. Zero switches instantly.                                                     |
+| `className`     | `string`                  | None         | Additional root classes.                                                                                                            |
 
 ### TabsList
 

@@ -68,11 +68,14 @@ describe("Tabs", () => {
     const list = screen.getByRole("tablist");
     expect(list).toHaveClass("border-b");
     fireEvent.pointerEnter(screen.getByRole("tab", { name: "Overview" }));
-    expect(document.querySelector('[data-slot="tabs-hover"]')).toBeNull();
+    expect(document.querySelector('[data-slot="tabs-hover"][data-visible]')).toBeNull();
     fireEvent.pointerEnter(screen.getByRole("tab", { name: "Analytics" }));
     expect(
-      screen.getByRole("tab", { name: "Analytics" }).querySelector('[data-slot="tabs-hover"]'),
+      screen.getByRole("tab", { name: "Analytics" }).querySelector('[data-slot="tabs-hover"][data-visible]'),
     ).not.toBeNull();
+    expect(document.querySelectorAll('[data-slot="tabs-hover"]')).toHaveLength(1);
+    fireEvent.pointerLeave(list);
+    expect(document.querySelector('[data-slot="tabs-hover"][data-visible]')).toBeNull();
   });
 
   it("requires the Tabs root", () => {
