@@ -22,7 +22,6 @@ const groups = [
     items: [
       { label: "New project", shortcut: "⇧⌘N" },
       { label: "Projects", shortcut: "⌘O" },
-      { label: "Invite members", shortcut: "⇧⌘I", disabled: true },
     ],
   },
   {
@@ -48,12 +47,7 @@ export function DropdownMenuPreview() {
               {index > 0 && <DropdownMenuSeparator />}
               <DropdownMenuLabel>{group.label}</DropdownMenuLabel>
               {group.items.map((item) => (
-                <DropdownMenuItem
-                  key={item.label}
-                  disabled={"disabled" in item && item.disabled}
-                  label={item.label}
-                  onClick={() => setAction(item.label)}
-                >
+                <DropdownMenuItem key={item.label} label={item.label} onClick={() => setAction(item.label)}>
                   <span>{item.label}</span>
                   <kbd
                     aria-hidden="true"

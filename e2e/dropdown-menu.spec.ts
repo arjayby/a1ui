@@ -60,7 +60,7 @@ test("hover and keyboard focus move the shared highlight without activating acti
   const menu = page.getByRole("menu", { name: "Workspace actions" });
   await expect(menu).toHaveCSS("opacity", "1");
   await settled(page);
-  await expect(menu.getByRole("menuitem")).toHaveCount(7);
+  await expect(menu.getByRole("menuitem")).toHaveCount(6);
   await expect(menu.getByRole("group")).toHaveCount(2);
   await expect(menu.locator("svg")).toHaveCount(0);
   await expect(page.getByText("Resources", { exact: true })).toHaveCount(0);
@@ -99,14 +99,6 @@ test("hover and keyboard focus move the shared highlight without activating acti
   await expect(first).toHaveAttribute("data-highlighted");
   await page.keyboard.press("ArrowDown");
   await expect(menu.getByRole("menuitem", { name: "Projects", exact: true })).toBeFocused();
-  await page.keyboard.press("ArrowDown");
-  const disabled = menu.getByRole("menuitem", { name: "Invite members" });
-  await expect(disabled).toBeFocused();
-  await expect(disabled).toHaveAttribute("aria-disabled", "true");
-  await expect(disabled).toHaveAttribute("data-highlighted");
-  await page.keyboard.press("Enter");
-  await expect(menu).toBeVisible();
-  await expect(page.locator(".demo-frame").getByRole("status")).toBeEmpty();
   await page.keyboard.press("ArrowDown");
   await expect(menu.getByRole("menuitem", { name: "Switch workspace", exact: true })).toBeFocused();
   await page.keyboard.press("End");

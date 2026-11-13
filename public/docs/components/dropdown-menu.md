@@ -57,7 +57,6 @@ export function DropdownMenuExample() {
           <DropdownMenuLabel>Workspace</DropdownMenuLabel>
           <DropdownMenuItem onClick={() => alert("New project")}>New project</DropdownMenuItem>
           <DropdownMenuItem render={<a href="/projects" />}>Projects</DropdownMenuItem>
-          <DropdownMenuItem disabled>Invite members</DropdownMenuItem>
           <DropdownMenuSub>
             <DropdownMenuSubTrigger>Switch workspace</DropdownMenuSubTrigger>
             <DropdownMenuSubContent aria-label="Switch workspace" className="w-52">
