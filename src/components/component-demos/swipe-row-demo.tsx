@@ -23,10 +23,34 @@ interface Message {
 }
 
 const inbox: Message[] = [
-  { id: "ines", from: "Ines Okafor", subject: "Launch checklist, final pass", time: "9:41", unread: true },
-  { id: "tomas", from: "Tomas Lindqvist", subject: "Invoice 2041 is ready", time: "8:12", unread: true },
-  { id: "priya", from: "Priya Raman", subject: "Notes from the research call", time: "Mon", unread: false },
-  { id: "noel", from: "Noel Abara", subject: "Offsite travel options", time: "Sun", unread: false },
+  {
+    id: "registry",
+    from: "Registry",
+    subject: "54 items built and ready to install",
+    time: "9:41",
+    unread: true,
+  },
+  {
+    id: "draft",
+    from: "Arjay Bayona",
+    subject: "Swipe Row docs, ready for review",
+    time: "8:12",
+    unread: true,
+  },
+  {
+    id: "tests",
+    from: "Test suite",
+    subject: "All component tests passed",
+    time: "Mon",
+    unread: false,
+  },
+  {
+    id: "ideas",
+    from: "Arjay Bayona",
+    subject: "Ideas for the next block",
+    time: "Sun",
+    unread: false,
+  },
 ].map((message) => ({ ...message, pinned: false }));
 
 const sideOptions = ["both", "trailing", "leading"] as const;
@@ -36,7 +60,7 @@ function MessageRow({ message }: { message: Message }) {
     <div className="bg-card text-foreground flex items-center gap-3 px-4 py-3 text-sm">
       <span
         aria-hidden="true"
-        className={`size-2 shrink-0 rounded-full ${message.unread ? "bg-foreground" : "bg-transparent"}`}
+        className={`size-2 shrink-0 rounded-full ${message.unread ? "bg-chart-3" : "bg-transparent"}`}
       />
       <span className="min-w-0 flex-1">
         <span className="flex items-center gap-1.5 font-medium">
