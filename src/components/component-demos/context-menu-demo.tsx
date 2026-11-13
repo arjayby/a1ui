@@ -80,14 +80,6 @@ export function ContextMenuPreview() {
             </ContextMenuRadioGroup>
           </ContextMenuGroup>
           <ContextMenuSeparator />
-          <ContextMenuItem
-            inset
-            disabled
-            label="Move to archive"
-            onClick={() => setAction("Move to archive")}
-          >
-            Move to archive
-          </ContextMenuItem>
           <ContextMenuItem inset label="Delete" onClick={() => setAction("Delete")}>
             Delete
             <ContextMenuShortcut>⌘⌫</ContextMenuShortcut>

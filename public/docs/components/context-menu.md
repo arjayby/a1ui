@@ -68,9 +68,6 @@ export function ContextMenuExample() {
           Open
           <ContextMenuShortcut>⌘O</ContextMenuShortcut>
         </ContextMenuItem>
-        <ContextMenuItem inset disabled>
-          Move to archive
-        </ContextMenuItem>
         <ContextMenuSub>
           <ContextMenuSubTrigger inset>Share</ContextMenuSubTrigger>
           <ContextMenuSubContent className="w-40" aria-label="Share">

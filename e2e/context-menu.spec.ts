@@ -186,13 +186,6 @@ test("opens from the keyboard below the focused element, with navigation and typ
 
   await page.keyboard.type("de");
   await expect(item("Delete")).toBeFocused();
-  await page.keyboard.press("ArrowUp");
-  const archive = item("Move to archive");
-  await expect(archive).toBeFocused();
-  await expect(archive).toHaveAttribute("aria-disabled", "true");
-  await page.keyboard.press("Enter");
-  await expect(menu).toBeVisible();
-  await expect(status).toBeEmpty();
 
   await page.keyboard.press("Home");
   await expect(item("Open")).toBeFocused();

@@ -13,14 +13,17 @@ import {
 import {
   createContext,
   useContext,
+  useEffect,
   useId,
   useLayoutEffect,
   useRef,
   useState,
   type ComponentProps,
+  type Dispatch,
   type ReactNode,
   type Ref,
   type RefObject,
+  type SetStateAction,
 } from "react";
 
 type Point = { x: number; y: number };
@@ -57,6 +60,12 @@ type SurfaceContextValue = {
 };
 
 const SurfaceContext = createContext<SurfaceContextValue | null>(null);
+
+// The row that last held a menu level's highlight. Its highlight stays mounted (faded out) while the
+// pointer crosses a label or separator, so the next row's highlight glides from it instead of appearing.
+const LastHighlightContext = createContext<[string | null, Dispatch<SetStateAction<string | null>>] | null>(
+  null,
+);
 const RadioGroupContext = createContext("");
 
 // Critically damped: the menu settles without overshoot.
@@ -288,6 +297,7 @@ function Surface({
   className?: string;
 }) {
   const id = useId();
+  const lastHighlight = useState<string | null>(null);
   const surface = useContext(SurfaceContext);
   if (!surface) throw new Error("ContextMenuContent must be used within ContextMenu.");
   const { open, reducedMotion, onClosed } = surface;
@@ -327,18 +337,20 @@ function Surface({
           className={`border-border bg-popover/80 text-popover-foreground [@media(prefers-reduced-transparency:reduce)]:bg-popover contrast-more:border-foreground contrast-more:bg-popover isolate max-h-(--available-height) max-w-[calc(100vw-1rem)] min-w-32 overflow-x-hidden overflow-y-auto overscroll-contain rounded-md border p-1 text-left shadow-lg backdrop-blur-xl backdrop-saturate-150 outline-none contrast-more:backdrop-filter-none [@media(prefers-reduced-transparency:reduce)]:backdrop-filter-none ${origin} ${className}`}
           render={(popupProps) => (
             // One layout scope per popup, so each menu level has its own traveling highlight.
-            <LayoutGroup id={id}>
-              <motion.div
-                {...(popupProps as HTMLMotionProps<"div">)}
-                layoutScroll
-                variants={variants}
-                initial={seconds === 0 ? false : "closed"}
-                animate={open ? "open" : "closed"}
-                onAnimationComplete={(definition) => {
-                  if (definition === "closed") onClosed();
-                }}
-              />
-            </LayoutGroup>
+            <LastHighlightContext.Provider value={lastHighlight}>
+              <LayoutGroup id={id}>
+                <motion.div
+                  {...(popupProps as HTMLMotionProps<"div">)}
+                  layoutScroll
+                  variants={variants}
+                  initial={seconds === 0 ? false : "closed"}
+                  animate={open ? "open" : "closed"}
+                  onAnimationComplete={(definition) => {
+                    if (definition === "closed") onClosed();
+                  }}
+                />
+              </LayoutGroup>
+            </LastHighlightContext.Provider>
           )}
         />
       </Primitive.Positioner>
@@ -398,6 +410,14 @@ function Row<State extends RowState>({
   const radioGroup = useContext(RadioGroupContext);
   const checked = state.checked === true;
   const travel: Transition = reducedMotion ? { duration: 0 } : spring(0.3);
+  // A submenu's trigger stays lit while its menu is open.
+  const highlighted = state.highlighted || state.open === true;
+  const rowId = useId();
+  const [lastHighlight, setLastHighlight] = useContext(LastHighlightContext) ?? [null, null];
+
+  useEffect(() => {
+    if (highlighted) setLastHighlight?.(rowId);
+  }, [highlighted, rowId, setLastHighlight]);
 
   return useRender({
     defaultTagName: "div",
@@ -406,14 +426,21 @@ function Row<State extends RowState>({
       ...props,
       children: (
         <>
-          {/* A submenu's trigger stays lit while its menu is open. */}
-          {(state.highlighted || state.open === true) && (
+          {(highlighted || lastHighlight === rowId) && (
             <motion.span
               aria-hidden="true"
               data-slot="context-menu-highlight"
               layoutId="context-menu-highlight"
+              // One highlight travels between rows; crossfading the outgoing and incoming copies
+              // would dim it on every hop.
+              layoutCrossfade={false}
               initial={false}
-              transition={travel}
+              animate={{ opacity: highlighted ? 1 : 0 }}
+              transition={
+                reducedMotion
+                  ? { duration: 0 }
+                  : { ...travel, opacity: { duration: 0.15, delay: highlighted ? 0 : 0.1 } }
+              }
               className="bg-muted contrast-more:outline-foreground pointer-events-none absolute inset-0 -z-10 rounded-[inherit] contrast-more:outline-2 contrast-more:-outline-offset-2"
             />
           )}
