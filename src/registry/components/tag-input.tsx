@@ -125,7 +125,7 @@ export function TagInput({
       <div
         ref={scope}
         data-slot="tag-input-field"
-        className={`bg-background border-border focus-within:border-ring focus-within:ring-ring/30 mt-2 flex min-h-9 w-full cursor-text flex-wrap items-center gap-1.5 rounded-md border p-1.5 text-sm transition-[border-color,box-shadow] focus-within:ring-3 ${disabled ? "cursor-not-allowed opacity-50" : ""}`}
+        className={`border-input focus-within:border-ring mt-2 flex min-h-9 w-full cursor-text flex-wrap items-center gap-1.5 rounded-sm border bg-(--control-background) px-1.5 py-[5px] text-sm transition-[border-color,box-shadow] focus-within:ring-4 focus-within:ring-[color:var(--ring-halo,color-mix(in_oklab,var(--ring)_50%,transparent))] max-md:min-h-11 pointer-coarse:min-h-11 ${disabled ? "cursor-not-allowed opacity-50" : "not-focus-within:hover:border-foreground/28"}`}
         onPointerDown={(event) => {
           // Clicking the empty space of the field focuses the text input.
           if (disabled || event.target !== event.currentTarget) return;
@@ -189,7 +189,7 @@ export function TagInput({
           autoComplete="off"
           enterKeyHint="enter"
           aria-describedby={[descriptionId, countId].filter(Boolean).join(" ") || undefined}
-          className="placeholder:text-muted-foreground h-6 min-w-24 flex-1 bg-transparent px-1 outline-none disabled:cursor-not-allowed"
+          className="placeholder:text-muted-foreground h-6 min-w-24 flex-1 bg-transparent px-1.5 outline-none disabled:cursor-not-allowed"
           onChange={(event) => {
             setArmed(false);
             setDraft(event.currentTarget.value);

@@ -68,7 +68,7 @@ export function OtpInput({
       data-complete={complete || undefined}
       data-invalid={invalid || undefined}
       data-success={success || undefined}
-      className={`relative flex w-full max-w-max items-center gap-1.5 sm:gap-2 ${disabled ? "cursor-not-allowed opacity-50" : ""} ${className ?? ""}`}
+      className={`group relative flex w-full max-w-max items-center gap-1.5 sm:gap-2 ${disabled ? "cursor-not-allowed opacity-50" : ""} ${className ?? ""}`}
       animate={{ x: invalid && !reducedMotion ? [0, -6, 6, -4, 4, 0] : 0 }}
       transition={{ duration: reducedMotion ? 0 : 0.36 }}
     >
@@ -117,7 +117,7 @@ export function OtpInput({
               data-slot="otp-input-slot"
               data-active={active || undefined}
               data-filled={char !== undefined || undefined}
-              className={`bg-background text-foreground relative grid aspect-5/6 w-10 min-w-0 place-items-center rounded-md border font-mono text-lg tabular-nums ${success ? "border-success" : invalid ? "border-destructive" : "border-border"}`}
+              className={`text-foreground relative grid aspect-5/6 w-10 min-w-0 place-items-center rounded-sm border bg-(--control-background) font-mono text-lg tabular-nums transition-[border-color] duration-150 ${success ? "border-success" : invalid ? "border-destructive" : disabled ? "border-input" : "border-input group-[:hover:not(:focus-within)]:border-foreground/28"}`}
               animate={{ y: success && !reducedMotion ? [0, -3, 0] : 0 }}
               transition={{ duration: reducedMotion ? 0 : 0.28, delay: reducedMotion ? 0 : index * 0.035 }}
             >
@@ -125,7 +125,7 @@ export function OtpInput({
                 <motion.span
                   layoutId={highlightId}
                   data-slot="otp-input-highlight"
-                  className={`pointer-events-none absolute -inset-px rounded-md border ${invalid ? "border-destructive ring-destructive/25" : "border-ring ring-ring/30"} ring-3`}
+                  className={`pointer-events-none absolute -inset-px rounded-sm border ${invalid ? "border-destructive ring-3 ring-[color:var(--danger-soft-hover,color-mix(in_oklab,var(--destructive)_20%,transparent))]" : "border-ring ring-4 ring-[color:var(--ring-halo,color-mix(in_oklab,var(--ring)_50%,transparent))]"}`}
                   transition={{ type: "spring", duration: reducedMotion ? 0 : 0.3, bounce: 0 }}
                 />
               )}
