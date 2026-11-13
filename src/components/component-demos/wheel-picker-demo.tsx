@@ -38,7 +38,7 @@ export function WheelPickerPreview() {
 }
 
 export function WheelPickerDemo() {
-  const [picker, setPicker] = useState<"time" | "date">("time");
+  const [picker, setPicker] = useState<"time" | "date">("date");
   const [haptics, setHaptics] = useState(true);
   const [time, setTime] = useState({ hour: "9", minute: "41", period: "AM" });
   const [date, setDate] = useState({ month: "2", day: "14", year: "2026" });

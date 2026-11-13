@@ -9,10 +9,25 @@ const selected = (list: Locator) => list.getByRole("option", { selected: true })
 const scrollTop = (list: Locator) => list.evaluate((element) => element.scrollTop);
 const readout = (page: Page) => page.locator('[data-slot="wheel-picker-demo-value"]');
 
-async function open(page: Page) {
+async function open(page: Page, picker: "time" | "date" = "time") {
   await page.goto("/components/wheel-picker");
   await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
-  await wheel(page, "Hour").scrollIntoViewIfNeeded();
+  // The demo opens on the date picker.
+  if (picker === "time") {
+    await page.getByRole("button", { name: "Picker: date" }).click();
+    await page.getByRole("menuitem", { name: "time", exact: true }).click();
+  }
+  await wheel(page, picker === "time" ? "Hour" : "Month").scrollIntoViewIfNeeded();
+  // Wait for each wheel to rest on its value before the test touches it.
+  const names = picker === "time" ? ["Hour", "Minute", "AM or PM"] : ["Month", "Day", "Year"];
+  for (const name of names) {
+    const list = wheel(page, name);
+    await expect
+      .poll(
+        async () => (await scrollTop(list)) === Number(await selected(list).getAttribute("data-index")) * ROW,
+      )
+      .toBe(true);
+  }
 }
 
 test("follows native scrolling, clicks, keys and typeahead, and sits its value at the centre", async ({
@@ -130,9 +145,7 @@ test("drags with the mouse, rubber-bands at the end and scrolls to a value set f
 });
 
 test("skips disabled options and follows a value its parent corrects", async ({ page }) => {
-  await open(page);
-  await page.getByRole("button", { name: "Picker: time" }).click();
-  await page.getByRole("menuitem", { name: "date", exact: true }).click();
+  await open(page, "date");
   const month = wheel(page, "Month");
   const day = wheel(page, "Day");
   await expect(readout(page)).toHaveText("February 14, 2026");
