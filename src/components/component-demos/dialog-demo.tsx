@@ -40,7 +40,7 @@ export function DialogPreview() {
 
 export function DialogDemo() {
   const [dismiss, setDismiss] = useState<Dismiss>("outside click");
-  const [duration, setDuration] = useState(0.2);
+  const [duration, setDuration] = useState(0.3);
   const [name, setName] = useState("a1ui");
   const dismissible = dismiss === "outside click";
 

@@ -20,26 +20,17 @@ async function sampleScale(page: Page, act: "open" | "close") {
       const transform = getComputedStyle(element).transform;
       scales.push(transform === "none" ? 1 : new DOMMatrix(transform).a);
     }
-    const element = document.querySelector<HTMLElement>('[data-slot="dialog-content"]');
-    const rect = trigger.getBoundingClientRect();
-    const [x, y] = (element?.style.transformOrigin ?? "").split(" ").map(Number.parseFloat);
-    return {
-      scales,
-      // Where the transform origin sits on screen, compared with the trigger's centre.
-      origin: element ? { x: element.offsetLeft + x, y: element.offsetTop + y } : null,
-      trigger: { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 },
-    };
+    return { scales };
   }, act);
 }
 
-test("popup grows out of its trigger, traps focus, and shrinks back on close", async ({ page }) => {
+test("popup scales in at the center, traps focus, and scales out on close", async ({ page }) => {
   await page.goto("/components/dialog");
   await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
 
   const opening = await sampleScale(page, "open");
-  expect(opening.scales.some((scale) => scale > 0.45 && scale < 0.95)).toBe(true);
-  expect(Math.abs(opening.origin!.x - opening.trigger.x)).toBeLessThan(2);
-  expect(Math.abs(opening.origin!.y - opening.trigger.y)).toBeLessThan(2);
+  expect(opening.scales.some((scale) => scale > 0.94 && scale < 1)).toBe(true);
+  expect(opening.scales.every((scale) => scale >= 0.94)).toBe(true);
   const dialog = page.getByRole("dialog", { name: "Edit project" });
   await expect(dialog).toBeVisible();
   await expect(dialog.getByRole("textbox")).toBeFocused();
@@ -54,7 +45,7 @@ test("popup grows out of its trigger, traps focus, and shrinks back on close", a
   }
 
   const closing = await sampleScale(page, "close");
-  expect(closing.scales.some((scale) => scale > 0.45 && scale < 0.95)).toBe(true);
+  expect(closing.scales.some((scale) => scale > 0.94 && scale < 1)).toBe(true);
   await expect(page.locator(popup)).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Edit project" })).toBeFocused();
 

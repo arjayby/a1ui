@@ -2,23 +2,13 @@
 
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
 import { motion, useReducedMotion, type Transition } from "motion/react";
-import {
-  createContext,
-  useContext,
-  useLayoutEffect,
-  useRef,
-  useState,
-  type ComponentProps,
-  type ReactNode,
-} from "react";
+import { createContext, useContext, useState, type ComponentProps, type ReactNode } from "react";
 
 type DialogContextValue = {
   open: boolean;
   /** Stays true while the exit animation plays, then the popup unmounts. */
   present: boolean;
   finishExit: () => void;
-  /** The element that opened the dialog, so the popup can grow out of it. */
-  getOrigin: () => HTMLElement | null;
   seconds: number;
   reducedMotion: boolean;
 };
@@ -51,26 +41,18 @@ export function Dialog({
   open,
   defaultOpen = false,
   onOpenChange,
-  duration = 0.2,
+  duration = 0.3,
   dismissible = true,
   children,
 }: DialogProps) {
   const reducedMotion = useReducedMotion() ?? false;
   const [internalOpen, setInternalOpen] = useState(defaultOpen);
   const current = open ?? internalOpen;
-  const seconds = Number.isFinite(duration) ? Math.max(0, duration) : 0.2;
-  // The trigger that opened the dialog, so the popup can grow out of it and shrink back into it.
-  const triggerRef = useRef<HTMLElement | null>(null);
-  // A dialog opened without a trigger, such as from a menu item or a shortcut, grows from whatever had focus.
-  const [focusOrigin, setFocusOrigin] = useState<HTMLElement | null>(null);
+  const seconds = Number.isFinite(duration) ? Math.max(0, duration) : 0.3;
 
   // Keep the popup rendered after closing until its exit animation reports that it finished.
   const [present, setPresent] = useState(current);
-  if (current && !present) {
-    setPresent(true);
-    const focused = document.activeElement;
-    setFocusOrigin(focused instanceof HTMLElement && focused !== document.body ? focused : null);
-  }
+  if (current && !present) setPresent(true);
   if (!current && present && seconds === 0) setPresent(false);
 
   return (
@@ -78,11 +60,7 @@ export function Dialog({
       value={{
         open: current,
         present: present || current,
-        finishExit: () => {
-          triggerRef.current = null;
-          setPresent(false);
-        },
-        getOrigin: () => triggerRef.current ?? focusOrigin,
+        finishExit: () => setPresent(false),
         seconds,
         reducedMotion,
       }}
@@ -90,8 +68,7 @@ export function Dialog({
       <DialogPrimitive.Root
         open={current}
         disablePointerDismissal={!dismissible}
-        onOpenChange={(next, details) => {
-          if (next) triggerRef.current = details.trigger instanceof HTMLElement ? details.trigger : null;
+        onOpenChange={(next) => {
           if (open === undefined) setInternalOpen(next);
           onOpenChange?.(next);
         }}
@@ -149,7 +126,7 @@ export function DialogContent(props: DialogContentProps) {
   return <DialogLayer {...props} dialog={dialog} />;
 }
 
-// Mounted fresh for every opening, so the layout reads and media query below run once per open.
+// Mounted fresh for every opening, so the media query below runs once per open.
 function DialogLayer({
   dialog,
   showCloseButton = true,
@@ -157,48 +134,22 @@ function DialogLayer({
   className,
   children,
 }: DialogContentProps & { dialog: DialogContextValue }) {
-  const { open, seconds, reducedMotion, getOrigin, finishExit } = dialog;
-  const popupRef = useRef<HTMLDivElement | null>(null);
+  const { open, seconds, reducedMotion, finishExit } = dialog;
   // Below the sm breakpoint the popup rises from the bottom edge like a sheet.
   const [sheet] = useState(
     () => typeof window !== "undefined" && (window.matchMedia?.("(max-width: 639px)").matches ?? false),
   );
-  // Reduced motion keeps a short fade and drops the scale, slide, and blur.
+  // Reduced motion keeps a short fade and drops the scale and slide.
   const time = reducedMotion ? Math.min(seconds, 0.15) : seconds;
-
-  // Point the transform origin at the trigger so the popup grows out of it and shrinks back into it.
-  const placeOrigin = (popup: HTMLDivElement) => {
-    const origin = getOrigin();
-    if (!origin?.isConnected || sheet) {
-      popup.style.transformOrigin = sheet ? "50% 100%" : "50% 50%";
-      return;
-    }
-    // Offsets ignore the running scale, so they give the popup's resting position.
-    const frame = popup.offsetParent?.getBoundingClientRect() ?? { left: 0, top: 0 };
-    const trigger = origin.getBoundingClientRect();
-    const x = trigger.left + trigger.width / 2 - (frame.left + popup.offsetLeft);
-    const y = trigger.top + trigger.height / 2 - (frame.top + popup.offsetTop);
-    popup.style.transformOrigin = `${x}px ${y}px`;
-  };
-
-  // Measure again on close: the popup may have changed size while it was open.
-  useLayoutEffect(() => {
-    if (!open && popupRef.current) placeOrigin(popupRef.current);
-  });
 
   const closed = reducedMotion
     ? { opacity: 0 }
     : sheet
       ? { opacity: 0, y: "100%", scale: 1 }
-      : { opacity: 0, y: 0, scale: 0.4 };
+      : { opacity: 0, y: 0, scale: 0.94 };
   const enter: Transition =
-    time === 0
-      ? { duration: 0 }
-      : {
-          default: { type: "spring", visualDuration: time, bounce: 0 },
-          opacity: { duration: time * 0.5, ease: "easeOut" },
-        };
-  const exit: Transition = time === 0 ? { duration: 0 } : { duration: time * 0.7, ease: [0.4, 0, 0.9, 0.4] };
+    time === 0 ? { duration: 0 } : { type: "spring", visualDuration: time, bounce: 0 };
+  const exit: Transition = { duration: time * 0.6, ease: [0.4, 0, 1, 1] };
 
   return (
     <DialogPrimitive.Portal keepMounted>
@@ -207,16 +158,12 @@ function DialogLayer({
         hidden={false}
         // A fading backdrop lets clicks through, so the trigger can reopen the dialog mid-exit.
         style={{ pointerEvents: open ? undefined : "none" }}
-        className="bg-background/60 fixed inset-0 z-50"
+        className="bg-background/60 fixed inset-0 z-50 backdrop-blur-[3px]"
         render={
           <motion.div
-            initial={{ opacity: 0, backdropFilter: "blur(0px)" }}
-            animate={
-              open
-                ? { opacity: 1, backdropFilter: reducedMotion ? "blur(0px)" : "blur(4px)" }
-                : { opacity: 0, backdropFilter: "blur(0px)" }
-            }
-            transition={{ duration: open ? time * 0.8 : time * 0.7, ease: "easeOut" }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: open ? 1 : 0 }}
+            transition={{ duration: open ? time * 0.8 : time * 0.6, ease: "easeOut" }}
           />
         }
       />
@@ -226,11 +173,6 @@ function DialogLayer({
         className="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-4"
       >
         <DialogPrimitive.Popup
-          // Base UI's portal mounts the popup a commit after this layer, so measure as it attaches.
-          ref={(node: HTMLDivElement | null) => {
-            if (node && node !== popupRef.current) placeOrigin(node);
-            popupRef.current = node;
-          }}
           data-slot="dialog-content"
           data-sheet={sheet || undefined}
           data-state={open ? "open" : "closed"}

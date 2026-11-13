@@ -1,6 +1,6 @@
 # Dialog
 
-A modal dialog that grows out of the button that opened it and shrinks back into it, over a blurred backdrop.
+A modal dialog that springs in at the center of the screen over a blurred backdrop, and rises from the bottom edge on small screens.
 
 See [agent setup instructions](http://localhost:3000/llms.txt) before installation. Import paths in examples assume the @/components/animated path; adapt them to the target project's components.json.
 
@@ -75,7 +75,7 @@ export function DialogExample() {
 | `open`         | `boolean`                 | Uncontrolled | Whether the dialog is open when controlled by the caller.                                        |
 | `defaultOpen`  | `boolean`                 | `false`      | Whether the dialog starts open when uncontrolled.                                                |
 | `onOpenChange` | `(open: boolean) => void` | None         | Called when a trigger, close button, Escape, or outside click asks to change the open state.     |
-| `duration`     | `number`                  | `0.2`        | Open time in seconds. Closing takes 70% of it. Zero opens and closes instantly.                  |
+| `duration`     | `number`                  | `0.3`        | Open time in seconds. Closing takes 60% of it. Zero opens and closes instantly.                  |
 | `dismissible`  | `boolean`                 | `true`       | Close when the backdrop is clicked. Escape and close buttons always close.                       |
 | `children`     | `ReactNode`               | None         | A `DialogTrigger` and a `DialogContent`. A controlled dialog can leave out the trigger entirely. |
 
