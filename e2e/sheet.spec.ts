@@ -35,7 +35,7 @@ function sample(page: Page, act: "open" | "escape", ms = 500) {
     async ({ act, ms }) => {
       if (act === "open") {
         [...document.querySelectorAll<HTMLButtonElement>('[data-slot="sheet-trigger"]')]
-          .find((button) => button.textContent?.includes("Show route"))!
+          .find((button) => button.textContent?.includes("Bag"))!
           .click();
       } else {
         document.activeElement!.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
@@ -81,9 +81,9 @@ test("slides in from the bottom without overshoot, traps focus, and leaves the w
 }) => {
   await openDemo(page);
   const opening = await sample(page, "open", 900);
-  const sheet = page.getByRole("dialog", { name: "T Third Street" });
+  const sheet = page.getByRole("dialog", { name: "Your bag" });
   await expect(sheet).toBeVisible();
-  await expect(sheet).toHaveAccessibleDescription(/Outbound to Sunnydale/);
+  await expect(sheet).toHaveAccessibleDescription(/Free shipping/);
   const { size } = (await read(page))!;
   const half = size / 2;
   // It starts past the bottom edge, passes through the middle, and never rises above its detent.
@@ -95,7 +95,7 @@ test("slides in from the bottom without overshoot, traps focus, and leaves the w
 
   // The footer sits inside the visible half, and the page behind is dimmed and pushed back.
   const viewport = page.viewportSize()!;
-  const done = (await sheet.getByRole("button", { name: "Done" }).boundingBox())!;
+  const done = (await sheet.getByRole("button", { name: "Checkout" }).boundingBox())!;
   expect(done.y + done.height).toBeLessThan(viewport.height);
   const resting = (await read(page))!;
   expect(resting.scrim).toBe(1);
@@ -111,7 +111,7 @@ test("slides in from the bottom without overshoot, traps focus, and leaves the w
   expect(Math.min(...closing.map(({ offset }) => offset))).toBeGreaterThan(half - 1);
   await expect(page.locator(popup)).toHaveCount(0);
   await expect(page.locator('[data-slot="sheet-backdrop"]')).toHaveCount(0);
-  await expect(page.locator(".demo-frame").getByRole("button", { name: "Show route" })).toBeFocused();
+  await expect(page.locator(".demo-frame").getByRole("button", { name: /^Bag/ })).toBeFocused();
   expect(await page.locator('[data-slot="sidebar-inset"]').evaluate((element) => element.style.scale)).toBe(
     "",
   );
@@ -121,8 +121,8 @@ test("tracks the pointer 1:1, rests at the nearest detent, resists past the larg
   page,
 }) => {
   await openDemo(page);
-  await page.locator(".demo-frame").getByRole("button", { name: "Show route" }).click();
-  const sheet = page.getByRole("dialog", { name: "T Third Street" });
+  await page.locator(".demo-frame").getByRole("button", { name: /^Bag/ }).click();
+  const sheet = page.getByRole("dialog", { name: "Your bag" });
   const { size } = (await read(page))!;
   const half = size / 2;
   await rested(page, half);
@@ -149,7 +149,7 @@ test("tracks the pointer 1:1, rests at the nearest detent, resists past the larg
   await expect(handle).toHaveAttribute("aria-valuenow", "100");
   await rested(page, 0);
   // At the largest detent the content area fills the sheet again.
-  const done = (await sheet.getByRole("button", { name: "Done" }).boundingBox())!;
+  const done = (await sheet.getByRole("button", { name: "Checkout" }).boundingBox())!;
   expect(done.y + done.height).toBeGreaterThan(page.viewportSize()!.height - 40);
 
   // Past the largest detent it follows less and less, then springs back.
@@ -164,7 +164,7 @@ test("tracks the pointer 1:1, rests at the nearest detent, resists past the larg
   await rested(page, 0);
 
   // A slow drag part of the way down returns to the detent it is nearest to.
-  const title = (await sheet.getByRole("heading", { name: "T Third Street" }).boundingBox())!;
+  const title = (await sheet.getByRole("heading", { name: "Your bag" }).boundingBox())!;
   await page.mouse.move(title.x + 10, title.y + 10);
   await page.mouse.down();
   await page.mouse.move(title.x + 10, title.y + 130, { steps: 6 });
@@ -182,12 +182,12 @@ test("tracks the pointer 1:1, rests at the nearest detent, resists past the larg
   await page.mouse.move(title.x + 10, title.y + 130, { steps: 3 });
   await page.mouse.up();
   await expect(page.locator(popup)).toHaveCount(0);
-  await expect(page.locator(".demo-frame").getByRole("button", { name: "Show route" })).toBeFocused();
+  await expect(page.locator(".demo-frame").getByRole("button", { name: /^Bag/ })).toBeFocused();
 });
 
 test("can be caught on its way out and dragged back open", async ({ page }) => {
   await openDemo(page);
-  await page.locator(".demo-frame").getByRole("button", { name: "Show route" }).click();
+  await page.locator(".demo-frame").getByRole("button", { name: /^Bag/ }).click();
   const sheet = page.locator(popup);
   const { size } = (await read(page))!;
   await rested(page, size / 2);
@@ -216,7 +216,7 @@ test("can be caught on its way out and dragged back open", async ({ page }) => {
   await page.waitForTimeout(200);
   await page.mouse.up();
   await rested(page, size / 2);
-  await expect(page.getByRole("dialog", { name: "T Third Street" })).toBeVisible();
+  await expect(page.getByRole("dialog", { name: "Your bag" })).toBeVisible();
 
   // A press that only holds a moving sheet lets it carry on, and a button under it still clicks.
   await page.keyboard.press("Escape");
@@ -227,11 +227,11 @@ test("can be caught on its way out and dragged back open", async ({ page }) => {
 
 test("content scrolls first and hands the drag to the sheet only from its top", async ({ page }) => {
   await openDemo(page);
-  await page.locator(".demo-frame").getByRole("button", { name: "Show route" }).click();
+  await page.locator(".demo-frame").getByRole("button", { name: /^Bag/ }).click();
   const { size } = (await read(page))!;
   await rested(page, size / 2);
   const body = page.locator('[data-slot="sheet-body"]');
-  const row = (await body.getByText("Brannan Street").boundingBox())!;
+  const row = (await body.getByText("Ink refill").boundingBox())!;
   const x = row.x + 20;
   const y = row.y + 10;
 
@@ -272,7 +272,7 @@ test.describe("touch", () => {
 
   test("a finger scrolls the content, and drags the sheet from the top of the content", async ({ page }) => {
     await openDemo(page);
-    await page.locator(".demo-frame").getByRole("button", { name: "Show route" }).click();
+    await page.locator(".demo-frame").getByRole("button", { name: /^Bag/ }).click();
     const { size } = (await read(page))!;
     await rested(page, size / 2);
     await page.getByRole("slider", { name: "Resize sheet" }).press("End");
@@ -313,7 +313,7 @@ test.describe("touch", () => {
 test("the handle moves between detents from the keyboard", async ({ page }) => {
   await openDemo(page);
   await choose(page, "Detents", "three stops");
-  await page.locator(".demo-frame").getByRole("button", { name: "Show route" }).click();
+  await page.locator(".demo-frame").getByRole("button", { name: /^Bag/ }).click();
   const { size } = (await read(page))!;
   await rested(page, size * 0.7);
   const handle = page.getByRole("slider", { name: "Resize sheet" });
@@ -339,8 +339,8 @@ test("a side sheet enters from its edge and is dragged back to it", async ({ pag
   await openDemo(page);
   await choose(page, "Side", "right");
   await choose(page, "Detents", "fit content");
-  await page.locator(".demo-frame").getByRole("button", { name: "Show route" }).click();
-  const sheet = page.getByRole("dialog", { name: "T Third Street" });
+  await page.locator(".demo-frame").getByRole("button", { name: /^Bag/ }).click();
+  const sheet = page.getByRole("dialog", { name: "Your bag" });
   await expect(sheet).toHaveAttribute("data-side", "right");
   await rested(page, 0);
   const viewport = page.viewportSize()!;
@@ -363,7 +363,7 @@ test("a side sheet enters from its edge and is dragged back to it", async ({ pag
   await expect(page.locator(popup)).toHaveCount(0);
 
   await choose(page, "Side", "left");
-  await page.locator(".demo-frame").getByRole("button", { name: "Show route" }).click();
+  await page.locator(".demo-frame").getByRole("button", { name: /^Bag/ }).click();
   await expect(sheet).toHaveAttribute("data-side", "left");
   await rested(page, 0);
   expect((await sheet.boundingBox())!.x).toBeCloseTo(0, 0);
@@ -373,7 +373,7 @@ test("a side sheet enters from its edge and is dragged back to it", async ({ pag
 
 test("reduced motion fades in place, and reduced transparency makes the surface solid", async ({ page }) => {
   await openDemo(page);
-  await page.locator(".demo-frame").getByRole("button", { name: "Show route" }).click();
+  await page.locator(".demo-frame").getByRole("button", { name: /^Bag/ }).click();
   const { size } = (await read(page))!;
   await rested(page, size / 2);
   const material = () =>
@@ -402,7 +402,7 @@ test("reduced motion fades in place, and reduced transparency makes the surface 
   // The sheet never slides: it is at its detent from the first frame and only its opacity changes.
   expect(opening.every(({ offset }) => Math.abs(offset - size / 2) < 1)).toBe(true);
   expect(opening.some(({ opacity }) => opacity > 0 && opacity < 1)).toBe(true);
-  const sheet = page.getByRole("dialog", { name: "T Third Street" });
+  const sheet = page.getByRole("dialog", { name: "Your bag" });
   await expect(sheet).toHaveCSS("opacity", "1");
   expect((await read(page))!.scale).toBe("");
 
@@ -429,8 +429,8 @@ test("fits a phone screen from the bottom edge", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await openDemo(page);
   await choose(page, "Detents", "fit content");
-  await page.locator(".demo-frame").getByRole("button", { name: "Show route" }).click();
-  const sheet = page.getByRole("dialog", { name: "T Third Street" });
+  await page.locator(".demo-frame").getByRole("button", { name: /^Bag/ }).click();
+  const sheet = page.getByRole("dialog", { name: "Your bag" });
   await rested(page, 0);
   const box = (await sheet.boundingBox())!;
   expect(box.width).toBeCloseTo(390, 0);
@@ -438,7 +438,7 @@ test("fits a phone screen from the bottom edge", async ({ page }) => {
   // A sheet that fits its content is only as tall as it needs to be.
   expect(box.height).toBeLessThan(500);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-  await sheet.getByRole("button", { name: "Done" }).click();
+  await sheet.getByRole("button", { name: "Checkout" }).click();
   await expect(page.locator(popup)).toHaveCount(0);
 });
 
