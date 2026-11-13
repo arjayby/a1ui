@@ -610,34 +610,6 @@
       }
     },
     {
-      "name": "stepper",
-      "type": "registry:component",
-      "title": "Stepper",
-      "description": "A numeric stepper whose value rolls in the direction of each step, repeats faster the longer you hold, and nudges at its limits.",
-      "dependencies": ["motion", "@phosphor-icons/react"],
-      "files": [
-        {
-          "path": "src/registry/components/stepper.tsx",
-          "type": "registry:component",
-          "target": "components/animated/stepper.tsx"
-        }
-      ],
-      "categories": ["input", "number", "form", "interactive", "animation"],
-      "meta": {
-        "a1ui": {
-          "useCases": [
-            "Small bounded quantities such as guests, items in a cart, or a zoom level, where plus and minus are faster than typing."
-          ],
-          "limitations": [
-            "The value cannot be typed. One size, 40 pixels tall, laid out horizontally. Feedback is visual and does not vibrate the device. The width is reserved from min, max, and the values one step inside them, so a format that is longer elsewhere in the range widens the control."
-          ],
-          "requirements": [
-            "React 19, Tailwind CSS 4, Motion, Phosphor Icons, and theme colors. Supply label and a finite min and max. Buttons step on pointer down and repeat while held. Reduced motion cross-fades the value and drops the nudge at the limits."
-          ]
-        }
-      }
-    },
-    {
       "name": "otp-input",
       "type": "registry:component",
       "title": "OTP Input",

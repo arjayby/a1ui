@@ -46,7 +46,6 @@ import { SkeletonDemo } from "@/components/component-demos/skeleton-demo";
 import { BreadcrumbDemo } from "@/components/component-demos/breadcrumb-demo";
 import { SliderDemo } from "@/components/component-demos/slider-demo";
 import { SegmentedControlDemo } from "@/components/component-demos/segmented-control-demo";
-import { StepperDemo } from "@/components/component-demos/stepper-demo";
 import { WheelPickerDemo } from "@/components/component-demos/wheel-picker-demo";
 import { OtpInputDemo } from "@/components/component-demos/otp-input-demo";
 import { ValidatedInputDemo } from "@/components/component-demos/validated-input-demo";
@@ -107,7 +106,6 @@ export function getMDXComponents(components?: MDXComponents) {
     BreadcrumbDemo,
     SliderDemo,
     SegmentedControlDemo,
-    StepperDemo,
     WheelPickerDemo,
     OtpInputDemo,
     ValidatedInputDemo,

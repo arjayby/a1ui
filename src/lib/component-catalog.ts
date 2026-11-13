@@ -24,7 +24,6 @@ const categorySlugs = [
       "segmented-control",
       "slider",
       "wheel-picker",
-      "stepper",
       "select",
     ],
   },
