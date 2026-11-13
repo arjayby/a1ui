@@ -921,29 +921,29 @@
       }
     },
     {
-      "name": "progress",
+      "name": "loader",
       "type": "registry:component",
-      "title": "Progress",
-      "description": "A progress bar, ring, or step row whose fill springs to each value while the percentage rolls like a counter.",
-      "dependencies": ["motion", "@base-ui/react"],
+      "title": "Loader",
+      "description": "Twelve looping indicators for waits of unknown length, from a leaning ring to sliding tiles, all sized and timed from two props.",
+      "dependencies": ["motion"],
       "files": [
         {
-          "path": "src/registry/components/progress.tsx",
+          "path": "src/registry/components/loader.tsx",
           "type": "registry:component",
-          "target": "components/animated/progress.tsx"
+          "target": "components/animated/loader.tsx"
         }
       ],
-      "categories": ["feedback", "progress", "animation", "loading"],
+      "categories": ["feedback", "loading", "spinner", "animation"],
       "meta": {
         "a1ui": {
           "useCases": [
-            "Uploads, onboarding checklists, quotas, and background jobs where a value changes over time or is not yet known."
+            "Searches, saves, page sections, and background jobs where the wait has no known length or percentage."
           ],
           "limitations": [
-            "Display only: the caller owns the value. The value text rolls digits 0 to 9 only, so other characters in formatValue output change instantly. The ring has one stroke width derived from its size."
+            "Indeterminate only: it cannot show a value or a percentage. The infinity dash and the morph outline animate on the main thread, so they can stutter while the page is busy; the other variants animate transform and opacity only. Stack lines travel slightly outside the box as they fade. The line variant fills its container and needs a width."
           ],
           "requirements": [
-            "React 19, Tailwind CSS 4, Motion, Base UI, and theme colors. Supply label or aria-label. Pass value={null} for indeterminate. Reduced motion jumps the fill, stops the sweep and shimmer, and swaps digits without rolling."
+            "React 19, Tailwind CSS 4, Motion, and a text color to inherit. Pick a variant, size, and cycle. The root has role status and announces label, or aria-label when there is no visible label. Reduced motion holds the shape still and breathes its opacity; a cycle of zero holds a still frame."
           ]
         }
       }

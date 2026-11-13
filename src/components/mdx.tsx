@@ -27,7 +27,7 @@ import { TabsDemo } from "@/components/component-demos/tabs-demo";
 import { RadioGroupDemo } from "@/components/component-demos/radio-group-demo";
 import { ToggleGroupDemo } from "@/components/component-demos/toggle-group-demo";
 import { AccordionDemo } from "@/components/component-demos/accordion-demo";
-import { ProgressDemo } from "@/components/component-demos/progress-demo";
+import { LoaderDemo } from "@/components/component-demos/loader-demo";
 import { DialogDemo } from "@/components/component-demos/dialog-demo";
 import { AlertDialogDemo } from "@/components/component-demos/alert-dialog-demo";
 import { SheetDemo } from "@/components/component-demos/sheet-demo";
@@ -89,7 +89,7 @@ export function getMDXComponents(components?: MDXComponents) {
     RadioGroupDemo,
     ToggleGroupDemo,
     AccordionDemo,
-    ProgressDemo,
+    LoaderDemo,
     DialogDemo,
     AlertDialogDemo,
     SheetDemo,

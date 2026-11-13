@@ -8,10 +8,10 @@ import { componentMetadata } from "@/lib/doc-metadata";
 import { componentsGroup, docStructuredData, JsonLd } from "@/lib/seo";
 import { source } from "@/lib/source";
 
-export const metadata = componentMetadata("progress");
+export const metadata = componentMetadata("loader");
 
-export default function ProgressPage() {
-  const page = source.getPage(["components", "progress"]);
+export default function LoaderPage() {
+  const page = source.getPage(["components", "loader"]);
   if (!page) notFound();
   const MDX = page.data.body;
 
@@ -22,7 +22,7 @@ export default function ProgressPage() {
           group: componentsGroup,
           title: page.data.title,
           description: page.data.description ?? "",
-          path: "/components/progress",
+          path: "/components/loader",
         })}
       />
       <header>
@@ -32,7 +32,7 @@ export default function ProgressPage() {
         </div>
         <h1>{page.data.title}</h1>
         <p>{page.data.description}</p>
-        <AgentInstall name="progress" />
+        <AgentInstall name="loader" />
       </header>
       <DocsToc items={page.data.toc} />
       <div className="docs-article-body prose">

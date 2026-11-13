@@ -42,7 +42,7 @@ const categorySlugs = [
       "context-menu",
     ],
   },
-  { title: "Feedback & Status", slugs: ["toast", "progress", "skeleton"] },
+  { title: "Feedback & Status", slugs: ["toast", "loader", "skeleton"] },
   {
     title: "Data Display",
     slugs: [

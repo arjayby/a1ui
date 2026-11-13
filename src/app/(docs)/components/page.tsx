@@ -16,7 +16,7 @@ import { TabsPreview } from "@/components/component-demos/tabs-demo";
 import { RadioGroupPreview } from "@/components/component-demos/radio-group-demo";
 import { ToggleGroupPreview } from "@/components/component-demos/toggle-group-demo";
 import { AccordionPreview } from "@/components/component-demos/accordion-demo";
-import { ProgressPreview } from "@/components/component-demos/progress-demo";
+import { LoaderPreview } from "@/components/component-demos/loader-demo";
 import { DialogPreview } from "@/components/component-demos/dialog-demo";
 import { AlertDialogPreview } from "@/components/component-demos/alert-dialog-demo";
 import { SheetPreview } from "@/components/component-demos/sheet-demo";
@@ -68,7 +68,7 @@ const previews: Record<string, ReactNode> = {
   "radio-group": <RadioGroupPreview />,
   "toggle-group": <ToggleGroupPreview />,
   accordion: <AccordionPreview />,
-  progress: <ProgressPreview />,
+  loader: <LoaderPreview />,
   dialog: <DialogPreview />,
   "alert-dialog": <AlertDialogPreview />,
   sheet: <SheetPreview />,
