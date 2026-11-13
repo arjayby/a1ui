@@ -1,6 +1,5 @@
 "use client";
 
-import { PencilSimpleIcon } from "@phosphor-icons/react";
 import { useState } from "react";
 
 import { DemoDuration, DemoSelect } from "@/components/component-demos/demo-controls";
@@ -50,10 +49,7 @@ export function DialogDemo() {
       <div className="component-demo-stage">
         <div className="flex w-full max-w-md items-center justify-center px-4">
           <Dialog duration={duration} dismissible={dismissible}>
-            <DialogTrigger>
-              <PencilSimpleIcon aria-hidden="true" />
-              Edit project
-            </DialogTrigger>
+            <DialogTrigger>Edit project</DialogTrigger>
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Edit project</DialogTitle>
