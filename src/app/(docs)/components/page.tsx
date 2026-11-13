@@ -43,7 +43,6 @@ import { ValidatedInputPreview } from "@/components/component-demos/validated-in
 import { TagInputPreview } from "@/components/component-demos/tag-input-demo";
 import { PasswordInputPreview } from "@/components/component-demos/password-input-demo";
 import { SwipeRowPreview } from "@/components/component-demos/swipe-row-demo";
-import { ReorderListPreview } from "@/components/component-demos/reorder-list-demo";
 import { components } from "@/lib/component-catalog";
 import { collectionStructuredData, componentsGroup, JsonLd, pageMetadata } from "@/lib/seo";
 
@@ -95,7 +94,6 @@ const previews: Record<string, ReactNode> = {
   "tag-input": <TagInputPreview />,
   "password-input": <PasswordInputPreview />,
   "swipe-row": <SwipeRowPreview />,
-  "reorder-list": <ReorderListPreview />,
 };
 
 export default function ComponentsPage() {

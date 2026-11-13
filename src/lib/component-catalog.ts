@@ -52,7 +52,6 @@ const categorySlugs = [
       "lightbox",
       "kbd",
       "accordion",
-      "reorder-list",
       "swipe-row",
     ],
   },
