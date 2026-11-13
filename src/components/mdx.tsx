@@ -25,7 +25,7 @@ import { SwitchDemo } from "@/components/component-demos/switch-demo";
 import { CheckboxDemo } from "@/components/component-demos/checkbox-demo";
 import { TabsDemo } from "@/components/component-demos/tabs-demo";
 import { RadioGroupDemo } from "@/components/component-demos/radio-group-demo";
-import { ToggleGroupDemo } from "@/components/component-demos/toggle-group-demo";
+import { ChipGroupDemo } from "@/components/component-demos/chip-group-demo";
 import { AccordionDemo } from "@/components/component-demos/accordion-demo";
 import { LoaderDemo } from "@/components/component-demos/loader-demo";
 import { DialogDemo } from "@/components/component-demos/dialog-demo";
@@ -85,7 +85,7 @@ export function getMDXComponents(components?: MDXComponents) {
     CheckboxDemo,
     TabsDemo,
     RadioGroupDemo,
-    ToggleGroupDemo,
+    ChipGroupDemo,
     AccordionDemo,
     LoaderDemo,
     DialogDemo,

@@ -14,7 +14,7 @@ import { SwitchPreview } from "@/components/component-demos/switch-demo";
 import { CheckboxPreview } from "@/components/component-demos/checkbox-demo";
 import { TabsPreview } from "@/components/component-demos/tabs-demo";
 import { RadioGroupPreview } from "@/components/component-demos/radio-group-demo";
-import { ToggleGroupPreview } from "@/components/component-demos/toggle-group-demo";
+import { ChipGroupPreview } from "@/components/component-demos/chip-group-demo";
 import { AccordionPreview } from "@/components/component-demos/accordion-demo";
 import { LoaderPreview } from "@/components/component-demos/loader-demo";
 import { DialogPreview } from "@/components/component-demos/dialog-demo";
@@ -64,7 +64,7 @@ const previews: Record<string, ReactNode> = {
   checkbox: <CheckboxPreview />,
   tabs: <TabsPreview />,
   "radio-group": <RadioGroupPreview />,
-  "toggle-group": <ToggleGroupPreview />,
+  "chip-group": <ChipGroupPreview />,
   accordion: <AccordionPreview />,
   loader: <LoaderPreview />,
   dialog: <DialogPreview />,

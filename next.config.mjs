@@ -22,6 +22,14 @@ const nextConfig = {
       .flatMap(({ name }) => [
         { source: `/components/${name}`, destination: `/blocks/${name}`, permanent: true },
         { source: `/docs/components/${name}.md`, destination: `/docs/blocks/${name}.md`, permanent: true },
+      ])
+      .concat([
+        { source: "/components/toggle-group", destination: "/components/chip-group", permanent: true },
+        {
+          source: "/docs/components/toggle-group.md",
+          destination: "/docs/components/chip-group.md",
+          permanent: true,
+        },
       ]);
   },
 };

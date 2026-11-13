@@ -8,10 +8,10 @@ import { componentMetadata } from "@/lib/doc-metadata";
 import { componentsGroup, docStructuredData, JsonLd } from "@/lib/seo";
 import { source } from "@/lib/source";
 
-export const metadata = componentMetadata("toggle-group");
+export const metadata = componentMetadata("chip-group");
 
-export default function ToggleGroupPage() {
-  const page = source.getPage(["components", "toggle-group"]);
+export default function ChipGroupPage() {
+  const page = source.getPage(["components", "chip-group"]);
   if (!page) notFound();
   const MDX = page.data.body;
 
@@ -22,7 +22,7 @@ export default function ToggleGroupPage() {
           group: componentsGroup,
           title: page.data.title,
           description: page.data.description ?? "",
-          path: "/components/toggle-group",
+          path: "/components/chip-group",
         })}
       />
       <header>
@@ -32,7 +32,7 @@ export default function ToggleGroupPage() {
         </div>
         <h1>{page.data.title}</h1>
         <p>{page.data.description}</p>
-        <AgentInstall name="toggle-group" />
+        <AgentInstall name="chip-group" />
       </header>
       <DocsToc items={page.data.toc} />
       <div className="docs-article-body prose">

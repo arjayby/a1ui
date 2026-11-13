@@ -1198,19 +1198,19 @@
       "docs": "Read http://localhost:3000/docs/components/radio-group.md for usage, required props, and integration instructions."
     },
     {
-      "name": "toggle-group",
+      "name": "chip-group",
       "type": "registry:component",
-      "title": "Toggle Group",
-      "description": "A segmented control whose surface slides between items, or chips that pop in with a check when pressed.",
+      "title": "Chip Group",
+      "description": "Chips that press on their own, popping in with a drawn check.",
       "dependencies": [
         "motion",
         "@base-ui/react"
       ],
       "files": [
         {
-          "path": "src/registry/components/toggle-group.tsx",
+          "path": "src/registry/components/chip-group.tsx",
           "type": "registry:component",
-          "target": "components/animated/toggle-group.tsx"
+          "target": "components/animated/chip-group.tsx"
         }
       ],
       "categories": [
@@ -1222,19 +1222,19 @@
       "meta": {
         "a1ui": {
           "useCases": [
-            "Switching a view or alignment with a segmented control, or picking several filters as chips."
+            "Picking several filters, tags, or formatting options as chips."
           ],
           "limitations": [
-            "Single mode keeps one item pressed once chosen. Chips wrap onto new lines; the segmented track expects one row. Icon-only detection treats any item without text children as icon-only."
+            "Multiple selection only; use SegmentedControl for a single choice. Chips wrap onto new lines. Icon-only detection treats any item without text children as icon-only."
           ],
           "requirements": [
-            "React 19, Tailwind CSS 4, Motion, Base UI, and theme colors. Give each ToggleGroupItem a unique string value, the group an aria-label, and icon-only items an aria-label. Reduced motion moves the surface and presses chips instantly."
+            "React 19, Tailwind CSS 4, Motion, Base UI, and theme colors. Give each ChipGroupItem a unique string value, the group an aria-label, and icon-only items an aria-label. Reduced motion presses chips instantly."
           ],
-          "docsUrl": "http://localhost:3000/docs/components/toggle-group.md",
-          "registryUrl": "http://localhost:3000/r/toggle-group.json"
+          "docsUrl": "http://localhost:3000/docs/components/chip-group.md",
+          "registryUrl": "http://localhost:3000/r/chip-group.json"
         }
       },
-      "docs": "Read http://localhost:3000/docs/components/toggle-group.md for usage, required props, and integration instructions."
+      "docs": "Read http://localhost:3000/docs/components/chip-group.md for usage, required props, and integration instructions."
     },
     {
       "name": "accordion",

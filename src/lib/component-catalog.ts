@@ -20,7 +20,7 @@ const categorySlugs = [
       "checkbox",
       "switch",
       "radio-group",
-      "toggle-group",
+      "chip-group",
       "segmented-control",
       "slider",
       "wheel-picker",
@@ -44,15 +44,7 @@ const categorySlugs = [
   { title: "Feedback & Status", slugs: ["toast", "loader", "skeleton"] },
   {
     title: "Data Display",
-    slugs: [
-      "badge",
-      "rolling-number",
-      "avatar-group",
-      "lightbox",
-      "kbd",
-      "accordion",
-      "swipe-row",
-    ],
+    slugs: ["badge", "rolling-number", "avatar-group", "lightbox", "kbd", "accordion", "swipe-row"],
   },
 ] as const;
 
