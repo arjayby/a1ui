@@ -135,7 +135,7 @@ export function RadioGroupItem({
           transition={{ type: "spring", visualDuration: 0.2, bounce: 0 }}
         />
       }
-      className={`border-border bg-background data-checked:border-foreground focus-visible:ring-ring/30 relative inline-grid size-[18px] shrink-0 cursor-pointer place-items-center rounded-full border shadow-xs transition-colors duration-150 outline-none focus-visible:ring-3 data-disabled:cursor-not-allowed ${label ? "mt-px" : `data-disabled:opacity-50 ${className ?? ""}`}`}
+      className={`border-muted-foreground/50 hover:border-muted-foreground/80 bg-background data-checked:border-foreground focus-visible:ring-ring/30 relative inline-grid size-[18px] shrink-0 cursor-pointer place-items-center rounded-full border shadow-xs transition-colors duration-150 outline-none focus-visible:ring-3 data-disabled:cursor-not-allowed ${label ? "mt-px" : `data-disabled:opacity-50 ${className ?? ""}`}`}
     >
       {checked && (
         <motion.span
