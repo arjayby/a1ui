@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 
-import { DemoSelect } from "@/components/component-demos/demo-controls";
-import { Switch } from "@/components/ui/switch";
+import { DemoSelect, DemoSwitch } from "@/components/component-demos/demo-controls";
 import { ReorderList, ReorderListHandle, ReorderListItem } from "@/registry/components/reorder-list";
 
 interface Task {
@@ -91,12 +90,7 @@ export function ReorderListDemo() {
       </div>
       <div className="component-demo-controls">
         <DemoSelect label="List" value={length} options={["short", "long"]} onChange={setLength} />
-        <label className="component-demo-control">
-          <span>Drag handle</span>
-          <span className="flex h-8 items-center">
-            <Switch checked={handle} onCheckedChange={setHandle} />
-          </span>
-        </label>
+        <DemoSwitch label="Drag handle" checked={handle} onChange={setHandle} />
       </div>
     </div>
   );

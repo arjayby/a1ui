@@ -3,7 +3,7 @@
 import { ArrowCounterClockwiseIcon, MinusIcon, PlusIcon } from "@phosphor-icons/react";
 import { useEffect, useState } from "react";
 
-import { DemoDuration, DemoSelect } from "@/components/component-demos/demo-controls";
+import { DemoDuration, DemoSelect, DemoSwitch } from "@/components/component-demos/demo-controls";
 import { Button } from "@/components/ui/button";
 import { RollingNumber } from "@/registry/components/rolling-number";
 
@@ -21,8 +21,6 @@ const labels: Record<Format, string> = {
   percent: "Conversion rate",
   compact: "Page views",
 };
-type Toggle = "on" | "off";
-const toggles: Toggle[] = ["on", "off"];
 const START = 1284;
 // Steps that cross 999 and 1,000 within a few clicks, so columns enter and leave.
 const ADD = 137;
@@ -55,7 +53,7 @@ export function RollingNumberPreview() {
 
 export function RollingNumberDemo() {
   const [format, setFormat] = useState<Format>("number");
-  const [delta, setDelta] = useState<Toggle>("on");
+  const [delta, setDelta] = useState(true);
   const [duration, setDuration] = useState(0.5);
   const [value, setValue] = useState(START);
 
@@ -70,7 +68,7 @@ export function RollingNumberDemo() {
               value={scale(format, value)}
               locale="en-US"
               format={options[format]}
-              delta={delta === "on"}
+              delta={delta}
               announce
               duration={duration}
               // A phone has no room beside a long number, so the chip sits under it there.
@@ -95,7 +93,7 @@ export function RollingNumberDemo() {
       </div>
       <div className="component-demo-controls [&_[data-slot=demo-select-trigger]]:w-32">
         <DemoSelect label="Format" value={format} options={formats} onChange={setFormat} />
-        <DemoSelect label="Delta chip" value={delta} options={toggles} onChange={setDelta} />
+        <DemoSwitch label="Delta chip" checked={delta} onChange={setDelta} />
         <DemoDuration value={duration} onChange={setDuration} />
       </div>
     </div>

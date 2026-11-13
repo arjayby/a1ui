@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 
-import { DemoSelect } from "@/components/component-demos/demo-controls";
-import { Switch } from "@/components/ui/switch";
+import { DemoSelect, DemoSwitch } from "@/components/component-demos/demo-controls";
 import { Lightbox, type LightboxImage } from "@/registry/components/lightbox";
 
 type Scene = {
@@ -137,12 +136,7 @@ export function LightboxDemo() {
       </div>
       <div className="component-demo-controls">
         <DemoSelect label="Images" value={set} options={["gallery", "single"]} onChange={setSet} />
-        <label className="component-demo-control">
-          <span>Arrow buttons</span>
-          <span className="flex h-8 items-center">
-            <Switch checked={showArrows} onCheckedChange={setShowArrows} />
-          </span>
-        </label>
+        <DemoSwitch label="Arrow buttons" checked={showArrows} onChange={setShowArrows} />
       </div>
     </div>
   );

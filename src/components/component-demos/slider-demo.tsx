@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 
-import { DemoSelect } from "@/components/component-demos/demo-controls";
-import { Switch } from "@/components/ui/switch";
+import { DemoSelect, DemoSwitch } from "@/components/component-demos/demo-controls";
 import { Slider } from "@/registry/components/slider";
 
 const layouts = {
@@ -48,12 +47,7 @@ export function SliderDemo() {
           options={["light", "medium", "firm"]}
           onChange={setStrength}
         />
-        <label className="component-demo-control">
-          <span>Stop labels</span>
-          <span className="flex h-8 items-center">
-            <Switch checked={showStopLabels} onCheckedChange={setShowStopLabels} />
-          </span>
-        </label>
+        <DemoSwitch label="Stop labels" checked={showStopLabels} onChange={setShowStopLabels} />
       </div>
     </div>
   );

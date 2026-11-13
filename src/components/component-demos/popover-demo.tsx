@@ -3,9 +3,8 @@
 import { ShareNetworkIcon } from "@phosphor-icons/react";
 import { useRef, useState } from "react";
 
-import { DemoDuration, DemoSelect } from "@/components/component-demos/demo-controls";
+import { DemoDuration, DemoSelect, DemoSwitch } from "@/components/component-demos/demo-controls";
 import { Button } from "@/components/ui/button";
-import { Switch as DemoSwitch } from "@/components/ui/switch";
 import { CopyButton } from "@/registry/components/copy-button";
 import {
   Popover,
@@ -72,12 +71,7 @@ export function PopoverDemo() {
         <SharePopover key={`${morph}-${duration}`} morph={morph} side={side} duration={duration} />
       </div>
       <div className="component-demo-controls">
-        <label className="component-demo-control">
-          <span>Morph</span>
-          <span className="flex h-8 items-center">
-            <DemoSwitch checked={morph} onCheckedChange={setMorph} />
-          </span>
-        </label>
+        <DemoSwitch label="Morph" checked={morph} onChange={setMorph} />
         <DemoSelect label="Side" value={side} options={sides} onChange={setSide} />
         <DemoDuration value={duration} onChange={setDuration} />
       </div>

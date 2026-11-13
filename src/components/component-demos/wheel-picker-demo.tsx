@@ -2,9 +2,8 @@
 
 import { useState } from "react";
 
-import { DemoSelect } from "@/components/component-demos/demo-controls";
+import { DemoSelect, DemoSwitch } from "@/components/component-demos/demo-controls";
 import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
 import { WheelPicker, WheelPickerGroup } from "@/registry/components/wheel-picker";
 
 const hours = Array.from({ length: 12 }, (_, index) => ({ value: String(index + 1) }));
@@ -145,12 +144,7 @@ export function WheelPickerDemo() {
       </div>
       <div className="component-demo-controls">
         <DemoSelect label="Picker" value={picker} options={["time", "date"]} onChange={setPicker} />
-        <label className="component-demo-control">
-          <span>Haptics</span>
-          <span className="flex h-8 items-center">
-            <Switch checked={haptics} onCheckedChange={setHaptics} />
-          </span>
-        </label>
+        <DemoSwitch label="Haptics" checked={haptics} onChange={setHaptics} />
       </div>
     </div>
   );

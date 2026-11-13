@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 
-import { DemoSelect } from "@/components/component-demos/demo-controls";
-import { Switch } from "@/components/ui/switch";
+import { DemoSelect, DemoSwitch } from "@/components/component-demos/demo-controls";
 import { OtpInput } from "@/registry/components/otp-input";
 
 const lengths = ["4", "6", "8"] as const;
@@ -59,12 +58,7 @@ export function OtpInputDemo() {
             setCode("");
           }}
         />
-        <label className="component-demo-control">
-          <span>Separator</span>
-          <span className="flex h-8 items-center">
-            <Switch checked={separator} onCheckedChange={setSeparator} />
-          </span>
-        </label>
+        <DemoSwitch label="Separator" checked={separator} onChange={setSeparator} />
         <div className="component-demo-control">
           <span>Correct code</span>
           <span

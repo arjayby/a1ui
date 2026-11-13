@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 
-import { DemoSelect } from "@/components/component-demos/demo-controls";
-import { Switch } from "@/components/ui/switch";
+import { DemoSelect, DemoSwitch } from "@/components/component-demos/demo-controls";
 import { Stepper, type StepperProps } from "@/registry/components/stepper";
 
 const presets = {
@@ -49,12 +48,7 @@ export function StepperDemo() {
           options={["guests", "budget", "zoom"]}
           onChange={setPreset}
         />
-        <label className="component-demo-control">
-          <span>Disabled</span>
-          <span className="flex h-8 items-center">
-            <Switch checked={disabled} onCheckedChange={setDisabled} />
-          </span>
-        </label>
+        <DemoSwitch label="Disabled" checked={disabled} onChange={setDisabled} />
       </div>
     </div>
   );

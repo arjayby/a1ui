@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 
-import { DemoSelect } from "@/components/component-demos/demo-controls";
-import { Switch } from "@/components/ui/switch";
+import { DemoSelect, DemoSwitch } from "@/components/component-demos/demo-controls";
 import {
   Sheet,
   SheetBody,
@@ -113,12 +112,7 @@ export function SheetDemo() {
       <div className="component-demo-controls [&_[data-slot=demo-select-trigger]]:w-32">
         <DemoSelect label="Side" value={side} options={sides} onChange={setSide} />
         <DemoSelect label="Detents" value={size} options={sizeOptions} onChange={setSize} />
-        <label className="component-demo-control">
-          <span>Push back</span>
-          <span className="flex h-8 items-center">
-            <Switch checked={pushBack} onCheckedChange={setPushBack} />
-          </span>
-        </label>
+        <DemoSwitch label="Push back" checked={pushBack} onChange={setPushBack} />
       </div>
     </div>
   );

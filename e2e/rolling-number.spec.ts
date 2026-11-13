@@ -178,9 +178,7 @@ test("formats through Intl.NumberFormat and works from the keyboard", async ({ p
   await expect(frame.locator('[data-slot="rolling-number-text"]')).toHaveText("35.5K");
   await expect(frame.locator('[data-slot="rolling-number-delta"]')).toHaveText("+3.4K");
 
-  await page.getByRole("button", { name: /^Delta chip:/ }).click();
-  await page.getByRole("menuitem", { name: "off", exact: true }).click();
-  await page.keyboard.press("Escape");
+  await page.getByRole("switch", { name: "Delta chip" }).uncheck();
   await frame.getByRole("button", { name: "Reset" }).click();
   await expect(value).toHaveAttribute("data-value", "32.1K");
   await expect(frame.locator('[data-slot="rolling-number-delta"]')).toHaveCount(0);

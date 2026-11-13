@@ -2,6 +2,7 @@ import { Check, ChevronDown } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/registry/components/slider";
+import { Switch } from "@/registry/components/switch";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -53,6 +54,26 @@ export function DemoSelect<T extends string>({
         </DropdownMenuContent>
       </DropdownMenu>
     </div>
+  );
+}
+
+export function DemoSwitch({
+  label,
+  checked,
+  onChange,
+}: {
+  label: string;
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+}) {
+  return (
+    <label className="component-demo-control">
+      <span>{label}</span>
+      {/* As tall as the dropdown triggers, so a row of controls shares one baseline. */}
+      <span className="flex h-8 items-center">
+        <Switch aria-label={label} checked={checked} onCheckedChange={onChange} />
+      </span>
+    </label>
   );
 }
 

@@ -4,9 +4,8 @@ import { EnvelopeSimpleIcon, EnvelopeSimpleOpenIcon, PushPinIcon, TrashIcon } fr
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useState } from "react";
 
-import { DemoSelect } from "@/components/component-demos/demo-controls";
+import { DemoSelect, DemoSwitch } from "@/components/component-demos/demo-controls";
 import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
 import {
   SwipeRow,
   SwipeRowGroup,
@@ -152,12 +151,7 @@ export function SwipeRowDemo() {
       </div>
       <div className="component-demo-controls">
         <DemoSelect label="Actions" value={sides} options={sideOptions} onChange={setSides} />
-        <label className="component-demo-control">
-          <span>Full swipe</span>
-          <span className="flex h-8 items-center">
-            <Switch checked={fullSwipe} onCheckedChange={setFullSwipe} />
-          </span>
-        </label>
+        <DemoSwitch label="Full swipe" checked={fullSwipe} onChange={setFullSwipe} />
         <div className="component-demo-control">
           <span>Rows</span>
           <Button variant="outline" size="sm" onClick={reset}>
