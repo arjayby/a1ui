@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowCounterClockwiseIcon, MinusIcon, PlusIcon } from "@phosphor-icons/react";
+import { MinusIcon, PlusIcon } from "@phosphor-icons/react";
 import { useEffect, useState } from "react";
 
 import { DemoDuration, DemoSelect, DemoSwitch } from "@/components/component-demos/demo-controls";
@@ -12,7 +12,7 @@ const formats: Format[] = ["number", "currency", "percent", "compact"];
 const options: Record<Format, Intl.NumberFormatOptions> = {
   number: {},
   currency: { style: "currency", currency: "USD" },
-  percent: { style: "percent", maximumFractionDigits: 1 },
+  percent: { style: "percent", maximumFractionDigits: 2 },
   compact: { notation: "compact", maximumFractionDigits: 1 },
 };
 const labels: Record<Format, string> = {
@@ -23,10 +23,15 @@ const labels: Record<Format, string> = {
 };
 const START = 1284;
 // Steps that cross 999 and 1,000 within a few clicks, so columns enter and leave.
-const ADD = 137;
-const SUBTRACT = 420;
+const INCREASE = 69;
+const DECREASE = 420;
+// Each format shows the same counter at its own scale, chosen so every value and step prints
+// exactly: 1,284 is 12.84% and 128.4K, and a step of 69 is 0.69% and 6.9K.
 const scale = (format: Format, value: number) =>
-  format === "percent" ? value / 10000 : format === "compact" ? value * 25 : value;
+  format === "percent" ? value / 10000 : format === "compact" ? value * 100 : value;
+// Button labels name the step in the current format, so they match the delta chip.
+const step = (format: Format, amount: number) =>
+  new Intl.NumberFormat("en-US", { ...options[format], minimumFractionDigits: 0 }).format(scale(format, amount));
 
 // The catalog card walks through a fixed set of changes, up and down across a new column.
 const PREVIEW_STEPS = [318, -45, 1206, -1730, 251];
@@ -76,17 +81,13 @@ export function RollingNumberDemo() {
             />
           </div>
           <div className="flex flex-wrap justify-center gap-2">
-            <Button variant="outline" size="sm" onClick={() => setValue((current) => current + ADD)}>
+            <Button variant="outline" size="sm" onClick={() => setValue((current) => current + INCREASE)}>
               <PlusIcon aria-hidden="true" weight="bold" />
-              Add {ADD}
+              Increase {step(format, INCREASE)}
             </Button>
-            <Button variant="outline" size="sm" onClick={() => setValue((current) => current - SUBTRACT)}>
+            <Button variant="outline" size="sm" onClick={() => setValue((current) => current - DECREASE)}>
               <MinusIcon aria-hidden="true" weight="bold" />
-              Subtract {SUBTRACT}
-            </Button>
-            <Button variant="ghost" size="sm" disabled={value === START} onClick={() => setValue(START)}>
-              <ArrowCounterClockwiseIcon aria-hidden="true" weight="bold" />
-              Reset
+              Decrease {step(format, DECREASE)}
             </Button>
           </div>
         </div>

@@ -55,7 +55,7 @@ export function Revenue({ total }: { total: number }) {
 - Each digit is its own wheel. It rolls up when the value rises and down when it falls, and passes through 0 when it wraps, so 19 to 21 turns the ones wheel forward from 9 to 1.
 - A new value in the middle of a roll retargets every wheel from where it is on screen and keeps its speed, so quick changes never restart or jump.
 - Digits use tabular figures and keep their place value. Going from 999 to 1,000 opens a new column and separator at their width while the other columns stay where they are.
-- The delta chip sits outside the number's box, so it never moves the number. It shows the change with a sign and an arrow, in neutral colors. Style it by direction with `data-direction="up"` or `"down"` on `[data-slot="rolling-number-delta"]`.
+- The delta chip sits outside the number's box, so it never moves the number. It shows the change with a sign and an arrow, green for an increase and red for a decrease, in Inter. Style it by direction with `data-direction="up"` or `"down"` on `[data-slot="rolling-number-delta"]`.
 
 ## Accessibility
 

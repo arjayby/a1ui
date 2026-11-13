@@ -65,15 +65,15 @@ test("digits roll up for an increase and down for a decrease", async ({ page }) 
   await expect(text).toHaveAttribute("aria-live", "polite");
   await expect(value).toHaveAttribute("aria-hidden", "true");
 
-  // 1,284 to 1,421: the ones wheel turns forward from 4 through 9 and 0 to 1.
-  const up = await sample(frame, [[0, "Add"]], 1400);
-  await expect(value).toHaveAttribute("data-value", "1,421");
+  // 1,284 to 1,353: the ones wheel turns forward from 4 through 9 and 0 to 3.
+  const up = await sample(frame, [[0, "Increase"]], 1400);
+  await expect(value).toHaveAttribute("data-value", "1,353");
   await expect(value).toHaveAttribute("data-direction", "up");
-  await expect(text).toHaveText("1,421");
+  await expect(text).toHaveText("1,353");
   const ones = up.map(({ wheels }) => wheels[3]);
   expect(ones[0]).toBeCloseTo(4, 1);
   expect(ones.some((position) => position > 6 && position < 9.5)).toBe(true);
-  expect(ones.at(-1)).toBeCloseTo(1, 1);
+  expect(ones.at(-1)).toBeCloseTo(3, 1);
   // Never backward: every frame moves the wheel forward or leaves it where it is.
   for (let index = 1; index < ones.length; index++) {
     expect(turn(ones[index - 1], ones[index])).toBeGreaterThan(-0.01);
@@ -84,16 +84,22 @@ test("digits roll up for an increase and down for a decrease", async ({ page }) 
 
   // The delta chip names the change with a sign and an arrow, then leaves.
   const chip = frame.locator('[data-slot="rolling-number-delta"]');
-  await expect(chip).toHaveText("+137");
+  await expect(chip).toHaveText("+69");
   await expect(chip).toHaveAttribute("data-direction", "up");
   await expect(chip.locator("svg")).toHaveCount(1);
+  await expect(chip).toHaveCSS("font-family", /^Inter/);
+  await expect(chip).toHaveClass(/text-emerald-700/);
   await expect(chip).toHaveCount(0, { timeout: 6000 });
 
-  // 1,421 to 1,001: the tens wheel turns backward from 2 to 0.
-  const down = await sample(frame, [[0, "Subtract"]], 1400);
+  // 1,353 to 1,422, then 1,422 to 1,002: the tens wheel turns backward from 2 to 0.
+  await frame.getByRole("button", { name: "Increase 69" }).click();
+  await expect(value).toHaveAttribute("data-value", "1,422");
+  await expect(chip).toHaveCount(0, { timeout: 6000 });
+  const down = await sample(frame, [[0, "Decrease"]], 1400);
   await expect(value).toHaveAttribute("data-direction", "down");
   await expect(chip).toHaveText("-420");
   await expect(chip).toHaveAttribute("data-direction", "down");
+  await expect(chip).toHaveClass(/text-red-700/);
   const tens = down.map(({ wheels }) => wheels[2]);
   expect(tens.some((position) => position > 0.2 && position < 1.8)).toBe(true);
   for (let index = 1; index < tens.length; index++) {
@@ -104,20 +110,23 @@ test("digits roll up for an increase and down for a decrease", async ({ page }) 
 
 test("a new value mid-roll retargets from where the wheels are", async ({ page }) => {
   const { frame, value } = await open(page);
-  // Add starts the tens wheel forward from 8 toward 2; Subtract lands while it is still turning.
+  await frame.getByRole("button", { name: "Increase 69" }).click();
+  await expect(value).toHaveAttribute("data-value", "1,353");
+  await expect(frame.locator('[data-slot="rolling-number-delta"]')).toHaveCount(0, { timeout: 6000 });
+  // Increase starts the tens wheel forward from 5 toward 2; Decrease lands while it is still turning.
   const frames = await sample(
     frame,
     [
-      [0, "Add"],
-      [110, "Subtract"],
+      [0, "Increase"],
+      [110, "Decrease"],
     ],
     1600,
   );
-  await expect(value).toHaveAttribute("data-value", "1,001");
+  await expect(value).toHaveAttribute("data-value", "1,002");
   const interrupted = frames.findIndex(({ time }) => time >= 110);
   const tens = frames.map(({ wheels }) => wheels[2]);
   // The wheel had left 8 and was between digits when the second value arrived.
-  expect(Math.abs(turn(8, tens[interrupted]))).toBeGreaterThan(0.05);
+  expect(Math.abs(turn(5, tens[interrupted]))).toBeGreaterThan(0.05);
   // No frame restarts or teleports: each wheel moves no faster than a spring could carry it. The
   // window spans two frames, because a spring catches up in the frame after a dropped one.
   for (let index = 1; index < frames.length; index++) {
@@ -126,7 +135,7 @@ test("a new value mid-roll retargets from where the wheels are", async ({ page }
       expect(Math.abs(turn(frames[index - 1].wheels[wheel], position))).toBeLessThan(45 * elapsed + 0.2);
     });
   }
-  expect(frames.at(-1)!.wheels.map((position) => Math.abs(Math.round(position)) % 10)).toEqual([1, 0, 0, 1]);
+  expect(frames.at(-1)!.wheels.map((position) => Math.abs(Math.round(position)) % 10)).toEqual([1, 0, 0, 2]);
 });
 
 test("columns enter and leave at their own width without a jump", async ({ page }) => {
@@ -136,7 +145,7 @@ test("columns enter and leave at their own width without a jump", async ({ page 
   const digitWidth = (await digits.last().boundingBox())!.width;
 
   // 1,284 to 864: the thousands column and its separator close up.
-  const closing = await sample(frame, [[0, "Subtract"]], 1800);
+  const closing = await sample(frame, [[0, "Decrease"]], 1800);
   await expect(digits).toHaveCount(3);
   await expect(symbols).toHaveCount(0);
   const widths = closing.map(({ width }) => width);
@@ -149,8 +158,11 @@ test("columns enter and leave at their own width without a jump", async ({ page 
     closing.every(({ slots }) => slots.slice(-3).every((slot) => Math.abs(slot - digitWidth) < 0.5)),
   ).toBe(true);
 
-  // 864 to 1,001: they open again from nothing.
-  const opening = await sample(frame, [[0, "Add"]], 1800);
+  // 864 to 933, then 933 to 1,002: they open again from nothing.
+  await frame.getByRole("button", { name: "Increase 69" }).click();
+  await expect(value).toHaveAttribute("data-value", "933");
+  await page.waitForTimeout(1200);
+  const opening = await sample(frame, [[0, "Increase"]], 1800);
   await expect(digits).toHaveCount(4);
   await expect(symbols).toHaveText([","]);
   const grown = opening.map(({ width }) => width);
@@ -168,19 +180,20 @@ test("formats through Intl.NumberFormat and works from the keyboard", async ({ p
   await expect(value).toHaveAttribute("data-value", "$1,284.00");
   await expect(value.locator('[data-slot="rolling-number-symbol"]')).toHaveText(["$", ",", "."]);
   await pick("percent");
-  await expect(value).toHaveAttribute("data-value", "12.8%");
+  await expect(value).toHaveAttribute("data-value", "12.84%");
+  await expect(frame.getByRole("button", { name: "Increase 0.69%" })).toBeVisible();
   await pick("compact");
-  await expect(value).toHaveAttribute("data-value", "32.1K");
+  await expect(value).toHaveAttribute("data-value", "128.4K");
 
-  await frame.getByRole("button", { name: "Add 137" }).focus();
+  await frame.getByRole("button", { name: "Increase 6.9K" }).focus();
   await page.keyboard.press("Enter");
-  await expect(value).toHaveAttribute("data-value", "35.5K");
-  await expect(frame.locator('[data-slot="rolling-number-text"]')).toHaveText("35.5K");
-  await expect(frame.locator('[data-slot="rolling-number-delta"]')).toHaveText("+3.4K");
+  await expect(value).toHaveAttribute("data-value", "135.3K");
+  await expect(frame.locator('[data-slot="rolling-number-text"]')).toHaveText("135.3K");
+  await expect(frame.locator('[data-slot="rolling-number-delta"]')).toHaveText("+6.9K");
 
   await page.getByRole("switch", { name: "Delta chip" }).uncheck();
-  await frame.getByRole("button", { name: "Reset" }).click();
-  await expect(value).toHaveAttribute("data-value", "32.1K");
+  await frame.getByRole("button", { name: "Decrease 42K" }).click();
+  await expect(value).toHaveAttribute("data-value", "93.3K");
   await expect(frame.locator('[data-slot="rolling-number-delta"]')).toHaveCount(0);
 });
 
@@ -196,7 +209,7 @@ test("reduced motion cross-fades the changed digits on mobile", async ({ page })
   const seen = await frame.evaluate(async (root: Element) => {
     const columns = [...root.querySelectorAll('[data-slot="rolling-number-digit"]')];
     const box = root.querySelector('[data-slot="rolling-number-value"]')!.getBoundingClientRect();
-    [...root.querySelectorAll("button")].find((button) => button.textContent!.includes("Add"))!.click();
+    [...root.querySelectorAll("button")].find((button) => button.textContent!.includes("Increase"))!.click();
     const frames: { opacities: number[][]; moved: boolean }[] = [];
     const began = performance.now();
     while (performance.now() - began < 500) {
@@ -215,8 +228,8 @@ test("reduced motion cross-fades the changed digits on mobile", async ({ page })
     const after = root.querySelector('[data-slot="rolling-number-value"]')!.getBoundingClientRect();
     return { frames, shifted: Math.abs(after.left - box.left) + Math.abs(after.width - box.width) };
   });
-  await expect(value).toHaveAttribute("data-value", "1,421");
-  await expect(digits).toHaveText(["1", "4", "2", "1"]);
+  await expect(value).toHaveAttribute("data-value", "1,353");
+  await expect(digits).toHaveText(["1", "3", "5", "3"]);
   // The ones column held the old and the new digit at once, partly transparent, and nothing slid.
   expect(seen.frames.some(({ opacities }) => opacities[3].length === 2)).toBe(true);
   expect(
@@ -228,17 +241,17 @@ test("reduced motion cross-fades the changed digits on mobile", async ({ page })
   expect(seen.shifted).toBeLessThan(0.5);
 
   const chip = frame.locator('[data-slot="rolling-number-delta"]');
-  await expect(chip).toHaveText("+137");
+  await expect(chip).toHaveText("+69");
 
   // The longest format still fits a phone: the chip stays inside the frame, clear of the buttons.
   await page.getByRole("button", { name: /^Format:/ }).click();
   await page.getByRole("menuitem", { name: "currency", exact: true }).click();
-  await frame.getByRole("button", { name: "Subtract 420" }).click();
-  await expect(value).toHaveAttribute("data-value", "$1,001.00");
+  await frame.getByRole("button", { name: "Decrease $420" }).click();
+  await expect(value).toHaveAttribute("data-value", "$933.00");
   await expect(chip).toHaveText("-$420.00");
   await expect(chip).toHaveCSS("opacity", "1");
   const [chipBox, frameBox, valueBox, buttonBox] = await Promise.all(
-    [chip, frame, value, frame.getByRole("button", { name: "Add 137" })].map((part) => part.boundingBox()),
+    [chip, frame, value, frame.getByRole("button", { name: "Increase $69" })].map((part) => part.boundingBox()),
   );
   expect(chipBox!.x).toBeGreaterThanOrEqual(frameBox!.x);
   expect(chipBox!.x + chipBox!.width).toBeLessThanOrEqual(frameBox!.x + frameBox!.width);
