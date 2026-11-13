@@ -303,7 +303,7 @@ function ToastIcon({ type, seconds }: { type: string | undefined; seconds: numbe
     <span
       data-slot="toast-icon"
       data-type={type}
-      className={`mt-px grid size-[18px] shrink-0 place-items-center ${type === "error" ? "text-destructive" : "text-foreground"}`}
+      className={`mt-px grid size-[18px] shrink-0 place-items-center ${type === "error" ? "text-destructive" : type === "success" ? "text-[var(--status-success,#15803d)]" : "text-foreground"}`}
     >
       <svg
         aria-hidden="true"

@@ -12,7 +12,7 @@ test("toasts spring in, stack as a deck, fan out on hover, morph to success, and
   await page.goto("/components/toast");
   await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
   const frame = page.locator(".demo-frame");
-  const toasts = frame.locator('[data-slot="toast"]');
+  const toasts = page.locator('[data-slot="toast"]');
 
   // Toasts close themselves after 5 seconds, so the triggers fire inside the page where a slow
   // test runner cannot outlast that timer. The new toast rises from the bottom edge and is caught
@@ -28,14 +28,14 @@ test("toasts spring in, stack as a deck, fan out on hover, morph to success, and
     const entering: number[] = [];
     const began = performance.now();
     while (performance.now() - began < 300) {
-      const toast = stage.querySelector('[data-slot="toast"]');
+      const toast = document.querySelector('[data-slot="toast"]');
       if (toast) entering.push(offsetOf(toast));
       await new Promise(requestAnimationFrame);
     }
     press("Error");
     press("Loading");
     await new Promise((resolve) => setTimeout(resolve, 900));
-    const toasts = [...stage.querySelectorAll('[data-slot="toast"]')];
+    const toasts = [...document.querySelectorAll('[data-slot="toast"]')];
     return { entering, deck: toasts.map((toast) => [toast.getAttribute("data-type"), offsetOf(toast)]) };
   });
   expect(entering.some((offset) => offset > 5 && offset < 65)).toBe(true);
@@ -56,7 +56,7 @@ test("toasts spring in, stack as a deck, fan out on hover, morph to success, and
   await expect(toasts.nth(0).locator('[data-slot="toast-icon"]')).toHaveAttribute("data-type", "success");
 
   // The swiped toast is only marked while it flies out, so record the mark as it appears.
-  await frame.evaluate((stage) => {
+  await page.evaluate(() => {
     const seen: string[] = [];
     Object.assign(window, { swiped: seen });
     new MutationObserver((records) => {
@@ -64,7 +64,7 @@ test("toasts spring in, stack as a deck, fan out on hover, morph to success, and
         const value = (record.target as Element).getAttribute("data-swiped");
         if (value) seen.push(value);
       }
-    }).observe(stage, { subtree: true, attributeFilter: ["data-swiped"] });
+    }).observe(document.body, { subtree: true, attributeFilter: ["data-swiped"] });
   });
   const box = (await toasts.nth(0).boundingBox())!;
   await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
@@ -74,7 +74,7 @@ test("toasts spring in, stack as a deck, fan out on hover, morph to success, and
   await expect
     .poll(() => page.evaluate(() => (window as unknown as { swiped: string[] }).swiped))
     .toContain("right");
-  await expect(frame.getByText("Report uploaded")).toHaveCount(0);
+  await expect(page.getByText("Report uploaded")).toHaveCount(0);
 
   // Keyboard focus fans the deck out just like hover.
   await page.mouse.move(0, 0);
@@ -83,7 +83,9 @@ test("toasts spring in, stack as a deck, fan out on hover, morph to success, and
       [...stage.querySelectorAll("button")].find((button) => button.textContent?.trim() === name)!.click();
     }
   });
+  // The toaster lives at the end of the body, so F6 jumps to it and Tab enters the deck.
   await frame.getByRole("button", { name: "Loading" }).focus();
+  await page.keyboard.press("F6");
   await page.keyboard.press("Tab");
   await expect(toasts.nth(0)).toBeFocused();
   await expect(toasts.nth(0)).toHaveAttribute("data-type", "success");
@@ -101,18 +103,19 @@ test("toasts appear in place on mobile with reduced motion", async ({ page }) =>
     (button as HTMLButtonElement).click();
     await new Promise(requestAnimationFrame);
     await new Promise(requestAnimationFrame);
-    const toast = document.querySelector<HTMLElement>('.demo-frame [data-slot="toast"]')!;
+    const toast = document.querySelector<HTMLElement>('[data-slot="toast"]')!;
     return { transform: toast.style.transform, opacity: toast.style.opacity };
   });
   expect(first.transform).toBe("none");
   expect(first.opacity).toBe("1");
-  await expect(frame.locator('[data-slot="toast-icon"] svg')).not.toHaveClass(/animate-spin/);
+  await expect(page.locator('[data-slot="toast-icon"] svg')).not.toHaveClass(/animate-spin/);
 
-  const toast = frame.locator('[data-slot="toast"]');
-  const stage = await frame.locator(".component-demo-stage").boundingBox();
+  const toast = page.locator('[data-slot="toast"]');
   const card = await toast.boundingBox();
-  expect(card!.x).toBeGreaterThanOrEqual(stage!.x);
-  expect(card!.x + card!.width).toBeLessThanOrEqual(stage!.x + stage!.width);
+  expect(card!.x).toBeGreaterThanOrEqual(0);
+  expect(card!.x + card!.width).toBeLessThanOrEqual(390);
+  // The toaster is portaled to the body, outside the demo frame.
+  await expect(frame.locator('[data-slot="toaster"]')).toHaveCount(0);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await toast.locator('[data-slot="toast-close"]').click();
   await expect(toast).toHaveCount(0);

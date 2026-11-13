@@ -101,17 +101,14 @@ export function ToastPreview() {
 export function ToastDemo() {
   const [position, setPosition] = useState<ToastPosition>("bottom-right");
   const [duration, setDuration] = useState(0.45);
-  const top = position.startsWith("top");
 
   return (
     <div className="not-prose demo-frame">
       <ToastProvider>
-        <div
-          className={`component-demo-stage relative min-h-[26rem]! ${top ? "items-end!" : "items-start!"}`}
-        >
+        <div className="component-demo-stage">
           <Triggers />
-          <Toaster contained position={position} duration={duration} />
         </div>
+        <Toaster position={position} duration={duration} />
       </ToastProvider>
       <div className="component-demo-controls [&_[data-slot=demo-select-trigger]]:w-36">
         <DemoSelect label="Position" value={position} options={positions} onChange={setPosition} />
