@@ -52,7 +52,7 @@ const FADE = { duration: 0.2, ease: "easeOut" } as const;
 const TONES = {
   neutral: "bg-muted text-foreground",
   primary: "bg-primary text-primary-foreground",
-  destructive: "bg-destructive text-background",
+  destructive: "bg-destructive text-destructive-foreground",
 };
 
 /** Apple's rubber band: the further past the edge, the less the row follows. */
