@@ -3,7 +3,6 @@
 import { useState } from "react";
 
 import { DemoDuration, DemoSelect } from "@/components/component-demos/demo-controls";
-import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,7 +28,7 @@ function DeleteProjectDialog({
 }) {
   return (
     <AlertDialog duration={duration}>
-      <AlertDialogTrigger render={<Button variant={variant === "destructive" ? "destructive" : "outline"} />}>
+      <AlertDialogTrigger variant={variant === "destructive" ? "destructive" : "outline"}>
         Delete project
       </AlertDialogTrigger>
       <AlertDialogContent>

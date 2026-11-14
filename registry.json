@@ -924,6 +924,7 @@
       "title": "Dialog",
       "description": "A modal dialog that springs in at the center of the screen over a blurred backdrop, and rises from the bottom edge on small screens.",
       "dependencies": ["motion", "@base-ui/react"],
+      "registryDependencies": ["button"],
       "files": [
         {
           "path": "src/registry/components/dialog.tsx",

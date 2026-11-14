@@ -80,7 +80,7 @@ export function AlertDialogExample() {
 
 ### AlertDialogTrigger
 
-Renders a `<button>` that opens the dialog. Accepts every Base UI `AlertDialog.Trigger` prop, including `render` to supply your own button.
+Renders an outline `Button` that opens the dialog. Set `variant` to restyle it. Accepts every Base UI `AlertDialog.Trigger` prop, including `render` to supply your own button.
 
 ### AlertDialogContent
 

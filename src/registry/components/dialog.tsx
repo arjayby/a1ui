@@ -4,6 +4,8 @@ import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
 import { motion, useReducedMotion, type Transition } from "motion/react";
 import { createContext, useContext, useState, type ComponentProps, type ReactNode } from "react";
 
+import { Button } from "@/components/ui/button";
+
 type DialogContextValue = {
   open: boolean;
   /** Stays true while the exit animation plays, then the popup unmounts. */
@@ -21,8 +23,7 @@ function useDialog(part: string) {
   return context;
 }
 
-const buttonClass =
-  "border-border bg-background hover:bg-muted focus-visible:ring-ring/30 inline-flex h-9 cursor-pointer items-center justify-center gap-2 rounded-md border px-4 text-sm font-medium whitespace-nowrap shadow-xs transition-colors outline-none select-none focus-visible:ring-3 disabled:pointer-events-none disabled:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0";
+type ButtonVariant = NonNullable<ComponentProps<typeof Button>["variant"]>;
 
 export interface DialogProps {
   /** Whether the dialog is open when controlled by the caller. */
@@ -79,34 +80,34 @@ export function Dialog({
   );
 }
 
-export type DialogTriggerProps = Omit<ComponentProps<typeof DialogPrimitive.Trigger>, "className"> & {
-  className?: string;
+export type DialogTriggerProps = ComponentProps<typeof DialogPrimitive.Trigger> & {
+  /** Button style when no `render` is given. */
+  variant?: ButtonVariant;
 };
 
-export function DialogTrigger({ className, render, ...props }: DialogTriggerProps) {
+export function DialogTrigger({ variant = "outline", render, ...props }: DialogTriggerProps) {
   useDialog("DialogTrigger");
   return (
     <DialogPrimitive.Trigger
-      {...props}
-      render={render}
       data-slot="dialog-trigger"
-      className={render ? className : `${buttonClass} ${className ?? ""}`}
+      render={render ?? <Button variant={variant} />}
+      {...props}
     />
   );
 }
 
-export type DialogCloseProps = Omit<ComponentProps<typeof DialogPrimitive.Close>, "className"> & {
-  className?: string;
+export type DialogCloseProps = ComponentProps<typeof DialogPrimitive.Close> & {
+  /** Button style when no `render` is given. */
+  variant?: ButtonVariant;
 };
 
-export function DialogClose({ className, render, ...props }: DialogCloseProps) {
+export function DialogClose({ variant = "outline", render, ...props }: DialogCloseProps) {
   useDialog("DialogClose");
   return (
     <DialogPrimitive.Close
-      {...props}
-      render={render}
       data-slot="dialog-close"
-      className={render ? className : `${buttonClass} ${className ?? ""}`}
+      render={render ?? <Button variant={variant} />}
+      {...props}
     />
   );
 }

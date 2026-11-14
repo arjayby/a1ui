@@ -19,7 +19,6 @@ const dismissOptions: Dismiss[] = ["outside click", "buttons only"];
 
 const fieldClass =
   "border-border bg-background focus-visible:ring-ring/30 h-9 w-full rounded-md border px-3 text-sm outline-none focus-visible:ring-3";
-const primaryClass = "bg-foreground text-background hover:bg-foreground/90 border-transparent";
 
 export function DialogDemo() {
   const [dismiss, setDismiss] = useState<Dismiss>("outside click");
@@ -51,7 +50,7 @@ export function DialogDemo() {
               </label>
               <DialogFooter>
                 <DialogClose>Cancel</DialogClose>
-                <DialogClose className={primaryClass}>Save changes</DialogClose>
+                <DialogClose variant="default">Save changes</DialogClose>
               </DialogFooter>
             </DialogContent>
           </Dialog>

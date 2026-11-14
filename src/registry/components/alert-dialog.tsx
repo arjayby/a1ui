@@ -74,10 +74,19 @@ export function AlertDialog({
   );
 }
 
-export type AlertDialogTriggerProps = ComponentProps<typeof AlertDialogPrimitive.Trigger>;
+export type AlertDialogTriggerProps = ComponentProps<typeof AlertDialogPrimitive.Trigger> & {
+  /** Button style when no `render` is given. */
+  variant?: NonNullable<ComponentProps<typeof Button>["variant"]>;
+};
 
-export function AlertDialogTrigger(props: AlertDialogTriggerProps) {
-  return <AlertDialogPrimitive.Trigger data-slot="alert-dialog-trigger" {...props} />;
+export function AlertDialogTrigger({ variant = "outline", render, ...props }: AlertDialogTriggerProps) {
+  return (
+    <AlertDialogPrimitive.Trigger
+      data-slot="alert-dialog-trigger"
+      render={render ?? <Button variant={variant} />}
+      {...props}
+    />
+  );
 }
 
 export interface AlertDialogContentProps {

@@ -23,6 +23,7 @@ bun: bunx --bun shadcn@latest add http://localhost:3000/r/dialog.json --yes
 
 - `motion`
 - `@base-ui/react`
+- `button` (shadcn)
 
 ## Code
 
@@ -52,7 +53,7 @@ export function DialogExample() {
         </DialogHeader>
         <DialogFooter>
           <DialogClose>Cancel</DialogClose>
-          <DialogClose>Save changes</DialogClose>
+          <DialogClose variant="default">Save changes</DialogClose>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -90,11 +91,12 @@ export function DialogExample() {
 
 ### DialogTrigger and DialogClose
 
-| Prop        | Type           | Default | Description                                                                    |
-| ----------- | -------------- | ------- | ------------------------------------------------------------------------------ |
-| `render`    | `ReactElement` | None    | Replaces the default outline button with your own element, such as a `Button`. |
-| `className` | `string`       | None    | Additional classes. With `render`, these are the only classes added.           |
-| `disabled`  | `boolean`      | `false` | Prevents the button from opening or closing the dialog.                        |
+| Prop        | Type                                                                | Default     | Description                                             |
+| ----------- | ------------------------------------------------------------------- | ----------- | ------------------------------------------------------- |
+| `variant`   | `"default" \| "secondary" \| "outline" \| "ghost" \| "destructive"` | `"outline"` | Style of the `Button` it renders.                       |
+| `render`    | `ReactElement`                                                      | None        | Replaces the default `Button` with your own element.    |
+| `className` | `string`                                                            | None        | Additional classes.                                     |
+| `disabled`  | `boolean`                                                           | `false`     | Prevents the button from opening or closing the dialog. |
 
 ### DialogHeader, DialogFooter, DialogTitle, and DialogDescription
 
