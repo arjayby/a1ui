@@ -30,7 +30,7 @@ To change a token, edit `docs/stipple/tokens.json` (or re-export it from Claude 
 ## Principles
 
 - **Paper first.** Most of every page is `paper-100` with nothing on it. If a page feels busy, remove something before you shrink anything.
-- **One cobalt.** Cobalt is the only hue with a job. It is ink (`cobalt-ink`) for the wordmark, links, hovered rows, the current page and the focus ring, and a fill for the primary Button and the landing window. Nothing else is coloured.
+- **One cobalt.** Cobalt is the only hue with a job. It is ink (`cobalt-ink`) for the wordmark, links, hovered rows, the current page and the focus ring, and a fill for the primary Button, the landing window and every control that is on or selected. Nothing else is coloured.
 - **Dots, not drawings.** Pictures are dots in one ink: the landing's particle menu is drawn in `cobalt-ink`. No gradients outside the window, no 3D.
 - **Show the work.** Mono type means "this came from the machine": code, install commands, counts, durations, keyboard shortcuts and the small labels.
 - **One weight.** Endless ships in Regular only. Hierarchy comes from size, colour and space. Never bold, never italic, never a faked version of either.
@@ -52,28 +52,29 @@ Two themes share the same token names: **Paper** (light, the default) and **Nigh
 - Mark the current row with `cobalt-wash` behind `ink`: the sidebar does this for the current page.
 - Use `line` for decorative hairlines and `line-strong` for any border that is the only edge of a control or a floating layer.
 - `signal-red`, `signal-amber` and `signal-green` are the three window dots and nothing else.
-- Cobalt fills an area in two places on this site: the primary Button and the landing window. Checked checkboxes, radios and switches fill with `ink`.
+- Cobalt fills an area for the primary Button, the landing window and the on or selected state of a control: checked checkboxes and radios, switches that are on, pressed chips, the selected segment, page or tab, a slider's filled track and a completed key combo. Use the `primary` role for that fill and `on-primary` for anything on top of it, never `foreground` or a raw cobalt, so the colour changes in one place (`--primary` in `src/app/stipple-tokens.css`).
+- Keep idle and neutral parts on paper and ink: unchecked controls, slider knobs, carets, tooltips and badges. A selected row in a list or menu is still `accent` (`cobalt-wash` behind `ink`), not a fill.
 
 ### Roles
 
 Components read shadcn role names. Each one points at a Stipple token.
 
-| Role                                   | Token                 | Notes                                                                                     |
-| -------------------------------------- | --------------------- | ----------------------------------------------------------------------------------------- |
-| `background`, `sidebar`                | `paper-100`           | The page, the sidebar, demo wells.                                                        |
-| `card`, `popover`, `control`           | `paper-50`            | Raised ground.                                                                            |
-| `muted`, `secondary`, `sidebar-accent` | `paper-200`           | Quiet fills and hover rows.                                                               |
-| `foreground` and the `-foreground` set | `ink`                 | 12.4:1 on `paper-100` in Paper, 15.0:1 in Night.                                          |
-| `muted-foreground`                     | `ink-muted`           | 6.7:1 on `paper-100`, 5.9:1 on `paper-200` in Paper.                                      |
-| `subtle-foreground`                    | `ink-faint`           | 4.7:1 on `paper-100` in Paper. Not for `paper-200`.                                       |
-| `accent` / `accent-foreground`         | `cobalt-wash` / `ink` | A selected or current row.                                                                |
-| `border`, `hairline`, `sidebar-border` | `line`                | Decorative.                                                                               |
-| `input`                                | `line-strong`         | 3.3:1 on `paper-100`, 3.6:1 on `paper-50` in Paper.                                       |
-| `ring`, `sidebar-ring`                 | `cobalt-ink`          | 5.8:1 on `paper-100` in Paper, 3.9:1 in Night.                                            |
-| `primary`, `sidebar-primary`           | `cobalt-500`          | Fill only. Hover `cobalt-600`, pressed `cobalt-700`.                                      |
-| `on-primary`                           | `on-cobalt`           | 6.0:1 on `cobalt-500`.                                                                    |
-| `success`, `danger`                    | `success`, `danger`   | 5.0:1 on `paper-100` in Paper; 4.5:1 and 4.2:1 in Night. Always beside an icon or a sign. |
-| `chart-1` to `chart-5`                 | cobalt ramp           | `cobalt-300`, a 300/500 mix, `cobalt-500`, `cobalt-700`, a darker mix.                    |
+| Role                                   | Token                 | Notes                                                                                                |
+| -------------------------------------- | --------------------- | ---------------------------------------------------------------------------------------------------- |
+| `background`, `sidebar`                | `paper-100`           | The page, the sidebar, demo wells.                                                                   |
+| `card`, `popover`, `control`           | `paper-50`            | Raised ground.                                                                                       |
+| `muted`, `secondary`, `sidebar-accent` | `paper-200`           | Quiet fills and hover rows.                                                                          |
+| `foreground` and the `-foreground` set | `ink`                 | 12.4:1 on `paper-100` in Paper, 15.0:1 in Night.                                                     |
+| `muted-foreground`                     | `ink-muted`           | 6.7:1 on `paper-100`, 5.9:1 on `paper-200` in Paper.                                                 |
+| `subtle-foreground`                    | `ink-faint`           | 4.7:1 on `paper-100` in Paper. Not for `paper-200`.                                                  |
+| `accent` / `accent-foreground`         | `cobalt-wash` / `ink` | A selected or current row.                                                                           |
+| `border`, `hairline`, `sidebar-border` | `line`                | Decorative.                                                                                          |
+| `input`                                | `line-strong`         | 3.3:1 on `paper-100`, 3.6:1 on `paper-50` in Paper.                                                  |
+| `ring`, `sidebar-ring`                 | `cobalt-ink`          | 5.8:1 on `paper-100` in Paper, 3.9:1 in Night.                                                       |
+| `primary`, `sidebar-primary`           | `cobalt-500`          | Fill only: the primary Button and on or selected controls. Hover `cobalt-600`, pressed `cobalt-700`. |
+| `on-primary`                           | `on-cobalt`           | 6.0:1 on `cobalt-500`.                                                                               |
+| `success`, `danger`                    | `success`, `danger`   | 5.0:1 on `paper-100` in Paper; 4.5:1 and 4.2:1 in Night. Always beside an icon or a sign.            |
+| `chart-1` to `chart-5`                 | cobalt ramp           | `cobalt-300`, a 300/500 mix, `cobalt-500`, `cobalt-700`, a darker mix.                               |
 
 ### Local colours
 
@@ -161,7 +162,7 @@ Stipple has no equivalents for these; each follows its rules.
 
 - **Button** `outline` (a `line-strong` edge), `ghost` (no fill at rest) and `destructive` (`danger` on `danger-soft`). All three hover to a paper or tint fill, never to cobalt.
 - **Input, Textarea, Select**: `paper-50` inside a 1px `line-strong` edge, `radius-md`, 36px tall, `body` text. Hover turns the edge `ink`; invalid turns it `danger`.
-- **Checkbox, RadioGroup, Switch**: `paper-50` with a `line-strong` edge when off, `ink` with a `paper-50` mark when on.
+- **Checkbox, RadioGroup, Switch**: `paper-50` with a `line-strong` edge when off, `primary` with an `on-primary` mark when on.
 - **Card**: a `paper-50` sheet inside a `line` hairline. Catalog tiles sit on `paper-100` and their edge turns `cobalt-ink` on hover.
 - **Badge**: a `mono-label` on a `paper-200` chip; `outline` takes a `line-strong` edge, the state variants take their colour as text and edge, and `dot` is an 8px `cobalt-ink` dot.
 - **Tabs**: a `paper-200` track; the current tab is a `paper-50` chip with `cobalt-ink` text.

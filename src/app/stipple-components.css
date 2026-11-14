@@ -190,16 +190,16 @@
       background-color var(--motion-fast) ease,
       border-color var(--motion-fast) ease;
   }
-  /* Checked controls fill with ink: cobalt is kept for the primary button and the window. */
+  /* Checked controls fill with primary, with on-primary for the mark. */
   .ui-check-target:has(input:checked) .ui-check-glyph {
-    background: var(--ink);
-    border-color: var(--ink);
+    background: var(--primary);
+    border-color: var(--primary);
   }
   .ui-check-glyph > svg {
     display: none;
     width: 14px;
     height: 14px;
-    color: var(--paper-50);
+    color: var(--on-primary);
   }
   .ui-check-target:has(input:checked) .ui-check-glyph > svg {
     display: block;
@@ -229,11 +229,11 @@
     height: 6px;
     border: 0;
     border-radius: var(--radius-full);
-    background: var(--paper-50);
+    background: var(--on-primary);
     transform: none;
     content: "";
   }
-  /* Off: a paper-50 track inside a line-strong edge. On: ink with a paper-50 knob. */
+  /* Off: a paper-50 track inside a line-strong edge. On: primary with an on-primary knob. */
   .ui-switch-track {
     display: flex;
     width: 38px;
@@ -258,11 +258,11 @@
       background-color var(--motion-fast) ease;
   }
   .ui-switch-target:has(input:checked) .ui-switch-track {
-    border-color: var(--ink);
-    background: var(--ink);
+    border-color: var(--primary);
+    background: var(--primary);
   }
   .ui-switch-target:has(input:checked) .ui-switch-track > span {
-    background: var(--paper-50);
+    background: var(--on-primary);
     transform: translateX(16px);
   }
   /* Cards are flat: a paper-50 sheet inside a hairline, no shadow. */
