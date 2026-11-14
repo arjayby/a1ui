@@ -85,7 +85,7 @@ export function Switch({
             transition={transition}
           />
         }
-        className="bg-background text-foreground relative grid h-5 place-items-center overflow-hidden rounded-full shadow-[0_1px_3px_rgb(0_0_0/0.2),0_1px_1px_rgb(0_0_0/0.06)] [&_svg]:size-3"
+        className="border-input bg-background text-foreground relative grid h-5 border place-items-center overflow-hidden rounded-full shadow-[0_1px_3px_rgb(0_0_0/0.2),0_1px_1px_rgb(0_0_0/0.06)] [&_svg]:size-3"
         style={{ width: THUMB }}
       >
         {thumbIcons &&

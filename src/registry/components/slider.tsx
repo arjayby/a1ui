@@ -188,7 +188,7 @@ export function Slider({
             <motion.span
               aria-hidden="true"
               data-slot="slider-knob"
-              className="border-border bg-background dark:bg-foreground relative grid size-5 place-items-center rounded-full border shadow-sm"
+              className="border-input bg-background dark:bg-foreground relative grid size-5 place-items-center rounded-full border shadow-sm"
               style={{ x: stretch, scale: knobScale }}
             >
               <span className="bg-foreground dark:bg-background h-2 w-0.5 rounded-full opacity-60" />
