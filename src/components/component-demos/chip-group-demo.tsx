@@ -10,16 +10,6 @@ const variants: Variant[] = ["muted", "outline"];
 
 const topics = ["Design", "Engineering", "Marketing"];
 
-export function ChipGroupPreview() {
-  return (
-    <ChipGroup aria-label="Teams" defaultValue={["design"]}>
-      <ChipGroupItem value="design">Design</ChipGroupItem>
-      <ChipGroupItem value="engineering">Engineering</ChipGroupItem>
-      <ChipGroupItem value="sales">Sales</ChipGroupItem>
-    </ChipGroup>
-  );
-}
-
 export function ChipGroupDemo() {
   const [variant, setVariant] = useState<Variant>("muted");
   const [duration, setDuration] = useState(0.35);

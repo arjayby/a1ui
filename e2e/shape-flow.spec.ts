@@ -172,7 +172,7 @@ test("keyboard movement, reset and responsive layout preserve readable text", as
   }
 });
 
-test("catalog preview fits its card and centers the duck on desktop and mobile", async ({ page }) => {
+test("catalog card shows the docs demo without clipping it on desktop and mobile", async ({ page }) => {
   for (const width of [1440, 390, 320]) {
     await page.setViewportSize({ width, height: 900 });
     await page.goto("/blocks");
@@ -181,15 +181,13 @@ test("catalog preview fits its card and centers the duck on desktop and mobile",
     });
     const flow = card.locator('[data-slot="shape-flow"]');
     await expect(flow).toHaveAttribute("data-state", "ready");
-    const preview = await card.locator(".catalog-preview").boundingBox();
-    const shape = await card.locator('[data-slot="shape-flow-handle"]').boundingBox();
-    expect(shape!.x + shape!.width / 2).toBeCloseTo(preview!.x + preview!.width / 2, 0);
-    expect(shape!.y + shape!.height / 2).toBeCloseTo(preview!.y + preview!.height / 2, 0);
+    // The card holds the docs demo, heading included, and grows to fit all of it.
+    await expect(card.locator(".shape-flow-demo-heading h3")).toBeVisible();
     const clipsText = await card.evaluate((element) => {
       const bounds = element.querySelector(".catalog-preview")!.getBoundingClientRect();
       return [...element.querySelectorAll('[data-slot="shape-flow-line"]')].some((line) => {
         const rect = line.getBoundingClientRect();
-        return rect.top < bounds.top || rect.bottom > bounds.bottom - 20;
+        return rect.top < bounds.top || rect.bottom > bounds.bottom;
       });
     });
     expect(clipsText).toBe(false);

@@ -6,21 +6,6 @@ import { useEffect, useReducer } from "react";
 import { Button } from "@/components/ui/button";
 import { TaskSteps, type TaskStep } from "@/registry/blocks/task-steps";
 
-const previewSteps: TaskStep[] = [
-  { id: "install", label: "Install dependencies", status: "done", durationMs: 4200 },
-  { id: "build", label: "Build", status: "done", durationMs: 38_000 },
-  { id: "checks", label: "Run checks", status: "running" },
-  { id: "deploy", label: "Deploy", status: "pending" },
-];
-
-export function TaskStepsPreview() {
-  return (
-    <div className="not-prose demo-frame grid place-items-center">
-      <TaskSteps aria-label="Deployment preview" steps={previewSteps} className="max-w-64" />
-    </div>
-  );
-}
-
 // Each step waits `ticks` beats, or prints one log line per beat, and then finishes.
 const script: { id: string; label: string; detail?: string; lines: string[]; ticks?: number }[] = [
   { id: "queue", label: "Queue", detail: "Waiting for a free build machine.", lines: [], ticks: 3 },

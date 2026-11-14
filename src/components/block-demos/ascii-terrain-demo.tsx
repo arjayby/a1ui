@@ -5,14 +5,6 @@ import { useState } from "react";
 
 import { AsciiTerrain } from "@/registry/blocks/ascii-terrain";
 
-export function AsciiTerrainPreview() {
-  return (
-    <div className="not-prose demo-frame ascii-terrain-preview">
-      <AsciiTerrain paused interactive={false} cellSize={6} style={{ height: "100%" }} />
-    </div>
-  );
-}
-
 export function AsciiTerrainDemo() {
   const [paused, setPaused] = useState(false);
   const [seed, setSeed] = useState(7);

@@ -12,10 +12,6 @@ const rulesFor = (length: number) => [
   ...defaultPasswordRules.slice(1),
 ];
 
-export function PasswordInputPreview() {
-  return <PasswordInput label="Password" defaultValue="Graphite7" className="max-w-72 px-6" />;
-}
-
 export function PasswordInputDemo() {
   const [length, setLength] = useState<(typeof lengths)[number]>("8");
 

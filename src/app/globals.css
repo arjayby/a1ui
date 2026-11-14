@@ -458,11 +458,17 @@ h6 {
   line-height: var(--type-body-lg-leading);
 }
 
+/* Two columns at most. A tile is never narrower than half the row (the max() below),
+   and the row collapses to one column once half of it would fall under 24rem. */
 .catalog-grid {
+  --catalog-gap: var(--space-12);
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(min(100%, max(24rem, (100% - var(--catalog-gap)) / 2)), 1fr)
+  );
   /* Rows sit further apart than columns, so each row of tiles reads as its own band. */
-  gap: var(--space-16) var(--space-12);
+  gap: var(--space-16) var(--catalog-gap);
   margin-top: var(--space-16);
 }
 
@@ -488,10 +494,15 @@ h6 {
   box-shadow: 0 0 0 2px var(--ring);
 }
 
+/* The top of a tile is the docs demo itself, without its frame or its controls:
+   the tile is the frame, and the controls live on the docs page. */
 .catalog-preview {
-  --preview-height: 14rem;
-  --preview-padding: 1.5rem;
-  height: var(--preview-height);
+  --preview-height: 26rem;
+  display: flex;
+  min-height: var(--preview-height);
+  flex: 1;
+  flex-direction: column;
+  justify-content: center;
   overflow: hidden;
   border-top-left-radius: inherit;
   border-top-right-radius: inherit;
@@ -499,15 +510,64 @@ h6 {
   pointer-events: none;
 }
 
-.catalog-preview .demo-frame {
-  height: 100%;
-  padding: var(--preview-padding);
-  border: 0;
+/* The demo keeps its own layout and fills the tile; its stage centres the component. */
+.catalog-preview .demo-frame,
+.catalog-stage .demo-frame {
+  flex: 1 1 auto;
   border-radius: 0;
+  background: transparent;
 }
 
-.catalog-preview .spiral-demo > div {
-  width: min(100%, calc(var(--preview-height) - 2 * var(--preview-padding)));
+.catalog-preview .component-demo-stage {
+  min-height: var(--preview-height);
+}
+
+.catalog-stage .component-demo-stage {
+  min-height: 100dvh;
+}
+
+.catalog-preview :is(.component-demo-controls, .demo-caption),
+.catalog-stage :is(.component-demo-controls, .demo-caption) {
+  display: none;
+}
+
+/* A demo that opens over the page gets a frame of its own (see CatalogFrame). The frame
+   is laid out at a desktop width and zoomed out to fit the tile. */
+.catalog-frame {
+  position: relative;
+  min-height: var(--preview-height);
+  flex: 1;
+  overflow: hidden;
+}
+
+.catalog-frame iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border: 0;
+}
+
+/* The page inside a frame: one demo filling the frame, with its hidden content open. */
+.catalog-stage {
+  display: flex;
+  min-height: 100dvh;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.catalog-stage[data-place="top"] :is(.demo-frame, .component-demo-stage) {
+  align-items: flex-start;
+}
+
+html:has(.catalog-stage) {
+  min-width: 0;
+  overflow: hidden;
+  scrollbar-gutter: auto;
+}
+
+/* Next.js draws its development badge in every frame; one per page is enough. */
+html:has(.catalog-stage) nextjs-portal {
+  display: none;
 }
 
 .catalog-card-link::after {
@@ -524,7 +584,7 @@ h6 {
 .catalog-card-content {
   display: grid;
   gap: var(--space-2);
-  padding: var(--space-6);
+  padding: var(--space-6) var(--space-8) var(--space-8);
 }
 
 .catalog-card-content .ui-card-title {
@@ -916,16 +976,6 @@ h6 {
   height: clamp(17rem, 48vw, 27rem);
 }
 
-.catalog-preview .ascii-morph-preview {
-  display: grid;
-  place-items: center;
-  padding: 0;
-}
-
-.ascii-morph-preview [data-slot="ascii-morph"] {
-  height: 100%;
-}
-
 .shape-flow-demo-heading {
   display: flex;
   flex-direction: column;
@@ -948,10 +998,6 @@ h6 {
   font-weight: 400;
   letter-spacing: var(--type-display-xl-tracking);
   line-height: 1;
-}
-
-.shape-flow-preview {
-  padding: 1.5rem;
 }
 
 .ascii-terrain-footer {
@@ -990,10 +1036,6 @@ h6 {
 
 .ascii-terrain-demo [data-slot="ascii-terrain"] {
   height: clamp(16rem, 45vw, 24rem);
-}
-
-.catalog-preview .ascii-terrain-preview {
-  padding: 0;
 }
 
 .ascii-terrain-reduced-hint {
@@ -1041,11 +1083,6 @@ h6 {
 .section-rail-demo-copy {
   display: grid;
   gap: 0;
-}
-
-.section-rail-demo.section-rail-preview {
-  grid-template-columns: minmax(0, 1fr);
-  place-items: center;
 }
 
 .section-rail-demo-copy section {
@@ -1101,8 +1138,7 @@ h6 {
   font-size: 12px;
 }
 
-.text-banner-demo-stage,
-.catalog-preview .text-banner-preview {
+.text-banner-demo-stage {
   display: flex;
   min-height: 16rem;
   align-items: center;
@@ -1117,17 +1153,12 @@ h6 {
   background-size: 16px 16px;
 }
 
-.catalog-preview .text-banner-preview {
-  min-height: 0;
-}
-
 .text-banner-demo-controls {
   justify-content: center;
   flex-wrap: wrap;
 }
 
-.text-scramble-demo,
-.text-scramble-preview {
+.text-scramble-demo {
   /* Square 2px dots on a 16px pitch, in paper-300. */
   background-image: conic-gradient(
     from 270deg at var(--dot-size) var(--dot-size),
@@ -1161,17 +1192,6 @@ h6 {
   justify-content: center;
 }
 
-.text-scramble-preview {
-  display: grid;
-  place-items: center;
-}
-
-.text-scramble-preview-text {
-  font-size: 1.25rem;
-  font-weight: 400;
-  letter-spacing: var(--type-heading-sm-tracking);
-}
-
 .particle-menu-demo {
   container-type: inline-size;
   display: flex;
@@ -1197,34 +1217,6 @@ h6 {
   .particle-menu-demo nav ul {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
-}
-
-.particle-menu-preview {
-  display: grid;
-  place-items: center;
-}
-
-.catalog-preview .particle-menu-preview {
-  padding: 0;
-}
-
-.particle-menu-preview nav ul {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.5rem 1rem;
-}
-
-.particle-menu-preview :is(a, button) {
-  padding-block: 0.25rem;
-}
-
-.particle-menu-preview svg {
-  width: 4rem;
-  height: 4rem;
-}
-
-.particle-menu-preview span {
-  font-size: 0.625rem;
 }
 
 @media (max-width: 47.999rem) {

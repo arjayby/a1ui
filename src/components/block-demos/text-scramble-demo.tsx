@@ -11,14 +11,6 @@ const phrases = ["MAKE IT CLEAR.", "MAKE IT COUNT.", "MAKE IT YOURS."];
 const pressable =
   "transition-transform duration-(--ease-spring-snappy-duration) ease-(--ease-spring-snappy) active:scale-[0.96] active:duration-75 active:ease-(--ease-press) motion-reduce:transition-none motion-reduce:active:scale-100 motion-reduce:active:opacity-60";
 
-export function TextScramblePreview() {
-  return (
-    <div className="not-prose demo-frame text-scramble-preview">
-      <TextScramble text="7#A? %Q 2X@9G/" disabled className="text-scramble-preview-text" />
-    </div>
-  );
-}
-
 export function TextScrambleDemo() {
   const [index, setIndex] = useState(0);
 

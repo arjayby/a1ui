@@ -7,7 +7,6 @@ import {
   CopyIcon,
   CubeIcon,
   KeyboardIcon,
-  MagnifyingGlassIcon,
   MoonIcon,
   PaletteIcon,
   PlusIcon,
@@ -126,45 +125,6 @@ function useDemoItems(): CommandPaletteItem[] {
       },
     ],
     [setTheme],
-  );
-}
-
-const previewRows = [
-  { label: "Components", icon: CubeIcon, keys: ["G", "C"] },
-  { label: "New project", icon: PlusIcon, keys: ["⌘", "N"] },
-  { label: "Change theme", icon: PaletteIcon, keys: [] },
-];
-
-// The palette itself is a modal, so the catalog card shows a still of its surface instead.
-export function CommandPalettePreview() {
-  return (
-    <div className="not-prose demo-frame grid place-items-center">
-      <div className="bg-popover text-popover-foreground border-border w-full max-w-64 overflow-hidden rounded-lg border text-xs shadow-lg">
-        <div className="border-border text-muted-foreground flex h-8 items-center gap-2 border-b px-2.5">
-          <MagnifyingGlassIcon aria-hidden="true" className="size-3.5" />
-          Search commands…
-        </div>
-        <ul className="m-0 list-none p-1">
-          {previewRows.map(({ label, icon: Icon, keys }, index) => (
-            <li
-              key={label}
-              className={`flex h-7 items-center gap-2 rounded-md px-1.5 ${index === 0 ? "bg-foreground/8" : ""}`}
-            >
-              <Icon aria-hidden="true" className={`size-3.5 ${index === 0 ? "" : "text-muted-foreground"}`} />
-              <span className="flex-1">{label}</span>
-              {keys.map((key) => (
-                <kbd
-                  key={key}
-                  className="border-border text-muted-foreground inline-flex h-4 min-w-4 items-center justify-center rounded-[4px] border px-1 font-sans text-[0.625rem]"
-                >
-                  {key}
-                </kbd>
-              ))}
-            </li>
-          ))}
-        </ul>
-      </div>
-    </div>
   );
 }
 

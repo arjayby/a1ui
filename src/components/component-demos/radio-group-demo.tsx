@@ -15,16 +15,6 @@ const plans = [
   { value: "enterprise", label: "Enterprise", description: "Talk to sales.", disabled: true },
 ];
 
-export function RadioGroupPreview() {
-  return (
-    <RadioGroup aria-label="Notifications" defaultValue="mentions">
-      <RadioGroupItem value="all" label="All messages" />
-      <RadioGroupItem value="mentions" label="Mentions only" />
-      <RadioGroupItem value="none" label="Nothing" />
-    </RadioGroup>
-  );
-}
-
 export function RadioGroupDemo() {
   const [variant, setVariant] = useState<Variant>("default");
   const [duration, setDuration] = useState(0.35);

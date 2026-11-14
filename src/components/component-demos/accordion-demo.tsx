@@ -57,14 +57,6 @@ function Items() {
   ));
 }
 
-export function AccordionPreview() {
-  return (
-    <Accordion className="w-full max-w-64">
-      <Items />
-    </Accordion>
-  );
-}
-
 export function AccordionDemo() {
   const [icon, setIcon] = useState<Icon>("chevron");
   const [mode, setMode] = useState<Mode>("single");

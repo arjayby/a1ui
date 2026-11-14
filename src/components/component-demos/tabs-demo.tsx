@@ -43,20 +43,6 @@ const panels = [
   },
 ];
 
-export function TabsPreview() {
-  return (
-    <Tabs defaultValue="overview">
-      <TabsList aria-label="Dashboard">
-        {panels.slice(0, 3).map((panel) => (
-          <TabsTrigger key={panel.value} value={panel.value}>
-            {panel.label}
-          </TabsTrigger>
-        ))}
-      </TabsList>
-    </Tabs>
-  );
-}
-
 export function TabsDemo() {
   const [variant, setVariant] = useState<Variant>("pill");
   const [duration, setDuration] = useState(0.35);

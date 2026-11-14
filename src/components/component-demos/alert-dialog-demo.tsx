@@ -46,10 +46,6 @@ function DeleteProjectDialog({
   );
 }
 
-export function AlertDialogPreview() {
-  return <DeleteProjectDialog />;
-}
-
 export function AlertDialogDemo() {
   const [variant, setVariant] = useState<Variant>("destructive");
   const [duration, setDuration] = useState(0.3);

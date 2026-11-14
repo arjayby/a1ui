@@ -24,10 +24,6 @@ const views = [
   { value: "timeline", "aria-label": "Timeline", label: <StackIcon aria-hidden="true" />, disabled: true },
 ];
 
-export function SegmentedControlPreview() {
-  return <SegmentedControl aria-label="Range" options={ranges} defaultValue="week" />;
-}
-
 export function SegmentedControlDemo() {
   const [size, setSize] = useState<Size>("md");
   const [range, setRange] = useState<Range>("week");

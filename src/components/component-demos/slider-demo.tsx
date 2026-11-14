@@ -12,10 +12,6 @@ const layouts = {
 } satisfies Record<string, number[]>;
 const strengths = { light: 1, medium: 3, firm: 6 };
 
-export function SliderPreview() {
-  return <Slider label="Intensity" stops={layouts.quarters} defaultValue={50} className="max-w-64 px-6" />;
-}
-
 export function SliderDemo() {
   const [layout, setLayout] = useState<keyof typeof layouts>("quarters");
   const [strength, setStrength] = useState<keyof typeof strengths>("medium");

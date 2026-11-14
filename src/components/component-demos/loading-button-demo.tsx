@@ -18,19 +18,6 @@ async function simulateError() {
   throw new Error("Simulated request failed");
 }
 
-export function LoadingButtonPreview() {
-  return (
-    <LoadingButton
-      onClick={simulateRequest}
-      label="Submit"
-      loadingLabel="Submitting"
-      successLabel="Submitted"
-      icon={null}
-      className={buttonClassName}
-    />
-  );
-}
-
 export function LoadingButtonDemo() {
   const [animation, setAnimation] = useState<NonNullable<LoadingButtonProps["animation"]>>("blur");
   const [duration, setDuration] = useState(0.3);

@@ -60,23 +60,6 @@ function Swatch({ product, className }: { product: Product; className: string })
 const stepButton =
   "hover:bg-foreground/10 focus-visible:ring-ring grid size-7 place-items-center rounded-full outline-none focus-visible:ring-2 [&_svg]:size-3.5";
 
-export function SheetPreview() {
-  return (
-    <Sheet>
-      <SheetTrigger>Open sheet</SheetTrigger>
-      <SheetContent>
-        <SheetHeader>
-          <SheetTitle>Route details</SheetTitle>
-          <SheetDescription>Drag the sheet down to put it away.</SheetDescription>
-        </SheetHeader>
-        <SheetFooter>
-          <SheetClose className={primaryClass}>Done</SheetClose>
-        </SheetFooter>
-      </SheetContent>
-    </Sheet>
-  );
-}
-
 /** A bag summary and its sheet. Editing quantities in the sheet updates the summary behind it. */
 export function SheetDemo() {
   const [side, setSide] = useState<SheetSide>("bottom");

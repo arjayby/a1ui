@@ -7,18 +7,6 @@ import { TagInput } from "@/registry/components/tag-input";
 
 const limits = ["3", "5", "8"] as const;
 
-export function TagInputPreview() {
-  return (
-    <TagInput
-      label="Topics"
-      defaultValue={["Design", "Motion"]}
-      max={5}
-      placeholder="Add a topic"
-      className="max-w-72 px-6"
-    />
-  );
-}
-
 export function TagInputDemo() {
   const [limit, setLimit] = useState<(typeof limits)[number]>("5");
   const [tags, setTags] = useState(["Design", "Motion", "React"]);

@@ -10,10 +10,6 @@ type PageCount = (typeof pageCounts)[number];
 const siblingCounts = ["0", "1", "2"] as const;
 type SiblingCount = (typeof siblingCounts)[number];
 
-export function PaginationPreview() {
-  return <Pagination defaultPage={5} pageCount={10} siblingCount={0} previousLabel={null} nextLabel={null} />;
-}
-
 export function PaginationDemo() {
   const [pages, setPages] = useState<PageCount>("10");
   const [siblings, setSiblings] = useState<SiblingCount>("1");

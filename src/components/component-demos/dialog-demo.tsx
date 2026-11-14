@@ -21,23 +21,6 @@ const fieldClass =
   "border-border bg-background focus-visible:ring-ring/30 h-9 w-full rounded-md border px-3 text-sm outline-none focus-visible:ring-3";
 const primaryClass = "bg-foreground text-background hover:bg-foreground/90 border-transparent";
 
-export function DialogPreview() {
-  return (
-    <Dialog>
-      <DialogTrigger>Open dialog</DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Invite your team</DialogTitle>
-          <DialogDescription>Teammates get access to every project in this workspace.</DialogDescription>
-        </DialogHeader>
-        <DialogFooter>
-          <DialogClose className={primaryClass}>Done</DialogClose>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
 export function DialogDemo() {
   const [dismiss, setDismiss] = useState<Dismiss>("outside click");
   const [duration, setDuration] = useState(0.3);

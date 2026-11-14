@@ -3,21 +3,10 @@
 import { useState } from "react";
 
 import { DemoDuration, DemoSelect } from "@/components/component-demos/demo-controls";
-import { Loader, loaderVariants, type LoaderVariant } from "@/registry/components/loader";
+import { Loader, loaderVariants } from "@/registry/components/loader";
 
 const sizes = ["16", "24", "32", "48"] as const;
 type Size = (typeof sizes)[number];
-const previewVariants: LoaderVariant[] = ["ring", "tiles", "dots", "infinity"];
-
-export function LoaderPreview() {
-  return (
-    <div className="flex items-center gap-7">
-      {previewVariants.map((variant) => (
-        <Loader key={variant} variant={variant} size={28} />
-      ))}
-    </div>
-  );
-}
 
 export function LoaderDemo() {
   const [size, setSize] = useState<Size>("32");

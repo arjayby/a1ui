@@ -9,14 +9,6 @@ const demoItems: ParticleMenuItem[] = [
   { id: "oaths", label: "Oaths", shape: "oaths" },
 ];
 
-export function ParticleMenuPreview() {
-  return (
-    <div className="not-prose demo-frame particle-menu-preview">
-      <ParticleMenu items={demoItems} />
-    </div>
-  );
-}
-
 export function ParticleMenuDemo() {
   return (
     <>

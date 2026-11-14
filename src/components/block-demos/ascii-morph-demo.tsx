@@ -11,14 +11,6 @@ const labels: Partial<Record<AsciiMorphShape, string>> = {
   a1: "a1 monogram",
 };
 
-export function AsciiMorphPreview() {
-  return (
-    <div className="not-prose demo-frame ascii-morph-preview">
-      <AsciiMorph interactive={false} />
-    </div>
-  );
-}
-
 export function AsciiMorphDemo() {
   const [shape, setShape] = useState<AsciiMorphShape>("globe");
 

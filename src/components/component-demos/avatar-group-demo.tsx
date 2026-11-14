@@ -36,10 +36,6 @@ function ProjectMembers({ size, max, duration }: { size?: AvatarSize; max?: numb
   );
 }
 
-export function AvatarGroupPreview() {
-  return <ProjectMembers max={4} />;
-}
-
 export function AvatarGroupDemo() {
   const [size, setSize] = useState<AvatarSize>("md");
   const [max, setMax] = useState<MaxOption>("4");

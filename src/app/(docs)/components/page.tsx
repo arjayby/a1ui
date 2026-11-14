@@ -1,47 +1,9 @@
 import type { Metadata } from "next";
 import { ArrowUpRightIcon } from "@phosphor-icons/react/ssr";
 import Link from "next/link";
-import type { ReactNode } from "react";
 
+import { CatalogPreview } from "@/components/catalog-preview";
 import { Card, CardContent, CardDescription } from "@/components/ui/card";
-import { MenuPreview } from "@/components/component-demos/menu-demo";
-import { DropdownMenuPreview } from "@/components/component-demos/dropdown-menu-demo";
-import { ContextMenuPreview } from "@/components/component-demos/context-menu-demo";
-import { ConfirmButtonPreview } from "@/components/component-demos/confirm-button-demo";
-import { CopyButton } from "@/registry/components/copy-button";
-import { IconToggle } from "@/registry/components/icon-toggle";
-import { SwitchPreview } from "@/components/component-demos/switch-demo";
-import { CheckboxPreview } from "@/components/component-demos/checkbox-demo";
-import { TabsPreview } from "@/components/component-demos/tabs-demo";
-import { RadioGroupPreview } from "@/components/component-demos/radio-group-demo";
-import { ChipGroupPreview } from "@/components/component-demos/chip-group-demo";
-import { AccordionPreview } from "@/components/component-demos/accordion-demo";
-import { LoaderPreview } from "@/components/component-demos/loader-demo";
-import { DialogPreview } from "@/components/component-demos/dialog-demo";
-import { AlertDialogPreview } from "@/components/component-demos/alert-dialog-demo";
-import { SheetPreview } from "@/components/component-demos/sheet-demo";
-import { ToastPreview } from "@/components/component-demos/toast-demo";
-import { TooltipPreview } from "@/components/component-demos/tooltip-demo";
-import { HoverCardPreview } from "@/components/component-demos/hover-card-demo";
-import { PopoverPreview } from "@/components/component-demos/popover-demo";
-import { SelectPreview } from "@/components/component-demos/select-demo";
-import { AvatarGroupPreview } from "@/components/component-demos/avatar-group-demo";
-import { LightboxPreview } from "@/components/component-demos/lightbox-demo";
-import { BadgePreview } from "@/components/component-demos/badge-demo";
-import { RollingNumberPreview } from "@/components/component-demos/rolling-number-demo";
-import { PaginationPreview } from "@/components/component-demos/pagination-demo";
-import { KbdPreview } from "@/components/component-demos/kbd-demo";
-import { SkeletonPreview } from "@/components/component-demos/skeleton-demo";
-import { BreadcrumbPreview } from "@/components/component-demos/breadcrumb-demo";
-import { LoadingButtonPreview } from "@/components/component-demos/loading-button-demo";
-import { SliderPreview } from "@/components/component-demos/slider-demo";
-import { SegmentedControlPreview } from "@/components/component-demos/segmented-control-demo";
-import { WheelPickerPreview } from "@/components/component-demos/wheel-picker-demo";
-import { OtpInputPreview } from "@/components/component-demos/otp-input-demo";
-import { ValidatedInputPreview } from "@/components/component-demos/validated-input-demo";
-import { TagInputPreview } from "@/components/component-demos/tag-input-demo";
-import { PasswordInputPreview } from "@/components/component-demos/password-input-demo";
-import { SwipeRowPreview } from "@/components/component-demos/swipe-row-demo";
 import { components } from "@/lib/component-catalog";
 import { collectionStructuredData, componentsGroup, JsonLd, pageMetadata } from "@/lib/seo";
 
@@ -52,47 +14,6 @@ export const metadata: Metadata = pageMetadata({
   description: `${components.length} animated React components built with Motion and Tailwind CSS, with live previews and editable source you install with the shadcn CLI.`,
   path: "/components",
 });
-
-const previews: Record<string, ReactNode> = {
-  "dropdown-menu": <DropdownMenuPreview />,
-  "context-menu": <ContextMenuPreview />,
-  menu: <MenuPreview />,
-  "confirm-button": <ConfirmButtonPreview />,
-  "copy-button": <CopyButton value="hello@a1ui.dev" />,
-  "icon-toggle": <IconToggle label="Dark mode" />,
-  switch: <SwitchPreview />,
-  checkbox: <CheckboxPreview />,
-  tabs: <TabsPreview />,
-  "radio-group": <RadioGroupPreview />,
-  "chip-group": <ChipGroupPreview />,
-  accordion: <AccordionPreview />,
-  loader: <LoaderPreview />,
-  dialog: <DialogPreview />,
-  "alert-dialog": <AlertDialogPreview />,
-  sheet: <SheetPreview />,
-  toast: <ToastPreview />,
-  tooltip: <TooltipPreview />,
-  "hover-card": <HoverCardPreview />,
-  popover: <PopoverPreview />,
-  select: <SelectPreview />,
-  "avatar-group": <AvatarGroupPreview />,
-  lightbox: <LightboxPreview />,
-  badge: <BadgePreview />,
-  "rolling-number": <RollingNumberPreview />,
-  pagination: <PaginationPreview />,
-  kbd: <KbdPreview />,
-  skeleton: <SkeletonPreview />,
-  breadcrumb: <BreadcrumbPreview />,
-  "loading-button": <LoadingButtonPreview />,
-  slider: <SliderPreview />,
-  "segmented-control": <SegmentedControlPreview />,
-  "wheel-picker": <WheelPickerPreview />,
-  "otp-input": <OtpInputPreview />,
-  "validated-input": <ValidatedInputPreview />,
-  "tag-input": <TagInputPreview />,
-  "password-input": <PasswordInputPreview />,
-  "swipe-row": <SwipeRowPreview />,
-};
 
 export default function ComponentsPage() {
   return (
@@ -106,9 +27,7 @@ export default function ComponentsPage() {
       <div className="catalog-grid">
         {components.map((component) => (
           <Card key={component.slug} role="article" className="catalog-card">
-            <div inert aria-hidden="true" className="catalog-preview flex items-center justify-center">
-              {previews[component.slug]}
-            </div>
+            <CatalogPreview group="components" slug={component.slug} />
             <CardContent className="catalog-card-content">
               <h2 className="ui-card-title">
                 <Link href={`/components/${component.slug}`} className="catalog-card-link">

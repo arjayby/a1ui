@@ -12,10 +12,6 @@ const answers = { numeric: "12345678", alphanumeric: "A1B2C3D4" } satisfies Reco
   string
 >;
 
-export function OtpInputPreview() {
-  return <OtpInput label="Verification code" name="verification-code" length={6} defaultValue="482" />;
-}
-
 export function OtpInputDemo() {
   const [length, setLength] = useState<(typeof lengths)[number]>("6");
   const [mode, setMode] = useState<(typeof modes)[number]>("numeric");

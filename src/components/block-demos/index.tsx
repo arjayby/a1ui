@@ -1,5 +1,4 @@
 import { SectionRail } from "@/registry/blocks/section-rail";
-import { SpiralText } from "@/registry/blocks/spiral-text";
 
 export { SpiralTextDemo } from "./spiral-text-demo";
 
@@ -102,14 +101,6 @@ const demoSections = [
   },
 ];
 
-export function SectionRailPreview() {
-  return (
-    <div className="not-prose demo-frame section-rail-demo section-rail-preview">
-      <SectionRail sections={demoSections} gap={0} className="w-5" />
-    </div>
-  );
-}
-
 export function SectionRailDemo() {
   return (
     <div
@@ -133,14 +124,6 @@ export function SectionRailDemo() {
           </section>
         ))}
       </div>
-    </div>
-  );
-}
-
-export function SpiralTextPreview() {
-  return (
-    <div className="not-prose demo-frame spiral-demo">
-      <SpiralText text="THE CONTENT ARCHITECTURE · " rotating={false} />
     </div>
   );
 }

@@ -18,20 +18,6 @@ const positions: ActivityPillPosition[] = [
   "bottom-right",
 ];
 
-export function ActivityPillPreview() {
-  return (
-    <div className="not-prose demo-frame grid place-items-center">
-      <div className="relative h-10 w-full">
-        <ActivityPill
-          contained
-          className="top-0!"
-          activity={{ status: "progress", title: "Uploading", value: 64 }}
-        />
-      </div>
-    </div>
-  );
-}
-
 export function ActivityPillDemo() {
   const { activity, start, update, succeed, fail, clear } = useActivity();
   const [position, setPosition] = useState<ActivityPillPosition>("top-center");
@@ -81,11 +67,7 @@ export function ActivityPillDemo() {
 
   return (
     <div className="not-prose demo-frame">
-      <div
-        className="component-demo-stage flex-col gap-4"
-        role="region"
-        aria-label="Activity Pill demo"
-      >
+      <div className="component-demo-stage flex-col gap-4" role="region" aria-label="Activity Pill demo">
         <div className="flex flex-wrap justify-center gap-2">
           <Button variant="outline" size="sm" onClick={() => run("deploy")}>
             <RocketLaunchIcon aria-hidden="true" />

@@ -1,23 +1,10 @@
 import type { Metadata } from "next";
 import { ArrowUpRightIcon } from "@phosphor-icons/react/ssr";
 import Link from "next/link";
-import type { ComponentType } from "react";
 
 import { AgentInstall } from "@/components/agent-install";
 
-import { ActivityPillPreview } from "@/components/block-demos/activity-pill-demo";
-import { ArcReelPreview } from "@/components/block-demos/arc-reel-demo";
-import { AsciiTerrainPreview } from "@/components/block-demos/ascii-terrain-demo";
-import { AsciiMorphPreview } from "@/components/block-demos/ascii-morph-demo";
-import { AsciiLensPreview } from "@/components/block-demos/ascii-lens-demo";
-import { CommandPalettePreview } from "@/components/block-demos/command-palette-demo";
-import { CondensingHeaderPreview } from "@/components/block-demos/condensing-header-demo";
-import { SectionRailPreview, SpiralTextPreview } from "@/components/block-demos";
-import { ParticleMenuPreview } from "@/components/block-demos/particle-menu-demo";
-import { TextScramblePreview } from "@/components/block-demos/text-scramble-demo";
-import { TextBannerPreview } from "@/components/block-demos/text-banner-demo";
-import { ShapeFlowPreview } from "@/components/block-demos/shape-flow-demo";
-import { TaskStepsPreview } from "@/components/block-demos/task-steps-demo";
+import { CatalogPreview } from "@/components/catalog-preview";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription } from "@/components/ui/card";
 import { blocks } from "@/lib/block-catalog";
@@ -30,23 +17,6 @@ export const metadata: Metadata = pageMetadata({
   description: `${blocks.length} ready-made animated React blocks, from ASCII art to text effects and navigation, inspired by designs found online and installed as editable source.`,
   path: "/blocks",
 });
-
-const previews: Record<string, ComponentType> = {
-  "activity-pill": ActivityPillPreview,
-  "ascii-morph": AsciiMorphPreview,
-  "ascii-lens": AsciiLensPreview,
-  "ascii-terrain": AsciiTerrainPreview,
-  "section-rail": SectionRailPreview,
-  "condensing-header": CondensingHeaderPreview,
-  "spiral-text": SpiralTextPreview,
-  "particle-menu": ParticleMenuPreview,
-  "command-palette": CommandPalettePreview,
-  "arc-reel": ArcReelPreview,
-  "text-scramble": TextScramblePreview,
-  "text-banner": TextBannerPreview,
-  "shape-flow": ShapeFlowPreview,
-  "task-steps": TaskStepsPreview,
-};
 
 export default function BlocksPage() {
   return (
@@ -61,12 +31,9 @@ export default function BlocksPage() {
 
       <div className="catalog-grid">
         {blocks.map((block) => {
-          const Preview = previews[block.slug];
           return (
             <Card key={block.slug} role="article" className="catalog-card">
-              <div inert aria-hidden="true" className="catalog-preview">
-                <Preview />
-              </div>
+              <CatalogPreview group="blocks" slug={block.slug} />
               <CardContent className="catalog-card-content">
                 <h2 className="ui-card-title">
                   <Link

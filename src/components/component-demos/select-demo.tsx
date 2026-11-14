@@ -43,25 +43,6 @@ const items = regions.flatMap((group) => group.items);
 type Position = "aligned" | "below";
 const positions: Position[] = ["aligned", "below"];
 
-export function SelectPreview() {
-  return (
-    <Select items={items} defaultValue="eu-west">
-      <SelectTrigger aria-label="Region">
-        <SelectValue placeholder="Select a region" />
-      </SelectTrigger>
-      <SelectContent>
-        {items
-          .filter((item) => !item.disabled)
-          .map((item) => (
-            <SelectItem key={item.value} value={item.value}>
-              {item.label}
-            </SelectItem>
-          ))}
-      </SelectContent>
-    </Select>
-  );
-}
-
 export function SelectDemo() {
   const [position, setPosition] = useState<Position>("aligned");
   const [duration, setDuration] = useState(0.3);

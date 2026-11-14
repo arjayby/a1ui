@@ -27,16 +27,6 @@ const years = Array.from({ length: 11 }, (_, index) => ({ value: String(2020 + i
 
 const daysIn = (month: string, year: string) => new Date(Number(year), Number(month), 0).getDate();
 
-export function WheelPickerPreview() {
-  return (
-    <WheelPickerGroup label="Time" className="w-52 px-2">
-      <WheelPicker label="Hour" options={hours} defaultValue="9" className="flex-1" />
-      <WheelPicker label="Minute" options={minutes} defaultValue="41" className="flex-1" />
-      <WheelPicker label="AM or PM" options={periods} defaultValue="AM" className="flex-1" />
-    </WheelPickerGroup>
-  );
-}
-
 export function WheelPickerDemo() {
   const [picker, setPicker] = useState<"time" | "date">("date");
   const [haptics, setHaptics] = useState(true);

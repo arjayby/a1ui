@@ -21,10 +21,6 @@ const CONTENT_TIME = 3200;
 const about =
   "a1ui is a collection of animated React components and blocks. Install one with an agent, then edit it to make it yours.";
 
-export function SkeletonPreview() {
-  return <SkeletonText lines={3} className="w-56" />;
-}
-
 export function SkeletonDemo() {
   const [animation, setAnimation] = useState<Animation>("shimmer");
   const [direction, setDirection] = useState<SkeletonDirection>("right");

@@ -76,14 +76,6 @@ function Toolbar({ tools, side }: { tools: Tool[][]; side?: TooltipContentProps[
   );
 }
 
-export function TooltipPreview() {
-  return (
-    <TooltipProvider delay={200}>
-      <Toolbar tools={[groups[0].slice(0, 3)]} />
-    </TooltipProvider>
-  );
-}
-
 export function TooltipDemo() {
   const [mode, setMode] = useState<Mode>("glide");
   const [side, setSide] = useState<Side>("top");

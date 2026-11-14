@@ -1,7 +1,7 @@
 "use client";
 
 import { BellIcon, CheckCircleIcon, CloudArrowUpIcon, WarningCircleIcon } from "@phosphor-icons/react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { DemoDuration, DemoSelect } from "@/components/component-demos/demo-controls";
 import { Button } from "@/components/ui/button";
@@ -72,31 +72,6 @@ function Triggers() {
         Loading
       </Button>
     </div>
-  );
-}
-
-function PreviewToasts() {
-  const { add } = useToast();
-  useEffect(() => {
-    add({ id: "preview-older", title: "Event created", description: "Friday, 10:00" });
-    add({
-      id: "preview-newer",
-      type: "success",
-      title: "Changes saved",
-      description: "Your profile is up to date.",
-    });
-  }, [add]);
-  return null;
-}
-
-export function ToastPreview() {
-  return (
-    <ToastProvider timeout={0}>
-      <PreviewToasts />
-      <div className="relative h-36 w-full max-w-xs">
-        <Toaster contained position="bottom-center" duration={0} label="Preview notifications" />
-      </div>
-    </ToastProvider>
   );
 }
 

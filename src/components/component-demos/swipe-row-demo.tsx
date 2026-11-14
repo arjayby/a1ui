@@ -6,12 +6,7 @@ import { useState } from "react";
 
 import { DemoSelect, DemoSwitch } from "@/components/component-demos/demo-controls";
 import { Button } from "@/components/ui/button";
-import {
-  SwipeRow,
-  SwipeRowGroup,
-  type SwipeRowAction,
-  type SwipeRowSide,
-} from "@/registry/components/swipe-row";
+import { SwipeRow, SwipeRowGroup, type SwipeRowAction } from "@/registry/components/swipe-row";
 
 interface Message {
   id: string;
@@ -111,22 +106,6 @@ function useInbox() {
       },
     ],
   };
-}
-
-export function SwipeRowPreview() {
-  const { messages, leading, trailing } = useInbox();
-  const open: (SwipeRowSide | null)[] = [null, "trailing", null];
-
-  return (
-    <SwipeRowGroup className="border-border divide-border w-full max-w-72 divide-y overflow-hidden rounded-xl border">
-      {messages.slice(0, 3).map((message, index) => (
-        // Held open so the catalog card shows the actions: the card itself is inert.
-        <SwipeRow key={message.id} open={open[index]} leading={leading(message)} trailing={trailing(message)}>
-          <MessageRow message={message} />
-        </SwipeRow>
-      ))}
-    </SwipeRowGroup>
-  );
 }
 
 export function SwipeRowDemo() {

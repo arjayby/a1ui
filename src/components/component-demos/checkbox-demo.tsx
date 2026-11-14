@@ -37,19 +37,13 @@ function CheckboxShowcase({ strikethrough, duration }: { strikethrough: boolean;
             duration={duration}
             checked={done.includes(task.id)}
             onCheckedChange={(checked) =>
-              setDone((current) =>
-                checked ? [...current, task.id] : current.filter((id) => id !== task.id),
-              )
+              setDone((current) => (checked ? [...current, task.id] : current.filter((id) => id !== task.id)))
             }
           />
         ))}
       </div>
     </div>
   );
-}
-
-export function CheckboxPreview() {
-  return <CheckboxShowcase strikethrough />;
 }
 
 export function CheckboxDemo() {

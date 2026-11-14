@@ -116,7 +116,8 @@ Two families. **Endless** (`font-sans`, and `font-heading`, which is the same fa
 
 - Space on a 4px base: `space-1` to `space-4` (4 to 16px) inside components, `space-6` to `space-12` (24 to 48px) between the parts of a block, `space-16` (64px) between a picture and its words, `space-24` and `space-32` (96 and 128px) between sections.
 - Catalog pages open on `space-24` of empty paper and every page closes on `space-32`. A docs article opens on `space-16`, so a component's demo is on screen when the page loads. Docs sections sit `space-32` apart on desktop and `space-24` on small screens.
-- The catalog pages lay out in one 1120px column (`--container-content`), wider than Stipple's 960px so three tiles fit with room between them. Tiles sit `space-12` apart across and `space-16` apart down, `space-16` below the page header.
+- The catalog pages lay out in one 1120px column (`--container-content`), wider than Stipple's 960px, in two columns at most and one below about 50rem of room. Tiles sit `space-12` apart across and `space-16` apart down, `space-16` below the page header.
+- A catalog tile shows the docs demo itself, at least 26rem tall, without its controls and out of reach of the pointer and keyboard: the whole tile is one link. A component that opens over the page (a dialog, a sheet, a menu, a toast) is shown open, in a frame of its own inside the tile (`/preview/<group>/<slug>`), so its scrim, scroll lock and focus stop at the tile.
 - The docs toolbar is `space-16` tall. Sidebar rows are 34px, with `space-3` around each group and `space-6` around the wordmark. Demo stages keep `space-12` above and below the component.
 - On the landing page the window and the menu sit `space-24` apart.
 - Corners are small: `radius-sm` 4px for chips, checkboxes and menu rows, `radius-md` 8px for buttons and inputs, `radius-lg` 10px for cards, dialogs and the window. `radius-full` is for dots, radios and switch tracks.

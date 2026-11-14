@@ -109,24 +109,6 @@ const hrefFor = (folders: Folder[], depth: number) =>
     .map((folder) => folder.name)
     .join("/")}`;
 
-export function BreadcrumbPreview() {
-  // The card centers its preview, so the trail sizes to its content and collapses by count only.
-  return (
-    <div className="w-fit">
-      <Breadcrumb
-        maxItems={3}
-        collapseToFit={false}
-        items={[
-          { label: "Home", href: "#" },
-          { label: "Projects", href: "#" },
-          { label: "a1ui", href: "#" },
-          { label: "Breadcrumb" },
-        ]}
-      />
-    </div>
-  );
-}
-
 const row =
   "focus-visible:ring-ring/30 flex items-center gap-2 px-2.5 py-1.5 text-left text-sm outline-none focus-visible:ring-3";
 

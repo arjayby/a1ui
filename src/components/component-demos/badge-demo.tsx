@@ -64,10 +64,6 @@ function BadgeShowcase({ variant, max, duration }: { variant: Variant; max: numb
   );
 }
 
-export function BadgePreview() {
-  return <BadgeShowcase variant="outline" max={9} />;
-}
-
 export function BadgeDemo() {
   const [variant, setVariant] = useState<Variant>("outline");
   const [cap, setCap] = useState<Cap>("9");

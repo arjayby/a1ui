@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
-import { Analytics } from "@vercel/analytics/next";
-import { RootProvider } from "fumadocs-ui/provider/next";
 
+import { SiteProvider } from "@/components/site-provider";
 import { author, sharedOpenGraph, siteDescription, siteName, siteUrl } from "@/lib/seo";
 
 import "./globals.css";
@@ -39,15 +38,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" data-scroll-behavior="smooth" suppressHydrationWarning>
       <body>
-        <RootProvider
-          theme={{ defaultTheme: "light", enableSystem: false, hotKey: false }}
-          search={{ enabled: true, options: { api: "/api/search" } }}
-        >
-          {children}
-        </RootProvider>
-        {/* Analytics only reports from production builds; in development it would load a debug
-            script from Vercel's CDN that the browser blocks, logging a failed request on every page. */}
-        {process.env.NODE_ENV === "production" ? <Analytics /> : null}
+        <SiteProvider>{children}</SiteProvider>
       </body>
     </html>
   );

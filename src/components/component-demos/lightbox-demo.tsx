@@ -25,10 +25,6 @@ const images: LightboxImage[] = [
 
 const sets = { gallery: images, single: images.slice(0, 1) } satisfies Record<string, LightboxImage[]>;
 
-export function LightboxPreview() {
-  return <Lightbox images={images.slice(0, 3)} className="w-48" />;
-}
-
 export function LightboxDemo() {
   const [set, setSet] = useState<keyof typeof sets>("gallery");
   const [showArrows, setShowArrows] = useState(true);

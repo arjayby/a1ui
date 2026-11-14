@@ -8,10 +8,6 @@ import { ConfirmButton, type ConfirmButtonProps } from "@/registry/components/co
 const directions: NonNullable<ConfirmButtonProps["direction"]>[] = ["right", "up", "left", "down"];
 const animations: NonNullable<ConfirmButtonProps["animation"]>[] = ["blur", "slide", "flip"];
 
-export function ConfirmButtonPreview() {
-  return <ConfirmButton onConfirm={() => {}} />;
-}
-
 export function ConfirmButtonDemo() {
   const [direction, setDirection] = useState<NonNullable<ConfirmButtonProps["direction"]>>("right");
   const [animation, setAnimation] = useState<NonNullable<ConfirmButtonProps["animation"]>>("blur");

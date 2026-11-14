@@ -11,14 +11,6 @@ const items = ["a1ui", "Components"];
 const pressable =
   "transition-transform duration-(--ease-spring-snappy-duration) ease-(--ease-spring-snappy) active:scale-[0.96] active:duration-75 active:ease-(--ease-press) motion-reduce:transition-none motion-reduce:active:scale-100 motion-reduce:active:opacity-60";
 
-export function TextBannerPreview() {
-  return (
-    <div className="not-prose demo-frame text-banner-preview">
-      <TextBanner items={items} paused style={{ fontSize: "1.125rem" }} />
-    </div>
-  );
-}
-
 export function TextBannerDemo() {
   const [paused, setPaused] = useState(false);
   const [direction, setDirection] = useState<"left" | "right">("right");

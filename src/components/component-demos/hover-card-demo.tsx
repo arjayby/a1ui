@@ -67,22 +67,6 @@ function ProfileCard() {
   );
 }
 
-export function HoverCardPreview() {
-  return (
-    <p className="text-muted-foreground text-sm">
-      Designed by{" "}
-      <HoverCard openDelay={0}>
-        <HoverCardTrigger href="#" onClick={(event) => event.preventDefault()}>
-          @{profile.handle}
-        </HoverCardTrigger>
-        <HoverCardContent className={cardLayout}>
-          <ProfileCard />
-        </HoverCardContent>
-      </HoverCard>
-    </p>
-  );
-}
-
 export function HoverCardDemo() {
   const [side, setSide] = useState<Side>("bottom");
   const [delay, setDelay] = useState<Delay>("instant");

@@ -19,10 +19,6 @@ const labelOptions: Labels[] = ["auto", "mac", "other"];
 
 const singles = ["Escape", "Shift", "Control", "Alt", "Meta", "Enter"];
 
-export function KbdPreview() {
-  return <KbdGroup keys={["mod", "k"]} listen />;
-}
-
 export function KbdDemo() {
   const [combo, setCombo] = useState<Combo>("mod + shift + enter");
   const [labels, setLabels] = useState<Labels>("auto");

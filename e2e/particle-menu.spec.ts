@@ -16,7 +16,7 @@ for (const width of [1440, 390, 320]) {
       has: page.getByRole("link", { name: "Particle Menu", exact: true }),
     });
     await card.scrollIntoViewIfNeeded();
-    const preview = card.locator(".particle-menu-preview");
+    const preview = card.locator(".particle-menu-demo");
     await expect(preview.locator("span")).toHaveText(labels);
     for (const label of await preview.locator("span").all()) {
       await expect(label).toHaveCSS("font-family", /^Endless/);

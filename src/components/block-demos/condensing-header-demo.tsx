@@ -91,28 +91,6 @@ function NoteRows({ count = notes.length }: { count?: number }) {
   );
 }
 
-export function CondensingHeaderPreview() {
-  return (
-    <div className="not-prose demo-frame">
-      <div className={`${panel} h-full overflow-hidden`}>
-        <CondensingHeader
-          title="Notes"
-          headingLevel={3}
-          subtitle="16 notes"
-          leading={
-            <span className={action}>
-              <CaretLeftIcon aria-hidden="true" className="size-4" />
-              Folders
-            </span>
-          }
-          trailing={<span className={action}>Edit</span>}
-        />
-        <NoteRows count={2} />
-      </div>
-    </div>
-  );
-}
-
 export function CondensingHeaderDemo() {
   return (
     <>

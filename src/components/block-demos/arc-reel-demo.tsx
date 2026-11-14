@@ -1,5 +1,4 @@
 import Image from "next/image";
-import type { CSSProperties } from "react";
 
 import { ArcReel, type ArcReelItem } from "@/registry/blocks/arc-reel";
 
@@ -38,27 +37,7 @@ const reel = (eager: boolean): ArcReelItem[] =>
     ...provider,
     artwork: <ReelArtwork scene={scene} eager={eager} />,
   }));
-const providers = reel(false);
 const eagerProviders = reel(true);
-
-export function ArcReelPreview() {
-  return (
-    <ArcReel
-      items={providers}
-      initialIndex={2}
-      className="h-full"
-      style={
-        {
-          "--arc-reel-card-width": "7.25rem",
-          "--arc-reel-stage-padding": "1rem",
-          "--arc-reel-name-size": "0.625rem",
-          "--arc-reel-gap": "1rem",
-          "--arc-reel-controls-padding": "0rem",
-        } as CSSProperties
-      }
-    />
-  );
-}
 
 export function ArcReelDemo() {
   return (

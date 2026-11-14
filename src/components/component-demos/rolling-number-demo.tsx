@@ -1,7 +1,7 @@
 "use client";
 
 import { MinusIcon, PlusIcon } from "@phosphor-icons/react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { DemoDuration, DemoSelect, DemoSwitch } from "@/components/component-demos/demo-controls";
 import { Button } from "@/components/ui/button";
@@ -31,30 +31,9 @@ const scale = (format: Format, value: number) =>
   format === "percent" ? value / 10000 : format === "compact" ? value * 100 : value;
 // Button labels name the step in the current format, so they match the delta chip.
 const step = (format: Format, amount: number) =>
-  new Intl.NumberFormat("en-US", { ...options[format], minimumFractionDigits: 0 }).format(scale(format, amount));
-
-// The catalog card walks through a fixed set of changes, up and down across a new column.
-const PREVIEW_STEPS = [318, -45, 1206, -1730, 251];
-export function RollingNumberPreview() {
-  const [tick, setTick] = useState(0);
-  useEffect(() => {
-    const timer = window.setTimeout(() => setTick((current) => current + 1), 1800);
-    return () => window.clearTimeout(timer);
-  }, [tick]);
-  const value = PREVIEW_STEPS.slice(0, tick % (PREVIEW_STEPS.length + 1)).reduce(
-    (total, step) => total + step,
-    9120,
+  new Intl.NumberFormat("en-US", { ...options[format], minimumFractionDigits: 0 }).format(
+    scale(format, amount),
   );
-
-  return (
-    <RollingNumber
-      value={value}
-      locale="en-US"
-      format={{ style: "currency", currency: "USD", maximumFractionDigits: 0 }}
-      className="text-foreground text-3xl font-semibold tracking-tight"
-    />
-  );
-}
 
 export function RollingNumberDemo() {
   const [format, setFormat] = useState<Format>("number");

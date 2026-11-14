@@ -20,10 +20,6 @@ const iconSets = {
 type IconSet = keyof typeof iconSets;
 const iconOptions: IconSet[] = ["none", "check / x", "sun / moon"];
 
-export function SwitchPreview() {
-  return <Switch label="Notifications" defaultChecked />;
-}
-
 export function SwitchDemo() {
   const [icons, setIcons] = useState<IconSet>("none");
   const [duration, setDuration] = useState(0.3);

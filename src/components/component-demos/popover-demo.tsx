@@ -56,10 +56,6 @@ function SharePopover({ morph = true, side, duration }: { morph?: boolean; side?
   );
 }
 
-export function PopoverPreview() {
-  return <SharePopover />;
-}
-
 export function PopoverDemo() {
   const [morph, setMorph] = useState(true);
   const [side, setSide] = useState<Side>("bottom");
