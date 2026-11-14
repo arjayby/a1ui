@@ -131,7 +131,7 @@ export function PopoverTrigger({ className, children, ...props }: PopoverTrigger
           layoutCrossfade={false}
           transition={spring(popover.seconds)}
           style={{ borderRadius: TRIGGER_RADIUS }}
-          className="bg-popover border-border pointer-events-none absolute inset-0 -z-10 border shadow-sm"
+          className="bg-popover border-input pointer-events-none absolute inset-0 -z-10 border shadow-sm"
         />
       )}
       <motion.span
