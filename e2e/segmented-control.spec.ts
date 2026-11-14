@@ -96,7 +96,9 @@ test("the thumb shrinks when held, follows the pointer, and lands on the nearest
   await page.mouse.up();
   await expect(control).not.toHaveAttribute("data-dragging");
   await expect(control.getByRole("radio", { name: "Month" })).toHaveAttribute("aria-checked", "true");
-  await expect(page.locator(".demo-frame").getByText("Showing the last month")).toBeVisible();
+  await expect(
+    page.locator(".demo-frame").getByRole("img", { name: "Activity over the last month, as bars" }),
+  ).toBeVisible();
   await expect(control.locator('input[type="hidden"][name="range"]')).toHaveValue("month");
   // The press focused Week; focus follows the thumb to the option it chose.
   await expect(control.getByRole("radio", { name: "Month" })).toBeFocused();
@@ -210,33 +212,32 @@ test("is a radio group for the keyboard, in both writing directions", async ({ p
   await page.goto(route);
   await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
   const frame = page.locator(".demo-frame");
-  const view = frame.getByRole("radiogroup", { name: "View" });
-  const names = ["List", "Board", "Calendar", "Timeline"];
+  const view = frame.getByRole("radiogroup", { name: "Range" });
+  const names = ["Day", "Week", "Month", "Year"];
   const radio = (name: string) => view.getByRole("radio", { name });
-  await expect(radio("Timeline")).toBeDisabled();
   expect(await view.getByRole("radio").evaluateAll((items) => items.map((item) => item.tabIndex))).toEqual([
-    0, -1, -1, -1,
+    -1, 0, -1, -1,
   ]);
 
-  await radio("List").focus();
+  await radio("Week").focus();
   await page.keyboard.press("ArrowRight");
-  await expect(radio("Board")).toBeFocused();
-  await expect(radio("Board")).toHaveAttribute("aria-checked", "true");
+  await expect(radio("Month")).toBeFocused();
+  await expect(radio("Month")).toHaveAttribute("aria-checked", "true");
   await page.keyboard.press("End");
-  // Timeline is disabled, so End stops on Calendar and the next arrow wraps to List.
-  await expect(radio("Calendar")).toBeFocused();
+  // End stops on Year, the last option, and the next arrow wraps to Day.
+  await expect(radio("Year")).toBeFocused();
   await page.keyboard.press("ArrowRight");
-  await expect(radio("List")).toBeFocused();
+  await expect(radio("Day")).toBeFocused();
   await page.keyboard.press("ArrowLeft");
-  await expect(radio("Calendar")).toHaveAttribute("aria-checked", "true");
+  await expect(radio("Year")).toHaveAttribute("aria-checked", "true");
   await page.keyboard.press("Home");
-  await expect(radio("List")).toHaveAttribute("aria-checked", "true");
+  await expect(radio("Day")).toHaveAttribute("aria-checked", "true");
   // Tab leaves the group in one step: only the checked option is a tab stop.
   await page.keyboard.press("ArrowDown");
   await page.keyboard.press("Tab");
   for (const name of names) await expect(radio(name)).not.toBeFocused();
-  await radio("Calendar").click();
-  await expect(radio("Calendar")).toHaveAttribute("aria-checked", "true");
+  await radio("Month").click();
+  await expect(radio("Month")).toHaveAttribute("aria-checked", "true");
   await expect.poll(async () => (await measure(view)).position).toBeCloseTo(2, 2);
 
   // Right to left, the first option sits on the right and the arrows follow the layout.
@@ -246,9 +247,9 @@ test("is a radio group for the keyboard, in both writing directions", async ({ p
   expect(mirrored.thumb!.left).toBeCloseTo(mirrored.items[2].left, 0);
   expect(mirrored.window.left).toBeCloseTo(mirrored.thumb!.left, 0);
   expect(mirrored.window.right).toBeCloseTo(mirrored.thumb!.right, 0);
-  await radio("Calendar").focus();
+  await radio("Month").focus();
   await page.keyboard.press("ArrowRight");
-  await expect(radio("Board")).toHaveAttribute("aria-checked", "true");
+  await expect(radio("Week")).toHaveAttribute("aria-checked", "true");
   await expect.poll(async () => (await measure(view)).position).toBeCloseTo(1, 2);
   const settled = await measure(view);
   expect(settled.thumb!.left).toBeCloseTo(settled.items[1].left, 0);
@@ -329,7 +330,9 @@ test("reduced motion cross-fades the thumb in place, by click and by drag", asyn
   await expect(control.getByRole("radio", { name: "Year" })).toHaveAttribute("aria-checked", "true");
   await client.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
   await expect(control.getByRole("radio", { name: "Day" })).toHaveAttribute("aria-checked", "true");
-  await expect(page.locator(".demo-frame").getByText("Showing the last day")).toBeVisible();
+  await expect(
+    page.locator(".demo-frame").getByRole("img", { name: "Activity over the last day, as bars" }),
+  ).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await context.close();
 });
