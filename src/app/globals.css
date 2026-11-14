@@ -282,7 +282,8 @@ h6 {
   height: 20px;
   flex-shrink: 0;
   background: var(--cobalt-ink);
-  mask: url("/icon.svg") center / contain no-repeat;
+  /* The bare mark. The favicon (src/app/icon.svg) has a background, so it cannot be the mask. */
+  mask: url("/brand-mark.svg") center / contain no-repeat;
   mask-mode: alpha;
 }
 

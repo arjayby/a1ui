@@ -45,7 +45,7 @@ const asciiForms: Record<string, string> = {
 const inEndless = (text: string) =>
   text.replace(/[\u2018\u2019\u201c\u201d\u2013\u2014\u2026\u00b7\u00a0]/g, (c) => asciiForms[c]);
 
-// The brand mark from src/app/icon.svg.
+// The brand mark, the same path as public/brand-mark.svg and src/app/icon.svg.
 export const brandMarkPath =
   "M108 0c11.046 0 20 8.954 20 20l.007-.517C128.281 8.676 137.127 0 148 0h88c11.046 0 20 8.954 20 20v88c0 11.046-8.954 20-20 20 11.046 0 20 8.954 20 20v88c0 11.046-8.954 20-20 20h-88c-11.046 0-20-8.954-20-20 0 11.046-8.954 20-20 20H20c-11.046 0-20-8.954-20-20v-88c0-10.873 8.676-19.719 19.483-19.993L20 128c-11.046 0-20-8.954-20-20V20C0 8.954 8.954 0 20 0Zm20 64c0 35.346-28.654 64-64 64 35.346 0 64 28.654 64 64 0-35.346 28.654-64 64-64-35.346 0-64-28.654-64-64";
 
