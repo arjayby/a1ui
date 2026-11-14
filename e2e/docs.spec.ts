@@ -200,7 +200,7 @@ test.describe("smooth scrolling", () => {
     }
 
     await page.mouse.move(400, 400);
-    await page.mouse.wheel(0, 800);
+    await page.mouse.wheel(0, 880);
     await expect(toc.getByRole("link", { name: "Dependencies" })).toHaveAttribute("aria-current", "location");
   });
 });

@@ -8,6 +8,7 @@ const scenarios = [
     role: "button",
     from: "Overview",
     to: "Settings",
+    indicator: "muted",
   },
   {
     name: "sidebar rows",
@@ -40,6 +41,8 @@ const scenarios = [
   role: "button" | "link" | "menuitem";
   from: string;
   to: string;
+  /** The Menu demo opens on the dot indicator, which has no traveling background. */
+  indicator?: string;
 }[];
 
 for (const scenario of scenarios) {
@@ -50,6 +53,10 @@ for (const scenario of scenarios) {
     await page.evaluate(() => document.fonts.ready);
     if (scenario.role === "menuitem")
       await page.getByRole("button", { name: "Workspace", exact: true }).click();
+    if (scenario.indicator) {
+      await page.getByRole("button", { name: /^Indicator:/ }).click();
+      await page.getByRole("menuitem", { name: scenario.indicator, exact: true }).click();
+    }
     const container = page.locator(scenario.container);
     const source = container.getByRole(scenario.role, { name: scenario.from, exact: true });
     const target = container.getByRole(scenario.role, { name: scenario.to, exact: true });

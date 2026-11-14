@@ -132,7 +132,7 @@ export function DocsToc({ items }: { items: DocsTocItem[] }) {
       <div className="docs-toc-rail">
         <nav aria-label="On this page">
           <p className="docs-toc-label">On this page</p>
-          <Menu value={active} className="flex flex-col gap-0.5">
+          <Menu value={active} indicator="muted" className="flex flex-col gap-0.5">
             {sections.map((item, index) => {
               const id = ids[index];
               const current = active === id;

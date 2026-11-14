@@ -1,9 +1,56 @@
+import type { Page } from "@playwright/test";
+
 import { expect, test } from "./fixtures";
 
 const highlight = '[data-slot="menu-highlight"]';
 
+// The demo opens on the dot indicator, which has no traveling background.
+async function chooseIndicator(page: Page, indicator: "dot" | "fill" | "muted") {
+  await page.getByRole("button", { name: /^Indicator:/ }).click();
+  await page.getByRole("menuitem", { name: indicator, exact: true }).click();
+  await expect(page.getByRole("menu", { name: "Indicator" })).not.toBeVisible();
+}
+
+test("dot marks the selected row without a background, and fill colors the covered row", async ({ page }) => {
+  await page.goto("/components/menu");
+  const menu = page.getByRole("group", { name: "Workspace views" });
+  const overview = menu.getByRole("button", { name: "Overview" });
+  const settings = menu.getByRole("button", { name: "Settings" });
+  await expect(menu).toHaveAttribute("data-indicator", "dot");
+  await expect(overview.locator('[data-slot="menu-dot"]')).toHaveCount(1);
+  await expect(menu.locator(highlight)).toHaveCount(0);
+  await settings.click();
+  await expect(settings.locator('[data-slot="menu-dot"]')).toHaveCount(1);
+  await expect(menu.locator('[data-slot="menu-dot"]')).toHaveCount(1);
+
+  await chooseIndicator(page, "fill");
+  await expect(menu.locator('[data-slot="menu-dot"]')).toHaveCount(0);
+  await expect(settings).toHaveAttribute("data-covered");
+  // While the highlight travels, a row's text is light only while the highlight is over it.
+  const mismatched = await overview.evaluate(async (target) => {
+    const menu = target.closest("[data-menu]")!;
+    (target as HTMLElement).click();
+    let mismatched = 0;
+    const started = performance.now();
+    while (performance.now() - started < 600) {
+      await new Promise(requestAnimationFrame);
+      const cover = menu.querySelector('[data-slot="menu-highlight"]')!.getBoundingClientRect();
+      for (const item of menu.querySelectorAll("[data-menu-item]")) {
+        const row = item.getBoundingClientRect();
+        const y = row.top + row.height / 2;
+        if ((y > cover.top && y < cover.bottom) !== item.hasAttribute("data-covered")) mismatched++;
+      }
+    }
+    return mismatched;
+  });
+  expect(mismatched).toBe(0);
+  await expect(overview).toHaveAttribute("data-covered");
+  await expect(settings).not.toHaveAttribute("data-covered");
+});
+
 test("focus travels between rows without selecting and returns on blur", async ({ page }) => {
   await page.goto("/components/menu");
+  await chooseIndicator(page, "muted");
   const menu = page.getByRole("group", { name: "Workspace views" });
   const overview = menu.getByRole("button", { name: "Overview" });
   const settings = menu.getByRole("button", { name: "Settings" });
@@ -83,6 +130,7 @@ test("reduced motion switches instantly and mobile navigation closes after selec
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/components/menu");
+  await chooseIndicator(page, "muted");
   const menu = page.getByRole("group", { name: "Workspace views" });
   await menu.getByRole("button", { name: "Settings" }).click();
   const positions = await menu.evaluate(async (element) => {
