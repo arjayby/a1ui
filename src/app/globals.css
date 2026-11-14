@@ -765,26 +765,6 @@ html:has(.catalog-stage) nextjs-portal {
   font-weight: 400;
 }
 
-/*
- * Code is ink, with cobalt-ink keywords, muted strings and faint comments: nothing else
- * on the page is coloured. The selectors match the default GitHub Shiki themes' token colours.
- */
-.shiki.shiki-themes code span[style] {
-  color: var(--ink);
-}
-
-.shiki.shiki-themes code span[style*="D73A49" i] {
-  color: var(--cobalt-ink);
-}
-
-.shiki.shiki-themes code span[style*="032F62" i] {
-  color: var(--ink-muted);
-}
-
-.shiki.shiki-themes code span[style*="6A737D" i] {
-  color: var(--ink-faint);
-}
-
 .docs-article-body :where(h3, h4, h5, h6):not(:where(.not-prose, .not-prose *)) {
   font-weight: 400;
 }

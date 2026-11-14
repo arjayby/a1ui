@@ -168,4 +168,4 @@ Stipple has no equivalents for these; each follows its rules.
 - **Dialog, Sheet, Popover, Tooltip, DropdownMenu, Toast**: `paper-50` sheets with one `line-strong` edge. Menu group labels are `mono-label`.
 - **Alert**: a `paper-50` sheet inside a `line` hairline; the variant colours its text and always comes with an icon.
 - **Skeleton**: a still `paper-200` block.
-- **Code blocks**: `ink` with `cobalt-ink` keywords, `ink-muted` strings and `ink-faint` comments.
+- **Code blocks**: syntax colours come from the default GitHub Shiki themes (light in Paper, dark in Night), not from Stipple. This is the one place besides cobalt where the page is coloured.
