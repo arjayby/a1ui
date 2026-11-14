@@ -18,9 +18,9 @@ function useHydrated() {
 }
 
 const variantClasses = {
-  default: "bg-foreground text-background border-transparent",
+  default: "bg-primary text-primary-foreground border-transparent",
   secondary: "bg-muted text-foreground border-transparent",
-  outline: "bg-background text-foreground border-border",
+  outline: "bg-background text-foreground border-input",
   destructive: "bg-destructive text-background border-transparent",
 } as const;
 

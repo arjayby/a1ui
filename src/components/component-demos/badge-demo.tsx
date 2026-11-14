@@ -40,7 +40,7 @@ function BadgeShowcase({ variant, max, duration }: { variant: Variant; max: numb
 
   return (
     <div className="flex flex-wrap items-center justify-center gap-4">
-      <span className="border-border text-foreground relative inline-grid size-10 place-items-center rounded-full border">
+      <span className="border-input text-foreground relative inline-grid size-10 place-items-center rounded-full border">
         <BellIcon aria-hidden="true" className="size-5" />
         <span className="absolute -top-1.5 left-6">
           <Badge
