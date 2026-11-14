@@ -7,12 +7,43 @@ import { siteUrl } from "@/lib/seo";
 
 export const ogImageSize = { width: 1200, height: 630 };
 
-const fontDirectory = join(process.cwd(), "public/fonts/graphite");
-const [headingFont, bodyFont, monoFont] = await Promise.all([
-  readFile(join(fontDirectory, "stack-sans-notch-500.ttf")),
-  readFile(join(fontDirectory, "inter-400.ttf")),
-  readFile(join(fontDirectory, "dm-mono-400.ttf")),
+// Endless (Regular only) sets the wordmark, title and description; JetBrains Mono 500 sets the mono labels.
+const fontDirectory = join(process.cwd(), "public/fonts/stipple");
+const [endless, mono] = await Promise.all([
+  readFile(join(fontDirectory, "endless-400.ttf")),
+  readFile(join(fontDirectory, "jetbrains-mono-500.ttf")),
 ]);
+
+// Stipple colours (Paper theme) from docs/stipple/tokens.json.
+const paper = "#ece9df";
+const ink = "#2a261f";
+const inkFaint = "#6a665c";
+const cobaltInk = "#3444da";
+
+// The mono-label style: JetBrains Mono 500, uppercase, tracked 0.12em, in ink-faint.
+const monoLabel = {
+  fontFamily: "JetBrains Mono",
+  fontWeight: 500,
+  fontSize: 20,
+  letterSpacing: "0.12em",
+  color: inkFaint,
+  textTransform: "uppercase",
+} as const;
+
+// Endless covers basic Latin only, so typographic punctuation is set as its ASCII form.
+const asciiForms: Record<string, string> = {
+  "\u2018": "'",
+  "\u2019": "'",
+  "\u201c": '"',
+  "\u201d": '"',
+  "\u2013": "-",
+  "\u2014": "-",
+  "\u2026": "...",
+  "\u00b7": "/",
+  "\u00a0": " ",
+};
+const inEndless = (text: string) =>
+  text.replace(/[\u2018\u2019\u201c\u201d\u2013\u2014\u2026\u00b7\u00a0]/g, (c) => asciiForms[c]);
 
 // The brand mark from src/app/icon.svg.
 export const brandMarkPath =
@@ -36,51 +67,42 @@ export function renderOgImage({
         flexDirection: "column",
         justifyContent: "space-between",
         padding: 72,
-        background: "#101010",
-        color: "#f2f2ee",
-        fontFamily: "Inter",
+        background: paper,
+        color: ink,
+        fontFamily: "Endless",
       }}
     >
+      {/* The wordmark: uppercase, tracked 0.14em, in cobalt-ink. */}
       <div
         style={{
           display: "flex",
           alignItems: "center",
           gap: 18,
-          fontFamily: "Stack Sans Notch",
           fontSize: 36,
+          letterSpacing: "0.14em",
+          textTransform: "uppercase",
+          color: cobaltInk,
         }}
       >
-        <svg width="44" height="44" viewBox="0 0 256 256" fill="#f2f2ee">
+        <svg width="44" height="44" viewBox="0 0 256 256" fill={cobaltInk}>
           <path d={brandMarkPath} />
         </svg>
         a1ui
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
-        <div style={{ fontFamily: "DM Mono", fontSize: 26, color: "#a3a39e", textTransform: "uppercase" }}>
-          {eyebrow}
+        <div style={{ ...monoLabel, display: "flex" }}>{eyebrow}</div>
+        <div style={{ fontSize: 88, lineHeight: 1.05, letterSpacing: "-0.02em" }}>{inEndless(title)}</div>
+        <div style={{ fontSize: 32, lineHeight: 1.4, color: inkFaint, maxWidth: 960 }}>
+          {inEndless(description)}
         </div>
-        <div
-          style={{
-            fontFamily: "Stack Sans Notch",
-            fontSize: 88,
-            lineHeight: 1.05,
-            letterSpacing: "-0.025em",
-          }}
-        >
-          {title}
-        </div>
-        <div style={{ fontSize: 32, lineHeight: 1.4, color: "#a3a39e", maxWidth: 960 }}>{description}</div>
       </div>
-      <div style={{ display: "flex", fontFamily: "DM Mono", fontSize: 24, color: "#a3a39e" }}>
-        {new URL(siteUrl).host}
-      </div>
+      <div style={{ ...monoLabel, display: "flex" }}>{new URL(siteUrl).host}</div>
     </div>,
     {
       ...ogImageSize,
       fonts: [
-        { name: "Stack Sans Notch", data: headingFont, weight: 500, style: "normal" },
-        { name: "Inter", data: bodyFont, weight: 400, style: "normal" },
-        { name: "DM Mono", data: monoFont, weight: 400, style: "normal" },
+        { name: "Endless", data: endless, weight: 400, style: "normal" },
+        { name: "JetBrains Mono", data: mono, weight: 500, style: "normal" },
       ],
     },
   );

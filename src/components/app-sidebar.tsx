@@ -85,7 +85,7 @@ export function AppSidebar() {
           <Link href="/" onClick={closeMobile} className="flex min-h-11 items-center gap-2 no-underline">
             <span className="brand-mark" aria-hidden="true" />
             <span className="flex flex-col">
-              <span className="font-heading text-lg leading-6 font-medium">a1ui</span>
+              <span className="wordmark">a1ui</span>
               <span className="text-muted-foreground text-xs">Documentation</span>
             </span>
           </Link>

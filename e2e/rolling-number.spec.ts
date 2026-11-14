@@ -87,7 +87,7 @@ test("digits roll up for an increase and down for a decrease", async ({ page }) 
   await expect(chip).toHaveText("+69");
   await expect(chip).toHaveAttribute("data-direction", "up");
   await expect(chip.locator("svg")).toHaveCount(1);
-  await expect(chip).toHaveCSS("font-family", /^Inter/);
+  await expect(chip).toHaveCSS("font-family", /^Endless/);
   await expect(chip).toHaveClass(/text-emerald-700/);
   await expect(chip).toHaveCount(0, { timeout: 6000 });
 
@@ -251,7 +251,9 @@ test("reduced motion cross-fades the changed digits on mobile", async ({ page })
   await expect(chip).toHaveText("-$420.00");
   await expect(chip).toHaveCSS("opacity", "1");
   const [chipBox, frameBox, valueBox, buttonBox] = await Promise.all(
-    [chip, frame, value, frame.getByRole("button", { name: "Increase $69" })].map((part) => part.boundingBox()),
+    [chip, frame, value, frame.getByRole("button", { name: "Increase $69" })].map((part) =>
+      part.boundingBox(),
+    ),
   );
   expect(chipBox!.x).toBeGreaterThanOrEqual(frameBox!.x);
   expect(chipBox!.x + chipBox!.width).toBeLessThanOrEqual(frameBox!.x + frameBox!.width);

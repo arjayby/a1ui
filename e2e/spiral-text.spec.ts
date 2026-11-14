@@ -76,7 +76,7 @@ test("theme changes recolor cached text without rasterizing the glyphs again", a
       return original.apply(this, args);
     };
   });
-  for (const theme of ["light", "dark", "light"]) {
+  for (const theme of ["dark", "light", "dark"]) {
     await page.getByRole("switch", { name: "Dark theme", exact: true }).click();
     await expect(page.locator("html")).toHaveClass(theme);
     await expect(page.locator("html")).not.toHaveAttribute("data-text-redrawn", "true");

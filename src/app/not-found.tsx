@@ -11,6 +11,11 @@ export default function NotFound() {
   return (
     <main className="landing landing-single">
       <article className="landing-card">
+        <div className="landing-card-dots" aria-hidden="true">
+          <i />
+          <i />
+          <i />
+        </div>
         <h1>Page not found</h1>
         <p>This page doesn’t exist or has moved.</p>
         <footer className="landing-card-footer">

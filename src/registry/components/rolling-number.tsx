@@ -240,7 +240,7 @@ export function RollingNumber({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: chipOffset }}
             transition={reducedMotion ? fade : springOrInstant(seconds * 0.6)}
-            className={`contrast-more:border-current pointer-events-none absolute start-full top-1/2 ms-2 -mt-2.5 inline-flex h-5 items-center gap-0.5 rounded-full border border-transparent px-1.5 font-[Inter,ui-sans-serif,system-ui,sans-serif] text-xs leading-none font-medium tracking-normal select-none ${
+            className={`pointer-events-none absolute start-full top-1/2 ms-2 -mt-2.5 inline-flex h-5 items-center gap-0.5 rounded-full border border-transparent px-1.5 font-sans text-xs leading-none font-medium tracking-normal select-none contrast-more:border-current ${
               rise
                 ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400"
                 : "bg-red-500/15 text-red-700 dark:text-red-400"

@@ -1,0 +1,30 @@
+[
+  {
+    "family": "Endless",
+    "weight": "400",
+    "source": "project/fonts/Endless-Regular.ttf in the Stipple design system",
+    "file": "endless-400.ttf",
+    "sha256": "bf6a1f6ba111921364727c49d1ed4b9e6354f3fd64c62454888754655cd60d5e"
+  },
+  {
+    "family": "JetBrains Mono",
+    "weight": "400",
+    "url": "https://fonts.gstatic.com/s/jetbrainsmono/v24/tDbY2o-flEEny0FZhsfKu5WU4zr3E_BX0PnT8RD8yKxjPQ.ttf",
+    "file": "jetbrains-mono-400.ttf",
+    "sha256": "44ce4a84f20d60f24539bd0cef11f79c29e38609e0f8adf18551c9794a5d9dc3"
+  },
+  {
+    "family": "JetBrains Mono",
+    "weight": "500",
+    "url": "https://fonts.gstatic.com/s/jetbrainsmono/v24/tDbY2o-flEEny0FZhsfKu5WU4zr3E_BX0PnT8RD8-qxjPQ.ttf",
+    "file": "jetbrains-mono-500.ttf",
+    "sha256": "3386a05f6ece969e4537de6be894170d20558e82f7d56c8c5d332972ef172160"
+  },
+  {
+    "family": "JetBrains Mono",
+    "weight": "700",
+    "url": "https://fonts.gstatic.com/s/jetbrainsmono/v24/tDbY2o-flEEny0FZhsfKu5WU4zr3E_BX0PnT8RD8L6tjPQ.ttf",
+    "file": "jetbrains-mono-700.ttf",
+    "sha256": "a1d92abc6b02a87faed23d98067ab1027e8e95242fd7c9978a072ea383b89d1a"
+  }
+]

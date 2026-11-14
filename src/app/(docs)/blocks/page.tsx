@@ -53,7 +53,7 @@ export default function BlocksPage() {
     <div className="page-frame">
       <JsonLd data={collectionStructuredData({ group: blocksGroup, description, items: blocks })} />
       <header>
-        <p className="graphite-eyebrow">a1ui / Block library</p>
+        <p className="stipple-eyebrow">a1ui / Block library</p>
         <h1 className="page-heading">Blocks</h1>
         <p className="page-description">{description}</p>
         <AgentInstall />

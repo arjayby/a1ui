@@ -1,0 +1,31 @@
+/* Endless ships in Regular only; every heading, label and paragraph is weight 400. */
+@font-face {
+  font-family: "Endless";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(/fonts/stipple/endless-400.ttf) format("truetype");
+}
+
+/* JetBrains Mono: 400 for code and readouts, 500 for mono labels, 700 for a tool name in a log. */
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(/fonts/stipple/jetbrains-mono-400.ttf) format("truetype");
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(/fonts/stipple/jetbrains-mono-500.ttf) format("truetype");
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(/fonts/stipple/jetbrains-mono-700.ttf) format("truetype");
+}

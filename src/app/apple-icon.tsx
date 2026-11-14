@@ -15,10 +15,10 @@ export default function AppleIcon() {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        background: "#101010",
+        background: "#ece9df",
       }}
     >
-      <svg width="100" height="100" viewBox="0 0 256 256" fill="#f2f2ee">
+      <svg width="100" height="100" viewBox="0 0 256 256" fill="#3444da">
         <path d={brandMarkPath} />
       </svg>
     </div>,

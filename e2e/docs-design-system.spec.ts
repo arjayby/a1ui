@@ -96,7 +96,7 @@ for (const access of ["read", "write"]) {
 
 test("documentation shares the component geometry in both themes", async ({ page }) => {
   await page.goto("/blocks/section-rail");
-  for (const theme of ["dark", "light"]) {
+  for (const theme of ["light", "dark"]) {
     await expect(page.locator("html")).toHaveClass(new RegExp(theme));
     await expect(page.getByRole("button", { name: "Copy prompt for agent" })).toHaveCSS(
       "border-radius",
@@ -104,18 +104,15 @@ test("documentation shares the component geometry in both themes", async ({ page
     );
     await expect(page.getByRole("button", { name: "Copy prompt for agent" })).toHaveCSS(
       "font-family",
-      "Inter, system-ui, sans-serif",
+      /^Endless/,
     );
-    await expect(page.locator(".demo-frame")).toHaveCSS("border-radius", "12px");
-    await expect(page.getByRole("tab", { name: "Usage", exact: true })).toHaveCSS(
-      "font-family",
-      "Inter, system-ui, sans-serif",
-    );
+    await expect(page.locator(".demo-frame")).toHaveCSS("border-radius", "10px");
+    await expect(page.getByRole("tab", { name: "Usage", exact: true })).toHaveCSS("font-family", /^Endless/);
     await expect(
       page
         .getByRole("navigation", { name: "Components", exact: true })
         .getByRole("button", { name: "Buttons & Actions", exact: true }),
-    ).toHaveCSS("font-family", "Inter, system-ui, sans-serif");
+    ).toHaveCSS("font-family", /^Endless/);
     await page.getByRole("switch", { name: "Dark theme" }).click();
   }
 });

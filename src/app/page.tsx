@@ -60,6 +60,11 @@ export default function HomePage() {
       <HydrationMarker />
 
       <article className="landing-card">
+        <div className="landing-card-dots" aria-hidden="true">
+          <i />
+          <i />
+          <i />
+        </div>
         <div className="landing-card-art">
           <AsciiMorph defaultShape="a1" shapes={["a1", "logo"]} ariaLabel="Morph the a1ui monogram" />
         </div>

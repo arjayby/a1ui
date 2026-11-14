@@ -1,0 +1,30 @@
+{
+  "source": {
+    "tool": "Claude Design",
+    "name": "Stipple",
+    "url": "https://claude.ai/artifact/UyvMnnHovgDXzJZUY45QoZ",
+    "version": "1794650883-043f",
+    "lastChange": "2026-11-14T10:14:00Z"
+  },
+  "retrievedOn": "2026-11-14",
+  "files": {
+    "project/tokens.json": {
+      "copiedTo": "docs/stipple/tokens.json",
+      "sha256": "46fc59fd77d2015977cc379dc8ba14e925eabd4c18cc75cab597daf46fe6d370"
+    },
+    "project/fonts/Endless-Regular.ttf": {
+      "copiedTo": "public/fonts/stipple/endless-400.ttf",
+      "sha256": "bf6a1f6ba111921364727c49d1ed4b9e6354f3fd64c62454888754655cd60d5e"
+    }
+  },
+  "replaces": "Graphite (https://claude.ai/artifact/9MqfgLG4LdqrErKqj4Xnxk, version 1793897822-33b3, retrieved 2026-11-06, with local colour changes through 2026-11-14)",
+  "localChanges": [
+    {
+      "date": "2026-11-14",
+      "scope": "colour",
+      "tokens": ["cobalt-ink", "success", "danger"],
+      "change": "Night keeps Paper's cobalt-ink (#3444da), success (#18703d) and danger (#b62f25) instead of Stipple's #a9acff, #5fd08d and #ff8f80, so every hue is the same in both themes. tokens.json is left as copied; the override is in src/app/stipple-tokens.css.",
+      "publishedTo": null
+    }
+  ]
+}

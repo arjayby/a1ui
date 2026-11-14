@@ -1,14 +1,12 @@
 # Third-party notices
 
-## Graphite fonts
+## Stipple fonts
 
-The documentation site serves Inter, DM Mono, and Stack Sans Notch locally. These fonts use the SIL Open Font License, Version 1.1. The complete license and copyright notices for each family are included in:
+The documentation site serves Endless locally from `public/fonts/stipple/endless-400.ttf`. The file comes from the Stipple design system in Claude Design; its name table reads "Copyright (c) 2025, sreej" and it carries no licence text. Its licence has not been confirmed. Confirm the terms with the font's author before redistributing the file.
 
-- `public/fonts/graphite/inter-OFL.txt`
-- `public/fonts/graphite/dmmono-OFL.txt`
-- `public/fonts/graphite/stacksansnotch-OFL.txt`
+The site also serves JetBrains Mono (weights 400, 500 and 700) locally. It uses the SIL Open Font License, Version 1.1; the complete license and copyright notice are in `public/fonts/stipple/jetbrainsmono-OFL.txt`. The original distribution is in [Google Fonts](https://github.com/google/fonts).
 
-The source URLs and file hashes are recorded in [docs/graphite/fonts.json](./docs/graphite/fonts.json). The original distributions are in [Google Fonts](https://github.com/google/fonts).
+Each file's source and hash are recorded in [docs/stipple/fonts.json](./docs/stipple/fonts.json).
 
 ## Commit Mono
 

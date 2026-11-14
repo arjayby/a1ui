@@ -1,67 +1,113 @@
-/* Landing page: one small card that says what this is, and a particle menu
-   for where to go next, centred together as a single group. */
+/* Landing page: one cobalt window that says what this is, and a particle menu
+   for where to go next, centred together as a single group on empty paper. */
 
 .landing {
   display: grid;
   min-height: 100dvh;
-  grid-template-columns: 300px auto;
+  grid-template-columns: 340px auto;
   align-items: center;
   justify-content: center;
-  gap: 64px;
-  padding: 48px;
+  gap: var(--space-16);
+  padding: var(--space-12);
 }
 
+/* The Stipple WindowCard: the one place on the page where cobalt fills an area. */
 .landing-card {
+  /* Everything inside reads on cobalt: text, marks and the focus ring are on-cobalt. */
+  --foreground: var(--on-cobalt);
+  --muted-foreground: var(--on-cobalt);
+  --background: var(--cobalt-700);
+  --ring: var(--on-cobalt);
+  position: relative;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
   border-radius: var(--radius-lg);
-  padding: 12px;
-  background: var(--card);
-  box-shadow: var(--shadow-card);
+  padding: var(--space-4) var(--space-6) var(--space-4);
+  background-color: var(--cobalt-600);
+  background-image:
+    radial-gradient(
+      85% 16% at 108% 46%,
+      color-mix(in srgb, var(--cobalt-300) 75%, transparent),
+      transparent 72%
+    ),
+    radial-gradient(
+      110% 22% at 112% 62%,
+      color-mix(in srgb, var(--cobalt-300) 45%, transparent),
+      transparent 70%
+    ),
+    linear-gradient(180deg, var(--cobalt-600), var(--cobalt-500));
+  box-shadow: var(--shadow-window);
+  color: var(--on-cobalt);
+}
+.landing-card :is(a, button):focus-visible {
+  outline-color: var(--on-cobalt);
+}
+/* The three window dots: decoration, never state. */
+.landing-card-dots {
+  display: flex;
+  gap: 6px;
+  margin-left: calc(var(--space-2) * -1);
+  margin-bottom: var(--space-4);
+}
+.landing-card-dots i {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: var(--signal-red);
+}
+.landing-card-dots i:nth-child(2) {
+  background: var(--signal-amber);
+}
+.landing-card-dots i:nth-child(3) {
+  background: var(--signal-green);
 }
 .landing-card-art {
-  margin: -2px -2px 4px;
+  margin: 0 calc(var(--space-2) * -1) var(--space-2);
 }
 .landing-card-art [data-slot="ascii-morph"] {
   width: 100%;
 }
 .landing-card h1 {
-  margin: 0 0 6px;
-  font-size: 19px;
-  font-weight: 500;
-  letter-spacing: -0.025em;
-  line-height: 1.15;
+  margin: 0 0 var(--space-3);
+  font-size: var(--type-heading-sm-size);
+  letter-spacing: var(--type-heading-sm-tracking);
+  line-height: var(--type-heading-sm-leading);
+  text-wrap: balance;
 }
 .landing-card p {
+  max-width: 24em;
   margin: 0;
-  font-size: 14px;
-  letter-spacing: -0.006em;
-  line-height: 1.4;
+  font-size: var(--type-body-sm-size);
+  line-height: var(--type-body-sm-leading);
 }
 .landing-card-footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  margin-top: 20px;
-  border-top: 0.5px solid var(--hairline);
-  padding-top: 8px;
-  color: var(--muted-foreground);
+  gap: var(--space-4);
+  margin-top: var(--space-6);
+  border-top: 1px solid color-mix(in srgb, var(--on-cobalt) 22%, transparent);
+  padding-top: var(--space-3);
+  color: var(--on-cobalt);
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: var(--type-mono-sm-size);
   font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+  line-height: var(--type-mono-sm-leading);
 }
 
-/* The 404 page reuses the card on its own. */
+/* The 404 page reuses the window on its own. */
 .landing-single {
-  grid-template-columns: minmax(0, 300px);
+  grid-template-columns: minmax(0, 340px);
 }
 .landing-card-links {
   display: flex;
-  gap: 12px;
+  gap: var(--space-3);
 }
 .landing-card-links a {
-  color: var(--foreground);
+  border-radius: var(--radius-sm);
+  color: var(--on-cobalt);
   text-decoration: none;
 }
 .landing-card-links a:hover {
@@ -72,13 +118,21 @@
 .landing-menu ul {
   gap: 40px 56px;
 }
-/* Labels use the heading face, matching the card title. */
+/* The particles are the page's dotted picture: cobalt-ink on paper. */
+.landing-menu svg {
+  color: var(--cobalt-ink);
+}
+/* Navigation labels; the hovered one turns cobalt-ink. */
 .landing-menu span {
-  font-family: var(--font-heading);
-  font-size: 15px;
-  font-weight: 500;
-  letter-spacing: 0.02em;
+  font-family: var(--font-sans);
+  font-size: var(--type-body-size);
+  letter-spacing: var(--type-label-tracking);
+  text-transform: none;
   white-space: nowrap;
+  transition: color var(--motion-fast) ease;
+}
+.landing-menu :is(a, button):hover span {
+  color: var(--cobalt-ink);
 }
 
 @media (max-width: 1100px) {
@@ -95,9 +149,9 @@
     align-content: start;
   }
   .landing {
-    grid-template-columns: minmax(0, 300px);
+    grid-template-columns: minmax(0, 340px);
     gap: 40px;
-    padding: 16px 16px 48px;
+    padding: var(--space-4) var(--space-4) var(--space-12);
   }
   .landing-menu ul {
     gap: 24px 16px;
@@ -107,6 +161,11 @@
     height: 88px;
   }
   .landing-menu span {
-    font-size: 13px;
+    font-size: var(--type-label-size);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .landing-menu span {
+    transition: none;
   }
 }

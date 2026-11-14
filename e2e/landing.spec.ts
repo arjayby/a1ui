@@ -47,7 +47,7 @@ for (const width of [1440, 390, 320]) {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/");
     await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
-    for (const theme of ["dark", "light"]) {
+    for (const theme of ["light", "dark"]) {
       await expect(page.locator("html")).toHaveClass(new RegExp(theme));
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
       const menu = page.getByRole("navigation", { name: "Main navigation" });
