@@ -45,7 +45,7 @@ function SharePopover({ morph = true, side, duration }: { morph?: boolean; side?
             value={displayLink}
             aria-label="Project link"
             onFocus={(event) => event.currentTarget.select()}
-            className="bg-muted/40 border-input focus-visible:ring-ring/30 h-9 min-w-0 flex-1 rounded-lg border px-3 font-mono text-xs outline-none focus-visible:ring-3"
+            className="bg-muted/40 border-input focus-visible:ring-ring/30 h-9 w-full min-w-0 flex-1 rounded-lg border px-3 font-mono text-xs outline-none focus-visible:ring-3"
           />
           <span ref={copyRef} className="contents">
             <CopyButton value={shareLink} label="Copy link" />
