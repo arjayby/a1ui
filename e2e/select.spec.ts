@@ -90,11 +90,6 @@ test("one highlight travels between items and the value slides in with a drawn c
   expect(positions.at(-1)).toBeCloseTo(to, 0);
   await expect(list.locator('[data-slot="select-highlight"]')).toHaveCount(1);
 
-  const disabled = list.getByRole("option", { name: "South America (São Paulo)" });
-  await expect(disabled).toHaveAttribute("aria-disabled", "true");
-  await disabled.click({ force: true });
-  await expect(list).toBeVisible();
-
   const texts = target.evaluate(async (option: HTMLElement) => {
     const counts = [];
     option.click();

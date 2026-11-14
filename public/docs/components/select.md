@@ -57,9 +57,7 @@ export function SelectExample() {
         <SelectGroup>
           <SelectLabel>Americas</SelectLabel>
           <SelectItem value="us-east">US East (Virginia)</SelectItem>
-          <SelectItem value="us-west" disabled>
-            US West (Oregon)
-          </SelectItem>
+          <SelectItem value="us-west">US West (Oregon)</SelectItem>
         </SelectGroup>
         <SelectSeparator />
         <SelectItem value="eu-west">Europe (Ireland)</SelectItem>

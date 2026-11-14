@@ -10,7 +10,17 @@ import {
   type Transition,
   type Variants,
 } from "motion/react";
-import { createContext, useContext, useId, useRef, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  type Dispatch,
+  type ReactNode,
+  type SetStateAction,
+} from "react";
 
 /** Labels for each value, so the trigger can show a label while the list is closed. */
 export type SelectItems = Record<string, ReactNode> | ReadonlyArray<{ value: string; label: ReactNode }>;
@@ -30,6 +40,12 @@ type SelectContextValue = {
 };
 
 const SelectContext = createContext<SelectContextValue | null>(null);
+
+// The item that last held the highlight. Its highlight stays mounted (faded out) while the pointer
+// crosses a label or separator, so the next item's highlight glides from it instead of appearing.
+const LastHighlightContext = createContext<[string | null, Dispatch<SetStateAction<string | null>>] | null>(
+  null,
+);
 
 function useSelect(part: string) {
   const context = useContext(SelectContext);
@@ -271,6 +287,13 @@ export function SelectContent({
   const select = useSelect("SelectContent");
   const id = useId();
   const { seconds } = select;
+  const lastHighlight = useState<string | null>(null);
+  // Each opening starts fresh, so the highlight never slides in from where the last visit left it.
+  const [opens, setOpens] = useState(select.opens);
+  if (opens !== select.opens) {
+    setOpens(select.opens);
+    lastHighlight[1](null);
+  }
   const variants: Variants = {
     // Closing shrinks back toward the trigger along the same path it opened on.
     closed: {
@@ -309,19 +332,21 @@ export function SelectContent({
           // A translucent material floats over the page; it turns solid for reduced transparency.
           className={`border-border bg-popover/80 text-popover-foreground [@media(prefers-reduced-transparency:reduce)]:bg-popover isolate max-h-(--available-height) min-w-(--anchor-width) origin-(--transform-origin) overflow-y-auto overscroll-contain rounded-lg border p-1 shadow-lg backdrop-blur-xl backdrop-saturate-150 outline-none [@media(prefers-reduced-transparency:reduce)]:backdrop-blur-none ${className ?? ""}`}
           render={(popupProps) => (
-            <LayoutGroup id={id}>
-              <motion.div
-                {...(popupProps as HTMLMotionProps<"div">)}
-                layoutScroll
-                variants={variants}
-                initial={seconds === 0 ? false : "closed"}
-                animate={select.open ? "open" : "closed"}
-                transition={seconds === 0 ? { duration: 0 } : undefined}
-                onAnimationComplete={(definition) => {
-                  if (definition === "closed") select.onPopupSettled(false);
-                }}
-              />
-            </LayoutGroup>
+            <LastHighlightContext.Provider value={lastHighlight}>
+              <LayoutGroup id={id}>
+                <motion.div
+                  {...(popupProps as HTMLMotionProps<"div">)}
+                  layoutScroll
+                  variants={variants}
+                  initial={seconds === 0 ? false : "closed"}
+                  animate={select.open ? "open" : "closed"}
+                  transition={seconds === 0 ? { duration: 0 } : undefined}
+                  onAnimationComplete={(definition) => {
+                    if (definition === "closed") select.onPopupSettled(false);
+                  }}
+                />
+              </LayoutGroup>
+            </LastHighlightContext.Provider>
           )}
         >
           {children}
@@ -340,12 +365,80 @@ export interface SelectItemProps {
   children?: ReactNode;
 }
 
-export function SelectItem({ value, disabled, label, className, children }: SelectItemProps) {
+function ItemRow({
+  state,
+  ...props
+}: HTMLMotionProps<"div"> & { state: { highlighted: boolean; selected: boolean } }) {
   const select = useSelect("SelectItem");
   const { seconds } = select;
-  const highlightTransition: Transition =
-    seconds === 0 ? { duration: 0 } : { type: "spring", visualDuration: seconds, bounce: 0 };
+  const itemId = useId();
+  const [lastHighlight, setLastHighlight] = useContext(LastHighlightContext) ?? [null, null];
+  const { highlighted, selected } = state;
 
+  useEffect(() => {
+    if (highlighted) setLastHighlight?.(itemId);
+  }, [highlighted, itemId, setLastHighlight]);
+
+  return (
+    <motion.div
+      {...props}
+      // Opacity only: any offset would throw off Base UI's measurement of the selected item
+      // when the list lines it up over the trigger.
+      variants={{
+        closed: { opacity: 0 },
+        open: { opacity: 1, transition: { duration: seconds * 0.6, ease: "easeOut" } },
+      }}
+    >
+      {(highlighted || lastHighlight === itemId) && (
+        <motion.span
+          aria-hidden="true"
+          data-slot="select-highlight"
+          layoutId="select-highlight"
+          // One highlight travels between items; crossfading the outgoing and incoming copies
+          // would dim it on every hop.
+          layoutCrossfade={false}
+          initial={false}
+          animate={{ opacity: highlighted ? 1 : 0 }}
+          transition={
+            seconds === 0
+              ? { duration: 0 }
+              : {
+                  type: "spring",
+                  visualDuration: seconds,
+                  bounce: 0,
+                  opacity: { duration: 0.15, delay: highlighted ? 0 : 0.1 },
+                }
+          }
+          className="bg-muted pointer-events-none absolute inset-0 -z-10 rounded-[inherit]"
+        />
+      )}
+      {props.children as ReactNode}
+      {selected && (
+        <svg
+          key={select.opens}
+          aria-hidden="true"
+          data-slot="select-check"
+          viewBox="0 0 16 16"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={1.75}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="absolute right-2 size-4"
+        >
+          <motion.path
+            d="M3.5 8.5 L6.5 11.5 L12.5 4.5"
+            initial={seconds === 0 ? false : { pathLength: 0 }}
+            animate={{ pathLength: 1 }}
+            transition={{ duration: seconds, delay: seconds * 0.5, ease: [0.65, 0, 0.35, 1] }}
+          />
+        </svg>
+      )}
+    </motion.div>
+  );
+}
+
+export function SelectItem({ value, disabled, label, className, children }: SelectItemProps) {
   return (
     <SelectPrimitive.Item
       value={value}
@@ -353,50 +446,7 @@ export function SelectItem({ value, disabled, label, className, children }: Sele
       label={label}
       data-slot="select-item"
       className={`data-disabled:text-muted-foreground relative flex min-h-8 cursor-default items-center gap-2 rounded-md py-1.5 pr-8 pl-2 text-sm outline-none select-none data-disabled:cursor-not-allowed ${className ?? ""}`}
-      render={(itemProps, state) => (
-        <motion.div
-          {...(itemProps as HTMLMotionProps<"div">)}
-          // Opacity only: any offset would throw off Base UI's measurement of the selected item
-          // when the list lines it up over the trigger.
-          variants={{
-            closed: { opacity: 0 },
-            open: { opacity: 1, transition: { duration: seconds * 0.6, ease: "easeOut" } },
-          }}
-        >
-          {state.highlighted && (
-            <motion.span
-              aria-hidden="true"
-              data-slot="select-highlight"
-              layoutId="select-highlight"
-              initial={false}
-              transition={highlightTransition}
-              className="bg-muted pointer-events-none absolute inset-0 -z-10 rounded-[inherit]"
-            />
-          )}
-          {itemProps.children}
-          {state.selected && (
-            <svg
-              key={select.opens}
-              aria-hidden="true"
-              data-slot="select-check"
-              viewBox="0 0 16 16"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={1.75}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="absolute right-2 size-4"
-            >
-              <motion.path
-                d="M3.5 8.5 L6.5 11.5 L12.5 4.5"
-                initial={seconds === 0 ? false : { pathLength: 0 }}
-                animate={{ pathLength: 1 }}
-                transition={{ duration: seconds, delay: seconds * 0.5, ease: [0.65, 0, 0.35, 1] }}
-              />
-            </svg>
-          )}
-        </motion.div>
-      )}
+      render={(itemProps, state) => <ItemRow {...(itemProps as HTMLMotionProps<"div">)} state={state} />}
     >
       <SelectPrimitive.ItemText data-slot="select-item-text" className="min-w-0 flex-1 truncate">
         {children}

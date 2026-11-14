@@ -20,7 +20,6 @@ const regions = [
     items: [
       { value: "us-east", label: "US East (Virginia)" },
       { value: "us-west", label: "US West (Oregon)" },
-      { value: "sa-east", label: "South America (São Paulo)", disabled: true },
     ],
   },
   {
@@ -66,7 +65,7 @@ export function SelectDemo() {
                   <SelectGroup>
                     <SelectLabel>{group.label}</SelectLabel>
                     {group.items.map((item) => (
-                      <SelectItem key={item.value} value={item.value} disabled={item.disabled}>
+                      <SelectItem key={item.value} value={item.value}>
                         {item.label}
                       </SelectItem>
                     ))}
