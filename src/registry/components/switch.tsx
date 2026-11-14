@@ -74,7 +74,7 @@ export function Switch({
       }}
       onKeyUp={release}
       onBlur={release}
-      className={`bg-muted-foreground/25 data-checked:bg-foreground focus-visible:ring-ring/30 relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full p-0.5 transition-colors duration-200 outline-none focus-visible:ring-3 data-disabled:cursor-not-allowed ${label ? "" : `data-disabled:opacity-50 ${className ?? ""}`}`}
+      className={`bg-muted-foreground/25 data-checked:bg-primary focus-visible:ring-ring/30 relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full p-0.5 transition-colors duration-200 outline-none focus-visible:ring-3 data-disabled:cursor-not-allowed ${label ? "" : `data-disabled:opacity-50 ${className ?? ""}`}`}
     >
       <SwitchPrimitive.Thumb
         data-slot="switch-thumb"

@@ -28,11 +28,12 @@ export function SwitchDemo() {
   return (
     <div className="not-prose demo-frame">
       <div className="component-demo-stage">
-        <div key={`${icons}-${duration}`} className="grid gap-4">
-          <Switch label="Airplane mode" thumbIcons={thumbIcons} duration={duration} />
-          <Switch label="Notifications" defaultChecked thumbIcons={thumbIcons} duration={duration} />
-          <Switch label="Sync over cellular" disabled thumbIcons={thumbIcons} duration={duration} />
-        </div>
+        <Switch
+          key={`${icons}-${duration}`}
+          label="Airplane mode"
+          thumbIcons={thumbIcons}
+          duration={duration}
+        />
       </div>
       <div className="component-demo-controls [&_[data-slot=demo-select-trigger]]:w-32">
         <DemoSelect label="Thumb icons" value={icons} options={iconOptions} onChange={setIcons} />

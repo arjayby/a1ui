@@ -22,7 +22,7 @@ test("thumb squashes while pressed, then springs across", async ({ page }) => {
   await expect(control).toHaveAttribute("aria-checked", "true");
 });
 
-test("thumb icons swap and the disabled switch stays put on mobile with reduced motion", async ({ page }) => {
+test("thumb icons swap on mobile with reduced motion", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/components/switch");
@@ -30,15 +30,12 @@ test("thumb icons swap and the disabled switch stays put on mobile with reduced 
   await page.getByRole("button", { name: /^Thumb icons:/ }).click();
   await page.getByRole("menuitem", { name: "sun / moon", exact: true }).click();
   const frame = page.locator(".demo-frame");
-  const control = frame.getByRole("switch", { name: "Notifications" });
+  const control = frame.getByRole("switch", { name: "Airplane mode" });
   await expect(control.locator('[data-slot="switch-icon"]')).toHaveCount(2);
-  await expect(control.locator('[data-state="checked"]')).toHaveCSS("opacity", "1");
-  await control.click();
-  await expect(control).toHaveAttribute("aria-checked", "false");
   await expect(control.locator('[data-state="unchecked"]')).toHaveCSS("opacity", "1");
-  const disabled = frame.getByRole("switch", { name: "Sync over cellular" });
-  await disabled.click({ force: true });
-  await expect(disabled).toHaveAttribute("aria-checked", "false");
+  await control.click();
+  await expect(control).toHaveAttribute("aria-checked", "true");
+  await expect(control.locator('[data-state="checked"]')).toHaveCSS("opacity", "1");
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
 
