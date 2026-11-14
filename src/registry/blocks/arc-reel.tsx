@@ -215,11 +215,6 @@ export function ArcReel({ items, initialIndex = 0, ariaLabel = "Arc Reel", class
       style={{ ...arcReelTheme, ...style }}
     >
       <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 [background-image:radial-gradient(var(--arc-reel-muted)_0.65px,transparent_0.65px)] [background-size:16px_16px] opacity-20"
-      />
-
-      <div
         ref={viewportRef}
         id={viewportId}
         role="group"

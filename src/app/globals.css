@@ -1128,29 +1128,11 @@ html:has(.catalog-stage) nextjs-portal {
   min-height: 16rem;
   align-items: center;
   padding: 0;
-  background-color: var(--well);
-  /* Square 2px dots on a 16px pitch, in paper-300. */
-  background-image: conic-gradient(
-    from 270deg at var(--dot-size) var(--dot-size),
-    var(--paper-300) 90deg,
-    transparent 0
-  );
-  background-size: 16px 16px;
 }
 
 .text-banner-demo-controls {
   justify-content: center;
   flex-wrap: wrap;
-}
-
-.text-scramble-demo {
-  /* Square 2px dots on a 16px pitch, in paper-300. */
-  background-image: conic-gradient(
-    from 270deg at var(--dot-size) var(--dot-size),
-    var(--paper-300) 90deg,
-    transparent 0
-  );
-  background-size: 16px 16px;
 }
 
 .text-scramble-demo {
