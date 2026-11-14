@@ -23,6 +23,8 @@ import {
   type RefObject,
 } from "react";
 
+import { Button } from "@/components/ui/button";
+
 export type SheetSide = "bottom" | "left" | "right";
 
 // Springs are written as stiffness and damping because Motion drops `velocity` on duration-based
@@ -74,8 +76,7 @@ const SIDES = {
   },
 } as const;
 
-const buttonClass =
-  "border-border bg-background hover:bg-muted focus-visible:ring-ring/30 inline-flex h-9 cursor-pointer items-center justify-center gap-2 rounded-md border px-4 text-sm font-medium whitespace-nowrap shadow-xs transition-colors outline-none select-none focus-visible:ring-3 disabled:pointer-events-none disabled:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0";
+type ButtonVariant = NonNullable<ComponentProps<typeof Button>["variant"]>;
 
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 
@@ -216,34 +217,34 @@ export function Sheet({
   );
 }
 
-export type SheetTriggerProps = Omit<ComponentProps<typeof DialogPrimitive.Trigger>, "className"> & {
-  className?: string;
+export type SheetTriggerProps = ComponentProps<typeof DialogPrimitive.Trigger> & {
+  /** Button style when no `render` is given. */
+  variant?: ButtonVariant;
 };
 
-export function SheetTrigger({ className, render, ...props }: SheetTriggerProps) {
+export function SheetTrigger({ variant = "outline", render, ...props }: SheetTriggerProps) {
   useSheet("SheetTrigger");
   return (
     <DialogPrimitive.Trigger
-      {...props}
-      render={render}
       data-slot="sheet-trigger"
-      className={render ? className : `${buttonClass} ${className ?? ""}`}
+      render={render ?? <Button variant={variant} />}
+      {...props}
     />
   );
 }
 
-export type SheetCloseProps = Omit<ComponentProps<typeof DialogPrimitive.Close>, "className"> & {
-  className?: string;
+export type SheetCloseProps = ComponentProps<typeof DialogPrimitive.Close> & {
+  /** Button style when no `render` is given. */
+  variant?: ButtonVariant;
 };
 
-export function SheetClose({ className, render, ...props }: SheetCloseProps) {
+export function SheetClose({ variant = "outline", render, ...props }: SheetCloseProps) {
   useSheet("SheetClose");
   return (
     <DialogPrimitive.Close
-      {...props}
-      render={render}
       data-slot="sheet-close"
-      className={render ? className : `${buttonClass} ${className ?? ""}`}
+      render={render ?? <Button variant={variant} />}
+      {...props}
     />
   );
 }

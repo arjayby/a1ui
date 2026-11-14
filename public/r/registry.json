@@ -1364,6 +1364,9 @@
         "motion",
         "@base-ui/react"
       ],
+      "registryDependencies": [
+        "button"
+      ],
       "files": [
         {
           "path": "src/registry/components/sheet.tsx",

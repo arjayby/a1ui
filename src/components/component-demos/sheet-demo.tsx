@@ -26,8 +26,6 @@ const sizes = {
 type Size = keyof typeof sizes;
 const sizeOptions = Object.keys(sizes) as Size[];
 
-const primaryClass = "bg-foreground text-background hover:bg-foreground/90 border-transparent";
-
 type Product = { id: string; name: string; detail: string; price: number; hue: number };
 type Line = Product & { quantity: number };
 
@@ -187,7 +185,7 @@ export function SheetDemo() {
                   <span className="text-muted-foreground">Subtotal</span>
                   <span className="font-mono font-medium tabular-nums">${subtotal}</span>
                 </span>
-                <SheetClose disabled={bag.length === 0} className={primaryClass}>
+                <SheetClose variant="default" disabled={bag.length === 0}>
                   Checkout
                 </SheetClose>
               </SheetFooter>

@@ -953,6 +953,7 @@
       "title": "Sheet",
       "description": "A draggable sheet with detents that tracks the pointer, throws to the nearest stop, and rubber-bands at its limit, from the bottom, left, or right edge.",
       "dependencies": ["motion", "@base-ui/react"],
+      "registryDependencies": ["button"],
       "files": [
         {
           "path": "src/registry/components/sheet.tsx",
