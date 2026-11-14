@@ -102,7 +102,6 @@ export function AppSidebar() {
       </SidebarHeader>
       <Menu
         value={pathname}
-        indicator="muted"
         data-slot="sidebar-content"
         data-sidebar="content"
         className="flex min-h-0 flex-1 flex-col gap-1 overflow-auto"
@@ -172,8 +171,8 @@ export function AppSidebar() {
                       }
                       render={<SidebarMenuItem />}
                     >
-                      {/* A category only discloses its pages, so it stays out of the menu's
-                          highlight: clicking it opens the group without marking it as the selection. */}
+                      {/* A category only discloses its pages, so it stays out of the menu:
+                          clicking it opens the group without marking it as the selection. */}
                       <SidebarMenuButton
                         size="sm"
                         render={<CollapsibleTrigger />}

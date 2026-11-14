@@ -132,7 +132,7 @@ export function DocsToc({ items }: { items: DocsTocItem[] }) {
       <div className="docs-toc-rail">
         <nav aria-label="On this page">
           <p className="docs-toc-label">On this page</p>
-          <Menu value={active} indicator="muted" className="flex flex-col gap-0.5">
+          <Menu value={active} className="flex flex-col gap-0.5">
             {sections.map((item, index) => {
               const id = ids[index];
               const current = active === id;
@@ -147,7 +147,7 @@ export function DocsToc({ items }: { items: DocsTocItem[] }) {
                     event.preventDefault();
                     jumpTo(id);
                     // A pointer click leaves focus on the link, and Menu highlights the focused item, so a
-                    // later window refocus would pull the highlight back here after scrolling elsewhere.
+                    // later window refocus would highlight this link again after scrolling elsewhere.
                     // Keyboard activation (detail 0) keeps focus so the reader stays in the menu.
                     if (event.detail > 0) event.currentTarget.blur();
                   }}

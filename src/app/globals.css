@@ -389,7 +389,7 @@ h6 {
   text-transform: uppercase;
 }
 
-/* Hovered rows turn cobalt-ink. The current page is ink on a cobalt-wash highlight. */
+/* Hovered rows turn cobalt-ink. The current page keeps its ink and is marked by the menu's dot. */
 [data-sidebar="sidebar"] :is([data-sidebar="menu-button"], [data-sidebar="menu-sub-button"]):hover {
   color: var(--cobalt-ink);
 }
@@ -399,18 +399,14 @@ h6 {
   background: transparent;
 }
 
-[data-sidebar="sidebar"] [data-menu-item][data-highlighted],
-[data-sidebar="sidebar"] [data-menu-item][data-highlighted] ~ [data-sidebar="menu-action"]:not(:hover) {
-  color: var(--cobalt-ink);
+/* The dot sits outside the row so labels keep their alignment: in the gutter for a top-level
+   row, and centred on the tree line for a page inside a category. */
+[data-sidebar="sidebar"] [data-slot="menu-dot"] {
+  left: -7px;
 }
 
-[data-sidebar="sidebar"] [data-menu-item][aria-current="page"] {
-  color: var(--accent-foreground);
-}
-
-[data-sidebar="sidebar"] [data-slot="menu-highlight"] {
-  border-radius: var(--radius-md);
-  background: var(--accent);
+[data-sidebar="sidebar"] [data-sidebar="menu-sub-button"] [data-slot="menu-dot"] {
+  left: -12.5px;
 }
 
 .ui-dialog.ui-sheet[data-side="left"] {
@@ -660,7 +656,7 @@ html:has(.catalog-stage) nextjs-portal {
 
 .docs-toc-label {
   margin: 0 0 var(--space-2);
-  padding-inline: 10px;
+  padding-inline: 16px 10px;
   color: var(--ink-faint);
   font-family: var(--font-mono);
   font-size: var(--type-mono-label-size);
@@ -674,7 +670,8 @@ html:has(.catalog-stage) nextjs-portal {
   display: flex;
   min-height: 30px;
   align-items: center;
-  padding-inline: 10px;
+  /* The wider left padding holds the menu's dot. */
+  padding-inline: 16px 10px;
   border-radius: var(--radius-sm);
   color: var(--muted-foreground);
   font-size: var(--type-body-sm-size);
@@ -682,9 +679,17 @@ html:has(.catalog-stage) nextjs-portal {
   transition: color var(--motion-fast) ease;
 }
 
-.docs-toc-link:hover,
-.docs-toc-link[data-active] {
+.docs-toc-link:hover {
   color: var(--cobalt-ink);
+}
+
+/* The current section is marked by the menu's dot; its text only steps up from muted to ink. */
+.docs-toc-link[data-active]:not(:hover) {
+  color: var(--foreground);
+}
+
+.docs-toc-link [data-slot="menu-dot"] {
+  left: 2px;
 }
 
 .docs-toc-link:focus-visible {

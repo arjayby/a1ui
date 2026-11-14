@@ -39,7 +39,7 @@ test("catalog opens block documentation in the agreed order", async ({ page }) =
   ]);
 });
 
-test("selected block navigation keeps its label visible", async ({ page }) => {
+test("selected block navigation is marked with a dot and keeps its text color", async ({ page }) => {
   await page.goto("/blocks/section-rail");
   const activeLink = page
     .getByRole("navigation", { name: "Blocks" })
@@ -47,25 +47,27 @@ test("selected block navigation keeps its label visible", async ({ page }) => {
 
   const colors = await activeLink.evaluate((element) => {
     const linkStyles = getComputedStyle(element);
-    const highlight = element.querySelector('[data-slot="menu-highlight"]');
-    if (!highlight) throw new Error("Expected a selection highlight");
+    const dot = element.querySelector('[data-slot="menu-dot"]');
+    if (!dot) throw new Error("Expected a selection dot");
     const probe = document.body.appendChild(document.createElement("span"));
-    probe.style.background = "var(--accent)";
-    probe.style.color = "var(--accent-foreground)";
+    probe.style.background = "var(--primary)";
+    probe.style.color = "var(--foreground)";
     const tokens = getComputedStyle(probe);
     const result = {
-      background: getComputedStyle(highlight).backgroundColor,
+      dot: getComputedStyle(dot).backgroundColor,
       color: linkStyles.color,
-      accent: tokens.backgroundColor,
-      onAccent: tokens.color,
+      primary: tokens.backgroundColor,
+      foreground: tokens.color,
+      highlights: element.querySelectorAll('[data-slot="menu-highlight"]').length,
     };
     probe.remove();
     return result;
   });
 
   expect(colors).toMatchObject({
-    background: colors.accent,
-    color: colors.onAccent,
+    dot: colors.primary,
+    color: colors.foreground,
+    highlights: 0,
   });
 });
 
@@ -205,12 +207,12 @@ test.describe("smooth scrolling", () => {
   });
 });
 
-test("on-page menu highlight follows the page after the window regains focus", async ({ page }) => {
+test("on-page menu dot follows the page after the window regains focus", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/components/menu");
   await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
   const toc = page.getByRole("navigation", { name: "On this page" });
-  const highlighted = toc.locator("a:has(> [data-slot='menu-highlight'])");
+  const marked = toc.locator("a:has(> [data-slot='menu-dot'])");
   const apiReference = toc.getByRole("link", { name: "API reference" });
 
   await apiReference.click();
@@ -230,7 +232,8 @@ test("on-page menu highlight follows the page after the window regains focus", a
     focused?.blur();
     focused?.focus();
   });
-  await expect(highlighted).toHaveText("Demo");
+  await expect(marked).toHaveText("Demo");
+  await expect(apiReference).not.toHaveAttribute("data-highlighted");
 
   // Keyboard activation keeps focus in the menu so the reader can continue from there.
   await apiReference.focus();

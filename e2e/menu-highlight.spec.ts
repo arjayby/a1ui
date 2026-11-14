@@ -11,22 +11,6 @@ const scenarios = [
     indicator: "muted",
   },
   {
-    name: "sidebar rows",
-    url: "/components/menu",
-    container: '[data-sidebar="content"]',
-    role: "link",
-    from: "Breadcrumb",
-    to: "Menu",
-  },
-  {
-    name: "sidebar groups",
-    url: "/components/menu",
-    container: '[data-sidebar="content"]',
-    role: "link",
-    from: "Breadcrumb",
-    to: "ASCII Morph",
-  },
-  {
     name: "Dropdown Menu",
     url: "/components/dropdown-menu",
     container: '[role="menu"][aria-label="Workspace actions"]',

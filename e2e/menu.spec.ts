@@ -79,7 +79,7 @@ test("focus travels between rows without selecting and returns on blur", async (
   await expect(settings).toHaveAttribute("aria-pressed", "false");
   await expect(settings).toBeFocused();
   await expect(settings).toHaveAttribute("data-highlighted");
-  // The sidebar has its own scoped highlight.
+  // The sidebar is a menu of its own, so focus here leaves its current page marked.
   await expect(page.locator('[data-sidebar="content"] [aria-current="page"]')).toHaveAttribute(
     "data-highlighted",
   );
@@ -95,7 +95,8 @@ test("focus travels between rows without selecting and returns on blur", async (
   await expect(projects).toHaveAttribute("aria-pressed", "true");
 });
 
-test("sidebar keeps its highlight across selection, groups, history, and scrolling", async ({ page }) => {
+test("sidebar keeps its dot across selection, groups, history, and scrolling", async ({ page }) => {
+  const dot = '[data-slot="menu-dot"]';
   await page.goto("/components/menu");
   const sidebar = page.locator('[data-sidebar="content"]');
   const buttons = sidebar.getByRole("button", { name: "Buttons & Actions", exact: true });
@@ -105,13 +106,11 @@ test("sidebar keeps its highlight across selection, groups, history, and scrolli
   await expect(page).toHaveURL(/\/components\/copy-button$/);
   await expect(link).toHaveAttribute("aria-current", "page");
   await expect(link).toHaveAttribute("data-highlighted");
-  await expect(sidebar.locator(highlight)).toHaveCount(1);
+  await expect(sidebar.locator(dot)).toHaveCount(1);
+  await expect(link.locator(dot)).toHaveCount(1);
+  await expect(sidebar.locator(highlight)).toHaveCount(0);
   await expect(link).toHaveCSS("overflow", "visible");
   await expect(link).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
-  await expect(link).not.toHaveCSS(
-    "color",
-    await sidebar.locator(highlight).evaluate((element) => getComputedStyle(element).backgroundColor),
-  );
 
   await page.goBack();
   await expect(sidebar.getByRole("link", { name: "Menu", exact: true })).toHaveAttribute("data-highlighted");
@@ -123,7 +122,7 @@ test("sidebar keeps its highlight across selection, groups, history, and scrolli
   await expect(sidebar.locator('[aria-current="page"]')).toHaveAttribute("data-highlighted");
   await buttons.click();
   await buttons.click();
-  await expect(sidebar.locator(highlight)).toHaveCount(1);
+  await expect(sidebar.locator(dot)).toHaveCount(1);
 });
 
 test("reduced motion switches instantly and mobile navigation closes after selection", async ({ page }) => {
