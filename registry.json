@@ -252,8 +252,9 @@
       "name": "command-palette",
       "type": "registry:block",
       "title": "Command Palette",
-      "description": "A ⌘K command palette that materialises from its trigger, with fuzzy search, a gliding highlight, and nested pages.",
+      "description": "A ⌘K command palette that scales in over a scrim, with fuzzy search, a gliding highlight, and nested pages.",
       "dependencies": ["motion", "@base-ui/react"],
+      "registryDependencies": ["input"],
       "files": [
         {
           "path": "src/registry/blocks/command-palette.tsx",

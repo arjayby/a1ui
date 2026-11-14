@@ -1,6 +1,6 @@
 # Command Palette
 
-A ⌘K command palette that materialises from its trigger, with fuzzy search, a gliding highlight, and nested pages.
+A ⌘K command palette that scales in over a scrim, with fuzzy search, a gliding highlight, and nested pages.
 
 See [agent setup instructions](http://localhost:3000/llms.txt) before installation. Import paths in examples assume the @/components/blocks path; adapt them to the target project's components.json.
 
@@ -23,6 +23,7 @@ bun: bunx --bun shadcn@latest add http://localhost:3000/r/command-palette.json -
 
 - `motion`
 - `@base-ui/react`
+- `input` (shadcn)
 
 ## Code
 
@@ -79,7 +80,7 @@ export function SiteCommands() {
 
 ## API reference
 
-- The surface scales and un-blurs out of the trigger and leaves the same way. Opened with the shortcut while no trigger is on screen, it settles in from the top centre.
+- The surface settles in from slightly larger as it fades in, and drifts a little larger as it fades out, matching the docs search dialog.
 - Typing filters labels and keywords with a fuzzy match that favors word starts and unbroken runs. Matched characters are wrapped in `mark`. Rows keep their identity and glide to their new places; typing again mid-flight retargets them from where they are.
 - One highlight follows both the keyboard and the pointer. Rows that move or scroll under a resting pointer do not take it.
 - An item with `children` opens a nested page. Backspace on an empty query, or the back button beside the input, returns to the page it came from.

@@ -222,19 +222,6 @@ function useAppleKeyboard() {
   );
 }
 
-function isInView(element: HTMLElement | null | undefined): element is HTMLElement {
-  if (!element?.isConnected) return false;
-  const box = element.getBoundingClientRect();
-  return (
-    box.width > 0 &&
-    box.height > 0 &&
-    box.bottom > 0 &&
-    box.right > 0 &&
-    box.top < window.innerHeight &&
-    box.left < window.innerWidth
-  );
-}
-
 const keyClass =
   "border-border bg-background/60 text-muted-foreground inline-flex h-5 min-w-5 items-center justify-center rounded-[5px] border px-1 font-sans text-[0.6875rem] leading-none font-medium";
 
@@ -243,8 +230,9 @@ const keyClass =
 const surfaceClass =
   "bg-popover/75 text-popover-foreground border-border backdrop-blur-2xl backdrop-saturate-150 [@media(prefers-reduced-transparency:reduce)]:bg-popover [@media(prefers-reduced-transparency:reduce)]:backdrop-filter-none contrast-more:bg-popover contrast-more:border-foreground contrast-more:backdrop-filter-none";
 
+// The trigger wears the Input component's field styling, so it reads as a search box.
 const triggerClass =
-  "border-border bg-background text-muted-foreground hover:text-foreground focus-visible:ring-ring/30 inline-flex h-9 min-w-56 cursor-pointer items-center gap-2 rounded-md border pr-1.5 pl-3 text-sm shadow-xs transition-[color,scale] duration-100 ease-out outline-none select-none focus-visible:ring-3 active:scale-[0.98] motion-reduce:transition-none motion-reduce:active:scale-100";
+  "ui-input text-muted-foreground hover:text-foreground inline-flex w-auto min-w-56 cursor-pointer items-center gap-2 pr-1.5 text-left select-none";
 
 function SearchIcon({ className }: { className?: string }) {
   return (
@@ -299,8 +287,6 @@ export function CommandPalette({
   const [internalOpen, setInternalOpen] = useState(defaultOpen);
   const current = open ?? internalOpen;
   const triggerRef = useRef<HTMLButtonElement | null>(null);
-  // Set while the shortcut opens the palette, so it does not grow out of whatever happened to have focus.
-  const viaShortcut = useRef(false);
   // The element that had focus when the palette opened. Focus returns to it on close.
   const [opener, setOpener] = useState<HTMLElement | null>(null);
 
@@ -322,7 +308,6 @@ export function CommandPalette({
     if (event.key.toLowerCase() !== key || !(event.metaKey || event.ctrlKey)) return;
     if (event.altKey || event.shiftKey || event.repeat || event.isComposing) return;
     event.preventDefault();
-    viaShortcut.current = !current;
     setOpen(!current);
   });
   useEffect(() => {
@@ -332,23 +317,10 @@ export function CommandPalette({
     return () => document.removeEventListener("keydown", listener);
   }, [key]);
 
-  // The popup grows out of the trigger. Opened some other way with no trigger on screen, it grows out of
-  // the control that opened it, and from the top centre when the shortcut did.
-  const getOrigin = () => {
-    if (isInView(triggerRef.current)) return triggerRef.current;
-    return !viaShortcut.current && isInView(opener) ? opener : null;
-  };
-
-  const hint = key ? (apple ? `⌘${key.toUpperCase()}` : `Ctrl ${key.toUpperCase()}`) : null;
+  const hint = key ? [apple ? "⌘" : "Ctrl", key.toUpperCase()] : null;
 
   return (
-    <DialogPrimitive.Root
-      open={current}
-      onOpenChange={(next) => {
-        if (next) viaShortcut.current = false;
-        setOpen(next);
-      }}
-    >
+    <DialogPrimitive.Root open={current} onOpenChange={setOpen}>
       {trigger && (
         <DialogPrimitive.Trigger
           ref={triggerRef}
@@ -361,9 +333,13 @@ export function CommandPalette({
               <SearchIcon className="size-4 shrink-0" />
               <span className="flex-1 text-left">Search</span>
               {hint && (
-                <kbd aria-hidden="true" className={keyClass}>
-                  {hint}
-                </kbd>
+                <span aria-hidden="true" className="flex items-center gap-1.5">
+                  {hint.map((keyLabel) => (
+                    <kbd key={keyLabel} className={keyClass}>
+                      {keyLabel}
+                    </kbd>
+                  ))}
+                </span>
               )}
             </>
           )}
@@ -374,12 +350,8 @@ export function CommandPalette({
           open={current}
           reducedMotion={reducedMotion}
           label={label}
-          getOrigin={getOrigin}
           finalFocus={() => (opener?.isConnected ? opener : triggerRef.current) ?? true}
-          onExited={() => {
-            viaShortcut.current = false;
-            setPresent(false);
-          }}
+          onExited={() => setPresent(false)}
         >
           <PalettePanel
             items={items}
@@ -403,59 +375,20 @@ interface PaletteLayerProps {
   open: boolean;
   reducedMotion: boolean;
   label: string;
-  getOrigin: () => HTMLElement | null;
   finalFocus: () => HTMLElement | boolean;
   onExited: () => void;
   children: ReactNode;
 }
 
 // Mounted fresh for every opening, so the origin is measured and the panel's state starts over each time.
-function PaletteLayer({
-  open,
-  reducedMotion,
-  label,
-  getOrigin,
-  finalFocus,
-  onExited,
-  children,
-}: PaletteLayerProps) {
-  const popupRef = useRef<HTMLDivElement | null>(null);
-  // With somewhere to come from, the surface travels most of the way. Without, it settles in from the top.
-  const [anchored] = useState(() => getOrigin() !== null);
-
-  // Point the transform origin at the trigger so the surface grows out of it and shrinks back into it.
-  const placeOrigin = (popup: HTMLDivElement) => {
-    const origin = getOrigin();
-    if (!origin) {
-      popup.style.transformOrigin = "50% 0%";
-      return;
-    }
-    // Offsets ignore the running scale, so they give the popup's resting position.
-    const frame = popup.offsetParent?.getBoundingClientRect() ?? { left: 0, top: 0 };
-    const box = origin.getBoundingClientRect();
-    const x = box.left + box.width / 2 - (frame.left + popup.offsetLeft);
-    const y = box.top + box.height / 2 - (frame.top + popup.offsetTop);
-    popup.style.transformOrigin = `${x}px ${y}px`;
-  };
-
-  // Measure again on close: the list may have changed the popup's size while it was open.
-  useLayoutEffect(() => {
-    if (!open && popupRef.current) placeOrigin(popupRef.current);
-  });
-
-  // Scale and blur share one spring, so the surface materialises as a single thing. A spring starts
-  // from the live value, so closing mid-open (or reopening mid-close) turns around without a jump,
-  // and the way out retraces the way in. Reduced motion keeps a short fade only.
-  const hidden = reducedMotion
-    ? { opacity: 0 }
-    : { opacity: 0, scale: anchored ? 0.5 : 0.94, filter: "blur(12px)" };
-  const shown = reducedMotion ? { opacity: 1 } : { opacity: 1, scale: 1, filter: "blur(0px)" };
-  const transition: Transition = reducedMotion
-    ? { duration: 0.15, ease: "easeOut" }
-    : {
-        default: { type: "spring", visualDuration: open ? 0.3 : 0.22, bounce: 0 },
-        opacity: { duration: open ? 0.16 : 0.18, ease: open ? "easeOut" : "easeIn" },
-      };
+function PaletteLayer({ open, reducedMotion, label, finalFocus, onExited, children }: PaletteLayerProps) {
+  // The same entrance and exit as the docs search dialog: the surface settles in from slightly larger
+  // and drifts out the same way while it fades. Reduced motion keeps the fade only.
+  const ease = [0.16, 1, 0.3, 1] as const;
+  const hidden = reducedMotion ? { opacity: 0 } : { opacity: 0, scale: 1.06 };
+  const shown = reducedMotion ? { opacity: 1 } : { opacity: 1, scale: 1 };
+  const leaving = reducedMotion ? { opacity: 0 } : { opacity: 0, scale: 1.04 };
+  const transition: Transition = { duration: reducedMotion ? 0.15 : 0.3, ease };
 
   return (
     <DialogPrimitive.Portal keepMounted>
@@ -464,12 +397,12 @@ function PaletteLayer({
         hidden={false}
         // A fading scrim lets clicks through, so the trigger can reopen the palette mid-exit.
         style={{ pointerEvents: open ? undefined : "none" }}
-        className="bg-foreground/25 dark:bg-background/70 fixed inset-0 z-50"
+        className="bg-foreground/25 dark:bg-background/70 fixed inset-0 z-50 backdrop-blur-xs"
         render={
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: open ? 1 : 0 }}
-            transition={{ duration: reducedMotion ? 0.15 : 0.2, ease: "easeOut" }}
+            transition={{ duration: reducedMotion ? 0.15 : 0.3, ease: [0.25, 0.1, 0.25, 1] }}
           />
         }
       />
@@ -479,11 +412,6 @@ function PaletteLayer({
         className="fixed inset-0 z-50 flex items-start justify-center px-4 pt-[max(1rem,12vh)]"
       >
         <DialogPrimitive.Popup
-          // Base UI's portal mounts the popup a commit after this layer, so measure as it attaches.
-          ref={(node: HTMLDivElement | null) => {
-            if (node && node !== popupRef.current) placeOrigin(node);
-            popupRef.current = node;
-          }}
           aria-label={label}
           data-slot="command-palette"
           data-state={open ? "open" : "closed"}
@@ -499,7 +427,7 @@ function PaletteLayer({
           render={
             <motion.div
               initial={hidden}
-              animate={open ? shown : hidden}
+              animate={open ? shown : leaving}
               transition={transition}
               onAnimationComplete={() => {
                 if (!open) onExited();
@@ -996,7 +924,7 @@ function PaletteRow({
         )}
       </span>
       {item.shortcut?.length ? (
-        <span aria-hidden="true" className="flex shrink-0 items-center gap-1">
+        <span aria-hidden="true" className="flex shrink-0 items-center gap-1.5">
           {item.shortcut.map((keyLabel, index) => (
             <kbd key={index} className={keyClass}>
               {keyLabel}
