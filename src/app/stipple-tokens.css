@@ -93,10 +93,10 @@
 }
 
 /*
- * Night, derived from Paper. Only the grounds, lines and inks change. The cobalts,
- * cobalt-ink included, and the state colours keep their Paper values so every hue is
- * the same in both themes; Stipple's lighter Night values (cobalt-ink #a9acff,
- * success #5fd08d, danger #ff8f80) are not applied.
+ * Night, derived from Paper. The grounds, lines and inks change. The cobalt fills are
+ * the same in both themes. cobalt-ink and the state colours are Paper's hues lifted a
+ * third of the way toward Stipple's Night values (#a9acff, #5fd08d, #ff8f80): close to
+ * the light theme's colours, but readable on the dark ground.
  */
 .dark {
   --paper-50: #1d1d26;
@@ -108,7 +108,10 @@
   --ink: #ece9df;
   --ink-muted: #b5b2a8;
   --ink-faint: #918e85;
+  --cobalt-ink: #5b66e6;
   --cobalt-wash: #20213f;
+  --success: #2f9057;
+  --danger: #ce4f43;
   --shadow-window: 0 28px 56px -20px rgba(0, 0, 0, 0.7), 0 4px 10px -2px rgba(0, 0, 0, 0.5);
 }
 
@@ -170,6 +173,7 @@
 }
 
 .dark {
+  --warning: #a17518;
   --overlay: rgb(0 0 0 / 0.6);
 }
 

@@ -23,7 +23,7 @@
       "date": "2026-11-14",
       "scope": "colour",
       "tokens": ["cobalt-ink", "success", "danger"],
-      "change": "Night keeps Paper's cobalt-ink (#3444da), success (#18703d) and danger (#b62f25) instead of Stipple's #a9acff, #5fd08d and #ff8f80, so every hue is the same in both themes. tokens.json is left as copied; the override is in src/app/stipple-tokens.css.",
+      "change": "Night uses Paper's cobalt-ink, success and danger lifted a third of the way toward Stipple's Night values: #5b66e6, #2f9057 and #ce4f43 in place of #a9acff, #5fd08d and #ff8f80. tokens.json is left as copied; the override is in src/app/stipple-tokens.css.",
       "publishedTo": null
     }
   ]
