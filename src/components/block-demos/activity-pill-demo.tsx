@@ -35,7 +35,6 @@ export function ActivityPillPreview() {
 export function ActivityPillDemo() {
   const { activity, start, update, succeed, fail, clear } = useActivity();
   const [position, setPosition] = useState<ActivityPillPosition>("top-center");
-  const [log, setLog] = useState("Start something to see the pill.");
   const scenario = useRef<Scenario>("deploy");
   const timers = useRef<number[]>([]);
 
@@ -62,7 +61,6 @@ export function ActivityPillDemo() {
   const run = (name: Scenario, retry = false) => {
     stop();
     scenario.current = name;
-    setLog(retry ? `Retried the ${name}.` : `Started the ${name}.`);
 
     if (name === "deploy") {
       start({ title: "Deploying", detail: "a1ui-docs to production. Building 14 routes." });
@@ -84,7 +82,7 @@ export function ActivityPillDemo() {
   return (
     <div className="not-prose demo-frame">
       <div
-        className="component-demo-stage relative min-h-[30rem]! flex-col gap-4"
+        className="component-demo-stage flex-col gap-4"
         role="region"
         aria-label="Activity Pill demo"
       >
@@ -102,24 +100,16 @@ export function ActivityPillDemo() {
             Export
           </Button>
         </div>
-        <p data-slot="activity-pill-demo-log" className="text-muted-foreground text-xs">
-          {log}
-        </p>
         <ActivityPill
-          contained
           position={position}
           activity={activity}
           onCancel={() => {
             stop();
             clear();
-            setLog(`Cancelled the ${scenario.current}.`);
           }}
           onRetry={() => run(scenario.current, true)}
-          onView={({ title }) => setLog(`Opened the ${scenario.current} log while it said "${title}".`)}
-          onDismiss={({ status }) => {
-            clear();
-            if (status === "error") setLog(`Dismissed the failed ${scenario.current}.`);
-          }}
+          onView={() => {}}
+          onDismiss={() => clear()}
         />
       </div>
       <div className="component-demo-controls [&_[data-slot=demo-select-trigger]]:w-36">

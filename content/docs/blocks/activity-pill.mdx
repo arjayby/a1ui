@@ -61,18 +61,18 @@ The shell changes size on one spring while the content cross-fades, and a change
 
 ### ActivityPill
 
-| Prop              | Type                                             | Default        | Description                                                                               |
-| ----------------- | ------------------------------------------------ | -------------- | ----------------------------------------------------------------------------------------- |
-| `activity`        | `Activity \| null`                               | Required       | The activity to show. `null` hides the pill.                                              |
-| `position`        | `ActivityPillPosition`                           | `"top-center"` | `top-left`, `top-center`, `top-right`, `bottom-left`, `bottom-center`, or `bottom-right`. |
-| `contained`       | `boolean`                                        | `false`        | Positions the pill inside the nearest positioned ancestor instead of the window.          |
-| `successDuration` | `number`                                         | `2500`         | Milliseconds a success stays before it leaves. `0` keeps it until dismissed.              |
-| `onCancel`        | `(activity) => void`                             | None           | Adds a Cancel button while the activity is running.                                       |
-| `onRetry`         | `(activity) => void`                             | None           | Adds a Retry button after an error.                                                       |
-| `onView`          | `(activity) => void`                             | None           | Adds a View button in every state.                                                        |
-| `onDismiss`       | `(activity) => void`                             | None           | Called when a success has left on its own, or when the person presses Dismiss.            |
-| `labels`          | `{ cancel?, retry?, view?, dismiss?, details? }` | English        | Replaces the `cancel`, `retry`, `view`, `dismiss`, and `details` text.                    |
-| `className`       | `string`                                         | None           | Additional classes on the positioned wrapper.                                             |
+| Prop              | Type                                             | Default        | Description                                                                                                                |
+| ----------------- | ------------------------------------------------ | -------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `activity`        | `Activity \| null`                               | Required       | The activity to show. `null` hides the pill.                                                                               |
+| `position`        | `ActivityPillPosition`                           | `"top-center"` | `top-left`, `top-center`, `top-right`, `bottom-left`, `bottom-center`, or `bottom-right`.                                  |
+| `contained`       | `boolean`                                        | `false`        | Positions the pill inside the nearest positioned ancestor instead of portaling it to the body and fixing it to the window. |
+| `successDuration` | `number`                                         | `2500`         | Milliseconds a success stays before it leaves. `0` keeps it until dismissed.                                               |
+| `onCancel`        | `(activity) => void`                             | None           | Adds a Cancel button while the activity is running.                                                                        |
+| `onRetry`         | `(activity) => void`                             | None           | Adds a Retry button after an error.                                                                                        |
+| `onView`          | `(activity) => void`                             | None           | Adds a View button in every state.                                                                                         |
+| `onDismiss`       | `(activity) => void`                             | None           | Called when a success has left on its own, or when the person presses Dismiss.                                             |
+| `labels`          | `{ cancel?, retry?, view?, dismiss?, details? }` | English        | Replaces the `cancel`, `retry`, `view`, `dismiss`, and `details` text.                                                     |
+| `className`       | `string`                                         | None           | Additional classes on the positioned wrapper.                                                                              |
 
 ### Activity
 

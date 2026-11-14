@@ -19,6 +19,7 @@ import {
   type ComponentPropsWithoutRef,
   type ReactNode,
 } from "react";
+import { createPortal } from "react-dom";
 
 export type ActivityStatus = "running" | "progress" | "success" | "error";
 
@@ -136,7 +137,7 @@ export interface ActivityPillProps extends Omit<ComponentPropsWithoutRef<"div">,
   activity: Activity | null | undefined;
   /** Edge the pill is anchored to. It enters from, grows away from, and leaves by that edge. */
   position?: ActivityPillPosition;
-  /** Positions the pill inside the nearest positioned ancestor instead of the window. */
+  /** Positions the pill inside the nearest positioned ancestor instead of portaling it to the body and fixing it to the window. */
   contained?: boolean;
   /** Milliseconds a success stays before it leaves. `0` keeps it until dismissed. */
   successDuration?: number;
@@ -180,6 +181,8 @@ const BANG = "M10 6 L10 10.75 M10 13.9 L10 14";
 const clampValue = (value: number | undefined) =>
   Number.isFinite(value) ? Math.min(100, Math.max(0, Math.round(value as number))) : 0;
 
+const subscribeNever = () => () => {};
+
 const keyOf = (activity: Activity) => `${activity.id ?? ""}|${activity.status}|${activity.title}`;
 
 export function ActivityPill({
@@ -202,6 +205,12 @@ export function ActivityPill({
   if (dismissed !== null && dismissed !== key) setDismissed(null);
   const shown = current !== null && dismissed !== key;
 
+  // The body only exists on the client, so a portaled pill renders after hydration.
+  const hydrated = useSyncExternalStore(
+    subscribeNever,
+    () => true,
+    () => false,
+  );
   const top = position.startsWith("top");
   const justify = position.endsWith("left")
     ? "justify-start"
@@ -209,7 +218,7 @@ export function ActivityPill({
       ? "justify-end"
       : "justify-center";
 
-  return (
+  const root = (
     <div
       data-slot="activity-pill-root"
       data-position={position}
@@ -246,6 +255,9 @@ export function ActivityPill({
       </AnimatePresence>
     </div>
   );
+
+  if (contained) return root;
+  return hydrated ? createPortal(root, document.body) : null;
 }
 
 function Pill({
@@ -644,9 +656,13 @@ function Glyph({
       strokeWidth={2}
       strokeLinecap="round"
       strokeLinejoin="round"
-      className={`size-[18px] shrink-0 ${status === "error" ? "text-destructive" : ""} ${
-        status === "running" ? (still ? "animate-pulse" : "animate-spin") : ""
-      }`}
+      className={`size-[18px] shrink-0 ${
+        status === "error"
+          ? "text-destructive"
+          : status === "success"
+            ? "text-[var(--status-success,#15803d)]"
+            : ""
+      } ${status === "running" ? (still ? "animate-pulse" : "animate-spin") : ""}`}
     >
       <circle cx={10} cy={10} r={8} opacity={status === "error" ? 0.35 : 0.2} />
       {status === "running" && <circle cx={10} cy={10} r={8} pathLength={1} strokeDasharray="0.28 1" />}

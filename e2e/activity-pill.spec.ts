@@ -2,7 +2,9 @@ import { type Locator, type Page } from "@playwright/test";
 import { expect, test } from "./fixtures";
 
 const stage = (page: Page) => page.getByRole("region", { name: "Activity Pill demo" });
-const pillIn = (demo: Locator) => demo.locator('[data-slot="activity-pill"]');
+/** The pill is portaled to the body, outside the demo, and fixed to the window. */
+const rootOf = (page: Page) => page.locator('body > [data-slot="activity-pill-root"]');
+const pillOf = (page: Page) => rootOf(page).locator('[data-slot="activity-pill"]');
 
 /** Resolves once the shell has stopped changing size. */
 async function settled(pill: Locator) {
@@ -28,7 +30,8 @@ test("a deploy enters from the top edge, announces itself, succeeds, and leaves 
   page,
 }) => {
   const demo = stage(page);
-  const pill = pillIn(demo);
+  const pill = pillOf(page);
+  const root = rootOf(page);
   await expect(pill).toHaveCount(0);
 
   // Sampled inside the page so a slow runner cannot miss the entrance.
@@ -40,8 +43,8 @@ test("a deploy enters from the top edge, announces itself, succeeds, and leaves 
     const began = performance.now();
     while (performance.now() - began < 900) {
       await new Promise(requestAnimationFrame);
-      const shell = element.querySelector('[data-slot="activity-pill"]');
-      if (shell) tops.push(shell.getBoundingClientRect().top - element.getBoundingClientRect().top);
+      const shell = document.querySelector('[data-slot="activity-pill"]');
+      if (shell) tops.push(shell.getBoundingClientRect().top);
     }
     return tops;
   });
@@ -52,27 +55,29 @@ test("a deploy enters from the top edge, announces itself, succeeds, and leaves 
   expect(Math.max(...entrance)).toBeLessThanOrEqual(rest + 0.5);
 
   await expect(pill).toHaveAttribute("data-status", "running");
-  await expect(demo.getByRole("status")).toHaveText("Deploying");
-  await expect(demo.getByRole("progressbar", { name: "Deploying" })).not.toHaveAttribute("aria-valuenow");
+  await expect(root.getByRole("status")).toHaveText("Deploying");
+  await expect(root.getByRole("progressbar", { name: "Deploying" })).not.toHaveAttribute("aria-valuenow");
   const box = await pill.boundingBox();
-  const frame = await demo.boundingBox();
-  expect(Math.abs(box!.x + box!.width / 2 - (frame!.x + frame!.width / 2))).toBeLessThanOrEqual(1);
+  const viewport = page.viewportSize()!;
+  expect(Math.abs(box!.x + box!.width / 2 - viewport.width / 2)).toBeLessThanOrEqual(1);
+  // It lives at the root of the page, not inside the demo.
+  await expect(demo.locator('[data-slot="activity-pill-root"]')).toHaveCount(0);
   expect(box!.height).toBeGreaterThanOrEqual(40);
 
   await expect(pill).toHaveAttribute("data-status", "success", { timeout: 10_000 });
-  await expect(demo.getByRole("status")).toHaveText("Deployed");
-  await expect(demo.getByRole("progressbar")).toHaveCount(0);
+  await expect(root.getByRole("status")).toHaveText("Deployed");
+  await expect(root.getByRole("progressbar")).toHaveCount(0);
 
   // Success lingers, then goes back out through the top edge.
-  const exit = await demo.evaluate(async (element) => {
+  const exit = await page.evaluate(async () => {
     const tops: number[] = [];
     const began = performance.now();
     while (performance.now() - began < 6000) {
       await new Promise(requestAnimationFrame);
-      const shell = element.querySelector('[data-slot="activity-pill"]');
+      const shell = document.querySelector('[data-slot="activity-pill"]');
       if (!shell) break;
       if (shell.hasAttribute("inert")) {
-        tops.push(shell.getBoundingClientRect().top - element.getBoundingClientRect().top);
+        tops.push(shell.getBoundingClientRect().top);
       }
     }
     return tops;
@@ -81,12 +86,13 @@ test("a deploy enters from the top edge, announces itself, succeeds, and leaves 
   expect(exit.length).toBeGreaterThan(0);
   expect(Math.min(...exit)).toBeLessThan(rest - 10);
   expect(Math.max(...exit)).toBeLessThanOrEqual(rest + 0.5);
-  await expect(demo.getByRole("status")).toHaveText("");
+  await expect(root.getByRole("status")).toHaveText("");
 });
 
 test("progress keeps the label still and its figures tabular while the value counts up", async ({ page }) => {
   const demo = stage(page);
-  const pill = pillIn(demo);
+  const pill = pillOf(page);
+  const root = rootOf(page);
 
   const samples = await demo.evaluate(async (element) => {
     [...element.querySelectorAll("button")]
@@ -98,7 +104,7 @@ test("progress keeps the label still and its figures tabular while the value cou
     let lastWidth = -1;
     while (performance.now() - began < 9000) {
       await new Promise(requestAnimationFrame);
-      const shell = element.querySelector<HTMLElement>('[data-slot="activity-pill"]');
+      const shell = document.querySelector<HTMLElement>('[data-slot="activity-pill"]');
       if (!shell || shell.dataset.status !== "progress") {
         if (seen.size > 0) break;
         continue;
@@ -134,23 +140,24 @@ test("progress keeps the label still and its figures tabular while the value cou
   }
 
   await expect(pill).toHaveAttribute("data-status", "success", { timeout: 10_000 });
-  await expect(demo.getByRole("status")).toHaveText("Uploaded");
+  await expect(root.getByRole("status")).toHaveText("Uploaded");
 });
 
 test("an error stays, expands with Enter, collapses on Escape and outside press, and retries", async ({
   page,
 }) => {
   const demo = stage(page);
-  const pill = pillIn(demo);
+  const pill = pillOf(page);
+  const root = rootOf(page);
   const toggle = pill.locator('[data-slot="activity-pill-toggle"]');
 
   await demo.getByRole("button", { name: "Export" }).click();
   await expect(pill).toHaveAttribute("data-status", "progress");
-  await expect(demo.getByRole("progressbar", { name: "Exporting" })).toHaveAttribute("aria-valuenow", /\d+/);
+  await expect(root.getByRole("progressbar", { name: "Exporting" })).toHaveAttribute("aria-valuenow", /\d+/);
   await expect(pill).toHaveAttribute("data-status", "error", { timeout: 15_000 });
-  await expect(demo.getByRole("alert")).toHaveText(/^Export failed\. The connection dropped/);
-  await expect(demo.getByRole("status")).toHaveText("");
-  await expect(demo.getByRole("progressbar")).toHaveCount(0);
+  await expect(root.getByRole("alert")).toHaveText(/^Export failed\. The connection dropped/);
+  await expect(root.getByRole("status")).toHaveText("");
+  await expect(root.getByRole("progressbar")).toHaveCount(0);
   await settled(pill);
   const compact = (await pill.boundingBox())!;
 
@@ -163,7 +170,7 @@ test("an error stays, expands with Enter, collapses on Escape and outside press,
   await page.keyboard.press("Enter");
   await expect(pill).toHaveAttribute("data-state", "expanded");
   await expect(toggle).toHaveAttribute("aria-expanded", "true");
-  const panel = demo.getByRole("group", { name: "Activity details" });
+  const panel = root.getByRole("group", { name: "Activity details" });
   await expect(panel).toContainText("The connection dropped at row 5,120.");
   await settled(pill);
   const expanded = (await pill.boundingBox())!;
@@ -180,7 +187,7 @@ test("an error stays, expands with Enter, collapses on Escape and outside press,
   }
   await page.keyboard.press("Shift+Tab");
   await page.keyboard.press("Enter");
-  await expect(demo.locator('[data-slot="activity-pill-demo-log"]')).toContainText("Opened the export log");
+  await expect(pill).toHaveAttribute("data-state", "expanded");
 
   await page.keyboard.press("Escape");
   await expect(pill).toHaveAttribute("data-state", "compact");
@@ -199,14 +206,14 @@ test("an error stays, expands with Enter, collapses on Escape and outside press,
   await expect(pill).toHaveAttribute("data-state", "expanded");
   await expect(panel.getByRole("button", { name: "Cancel" })).toBeVisible();
   await expect(pill).toHaveAttribute("data-status", "success", { timeout: 15_000 });
-  await expect(demo.getByRole("status")).toHaveText("Exported");
+  await expect(root.getByRole("status")).toHaveText("Exported");
   await page.mouse.move(0, 0);
   await expect(pill).toHaveCount(0, { timeout: 10_000 });
 });
 
 test("a collapse that lands mid-morph turns the shell around from its live size", async ({ page }) => {
   const demo = stage(page);
-  const pill = pillIn(demo);
+  const pill = pillOf(page);
   await demo.getByRole("button", { name: "Deploy" }).click();
   await expect(pill).toHaveAttribute("data-status", "running");
   await settled(pill);
@@ -256,17 +263,19 @@ test("a collapse that lands mid-morph turns the shell around from its live size"
 
 test("the pill is anchored to the chosen edge and grows away from it", async ({ page }) => {
   const demo = stage(page);
-  const pill = pillIn(demo);
+  const pill = pillOf(page);
+  const root = rootOf(page);
   await page.getByRole("button", { name: /^Position:/ }).click();
-  await page.getByRole("menuitem", { name: "bottom-right" }).click();
+  // Bottom-left, clear of the Next.js dev indicator in the bottom-right corner.
+  await page.getByRole("menuitem", { name: "bottom-left" }).click();
 
-  // Distances from the stage's right and bottom edges, which hold still if the page scrolls.
+  // Distances from the window's left and bottom edges.
   const inset = async () => {
-    const frame = (await demo.boundingBox())!;
+    const viewport = page.viewportSize()!;
     const box = (await pill.boundingBox())!;
     return {
-      right: frame.x + frame.width - (box.x + box.width),
-      bottom: frame.y + frame.height - (box.y + box.height),
+      left: box.x,
+      bottom: viewport.height - (box.y + box.height),
       height: box.height,
       width: box.width,
     };
@@ -276,21 +285,20 @@ test("the pill is anchored to the chosen edge and grows away from it", async ({ 
   await expect(pill).toHaveAttribute("data-status", "running");
   await settled(pill);
   const compact = await inset();
-  expect(compact.right).toBeCloseTo(16, 0);
+  expect(compact.left).toBeCloseTo(16, 0);
   expect(compact.bottom).toBeCloseTo(16, 0);
 
   await pill.click();
   await expect(pill).toHaveAttribute("data-state", "expanded");
   await settled(pill);
   const expanded = await inset();
-  expect(expanded.right).toBeCloseTo(16, 0);
+  expect(expanded.left).toBeCloseTo(16, 0);
   expect(expanded.bottom).toBeCloseTo(16, 0);
   expect(expanded.height).toBeGreaterThan(compact.height + 40);
   expect(expanded.width).toBeGreaterThan(compact.width + 40);
 
-  await demo.getByRole("group", { name: "Activity details" }).getByRole("button", { name: "Cancel" }).click();
+  await root.getByRole("group", { name: "Activity details" }).getByRole("button", { name: "Cancel" }).click();
   await expect(pill).toHaveCount(0, { timeout: 10_000 });
-  await expect(demo.locator('[data-slot="activity-pill-demo-log"]')).toHaveText("Cancelled the deploy.");
 });
 
 test("reduced motion changes size at once, cross-fades the content, and does not travel", async ({
@@ -298,7 +306,7 @@ test("reduced motion changes size at once, cross-fades the content, and does not
 }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   const demo = stage(page);
-  const pill = pillIn(demo);
+  const pill = pillOf(page);
 
   const tops = await demo.evaluate(async (element) => {
     [...element.querySelectorAll("button")]
@@ -308,8 +316,8 @@ test("reduced motion changes size at once, cross-fades the content, and does not
     const began = performance.now();
     while (performance.now() - began < 500) {
       await new Promise(requestAnimationFrame);
-      const shell = element.querySelector('[data-slot="activity-pill"]');
-      if (shell) seen.push(shell.getBoundingClientRect().top - element.getBoundingClientRect().top);
+      const shell = document.querySelector('[data-slot="activity-pill"]');
+      if (shell) seen.push(shell.getBoundingClientRect().top);
     }
     return seen;
   });
@@ -344,7 +352,7 @@ test("reduced motion changes size at once, cross-fades the content, and does not
 
 test("the surface is translucent, and solid when transparency is reduced", async ({ page }) => {
   const demo = stage(page);
-  const pill = pillIn(demo);
+  const pill = pillOf(page);
   const alphaOf = () =>
     pill.evaluate((element) => {
       const color = getComputedStyle(element).backgroundColor;
