@@ -96,7 +96,7 @@ export function SheetDemo() {
           >
             <SheetTrigger
               render={<button type="button" />}
-              className="border-border bg-background hover:bg-muted/50 focus-visible:ring-ring flex w-full items-center gap-3 rounded-xl border p-3 text-left outline-none focus-visible:ring-2"
+              className="border-input bg-background hover:bg-muted/50 focus-visible:ring-ring flex w-full items-center gap-3 rounded-xl border p-3 text-left outline-none focus-visible:ring-2"
             >
               {bag.length === 0 ? (
                 <span className="bg-muted text-muted-foreground grid size-10 shrink-0 place-items-center rounded-lg">
@@ -143,7 +143,7 @@ export function SheetDemo() {
                         <span className="truncate text-sm font-medium">{line.name}</span>
                         <span className="text-muted-foreground truncate text-xs">{line.detail}</span>
                       </span>
-                      <span className="border-border flex items-center rounded-full border">
+                      <span className="border-input flex items-center rounded-full border">
                         <button
                           type="button"
                           aria-label={

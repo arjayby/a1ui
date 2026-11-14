@@ -38,7 +38,7 @@ export function ContextMenuPreview() {
           tabIndex={0}
           role="group"
           aria-label="Report file"
-          className="border-border text-muted-foreground focus-visible:ring-ring/30 data-popup-open:bg-muted/50 flex h-36 w-64 max-w-full flex-col items-center justify-center gap-1 rounded-lg border border-dashed text-sm transition-[scale,background-color] duration-150 outline-none select-none focus-visible:ring-3 data-pressing:scale-[0.98] motion-reduce:transition-none"
+          className="border-input text-muted-foreground focus-visible:ring-ring/30 data-popup-open:bg-muted/50 flex h-36 w-64 max-w-full flex-col items-center justify-center gap-1 rounded-lg border border-dashed text-sm transition-[scale,background-color] duration-150 outline-none select-none focus-visible:ring-3 data-pressing:scale-[0.98] motion-reduce:transition-none"
         >
           <span className="text-foreground font-medium pointer-coarse:hidden">Right-click here</span>
           <span className="text-foreground hidden font-medium pointer-coarse:inline">

@@ -48,7 +48,7 @@ function Toolbar({ tools, side }: { tools: Tool[][]; side?: TooltipContentProps[
     <div
       role="toolbar"
       aria-label="Formatting"
-      className="border-border bg-background flex max-w-full items-center gap-0.5 rounded-lg border p-1 shadow-xs"
+      className="border-input bg-background flex max-w-full items-center gap-0.5 rounded-lg border p-1 shadow-xs"
     >
       {tools.map((group, index) => (
         <Fragment key={group[0].label}>
