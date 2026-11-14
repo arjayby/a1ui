@@ -20,7 +20,9 @@
     font-size: var(--type-label-size);
     font-weight: 400;
     letter-spacing: var(--type-label-tracking);
-    line-height: var(--type-label-leading);
+    /* 20px, not the label style's 16px: the registry's animated buttons give their label a
+       20px-tall slot (h-5), and a shorter line sits at the top of it instead of the middle. */
+    line-height: 20px;
     white-space: nowrap;
     cursor: pointer;
     user-select: none;
