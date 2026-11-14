@@ -7,7 +7,14 @@ const ROW = 36;
 const wheel = (page: Page, name: string) => page.locator(".demo-frame").getByRole("listbox", { name });
 const selected = (list: Locator) => list.getByRole("option", { selected: true });
 const scrollTop = (list: Locator) => list.evaluate((element) => element.scrollTop);
-const readout = (page: Page) => page.locator('[data-slot="wheel-picker-demo-value"]');
+// The value the wheels show, read from their selected rows: "9:41 AM" or "February 14, 2026".
+async function readout(page: Page) {
+  const text = (name: string) => selected(wheel(page, name)).innerText();
+  if (await wheel(page, "Hour").count()) {
+    return `${await text("Hour")}:${await text("Minute")} ${await text("AM or PM")}`;
+  }
+  return `${await text("Month")} ${await text("Day")}, ${await text("Year")}`;
+}
 
 async function open(page: Page, picker: "time" | "date" = "time") {
   await page.goto("/components/wheel-picker");
@@ -39,7 +46,7 @@ test("follows native scrolling, clicks, keys and typeahead, and sits its value a
   const hour = wheel(page, "Hour");
   const minute = wheel(page, "Minute");
   await expect(selected(hour)).toHaveText("9");
-  await expect(readout(page)).toHaveText("9:41 AM");
+  await expect.poll(() => readout(page)).toBe("9:41 AM");
   expect(await scrollTop(hour)).toBe(8 * ROW);
   expect(await scrollTop(minute)).toBe(41 * ROW);
   await expect(page.locator('input[name="minute"]')).toHaveValue("41");
@@ -57,7 +64,7 @@ test("follows native scrolling, clicks, keys and typeahead, and sits its value a
   await hour.hover();
   await page.mouse.wheel(0, 2 * ROW);
   await expect(selected(hour)).toHaveText("11");
-  await expect(readout(page)).toHaveText("11:41 AM");
+  await expect.poll(() => readout(page)).toBe("11:41 AM");
   await expect.poll(() => scrollTop(hour)).toBe(10 * ROW);
 
   await hour.getByRole("option", { name: "12", exact: true }).click();
@@ -83,7 +90,7 @@ test("follows native scrolling, clicks, keys and typeahead, and sits its value a
   await expect(minute).toBeFocused();
   await page.keyboard.type("07");
   await expect(selected(minute)).toHaveText("07");
-  await expect(readout(page)).toHaveText("3:07 AM");
+  await expect.poll(() => readout(page)).toBe("3:07 AM");
   await expect.poll(() => scrollTop(minute)).toBe(7 * ROW);
   await expect(page.locator('input[name="minute"]')).toHaveValue("07");
   expect(errors).toEqual([]);
@@ -113,7 +120,7 @@ test("drags with the mouse, rubber-bands at the end and scrolls to a value set f
   await page.mouse.up();
   await expect(minute).not.toHaveAttribute("data-dragging");
   await expect.poll(() => scrollTop(minute)).toBe(43 * ROW);
-  await expect(readout(page)).toHaveText("9:43 AM");
+  await expect.poll(() => readout(page)).toBe("9:43 AM");
 
   // Past the last row the list stretches with resistance instead of stopping dead, then returns.
   const list = period.locator('[data-slot="wheel-picker-list"]');
@@ -137,18 +144,14 @@ test("drags with the mouse, rubber-bands at the end and scrolls to a value set f
     const index = Number(await selected(list).getAttribute("data-index"));
     await expect.poll(() => scrollTop(list)).toBe(index * ROW);
   }
-  const [hours, minutes] = [
-    await selected(wheel(page, "Hour")).innerText(),
-    await selected(minute).innerText(),
-  ];
-  await expect(readout(page)).toHaveText(`${hours}:${minutes} ${await selected(period).innerText()}`);
+  await expect(page.locator('input[name="minute"]')).toHaveValue(await selected(minute).innerText());
 });
 
 test("skips disabled options and follows a value its parent corrects", async ({ page }) => {
   await open(page, "date");
   const month = wheel(page, "Month");
   const day = wheel(page, "Day");
-  await expect(readout(page)).toHaveText("February 14, 2026");
+  await expect.poll(() => readout(page)).toBe("February 14, 2026");
   await expect(day.getByRole("option", { name: "29", exact: true })).toHaveAttribute("aria-disabled", "true");
   await day.focus();
   await page.keyboard.press("End");
@@ -166,7 +169,7 @@ test("skips disabled options and follows a value its parent corrects", async ({ 
 
   await month.focus();
   await page.keyboard.press("ArrowUp");
-  await expect(readout(page)).toHaveText("January 28, 2026");
+  await expect.poll(() => readout(page)).toBe("January 28, 2026");
   await day.focus();
   await page.keyboard.press("End");
   await expect(selected(day)).toHaveText("31");
@@ -174,7 +177,7 @@ test("skips disabled options and follows a value its parent corrects", async ({ 
   // February has no 31st: the demo pulls the day back and the wheel follows it.
   await month.focus();
   await page.keyboard.press("ArrowDown");
-  await expect(readout(page)).toHaveText("February 28, 2026");
+  await expect.poll(() => readout(page)).toBe("February 28, 2026");
   await expect.poll(() => scrollTop(day)).toBe(27 * ROW);
 });
 

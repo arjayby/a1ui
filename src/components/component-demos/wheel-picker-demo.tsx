@@ -121,16 +121,9 @@ export function WheelPickerDemo() {
             />
           </WheelPickerGroup>
         )}
-        <div className="flex items-center gap-3">
-          <p data-slot="wheel-picker-demo-value" className="text-muted-foreground m-0 text-sm tabular-nums">
-            {picker === "time"
-              ? `${time.hour}:${time.minute} ${time.period}`
-              : `${months[Number(date.month) - 1].label} ${date.day}, ${date.year}`}
-          </p>
-          <Button variant="outline" size="sm" onClick={setNow}>
-            {picker === "time" ? "Set to now" : "Set to today"}
-          </Button>
-        </div>
+        <Button variant="outline" size="sm" onClick={setNow}>
+          {picker === "time" ? "Set to now" : "Set to today"}
+        </Button>
       </div>
       <div className="component-demo-controls">
         <DemoSelect label="Picker" value={picker} options={["time", "date"]} onChange={setPicker} />
