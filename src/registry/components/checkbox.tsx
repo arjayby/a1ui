@@ -81,14 +81,14 @@ export function Checkbox({
           transition={{ type: "spring", visualDuration: 0.2, bounce: 0 }}
         />
       }
-      className={`border-muted-foreground/50 hover:border-muted-foreground/80 bg-background text-background data-checked:border-foreground data-checked:bg-foreground data-indeterminate:border-foreground data-indeterminate:bg-foreground focus-visible:ring-ring/30 relative inline-grid size-[18px] shrink-0 cursor-pointer place-items-center rounded-[5px] border shadow-xs transition-colors duration-150 outline-none focus-visible:ring-3 data-disabled:cursor-not-allowed ${label ? "mt-px" : `data-disabled:opacity-50 ${className ?? ""}`}`}
+      className={`border-muted-foreground/50 hover:border-muted-foreground/80 bg-background text-primary-foreground data-checked:border-primary data-checked:bg-primary data-indeterminate:border-primary data-indeterminate:bg-primary focus-visible:ring-ring/30 relative inline-grid size-[18px] shrink-0 cursor-pointer place-items-center rounded-[5px] border shadow-xs transition-colors duration-150 outline-none focus-visible:ring-3 data-disabled:cursor-not-allowed ${label ? "mt-px" : `data-disabled:opacity-50 ${className ?? ""}`}`}
     >
       {burst.key > 0 && on && seconds > 0 && (
         <motion.span
           key={burst.key}
           aria-hidden="true"
           data-slot="checkbox-burst"
-          className="border-foreground pointer-events-none absolute -inset-px rounded-[inherit] border"
+          className="border-primary pointer-events-none absolute -inset-px rounded-[inherit] border"
           initial={{ scale: 1, opacity: 0.5 }}
           animate={{ scale: 1.9, opacity: 0 }}
           transition={{ duration: 0.45, ease: [0.2, 0.7, 0.3, 1] }}

@@ -164,14 +164,14 @@ export function Slider({
             render={<motion.div style={{ scaleX: trackScale, originX: trackOrigin }} />}
             className="bg-muted relative h-1.5 w-full rounded-full"
           >
-            <SliderPrimitive.Indicator className="bg-foreground rounded-full" />
+            <SliderPrimitive.Indicator className="bg-primary rounded-full" />
             <div aria-hidden="true" className="pointer-events-none absolute inset-0">
               {markers.map((stop) => (
                 <motion.span
                   key={stop}
                   data-slot="slider-stop"
                   data-active={stop === activeStop || undefined}
-                  className="bg-muted-foreground/60 data-active:bg-foreground absolute top-[calc(100%+10px)] h-1 w-px origin-top -translate-x-1/2"
+                  className="bg-muted-foreground/60 data-active:bg-primary absolute top-[calc(100%+10px)] h-1 w-px origin-top -translate-x-1/2"
                   style={{ left: `${((stop - min) / (max - min)) * 100}%` }}
                   animate={{ scaleY: stop === activeStop ? 1.5 : 1 }}
                   transition={reducedMotion ? { duration: 0 } : SETTLE}

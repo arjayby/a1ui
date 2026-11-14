@@ -1,7 +1,9 @@
 "use client";
 
 import { AnimatePresence, motion, useAnimate, useReducedMotion } from "motion/react";
-import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+
+import { RollingNumber } from "./rolling-number";
 
 // Motion's useReducedMotion reads the media query on the first client render, which the server
 // cannot know. Applying it only after hydration keeps the client's first render identical to the
@@ -69,16 +71,16 @@ export function Badge({
   const seconds = reducedMotion ? 0 : Number.isFinite(duration) ? Math.max(0, duration) : 0.4;
   const value = toCount(count);
   const cap = max === undefined || !Number.isFinite(max) ? undefined : Math.max(0, Math.floor(max));
-  const display = value === undefined ? "" : cap !== undefined && value > cap ? `${cap}+` : `${value}`;
+  const capped = value !== undefined && cap !== undefined && value > cap;
+  const shown = capped ? cap : value;
+  const display = shown === undefined ? "" : `${shown}${capped ? "+" : ""}`;
   const visible = value !== 0 || showZero;
 
-  // Digits slide up as the count rises and down as it falls; a rise from zero pops the badge.
+  // A rise from zero pops the badge.
   const [previous, setPrevious] = useState(value);
-  const [direction, setDirection] = useState<1 | -1>(1);
   const [pops, setPops] = useState(0);
   if (value !== previous) {
     setPrevious(value);
-    if (value !== undefined && previous !== undefined) setDirection(value > previous ? 1 : -1);
     if (previous === 0 && value !== undefined && value > 0) setPops((total) => total + 1);
   }
 
@@ -93,9 +95,9 @@ export function Badge({
       pulse={live && seconds > 0}
     >
       {children}
-      {value !== undefined && (
+      {shown !== undefined && (
         <>
-          <Counter display={display} direction={direction} seconds={seconds} />
+          <Count value={shown} capped={capped} seconds={seconds} />
           <span className="sr-only">{countLabel ? `${display} ${countLabel}` : display}</span>
         </>
       )}
@@ -178,60 +180,32 @@ function BadgeBody({
   );
 }
 
-function Counter({ display, direction, seconds }: { display: string; direction: 1 | -1; seconds: number }) {
-  const row = useRef<HTMLSpanElement>(null);
-  const [width, setWidth] = useState<number | "auto">("auto");
-  const roll = springOrInstant(seconds);
-
-  useLayoutEffect(() => {
-    const element = row.current;
-    if (!element) return;
-    const measure = () => setWidth(element.offsetWidth);
-    measure();
-    if (typeof ResizeObserver === "undefined") return;
-    const observer = new ResizeObserver(measure);
-    observer.observe(element);
-    return () => observer.disconnect();
-  }, []);
-
-  const characters = display.split("");
-
+/** The count rolls digit by digit through RollingNumber; the `+` of a capped count slides in beside it. */
+function Count({ value, capped, seconds }: { value: number; capped: boolean; seconds: number }) {
+  const slide = springOrInstant(seconds);
   return (
-    <motion.span
+    <span
       data-slot="badge-count"
       aria-hidden="true"
-      className="relative -my-px inline-flex h-4 shrink-0 justify-end overflow-hidden leading-4"
-      initial={false}
-      animate={{ width }}
-      transition={roll}
+      className="-my-px inline-flex shrink-0 items-baseline leading-4"
     >
-      <span ref={row} data-slot="badge-digits" className="relative inline-flex shrink-0">
-        <AnimatePresence initial={false} mode="popLayout" anchorX="right" custom={direction}>
-          {characters.map((character, index) => {
-            // Keys count from the right so ones, tens, and hundreds keep their columns as the count grows.
-            const column = characters.length - index;
-            return (
-              <motion.span
-                key={`${column}-${character}`}
-                data-slot="badge-digit"
-                className="inline-block"
-                custom={direction}
-                variants={{
-                  enter: (rise: number) => ({ y: rise > 0 ? "100%" : "-100%", opacity: 0 }),
-                  center: { y: "0%", opacity: 1 },
-                  exit: (rise: number) => ({ y: rise > 0 ? "-100%" : "100%", opacity: 0 }),
-                }}
-                initial={seconds ? "enter" : false}
-                animate="center"
-                exit={seconds ? "exit" : undefined}
-                transition={roll}
-              >
-                {character}
-              </motion.span>
-            );
-          })}
-        </AnimatePresence>
-      </span>
-    </motion.span>
+      {/* A fixed locale keeps the server and client digits identical, as plain ASCII numerals. */}
+      <RollingNumber value={value} locale="en-US" format={{ useGrouping: false }} duration={seconds} />
+      <AnimatePresence initial={false}>
+        {capped && (
+          <motion.span
+            key="plus"
+            data-slot="badge-plus"
+            className="inline-block overflow-hidden"
+            initial={{ width: 0, opacity: 0 }}
+            animate={{ width: "auto", opacity: 1 }}
+            exit={{ width: 0, opacity: 0 }}
+            transition={slide}
+          >
+            +
+          </motion.span>
+        )}
+      </AnimatePresence>
+    </span>
   );
 }

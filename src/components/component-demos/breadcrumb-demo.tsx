@@ -150,6 +150,7 @@ export function BreadcrumbDemo() {
           />
           <Menu
             value={hovered ?? ""}
+            indicator="muted"
             onPointerLeave={() => setHovered(null)}
             className="border-border flex flex-col rounded-lg border p-1"
           >

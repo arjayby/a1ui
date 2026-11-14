@@ -1724,6 +1724,11 @@
           "path": "src/registry/components/badge.tsx",
           "type": "registry:component",
           "target": "components/animated/badge.tsx"
+        },
+        {
+          "path": "src/registry/components/rolling-number.tsx",
+          "type": "registry:component",
+          "target": "components/animated/rolling-number.tsx"
         }
       ],
       "categories": [
@@ -1741,7 +1746,7 @@
             "One size, 20 pixels tall. Counts are whole numbers of zero or more, and the badge hides at zero unless showZero is set. The status dot uses the text color of the variant."
           ],
           "requirements": [
-            "React 19, Tailwind CSS 4, Motion, and theme colors. Pass countLabel so screen readers hear what a count means; counts are announced through a polite live region. Reduced motion swaps the digits instantly, skips the pop, and stops the pulse."
+            "React 19, Tailwind CSS 4, Motion, and theme colors. Pass countLabel so screen readers hear what a count means; counts are announced through a polite live region. The count is a Rolling Number, installed alongside. Reduced motion cross-fades the digits, skips the pop, and stops the pulse."
           ],
           "docsUrl": "http://localhost:3000/docs/components/badge.md",
           "registryUrl": "http://localhost:3000/r/badge.json"

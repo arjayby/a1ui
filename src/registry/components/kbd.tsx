@@ -125,6 +125,7 @@ function KeyLabel({ name, platform }: { name: string; platform: KbdPlatform }) {
 interface GroupContextValue {
   platform?: KbdPlatform;
   duration?: number;
+  complete: boolean;
   report: (id: string, pressed: boolean) => void;
   remove: (id: string) => void;
 }
@@ -242,6 +243,7 @@ export function Kbd({
   }, [report, id, active]);
   useEffect(() => () => remove?.(id), [remove, id]);
 
+  const complete = group?.complete ?? false;
   const transition = time === 0 ? { duration: 0 } : capSpring(active ? time / 3 : time);
 
   return (
@@ -263,14 +265,14 @@ export function Kbd({
         initial={false}
         animate={{ top: active ? TRAVEL : 0 }}
         transition={transition}
-        className="bg-border absolute inset-x-0 bottom-0 -z-10 rounded-md"
+        className={`absolute inset-x-0 bottom-0 -z-10 rounded-md transition-colors duration-150 ${complete ? "bg-primary" : "bg-border"}`}
       />
       <motion.span
         data-slot="kbd-cap"
         initial={false}
         animate={{ y: active ? TRAVEL : 0 }}
         transition={transition}
-        className={`border-border text-muted-foreground flex h-full w-full items-center justify-center gap-0.5 rounded-[5px] border px-1.5 leading-none transition-colors duration-150 ${active ? "bg-muted text-foreground" : "bg-background"}`}
+        className={`flex h-full w-full items-center justify-center gap-0.5 rounded-[5px] border px-1.5 leading-none transition-colors duration-150 ${complete ? "border-primary bg-primary text-primary-foreground" : active ? "border-border bg-muted text-foreground" : "border-border bg-background text-muted-foreground"}`}
       >
         {children ?? (listen ? <KeyLabel name={listen} platform={platform} /> : null)}
       </motion.span>
@@ -320,12 +322,12 @@ export function KbdGroup({
       return next;
     });
   }, []);
-  const context = useMemo(
-    () => ({ platform, duration, report, remove }),
-    [platform, duration, report, remove],
-  );
   const values = Object.values(states);
   const complete = values.length > 0 && values.every(Boolean);
+  const context = useMemo(
+    () => ({ platform, duration, complete, report, remove }),
+    [platform, duration, complete, report, remove],
+  );
 
   const onCompleteRef = useRef(onComplete);
   useEffect(() => {
@@ -340,7 +342,10 @@ export function KbdGroup({
     keys?.map((key, index) => (
       <span key={`${key}-${index}`} className="contents">
         {index > 0 && separator !== null && (
-          <span data-slot="kbd-separator" className="text-muted-foreground px-0.5 text-xs">
+          <span
+            data-slot="kbd-separator"
+            className={`px-0.5 text-xs transition-colors duration-150 ${complete ? "text-primary-foreground" : "text-muted-foreground"}`}
+          >
             {separator}
           </span>
         )}
@@ -361,7 +366,7 @@ export function KbdGroup({
         <motion.span
           aria-hidden="true"
           data-slot="kbd-group-glow"
-          className="bg-muted pointer-events-none absolute -inset-1 -z-10 rounded-lg"
+          className="bg-primary pointer-events-none absolute -inset-1 -z-10 rounded-lg"
           initial={false}
           animate={
             complete ? { opacity: 1, scale: time === 0 ? 1 : [0.92, 1.06, 1] } : { opacity: 0, scale: 1 }

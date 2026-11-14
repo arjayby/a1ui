@@ -74,7 +74,7 @@ const FLICK_SPEED = 400;
 
 const INDICATOR_CLASS: Record<TabsVariant, string> = {
   pill: "bg-background ring-foreground/5 contrast-more:ring-foreground/60 pointer-events-none absolute -z-10 rounded-md shadow-sm ring-1",
-  underline: "bg-foreground pointer-events-none absolute bottom-0 -z-10 h-0.5 rounded-full",
+  underline: "bg-primary pointer-events-none absolute bottom-0 -z-10 h-0.5 rounded-full",
 };
 // The underline bar sits this far inside its tab on each side.
 const UNDERLINE_INSET = 4;

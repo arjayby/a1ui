@@ -64,15 +64,15 @@ export function StreamStatus() {
 
 ## API reference
 
-| Prop         | Type                                                     | Default     | Description                                                                                                 |
-| ------------ | -------------------------------------------------------- | ----------- | ----------------------------------------------------------------------------------------------------------- |
-| `variant`    | `"default" \| "secondary" \| "outline" \| "destructive"` | `"default"` | Color scheme.                                                                                               |
-| `children`   | `ReactNode`                                              | None        | Text or icons shown before the count. Icons are sized to 12 pixels.                                         |
-| `count`      | `number`                                                 | None        | Whole number that rolls between values: digits slide up as it rises and down as it falls. Negatives show 0. |
-| `max`        | `number`                                                 | None        | Largest count shown before the badge reads, for example, `99+`.                                             |
-| `showZero`   | `boolean`                                                | `false`     | Keeps the badge visible at zero. Otherwise it pops out at zero and pops back in when the count rises.       |
-| `countLabel` | `string`                                                 | None        | Words screen readers hear after the count, such as `unread messages`. Counts use a polite live region.      |
-| `dot`        | `boolean`                                                | `false`     | Shows a status dot in the text color before the content.                                                    |
-| `live`       | `boolean`                                                | `false`     | Pulses an expanding ring around the dot.                                                                    |
-| `duration`   | `number`                                                 | `0.4`       | Roll, resize, and pop spring duration in seconds. Zero swaps digits instantly and stops the pulse.          |
-| `className`  | `string`                                                 | None        | Additional classes on the badge, such as absolute positioning over an icon.                                 |
+| Prop         | Type                                                     | Default     | Description                                                                                                                    |
+| ------------ | -------------------------------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `variant`    | `"default" \| "secondary" \| "outline" \| "destructive"` | `"default"` | Color scheme.                                                                                                                  |
+| `children`   | `ReactNode`                                              | None        | Text or icons shown before the count. Icons are sized to 12 pixels.                                                            |
+| `count`      | `number`                                                 | None        | Whole number that rolls between values with Rolling Number: digits turn up as it rises and down as it falls. Negatives show 0. |
+| `max`        | `number`                                                 | None        | Largest count shown before the badge reads, for example, `99+`.                                                                |
+| `showZero`   | `boolean`                                                | `false`     | Keeps the badge visible at zero. Otherwise it pops out at zero and pops back in when the count rises.                          |
+| `countLabel` | `string`                                                 | None        | Words screen readers hear after the count, such as `unread messages`. Counts use a polite live region.                         |
+| `dot`        | `boolean`                                                | `false`     | Shows a status dot in the text color before the content.                                                                       |
+| `live`       | `boolean`                                                | `false`     | Pulses an expanding ring around the dot.                                                                                       |
+| `duration`   | `number`                                                 | `0.4`       | Roll, resize, and pop spring duration in seconds. Zero swaps digits instantly and stops the pulse.                             |
+| `className`  | `string`                                                 | None        | Additional classes on the badge, such as absolute positioning over an icon.                                                    |

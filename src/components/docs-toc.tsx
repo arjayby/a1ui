@@ -147,7 +147,7 @@ export function DocsToc({ items }: { items: DocsTocItem[] }) {
                     event.preventDefault();
                     jumpTo(id);
                     // A pointer click leaves focus on the link, and Menu highlights the focused item, so a
-                    // later window refocus would pull the highlight back here after scrolling elsewhere.
+                    // later window refocus would highlight this link again after scrolling elsewhere.
                     // Keyboard activation (detail 0) keeps focus so the reader stays in the menu.
                     if (event.detail > 0) event.currentTarget.blur();
                   }}

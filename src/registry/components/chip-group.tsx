@@ -135,14 +135,14 @@ export function ChipGroupItem({
       render={
         <motion.button whileTap={group.seconds === 0 ? undefined : { scale: 0.96 }} transition={PRESS} />
       }
-      className={`${base} data-pressed:text-background isolate h-8 rounded-full border ${outline ? "border-border bg-background" : "bg-muted border-transparent"} text-muted-foreground not-data-pressed:hover:text-foreground ${iconOnly ? "w-8 px-0" : "px-3"} ${className ?? ""}`}
+      className={`${base} data-pressed:text-primary-foreground isolate h-8 rounded-full border ${outline ? "border-border bg-background" : "bg-muted border-transparent"} text-muted-foreground not-data-pressed:hover:text-foreground ${iconOnly ? "w-8 px-0" : "px-3"} ${className ?? ""}`}
     >
       <AnimatePresence initial={false}>
         {pressed && (
           <motion.span
             aria-hidden="true"
             data-slot="chip-group-fill"
-            className="bg-foreground pointer-events-none absolute -inset-px -z-10 rounded-full"
+            className="bg-primary pointer-events-none absolute -inset-px -z-10 rounded-full"
             initial={{ scale: 0.6, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{

@@ -42,7 +42,7 @@ export function MenuExample() {
           value={item}
           aria-pressed={value === item}
           onClick={() => setValue(item)}
-          className="flex h-10 items-center rounded-md px-3 text-left capitalize focus-visible:outline-2"
+          className="flex h-10 items-center rounded-md pr-3 pl-5 text-left capitalize focus-visible:outline-2"
         >
           {item}
         </MenuItem>
@@ -60,10 +60,12 @@ export function MenuExample() {
 
 ## API reference
 
-| Component  | Prop        | Type                             | Description                                                                                      |
-| ---------- | ----------- | -------------------------------- | ------------------------------------------------------------------------------------------------ |
-| `Menu`     | `value`     | `string`                         | Required selected item value. The caller updates selection.                                      |
-| `Menu`     | Other props | Motion `div` props               | Container classes, accessible labels, and event handlers. Use this container for menu scrolling. |
-| `MenuItem` | `value`     | `string`                         | Required unique item value within the menu.                                                      |
-| `MenuItem` | `render`    | React element or render function | Replaces the default button with a link or another interactive element through Base UI.          |
-| `MenuItem` | Other props | Base UI button props             | Item classes, children, native button attributes, and event handlers.                            |
+| Component  | Prop           | Type                             | Description                                                                                                                                                                                     |
+| ---------- | -------------- | -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Menu`     | `value`        | `string`                         | Required selected item value. The caller updates selection.                                                                                                                                     |
+| `Menu`     | `indicator`    | `"dot" \| "fill" \| "muted"`     | Marks the selected item. `dot` (default) adds a primary dot at its left edge, with no background. `fill` and `muted` move a primary or muted background between the focused and selected items. |
+| `Menu`     | Other props    | Motion `div` props               | Container classes, accessible labels, and event handlers. Use this container for menu scrolling.                                                                                                |
+| `MenuItem` | `value`        | `string`                         | Required unique item value within the menu.                                                                                                                                                     |
+| `MenuItem` | `render`       | React element or render function | Replaces the default button with a link or another interactive element through Base UI.                                                                                                         |
+| `MenuItem` | `data-covered` | attribute                        | Set on the row a `fill` highlight is drawn over, frame by frame as it travels. It carries the on-primary text color; style it to change that.                                                   |
+| `MenuItem` | Other props    | Base UI button props             | Item classes, children, native button attributes, and event handlers.                                                                                                                           |

@@ -51,7 +51,10 @@ test("the count climbs by a tenth of the next power of ten until it reads max+, 
   await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
   const frame = page.locator(".demo-frame");
   const inbox = frame.locator('[data-slot="badge"]', { hasText: "Inbox" });
-  const label = frame.locator('[data-slot="badge-live"]').filter({ hasText: "Inbox" }).locator(".sr-only");
+  const label = frame
+    .locator('[data-slot="badge-live"]')
+    .filter({ hasText: "Inbox" })
+    .locator('[data-slot="badge"] > .sr-only');
 
   // Max 9 steps by one, and each change rolls the digit vertically.
   await expect(label).toHaveText("1 messages", { timeout: 5_000 });
@@ -59,7 +62,7 @@ test("the count climbs by a tenth of the next power of ten until it reads max+, 
     const seen: number[] = [];
     const began = performance.now();
     while (performance.now() - began < 1_200) {
-      for (const digit of element.querySelectorAll('[data-slot="badge-digit"]')) {
+      for (const digit of element.querySelectorAll('[data-slot="rolling-number-digit"] [data-digit]')) {
         const transform = getComputedStyle(digit).transform;
         seen.push(transform === "none" ? 0 : Number.parseFloat(transform.split(",")[5]));
       }
@@ -67,7 +70,8 @@ test("the count climbs by a tenth of the next power of ten until it reads max+, 
     }
     return seen;
   });
-  expect(offsets.some((y) => Math.abs(y) > 2 && Math.abs(y) < 14)).toBe(true);
+  // Each wheel rests on a whole 16px cell, so an offset between cells means it is mid-roll.
+  expect(offsets.some((y) => Math.abs(y % 16) > 2 && Math.abs(y % 16) < 14)).toBe(true);
   await expect(label).toHaveText("9+ messages", { timeout: 15_000 });
   await expect(label).toHaveText("0 messages", { timeout: 5_000 });
 

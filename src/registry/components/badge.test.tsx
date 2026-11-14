@@ -45,6 +45,8 @@ describe("Badge", () => {
 
     rerender(<Badge count={150} max={99} countLabel="unread messages" />);
     expect(screen.getByText("99+ unread messages")).toHaveClass("sr-only");
+    expect(document.querySelector('[data-slot="rolling-number-value"]')).toHaveAttribute("data-value", "99");
+    expect(document.querySelector('[data-slot="badge-plus"]')).toHaveTextContent("+");
 
     cleanup();
     render(<Badge count={-3.7} showZero />);
@@ -75,7 +77,7 @@ describe("Badge", () => {
     expect(document.querySelector('[data-slot="badge-pulse"]')).toBeInTheDocument();
   });
 
-  it("swaps digits instantly and drops the pulse with reduced motion", async () => {
+  it("still updates the digits and drops the pulse with reduced motion", async () => {
     motionPreference.reduced = true;
     const { rerender } = render(
       <Badge count={9} dot live>
@@ -89,9 +91,6 @@ describe("Badge", () => {
       </Badge>,
     );
     await act(() => new Promise((resolve) => setTimeout(resolve, 50)));
-    const shown = [...document.querySelectorAll('[data-slot="badge-digit"]')].map(
-      (digit) => digit.textContent,
-    );
-    expect(shown).toEqual(["1", "0"]);
+    expect(document.querySelector('[data-slot="rolling-number-value"]')).toHaveAttribute("data-value", "10");
   });
 });
