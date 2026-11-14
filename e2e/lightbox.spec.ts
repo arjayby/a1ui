@@ -242,6 +242,8 @@ test("reverses from the live position when interrupted, and lands on a thumbnail
 });
 
 test("opening another thumbnail mid-close grows it in place without paging across", async ({ page }) => {
+  // Tall enough to show the second row of thumbnails whole: the image grows from the visible part.
+  await page.setViewportSize({ width: 1280, height: 900 });
   await open(page);
   await page.keyboard.press("Escape");
   // Still flying home when the next thumbnail is clicked.

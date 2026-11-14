@@ -115,7 +115,10 @@ Two families. **Endless** (`font-sans`, and `font-heading`, which is the same fa
 ## Space, shape and depth
 
 - Space on a 4px base: `space-1` to `space-4` (4 to 16px) inside components, `space-6` to `space-12` (24 to 48px) between the parts of a block, `space-16` (64px) between a picture and its words, `space-24` and `space-32` (96 and 128px) between sections.
-- The catalog pages lay out in one 960px column (`--container-content`).
+- Catalog pages open on `space-24` of empty paper and every page closes on `space-32`. A docs article opens on `space-16`, so a component's demo is on screen when the page loads. Docs sections sit `space-32` apart on desktop and `space-24` on small screens.
+- The catalog pages lay out in one 1120px column (`--container-content`), wider than Stipple's 960px so three tiles fit with room between them. Tiles sit `space-12` apart across and `space-16` apart down, `space-16` below the page header.
+- The docs toolbar is `space-16` tall. Sidebar rows are 34px, with `space-3` around each group and `space-6` around the wordmark. Demo stages keep `space-12` above and below the component.
+- On the landing page the window and the menu sit `space-24` apart.
 - Corners are small: `radius-sm` 4px for chips, checkboxes and menu rows, `radius-md` 8px for buttons and inputs, `radius-lg` 10px for cards, dialogs and the window. `radius-full` is for dots, radios and switch tracks.
 - Paper surfaces are flat. There are no shadows; the landing window alone takes `shadow-window`. Cards, demo wells and catalog tiles are set apart by a `line` hairline, and floating layers (menus, popovers, tooltips, dialogs, toasts) by one `line-strong` edge.
 - Nothing is translucent and nothing blurs in the site chrome. Registry components keep their own backdrop blur.

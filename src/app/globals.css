@@ -101,7 +101,7 @@
   --well-band: var(--paper-200);
   --tracking-normal: 0em;
   --container-reading: 62ch;
-  --container-content: 960px;
+  --container-content: 1120px;
   --opacity-disabled: 50%;
   --opacity-muted: 64%;
   /*
@@ -317,18 +317,18 @@ h6 {
   top: 0;
   z-index: 20;
   display: flex;
-  min-height: 52px;
+  min-height: var(--space-16);
   flex-shrink: 0;
   align-items: center;
-  gap: 8px;
-  padding-inline: 12px;
+  gap: var(--space-3);
+  padding-inline: var(--space-4);
   border-bottom: 1px solid var(--line);
   background: var(--background);
 }
 
 @media (min-width: 48rem) {
   .docs-header {
-    padding-inline: 16px;
+    padding-inline: var(--space-6);
   }
 }
 
@@ -359,7 +359,7 @@ h6 {
 }
 
 [data-sidebar="sidebar"] :is([data-sidebar="menu-button"], [data-sidebar="menu-sub-button"]) {
-  height: 30px;
+  height: 34px;
   border-radius: var(--radius-md);
   color: var(--foreground);
   font-family: var(--font-sans);
@@ -367,6 +367,15 @@ h6 {
   letter-spacing: var(--type-label-tracking);
   text-decoration: none;
   transition: color var(--motion-fast) ease;
+}
+
+/* Room around the wordmark and between the groups. */
+[data-sidebar="sidebar"] [data-sidebar="header"] {
+  padding-block: var(--space-6);
+}
+
+[data-sidebar="sidebar"] [data-sidebar="group"] {
+  padding-block: var(--space-3);
 }
 
 /* Group titles are mono labels. */
@@ -425,15 +434,16 @@ h6 {
   }
 }
 
+/* Paper first: a page opens and closes on a section's worth of empty paper. */
 .page-frame {
   width: min(100%, var(--container-content));
   margin-inline: auto;
-  padding: var(--space-16) clamp(16px, 4vw, 48px) var(--space-24);
+  padding: var(--space-24) clamp(16px, 4vw, 48px) var(--space-32);
 }
 
 /* Page titles are display-lg; they step down to heading-md on phones. */
 .page-heading {
-  margin: var(--space-3) 0 var(--space-4);
+  margin: var(--space-4) 0 var(--space-6);
   font-size: clamp(var(--type-heading-md-size), 5vw, var(--type-display-lg-size));
   letter-spacing: var(--type-display-lg-tracking);
   line-height: 1.08;
@@ -450,8 +460,9 @@ h6 {
 .catalog-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));
-  gap: var(--space-6);
-  margin-top: var(--space-12);
+  /* Rows sit further apart than columns, so each row of tiles reads as its own band. */
+  gap: var(--space-16) var(--space-12);
+  margin-top: var(--space-16);
 }
 
 /* Flat tiles on the page's own paper, set apart by a hairline. Nothing lifts on hover:
@@ -511,8 +522,8 @@ h6 {
 
 .catalog-card-content {
   display: grid;
-  gap: var(--space-1);
-  padding: var(--space-4) var(--space-6) var(--space-6);
+  gap: var(--space-2);
+  padding: var(--space-6);
 }
 
 .catalog-card-content .ui-card-title {
@@ -547,7 +558,8 @@ h6 {
   display: grid;
   grid-template-columns: minmax(0, var(--docs-article-width));
   justify-content: center;
-  padding: var(--space-16) clamp(16px, 4vw, 48px) var(--space-24);
+  /* The top stays at space-16 so a component's demo is on screen when the page opens. */
+  padding: var(--space-16) clamp(16px, 4vw, 48px) var(--space-32);
 }
 
 .docs-article > :not(.docs-toc) {
@@ -555,7 +567,7 @@ h6 {
 }
 
 .docs-article > header {
-  margin-bottom: var(--space-8);
+  margin-bottom: var(--space-12);
 }
 
 .docs-page-meta {
@@ -563,7 +575,7 @@ h6 {
   flex-wrap: wrap;
   align-items: center;
   gap: var(--space-3);
-  margin-bottom: var(--space-4);
+  margin-bottom: var(--space-6);
 }
 
 .docs-article h1 {
@@ -641,7 +653,7 @@ h6 {
   }
 
   .docs-toc-rail {
-    --docs-toc-top: calc(3.5rem + var(--space-8));
+    --docs-toc-top: calc(var(--space-16) + var(--space-8));
     position: sticky;
     top: var(--docs-toc-top);
     display: flex;
@@ -731,12 +743,19 @@ h6 {
 
 /* Sections are separated by space, not rules. */
 .docs-article-body h2 {
-  margin: var(--space-24) 0 var(--space-6);
+  margin: var(--space-24) 0 var(--space-8);
   scroll-margin-top: 5rem;
   font-size: var(--type-heading-md-size);
   font-weight: 400;
   letter-spacing: var(--type-heading-md-tracking);
   line-height: var(--type-heading-md-leading);
+}
+
+/* Sections sit space-24 apart on small screens and space-32 on desktop. */
+@media (min-width: 48rem) {
+  .docs-article-body h2 {
+    margin-top: var(--space-32);
+  }
 }
 
 .docs-article-body h2:first-child {
@@ -865,7 +884,7 @@ h6 {
   min-height: 16rem;
   align-items: center;
   justify-content: center;
-  padding: 2.5rem 1.5rem;
+  padding: var(--space-12) var(--space-6);
 }
 
 .component-demo-controls {
@@ -1209,7 +1228,7 @@ h6 {
 
 @media (max-width: 47.999rem) {
   .docs-article {
-    padding: 2.25rem 1rem 5rem;
+    padding: var(--space-12) 1rem var(--space-24);
   }
 
   .docs-article > header {
@@ -1226,7 +1245,12 @@ h6 {
 
 @media (max-width: 639px) {
   .page-frame {
-    padding-top: var(--space-8);
+    padding-top: var(--space-12);
+    padding-bottom: var(--space-24);
+  }
+
+  .catalog-grid {
+    row-gap: var(--space-12);
   }
 }
 
