@@ -7,7 +7,6 @@ import { AsciiLensDemo } from "@/components/block-demos/ascii-lens-demo";
 import { AsciiMorphDemo } from "@/components/block-demos/ascii-morph-demo";
 import { AsciiTerrainDemo } from "@/components/block-demos/ascii-terrain-demo";
 import { CommandPaletteDemo } from "@/components/block-demos/command-palette-demo";
-import { CondensingHeaderDemo } from "@/components/block-demos/condensing-header-demo";
 import { ParticleMenuDemo } from "@/components/block-demos/particle-menu-demo";
 import { ShapeFlowDemo } from "@/components/block-demos/shape-flow-demo";
 import { TaskStepsDemo } from "@/components/block-demos/task-steps-demo";
@@ -103,7 +102,6 @@ export const catalogDemos: Record<CatalogGroup, Record<string, ComponentType>> =
     "ascii-morph": AsciiMorphDemo,
     "ascii-terrain": AsciiTerrainDemo,
     "command-palette": CommandPaletteDemo,
-    "condensing-header": CondensingHeaderDemo,
     "particle-menu": ParticleMenuDemo,
     "section-rail": SectionRailDemo,
     "shape-flow": ShapeFlowDemo,
