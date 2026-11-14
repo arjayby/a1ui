@@ -179,7 +179,7 @@ export function SelectTrigger({ className, children, ...props }: SelectTriggerPr
     <SelectPrimitive.Trigger
       {...props}
       data-slot="select-trigger"
-      className={`border-border bg-background hover:bg-muted/50 focus-visible:ring-ring/30 data-popup-open:bg-muted/50 inline-flex h-9 min-w-44 cursor-pointer items-center justify-between gap-2 rounded-md border px-3 text-left text-sm shadow-xs transition-colors outline-none select-none focus-visible:ring-3 data-disabled:cursor-not-allowed data-disabled:opacity-50 ${className ?? ""}`}
+      className={`border-input bg-background hover:bg-muted/50 focus-visible:ring-ring/30 data-popup-open:bg-muted/50 inline-flex h-9 min-w-44 cursor-pointer items-center justify-between gap-2 rounded-md border px-3 text-left text-sm shadow-xs transition-colors outline-none select-none focus-visible:ring-3 data-disabled:cursor-not-allowed data-disabled:opacity-50 ${className ?? ""}`}
     >
       {children}
       <SelectPrimitive.Icon
