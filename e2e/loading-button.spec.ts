@@ -129,7 +129,7 @@ test("reduced motion preserves loading feedback on mobile without spinning", asy
 
 test("the library links to an installable loading button with documentation", async ({ page, request }) => {
   await page.goto("/components");
-  await page.locator('.catalog-card-link[href="/components/loading-button"]').click();
+  await page.locator('.catalog-row-link[href="/components/loading-button"]').click();
   await expect(page).toHaveURL(/\/components\/loading-button$/);
   await expect(
     page

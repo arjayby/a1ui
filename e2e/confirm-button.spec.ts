@@ -180,7 +180,7 @@ test("keyboard holds work with reduced motion on mobile", async ({ page }) => {
 
 test("the library links to an installable component and its API reference", async ({ page, request }) => {
   await page.goto("/components");
-  await page.locator('.catalog-card-link[href="/components/confirm-button"]').click();
+  await page.locator('.catalog-row-link[href="/components/confirm-button"]').click();
   await expect(
     page
       .getByRole("navigation", { name: "breadcrumb", exact: true })

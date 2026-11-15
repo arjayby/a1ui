@@ -1,130 +1,60 @@
 import { expect, test } from "./fixtures";
 import registry from "../registry.json" with { type: "json" };
 
-const framed = {
-  components: [
-    "alert-dialog",
-    "context-menu",
-    "dialog",
-    "dropdown-menu",
-    "hover-card",
-    "lightbox",
-    "popover",
-    "select",
-    "sheet",
-    "toast",
-    "tooltip",
-  ],
-  blocks: ["activity-pill", "command-palette"],
-};
-
 for (const group of ["components", "blocks"] as const) {
-  test(`${group} catalog has two columns at most and stacks on a phone`, async ({ page }) => {
-    for (const [width, columns] of [
-      [1920, 2],
-      [1440, 2],
-      [390, 1],
-    ]) {
+  const type = group === "blocks" ? "registry:block" : "registry:component";
+  const entries = registry.items
+    .filter((item) => item.type === type)
+    .sort((a, b) => a.title.localeCompare(b.title));
+
+  test(`${group} catalog is one numbered row per entry, in title order`, async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto(`/${group}`);
+    const rows = page.locator(".catalog-row");
+    await expect(rows).toHaveCount(entries.length);
+    await expect(page.locator(".catalog-row-link")).toHaveText(entries.map((entry) => entry.title));
+    await expect(page.locator(".catalog-row-number")).toHaveText(
+      entries.map((_, index) => String(index + 1).padStart(2, "0")),
+    );
+    await expect(page.locator(".catalog-row-description")).toHaveText(
+      entries.map((entry) => entry.description),
+    );
+    // An index, not a gallery: no demo is mounted or framed on the page.
+    await expect(page.locator(".catalog-list iframe, .catalog-list .demo-frame")).toHaveCount(0);
+  });
+
+  test(`${group} catalog rows are a single column that fits the screen`, async ({ page }) => {
+    for (const width of [1920, 1440, 390, 320]) {
       await page.setViewportSize({ width, height: 900 });
       await page.goto(`/${group}`);
       const lefts = await page
-        .locator(".catalog-card")
-        .evaluateAll((cards) => [
-          ...new Set(cards.map((card) => Math.round(card.getBoundingClientRect().left))),
-        ]);
-      expect(lefts).toHaveLength(columns);
+        .locator(".catalog-row")
+        .evaluateAll((rows) => [...new Set(rows.map((row) => Math.round(row.getBoundingClientRect().left)))]);
+      expect(lefts).toHaveLength(1);
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+      // The description never pushes a row past two lines of text on a phone, or one on a desktop.
+      const tallest = await page
+        .locator(".catalog-row")
+        .evaluateAll((rows) => Math.max(...rows.map((row) => row.getBoundingClientRect().height)));
+      expect(tallest).toBeLessThanOrEqual(width < 640 ? 96 : 48);
     }
   });
 
-  test(`${group} catalog cards show the docs demos as pictures`, async ({ page }) => {
+  test(`${group} catalog row is one link that covers the whole row`, async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto(`/${group}`);
-    const type = group === "blocks" ? "registry:block" : "registry:component";
-    const names = registry.items.filter((item) => item.type === type).map((item) => item.name);
-    const previews = page.locator(".catalog-card .catalog-preview");
-    await expect(previews).toHaveCount(names.length);
-
-    for (const name of names) {
-      const card = page.locator(".catalog-card").filter({ has: page.locator(`a[href="/${group}/${name}"]`) });
-      const preview = card.locator(".catalog-preview");
-      // A picture of the component, not a control: nothing in it takes focus or a click.
-      await expect(preview).toHaveAttribute("inert", "");
-      if (framed[group].includes(name)) {
-        await expect(preview.locator("iframe")).toHaveAttribute("src", `/preview/${group}/${name}`);
-      } else {
-        await expect(preview.locator("iframe")).toHaveCount(0);
-        expect(await preview.evaluate((element) => element.childElementCount)).toBeGreaterThan(0);
-      }
-      // The demo's controls belong to the docs page.
-      for (const controls of await preview.locator(".component-demo-controls").all()) {
-        await expect(controls).toBeHidden();
-      }
-    }
+    const [first] = entries;
+    const row = page.locator(".catalog-row").first();
+    await expect(row.getByRole("link")).toHaveCount(1);
+    await expect(row.getByRole("link")).toHaveAccessibleName(first.title);
+    // A click on the description, well away from the name, still opens the entry.
+    const description = (await row.locator(".catalog-row-description").boundingBox())!;
+    await page.mouse.click(description.x + description.width / 2, description.y + description.height / 2);
+    await expect(page).toHaveURL(new RegExp(`/${group}/${first.name}$`));
   });
 }
 
-test("components that open over the page are shown open inside their card", async ({ page }) => {
-  await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto("/components");
-  const frame = (name: string) => {
-    const card = page.locator(".catalog-card").filter({ has: page.locator(`a[href="/components/${name}"]`) });
-    return { card, inner: card.locator("iframe").contentFrame() };
-  };
-  const shown = async (name: string, selector: string) => {
-    const { card, inner } = frame(name);
-    await card.scrollIntoViewIfNeeded();
-    // A frame loads when its card nears the screen, then hydrates and opens its demo.
-    await expect(inner.locator(selector).first()).toBeVisible({ timeout: 20_000 });
-    return inner;
-  };
-
-  await shown("alert-dialog", '[role="alertdialog"]');
-  const dialog = await shown("dialog", '[role="dialog"]');
-  await shown("dropdown-menu", '[role="menu"]');
-  await shown("context-menu", '[role="menu"]');
-  await shown("hover-card", '[data-slot="hover-card-content"]');
-  await shown("lightbox", '[data-slot="lightbox"]');
-  await shown("popover", '[data-slot="popover-content"], [role="dialog"]');
-  await shown("select", '[role="listbox"]');
-  await shown("toast", '[data-slot="toast"]');
-  await shown("tooltip", '[role="tooltip"]');
-  const sheet = await shown("sheet", '[data-slot="sheet-content"]');
-  await expect(sheet.locator('[data-slot="sheet-content"]')).toBeInViewport();
-
-  // Framed demos lay out at a desktop width, so the dialog is centred, not a phone drawer.
-  expect(await dialog.locator("html").evaluate(() => window.innerWidth)).toBeGreaterThanOrEqual(640);
-
-  // The open dialogs stay inside their frames: the catalog itself still scrolls and keeps focus.
-  await page.evaluate(() => window.scrollTo(0, 0));
-  await page.mouse.wheel(0, 600);
-  await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
-  expect(await page.evaluate(() => document.activeElement?.tagName)).toBe("BODY");
-});
-
-test("blocks that open over the page are shown open inside their card", async ({ page }) => {
-  await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto("/blocks");
-  for (const [name, selector] of [
-    ["command-palette", '[data-slot="command-palette"]'],
-    ["activity-pill", '[data-slot="activity-pill"]'],
-  ]) {
-    const card = page.locator(".catalog-card").filter({ has: page.locator(`a[href="/blocks/${name}"]`) });
-    await card.scrollIntoViewIfNeeded();
-    await expect(card.locator("iframe").contentFrame().locator(selector).first()).toBeVisible({
-      timeout: 20_000,
-    });
-  }
-});
-
-test("framed previews stay out of search engines and unknown ones are not found", async ({
-  page,
-  request,
-}) => {
-  await page.goto("/preview/components/dialog");
-  await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/);
-  await expect(page.locator(".docs-header")).toHaveCount(0);
-  expect((await request.get("/preview/components/badge")).status()).toBe(404);
-  expect((await request.get("/preview/nothing/dialog")).status()).toBe(404);
-  expect(await (await request.get("/robots.txt")).text()).toContain("Disallow: /preview/");
+test("the retired card previews are not served", async ({ request }) => {
+  expect((await request.get("/preview/components/dialog")).status()).toBe(404);
+  expect(await (await request.get("/robots.txt")).text()).not.toContain("/preview/");
 });

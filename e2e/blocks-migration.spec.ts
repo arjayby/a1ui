@@ -11,11 +11,11 @@ async function componentLinks(nav: Locator) {
 
 test("blocks and reusable components have separate catalogs on desktop and mobile", async ({ page }) => {
   await page.goto("/blocks");
-  await expect(page.locator(".catalog-card")).toHaveCount(
+  await expect(page.locator(".catalog-row")).toHaveCount(
     registry.items.filter((item) => item.type === "registry:block").length,
   );
   for (const item of registry.items.filter((item) => item.type === "registry:block")) {
-    await expect(page.locator(`.catalog-card-link[href="/blocks/${item.name}"]`)).toHaveText(item.title);
+    await expect(page.locator(`.catalog-row-link[href="/blocks/${item.name}"]`)).toHaveText(item.title);
   }
 
   await page
@@ -25,7 +25,7 @@ test("blocks and reusable components have separate catalogs on desktop and mobil
   await expect(page).toHaveURL(/\/components$/);
   await expect(page.getByRole("heading", { name: "Components", exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "01 / Foundations" })).toHaveCount(0);
-  await expect(page.locator(".catalog-card")).toHaveCount(
+  await expect(page.locator(".catalog-row")).toHaveCount(
     registry.items.filter((item) => item.type === "registry:component").length,
   );
   const sidebar = page.locator('[data-sidebar="content"]');
@@ -33,7 +33,7 @@ test("blocks and reusable components have separate catalogs on desktop and mobil
     .filter((item) => item.type === "registry:component")
     .map((item) => item.title)
     .sort((a, b) => a.localeCompare(b));
-  await expect(page.locator(".catalog-card-link")).toHaveText(componentTitles);
+  await expect(page.locator(".catalog-row-link")).toHaveText(componentTitles);
   expect(await componentLinks(page.getByRole("navigation", { name: "Components", exact: true }))).toEqual(
     componentTitles,
   );

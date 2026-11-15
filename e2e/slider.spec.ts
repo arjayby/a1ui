@@ -89,7 +89,7 @@ test("touch catches stops on mobile with reduced motion", async ({ browser }) =>
 
 test("ships a catalog entry, source, and agent guide", async ({ page, request }) => {
   await page.goto("/components");
-  await page.locator('.catalog-card-link[href="/components/slider"]').click();
+  await page.locator('.catalog-row-link[href="/components/slider"]').click();
   await expect(page.getByRole("heading", { name: "Slider", exact: true })).toBeVisible();
   await expect(
     page

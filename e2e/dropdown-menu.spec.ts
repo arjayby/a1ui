@@ -189,7 +189,7 @@ test("reduced motion is instant and mobile menus dismiss on outside interaction"
 
 test("catalog, source, and registry expose the installable dropdown", async ({ page, request }) => {
   await page.goto("/components");
-  await page.locator('.catalog-card-link[href="/components/dropdown-menu"]').click();
+  await page.locator('.catalog-row-link[href="/components/dropdown-menu"]').click();
   await expect(page.getByRole("heading", { name: "Dropdown Menu", exact: true })).toBeVisible();
   const item = await (await request.get("/r/dropdown-menu.json")).json();
   expect(item.type).toBe("registry:component");

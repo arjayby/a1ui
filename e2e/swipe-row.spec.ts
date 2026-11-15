@@ -222,7 +222,7 @@ test("touch scrolls vertically, swipes horizontally, and fades with reduced moti
 
 test("ships a catalog entry, source, and agent guide", async ({ page, request }) => {
   await page.goto("/components");
-  await page.locator('.catalog-card-link[href="/components/swipe-row"]').click();
+  await page.locator('.catalog-row-link[href="/components/swipe-row"]').click();
   await expect(page.getByRole("heading", { name: "Swipe Row", exact: true })).toBeVisible();
   await expect(
     page

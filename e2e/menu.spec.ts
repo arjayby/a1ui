@@ -151,7 +151,7 @@ test("reduced motion switches instantly and mobile navigation closes after selec
 
 test("catalog and registry expose the installable component", async ({ page, request }) => {
   await page.goto("/components");
-  await page.locator('.catalog-card-link[href="/components/menu"]').click();
+  await page.locator('.catalog-row-link[href="/components/menu"]').click();
   await expect(page.getByRole("heading", { name: "Menu", exact: true })).toBeVisible();
   const item = await (await request.get("/r/menu.json")).json();
   expect(item.type).toBe("registry:component");

@@ -399,7 +399,7 @@ test("the material turns solid for reduced transparency and gains edges for more
 
 test("catalog, source, and registry expose the installable context menu", async ({ page, request }) => {
   await page.goto("/components");
-  await page.locator('.catalog-card-link[href="/components/context-menu"]').click();
+  await page.locator('.catalog-row-link[href="/components/context-menu"]').click();
   await expect(page.getByRole("heading", { name: "Context Menu", exact: true })).toBeVisible();
   const item = await (await request.get("/r/context-menu.json")).json();
   expect(item.type).toBe("registry:component");

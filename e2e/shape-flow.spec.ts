@@ -172,29 +172,6 @@ test("keyboard movement, reset and responsive layout preserve readable text", as
   }
 });
 
-test("catalog card shows the docs demo without clipping it on desktop and mobile", async ({ page }) => {
-  for (const width of [1440, 390, 320]) {
-    await page.setViewportSize({ width, height: 900 });
-    await page.goto("/blocks");
-    const card = page.locator(".catalog-card").filter({
-      has: page.getByRole("link", { name: "Shape Flow", exact: true }),
-    });
-    const flow = card.locator('[data-slot="shape-flow"]');
-    await expect(flow).toHaveAttribute("data-state", "ready");
-    // The card holds the docs demo, heading included, and grows to fit all of it.
-    await expect(card.locator(".shape-flow-demo-heading h3")).toBeVisible();
-    const clipsText = await card.evaluate((element) => {
-      const bounds = element.querySelector(".catalog-preview")!.getBoundingClientRect();
-      return [...element.querySelectorAll('[data-slot="shape-flow-line"]')].some((line) => {
-        const rect = line.getBoundingClientRect();
-        return rect.top < bounds.top || rect.bottom > bounds.bottom;
-      });
-    });
-    expect(clipsText).toBe(false);
-    await expectReadableFlow(flow);
-  }
-});
-
 test("server-rendered text remains readable without JavaScript", async ({ browser }) => {
   const context = await browser.newContext({ javaScriptEnabled: false });
   const page = await context.newPage();

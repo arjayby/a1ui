@@ -107,7 +107,7 @@ test("the live dot stays still on mobile with reduced motion", async ({ page }) 
 
 test("catalog, registry, and agent docs include the badge", async ({ page, request }) => {
   await page.goto("/components");
-  await page.locator('.catalog-card-link[href="/components/badge"]').click();
+  await page.locator('.catalog-row-link[href="/components/badge"]').click();
   await expect(page.getByRole("heading", { name: "Badge", exact: true })).toBeVisible();
   const item = await (await request.get("/r/badge.json")).json();
   expect(item.type).toBe("registry:component");

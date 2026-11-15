@@ -585,7 +585,7 @@ test("cross-fades in place with reduced motion, and pinches and swipes by touch"
 
 test("ships a catalog entry, source, and agent guide", async ({ page, request }) => {
   await page.goto("/components");
-  await page.locator('.catalog-card-link[href="/components/lightbox"]').click();
+  await page.locator('.catalog-row-link[href="/components/lightbox"]').click();
   await expect(page.getByRole("heading", { name: "Lightbox", exact: true })).toBeVisible();
   await expect(
     page

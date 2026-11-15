@@ -99,7 +99,7 @@ test("rises as a bottom sheet on mobile and only fades with reduced motion", asy
 
 test("catalog, registry, and agent docs include the dialog", async ({ page, request }) => {
   await page.goto("/components");
-  await page.locator('.catalog-card-link[href="/components/dialog"]').click();
+  await page.locator('.catalog-row-link[href="/components/dialog"]').click();
   await expect(page.getByRole("heading", { name: "Dialog", exact: true })).toBeVisible();
   const item = await (await request.get("/r/dialog.json")).json();
   expect(item.type).toBe("registry:component");

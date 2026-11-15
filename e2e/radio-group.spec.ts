@@ -62,7 +62,7 @@ test("card variant highlight lands instantly on mobile with reduced motion", asy
 
 test("catalog, registry, and agent docs include the radio group", async ({ page, request }) => {
   await page.goto("/components");
-  await page.locator('.catalog-card-link[href="/components/radio-group"]').click();
+  await page.locator('.catalog-row-link[href="/components/radio-group"]').click();
   await expect(page.getByRole("heading", { name: "Radio Group", exact: true })).toBeVisible();
   const item = await (await request.get("/r/radio-group.json")).json();
   expect(item.type).toBe("registry:component");

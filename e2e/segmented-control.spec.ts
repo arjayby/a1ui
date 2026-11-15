@@ -339,7 +339,7 @@ test("reduced motion cross-fades the thumb in place, by click and by drag", asyn
 
 test("ships a catalog entry, source, and agent guide", async ({ page, request }) => {
   await page.goto("/components");
-  await page.locator('.catalog-card-link[href="/components/segmented-control"]').click();
+  await page.locator('.catalog-row-link[href="/components/segmented-control"]').click();
   await expect(page.getByRole("heading", { name: "Segmented Control", exact: true })).toBeVisible();
   await expect(
     page

@@ -229,7 +229,7 @@ test("touch scrolls natively, and reduced motion gives a flat list positioned at
 
 test("ships a catalog entry, source, and agent guide", async ({ page, request }) => {
   await page.goto("/components");
-  await page.locator('.catalog-card-link[href="/components/wheel-picker"]').click();
+  await page.locator('.catalog-row-link[href="/components/wheel-picker"]').click();
   await expect(page.getByRole("heading", { name: "Wheel Picker", exact: true })).toBeVisible();
   await expect(
     page

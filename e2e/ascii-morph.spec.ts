@@ -134,16 +134,8 @@ test("honors live reduced motion and keeps both theme and responsive geometry", 
   await expect(root).toHaveAttribute("data-state", "morphing");
 });
 
-test("catalog shows the docs demo, out of reach, and links to it", async ({ page }) => {
+test("catalog lists the block and links to its demo", async ({ page }) => {
   await page.goto("/blocks");
-  const card = page
-    .getByRole("article")
-    .filter({ has: page.getByRole("link", { name: "ASCII Morph", exact: true }) });
-  const root = card.locator('[data-slot="ascii-morph"]');
-  // The card shows the same live demo as the docs page, but as a picture: it is inert.
-  await expect(root).toHaveAttribute("data-motion", "enabled");
-  await expect(root.locator("text")).toHaveCount(512);
-  await expect(card.locator(".catalog-preview")).toHaveAttribute("inert", "");
-  await card.getByRole("link").click();
+  await page.getByRole("link", { name: "ASCII Morph", exact: true }).click();
   await expect(page.getByRole("button", { name: "Change ASCII shape" })).toBeVisible();
 });

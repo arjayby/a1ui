@@ -38,7 +38,7 @@ test("adds tags, removes them with Backspace twice, and respects the limit", asy
 
 test("ships a catalog entry, source, and agent guide", async ({ page, request }) => {
   await page.goto("/components");
-  await page.locator('.catalog-card-link[href="/components/tag-input"]').click();
+  await page.locator('.catalog-row-link[href="/components/tag-input"]').click();
   await expect(page.getByRole("heading", { name: "Tag Input", exact: true })).toBeVisible();
   const item = await (await request.get("/r/tag-input.json")).json();
   expect(item.type).toBe("registry:component");

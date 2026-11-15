@@ -96,7 +96,7 @@ test("moves instantly on mobile with reduced motion", async ({ page }) => {
 
 test("catalog, registry, and agent docs include the tooltip", async ({ page, request }) => {
   await page.goto("/components");
-  await page.locator('.catalog-card-link[href="/components/tooltip"]').click();
+  await page.locator('.catalog-row-link[href="/components/tooltip"]').click();
   await expect(page.getByRole("heading", { name: "Tooltip", exact: true })).toBeVisible();
   const item = await (await request.get("/r/tooltip.json")).json();
   expect(item.type).toBe("registry:component");

@@ -444,7 +444,7 @@ test("fits a phone screen from the bottom edge", async ({ page }) => {
 
 test("catalog, registry, and agent docs include the sheet", async ({ page, request }) => {
   await page.goto("/components");
-  await page.locator('.catalog-card-link[href="/components/sheet"]').click();
+  await page.locator('.catalog-row-link[href="/components/sheet"]').click();
   await expect(page.getByRole("heading", { name: "Sheet", exact: true })).toBeVisible();
   const item = await (await request.get("/r/sheet.json")).json();
   expect(item.type).toBe("registry:component");

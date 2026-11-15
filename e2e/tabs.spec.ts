@@ -138,7 +138,7 @@ test("underline variant keeps its bar visible on mobile with reduced motion", as
 
 test("catalog, registry, and agent docs include tabs", async ({ page, request }) => {
   await page.goto("/components");
-  await page.locator('.catalog-card-link[href="/components/tabs"]').click();
+  await page.locator('.catalog-row-link[href="/components/tabs"]').click();
   await expect(page.getByRole("heading", { name: "Tabs", exact: true })).toBeVisible();
   const item = await (await request.get("/r/tabs.json")).json();
   expect(item.type).toBe("registry:component");

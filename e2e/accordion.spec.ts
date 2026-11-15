@@ -109,7 +109,7 @@ test("plus icon and multiple mode open instantly on mobile with reduced motion",
 
 test("catalog, registry, and agent docs include the accordion", async ({ page, request }) => {
   await page.goto("/components");
-  await page.locator('.catalog-card-link[href="/components/accordion"]').click();
+  await page.locator('.catalog-row-link[href="/components/accordion"]').click();
   await expect(page.getByRole("heading", { name: "Accordion", exact: true })).toBeVisible();
   const item = await (await request.get("/r/accordion.json")).json();
   expect(item.type).toBe("registry:component");

@@ -72,7 +72,7 @@ test("all icon pairs reverse on mobile with reduced motion and controls reset th
 
 test("catalog, registry, and agent docs include the icon toggle", async ({ page, request }) => {
   await page.goto("/components");
-  await page.locator('.catalog-card-link[href="/components/icon-toggle"]').click();
+  await page.locator('.catalog-row-link[href="/components/icon-toggle"]').click();
   await expect(page.getByRole("heading", { name: "Icon Toggle", exact: true })).toBeVisible();
   await expect(
     page

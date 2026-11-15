@@ -50,7 +50,7 @@ test("plain style skips the strikethrough on mobile with reduced motion", async 
 
 test("catalog, registry, and agent docs include the checkbox", async ({ page, request }) => {
   await page.goto("/components");
-  await page.locator('.catalog-card-link[href="/components/checkbox"]').click();
+  await page.locator('.catalog-row-link[href="/components/checkbox"]').click();
   await expect(page.getByRole("heading", { name: "Checkbox", exact: true })).toBeVisible();
   const item = await (await request.get("/r/checkbox.json")).json();
   expect(item.type).toBe("registry:component");

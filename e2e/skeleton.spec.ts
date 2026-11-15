@@ -190,7 +190,7 @@ test("reduced motion on mobile drops the shimmer and swaps instantly", async ({ 
 
 test("catalog, registry, and agent docs include the skeleton", async ({ page, request }) => {
   await page.goto("/components");
-  await page.locator('.catalog-card-link[href="/components/skeleton"]').click();
+  await page.locator('.catalog-row-link[href="/components/skeleton"]').click();
   await expect(page.getByRole("heading", { name: "Skeleton", exact: true })).toBeVisible();
   const item = await (await request.get("/r/skeleton.json")).json();
   expect(item.type).toBe("registry:component");

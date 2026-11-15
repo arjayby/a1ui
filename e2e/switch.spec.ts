@@ -41,7 +41,7 @@ test("thumb icons swap on mobile with reduced motion", async ({ page }) => {
 
 test("catalog, registry, and agent docs include the switch", async ({ page, request }) => {
   await page.goto("/components");
-  await page.locator('.catalog-card-link[href="/components/switch"]').click();
+  await page.locator('.catalog-row-link[href="/components/switch"]').click();
   await expect(page.getByRole("heading", { name: "Switch", exact: true })).toBeVisible();
   const item = await (await request.get("/r/switch.json")).json();
   expect(item.type).toBe("registry:component");

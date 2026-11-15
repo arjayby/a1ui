@@ -99,7 +99,7 @@ test("default action fits a phone and closes instantly with reduced motion", asy
 
 test("catalog, registry, and agent docs include the alert dialog", async ({ page, request }) => {
   await page.goto("/components");
-  await page.locator('.catalog-card-link[href="/components/alert-dialog"]').click();
+  await page.locator('.catalog-row-link[href="/components/alert-dialog"]').click();
   await expect(page.getByRole("heading", { name: "Alert Dialog", exact: true })).toBeVisible();
   const item = await (await request.get("/r/alert-dialog.json")).json();
   expect(item.type).toBe("registry:component");

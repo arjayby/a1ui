@@ -99,7 +99,7 @@ test("reduced motion holds the shape still and breathes its opacity on mobile", 
 
 test("catalog, registry, and agent docs include the loader", async ({ page, request }) => {
   await page.goto("/components");
-  await page.locator('.catalog-card-link[href="/components/loader"]').click();
+  await page.locator('.catalog-row-link[href="/components/loader"]').click();
   await expect(page.getByRole("heading", { name: "Loader", exact: true })).toBeVisible();
   const item = await (await request.get("/r/loader.json")).json();
   expect(item.type).toBe("registry:component");

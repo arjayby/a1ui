@@ -100,7 +100,7 @@ Two families. **Endless** (`font-sans`, and `font-heading`, which is the same fa
 | `heading-lg` | 40 / 44     | -0.015em | Not used yet: section headings on a landing page.                                          |
 | `heading-md` | 32 / 36     | -0.01em  | Docs `h2`; page titles on phones.                                                          |
 | `heading-sm` | 22 / 28     | -0.005em | Dialog titles, the landing window title.                                                   |
-| `body-lg`    | 18 / 28     | 0        | Page descriptions, catalog tile titles.                                                    |
+| `body-lg`    | 18 / 28     | 0        | Page descriptions.                                                                         |
 | `body`       | 15 / 24     | 0        | Running text, inputs.                                                                      |
 | `body-sm`    | 13 / 20     | 0        | Captions, card copy, tables, the contents rail.                                            |
 | `label`      | 13 / 16     | 0.01em   | Buttons, tabs, menu items, sidebar rows.                                                   |
@@ -117,12 +117,12 @@ Two families. **Endless** (`font-sans`, and `font-heading`, which is the same fa
 
 - Space on a 4px base: `space-1` to `space-4` (4 to 16px) inside components, `space-6` to `space-12` (24 to 48px) between the parts of a block, `space-16` (64px) between a picture and its words, `space-24` and `space-32` (96 and 128px) between sections.
 - Catalog pages open on `space-24` of empty paper and every page closes on `space-32`. A docs article opens on `space-16`, so a component's demo is on screen when the page loads. Docs sections sit `space-32` apart on desktop and `space-24` on small screens.
-- The catalog pages lay out in one 1120px column (`--container-content`), wider than Stipple's 960px, in two columns at most and one below about 50rem of room. Tiles sit `space-12` apart across and `space-16` apart down, `space-16` below the page header.
-- A catalog tile shows the docs demo itself, at least 26rem tall, without its controls and out of reach of the pointer and keyboard: the whole tile is one link. A component that opens over the page (a dialog, a sheet, a menu, a toast) is shown open, in a frame of its own inside the tile (`/preview/<group>/<slug>`), so its scrim, scroll lock and focus stop at the tile.
+- The catalog pages lay out in one 1120px column (`--container-content`), wider than Stipple's 960px. A catalog is an index, not a gallery: one row per entry in title order, `space-16` below the page header, with a `line` hairline between rows.
+- A catalog row is at least 44px tall and reads left to right: a two-digit `mono-sm` number, the name in `body`, the description in muted `body` cut to one line, and an arrow that arrives on hover. The name is the link and covers the whole row; no demo is mounted on a catalog page. On a phone the number goes and the description drops under the name, on two lines at most.
 - The docs toolbar is `space-16` tall. Sidebar rows are 34px, with `space-3` around each group and `space-6` around the wordmark. Demo stages keep `space-12` above and below the component.
 - On the landing page the window and the menu sit `space-24` apart.
 - Corners are small: `radius-sm` 4px for chips, checkboxes and menu rows, `radius-md` 8px for buttons and inputs, `radius-lg` 10px for cards, dialogs and the window. `radius-full` is for dots, radios and switch tracks.
-- Paper surfaces are flat. There are no shadows; the landing window alone takes `shadow-window`. Cards, demo wells and catalog tiles are set apart by a `line` hairline, and floating layers (menus, popovers, tooltips, dialogs, toasts) by one `line-strong` edge.
+- Paper surfaces are flat. There are no shadows; the landing window alone takes `shadow-window`. Cards and demo wells are set apart by a `line` hairline, catalog rows by a `line` rule between them, and floating layers (menus, popovers, tooltips, dialogs, toasts) by one `line-strong` edge.
 - Nothing is translucent and nothing blurs in the site chrome. Registry components keep their own backdrop blur.
 - Focus is a solid 2px `cobalt-ink` outline, offset 2px, on every interactive element. Inside the landing window it is `on-cobalt`.
 
@@ -163,7 +163,7 @@ Stipple has no equivalents for these; each follows its rules.
 - **Button** `outline` (a `line-strong` edge), `ghost` (no fill at rest) and `destructive` (`danger` on `danger-soft`). All three hover to a paper or tint fill, never to cobalt.
 - **Input, Textarea, Select**: `paper-50` inside a 1px `line-strong` edge, `radius-md`, 36px tall, `body` text. Hover turns the edge `ink`; invalid turns it `danger`.
 - **Checkbox, RadioGroup, Switch**: `paper-50` with a `line-strong` edge when off, `primary` with an `on-primary` mark when on.
-- **Card**: a `paper-50` sheet inside a `line` hairline. Catalog tiles sit on `paper-100` and their edge turns `cobalt-ink` on hover.
+- **Card**: a `paper-50` sheet inside a `line` hairline. Catalog rows sit on `paper-100` and their name and arrow turn `cobalt-ink` on hover.
 - **Badge**: a `mono-label` on a `paper-200` chip; `outline` takes a `line-strong` edge, the state variants take their colour as text and edge, and `dot` is an 8px `cobalt-ink` dot.
 - **Tabs**: a `paper-200` track; the current tab is a `paper-50` chip with `cobalt-ink` text.
 - **Dialog, Sheet, Popover, Tooltip, DropdownMenu, Toast**: `paper-50` sheets with one `line-strong` edge. Menu group labels are `mono-label`.

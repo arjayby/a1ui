@@ -43,7 +43,7 @@ test("rates the password, marks unmet rules on submit, and toggles visibility", 
 
 test("ships a catalog entry, source, and agent guide", async ({ page, request }) => {
   await page.goto("/components");
-  await page.locator('.catalog-card-link[href="/components/password-input"]').click();
+  await page.locator('.catalog-row-link[href="/components/password-input"]').click();
   await expect(page.getByRole("heading", { name: "Password Input", exact: true })).toBeVisible();
   const item = await (await request.get("/r/password-input.json")).json();
   expect(item.type).toBe("registry:component");

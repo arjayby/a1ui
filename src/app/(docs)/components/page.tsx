@@ -1,9 +1,6 @@
 import type { Metadata } from "next";
-import { ArrowUpRightIcon } from "@phosphor-icons/react/ssr";
-import Link from "next/link";
 
-import { CatalogPreview } from "@/components/catalog-preview";
-import { Card, CardContent, CardDescription } from "@/components/ui/card";
+import { CatalogList } from "@/components/catalog-list";
 import { components } from "@/lib/component-catalog";
 import { collectionStructuredData, componentsGroup, JsonLd, pageMetadata } from "@/lib/seo";
 
@@ -24,22 +21,7 @@ export default function ComponentsPage() {
         <h1 className="page-heading">Components</h1>
         <p className="page-description">{description}</p>
       </header>
-      <div className="catalog-grid">
-        {components.map((component) => (
-          <Card key={component.slug} role="article" className="catalog-card">
-            <CatalogPreview group="components" slug={component.slug} />
-            <CardContent className="catalog-card-content">
-              <h2 className="ui-card-title">
-                <Link href={`/components/${component.slug}`} className="catalog-card-link">
-                  {component.title}
-                  <ArrowUpRightIcon aria-hidden="true" className="size-4 shrink-0" />
-                </Link>
-              </h2>
-              <CardDescription>{component.description}</CardDescription>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      <CatalogList group="components" items={components} />
     </div>
   );
 }

@@ -54,7 +54,7 @@ test("outline chips fit on mobile and press instantly with reduced motion", asyn
 
 test("catalog, registry, and agent docs include the chip group", async ({ page, request }) => {
   await page.goto("/components");
-  await page.locator('.catalog-card-link[href="/components/chip-group"]').click();
+  await page.locator('.catalog-row-link[href="/components/chip-group"]').click();
   await expect(page.getByRole("heading", { name: "Chip Group", exact: true })).toBeVisible();
   const item = await (await request.get("/r/chip-group.json")).json();
   expect(item.type).toBe("registry:component");

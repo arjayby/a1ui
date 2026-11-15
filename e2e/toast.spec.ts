@@ -123,7 +123,7 @@ test("toasts appear in place on mobile with reduced motion", async ({ page }) =>
 
 test("catalog, registry, and agent docs include the toast", async ({ page, request }) => {
   await page.goto("/components");
-  await page.locator('.catalog-card-link[href="/components/toast"]').click();
+  await page.locator('.catalog-row-link[href="/components/toast"]').click();
   await expect(page.getByRole("heading", { name: "Toast", exact: true })).toBeVisible();
   const item = await (await request.get("/r/toast.json")).json();
   expect(item.type).toBe("registry:component");

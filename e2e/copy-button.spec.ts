@@ -111,7 +111,7 @@ for (const animation of ["blur", "slide", "flip"]) {
 
 test("the components page links to the installable component", async ({ page, request }) => {
   await page.goto("/components");
-  await page.locator('.catalog-card-link[href="/components/copy-button"]').click();
+  await page.locator('.catalog-row-link[href="/components/copy-button"]').click();
   await expect(page).toHaveURL(/\/components\/copy-button$/);
   await expect(
     page

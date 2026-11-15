@@ -120,7 +120,7 @@ test("morph panel fits a 390px screen and opens instantly with reduced motion", 
 
 test("catalog, registry, and agent docs include the popover", async ({ page, request }) => {
   await page.goto("/components");
-  await page.locator('.catalog-card-link[href="/components/popover"]').click();
+  await page.locator('.catalog-row-link[href="/components/popover"]').click();
   await expect(page.getByRole("heading", { name: "Popover", exact: true })).toBeVisible();
   const item = await (await request.get("/r/popover.json")).json();
   expect(item.type).toBe("registry:component");

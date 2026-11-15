@@ -98,7 +98,7 @@ test("collapses to fit a 390px screen and expands instantly with reduced motion"
 
 test("catalog, registry, and agent docs include the breadcrumb", async ({ page, request }) => {
   await page.goto("/components");
-  await page.locator('.catalog-card-link[href="/components/breadcrumb"]').click();
+  await page.locator('.catalog-row-link[href="/components/breadcrumb"]').click();
   await expect(page.getByRole("heading", { name: "Breadcrumb", exact: true })).toBeVisible();
   const item = await (await request.get("/r/breadcrumb.json")).json();
   expect(item.type).toBe("registry:component");

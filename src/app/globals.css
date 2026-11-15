@@ -454,158 +454,131 @@ h6 {
   line-height: var(--type-body-lg-leading);
 }
 
-/* Two columns at most. A tile is never narrower than half the row (the max() below),
-   and the row collapses to one column once half of it would fall under 24rem. */
-.catalog-grid {
-  --catalog-gap: var(--space-12);
-  display: grid;
-  grid-template-columns: repeat(
-    auto-fill,
-    minmax(min(100%, max(24rem, (100% - var(--catalog-gap)) / 2)), 1fr)
-  );
-  /* Rows sit further apart than columns, so each row of tiles reads as its own band. */
-  gap: var(--space-16) var(--catalog-gap);
-  margin-top: var(--space-16);
-}
-
-/* Flat tiles on the page's own paper, set apart by a hairline. Nothing lifts on hover:
-   the edge and the title turn cobalt-ink. */
-.catalog-card {
-  position: relative;
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
+/* The catalog is an index: one numbered row per entry, set apart by hairlines. */
+.catalog-list {
+  margin: var(--space-16) 0 0;
   padding: 0;
-  border-radius: var(--radius-lg);
-  background: var(--well);
-  box-shadow: var(--well-edge);
-  transition: box-shadow var(--motion-fast) ease;
+  list-style: none;
 }
 
-.catalog-card:has(.catalog-card-link:hover) {
-  box-shadow: 0 0 0 1px var(--cobalt-ink);
-}
-
-.catalog-card:has(.catalog-card-link:focus-visible) {
-  box-shadow: 0 0 0 2px var(--ring);
-}
-
-/* The top of a tile is the docs demo itself, without its frame or its controls:
-   the tile is the frame, and the controls live on the docs page. */
-.catalog-preview {
-  --preview-height: 26rem;
-  display: flex;
-  min-height: var(--preview-height);
-  flex: 1;
-  flex-direction: column;
-  justify-content: center;
-  overflow: hidden;
-  border-top-left-radius: inherit;
-  border-top-right-radius: inherit;
-  border-bottom: 1px solid var(--line);
-  pointer-events: none;
-}
-
-/* The demo keeps its own layout and fills the tile; its stage centres the component. */
-.catalog-preview .demo-frame,
-.catalog-stage .demo-frame {
-  flex: 1 1 auto;
-  border-radius: 0;
-  background: transparent;
-}
-
-.catalog-preview .component-demo-stage {
-  min-height: var(--preview-height);
-}
-
-.catalog-stage .component-demo-stage {
-  min-height: 100dvh;
-}
-
-.catalog-preview :is(.component-demo-controls, .demo-caption),
-.catalog-stage :is(.component-demo-controls, .demo-caption) {
-  display: none;
-}
-
-/* A demo that opens over the page gets a frame of its own (see CatalogFrame). The frame
-   is laid out at a desktop width and zoomed out to fit the tile. */
-.catalog-frame {
+.catalog-row {
   position: relative;
-  min-height: var(--preview-height);
-  flex: 1;
-  overflow: hidden;
-}
-
-.catalog-frame iframe {
-  position: absolute;
-  top: 0;
-  left: 0;
-  border: 0;
-}
-
-/* The page inside a frame: one demo filling the frame, with its hidden content open. */
-.catalog-stage {
-  display: flex;
-  min-height: 100dvh;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.catalog-stage[data-place="top"] :is(.demo-frame, .component-demo-stage) {
-  align-items: flex-start;
-}
-
-html:has(.catalog-stage) {
-  min-width: 0;
-  overflow: hidden;
-  scrollbar-gutter: auto;
-}
-
-/* Next.js draws its development badge in every frame; one per page is enough. */
-html:has(.catalog-stage) nextjs-portal {
-  display: none;
-}
-
-.catalog-card-link::after {
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  content: "";
-}
-
-.catalog-card-link:focus-visible {
-  outline: none;
-}
-
-.catalog-card-content {
   display: grid;
-  gap: var(--space-2);
-  padding: var(--space-6) var(--space-8) var(--space-8);
+  grid-template-columns: 2rem 15rem minmax(0, 1fr) auto;
+  align-items: baseline;
+  column-gap: var(--space-6);
+  min-height: 44px;
+  padding-block: 10px;
+  font-size: var(--type-body-size);
+  line-height: var(--type-body-leading);
 }
 
-.catalog-card-content .ui-card-title {
-  font-size: var(--type-body-lg-size);
-  letter-spacing: 0;
-  line-height: var(--type-body-lg-leading);
+.catalog-row + .catalog-row {
+  border-top: 1px solid var(--line);
 }
 
-.catalog-card-link svg {
+.catalog-row-number {
   color: var(--ink-faint);
-  transition: color var(--motion-fast) ease;
+  font-family: var(--font-mono);
+  font-size: var(--type-mono-sm-size);
+  font-variant-numeric: tabular-nums;
 }
 
-.catalog-card-link {
+.catalog-row-title {
   display: flex;
+  min-width: 0;
   align-items: center;
-  justify-content: space-between;
   gap: var(--space-2);
+  margin: 0;
+  font: inherit;
+  letter-spacing: 0;
+}
+
+.catalog-row-link {
+  color: var(--foreground);
   text-decoration: none;
   transition: color var(--motion-fast) ease;
 }
 
-.catalog-card-link:hover,
-.catalog-card-link:hover svg {
+/* The name is the link; its hit area is the whole row. */
+.catalog-row-link::after {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-sm);
+  content: "";
+}
+
+.catalog-row-link:focus-visible {
+  outline: none;
+}
+
+.catalog-row-link:focus-visible::after {
+  box-shadow: 0 0 0 2px var(--ring);
+}
+
+/* One line: a row is for scanning, and the docs page has the whole sentence. */
+.catalog-row-description {
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  color: var(--muted-foreground);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.catalog-row-arrow {
+  align-self: center;
+  width: 1rem;
+  height: 1rem;
+  color: var(--ink-faint);
+  transition:
+    color var(--motion-fast) ease,
+    opacity var(--motion-fast) ease,
+    transform var(--motion-fast) ease;
+}
+
+/* With a pointer the arrow waits off the row and arrives with the hover. */
+@media (hover: hover) {
+  .catalog-row-arrow {
+    opacity: 0;
+    transform: translate(-4px, 4px);
+  }
+}
+
+.catalog-row:is(:hover, :focus-within) :is(.catalog-row-link, .catalog-row-arrow) {
   color: var(--cobalt-ink);
+}
+
+.catalog-row:is(:hover, :focus-within) .catalog-row-arrow {
+  opacity: 1;
+  transform: none;
+}
+
+/* On a phone the description drops under the name, on two lines at most. */
+@media (max-width: 39.999rem) {
+  .catalog-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .catalog-row-number {
+    display: none;
+  }
+
+  .catalog-row-description {
+    display: -webkit-box;
+    grid-row: 2;
+    grid-column: 1;
+    font-size: var(--type-body-sm-size);
+    line-height: var(--type-body-sm-leading);
+    white-space: normal;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .catalog-row-arrow {
+    grid-row: 1;
+    grid-column: 2;
+  }
 }
 
 .docs-article {
@@ -920,8 +893,7 @@ html:has(.catalog-stage) nextjs-portal {
 }
 
 /* Inside a well, components that paint the page background (bg-background) match the well. */
-.demo-frame,
-.catalog-card {
+.demo-frame {
   --background: var(--well);
 }
 
@@ -1209,8 +1181,8 @@ html:has(.catalog-stage) nextjs-portal {
     padding-bottom: var(--space-24);
   }
 
-  .catalog-grid {
-    row-gap: var(--space-12);
+  .catalog-list {
+    margin-top: var(--space-12);
   }
 }
 
@@ -1219,9 +1191,8 @@ html:has(.catalog-stage) nextjs-portal {
     scroll-behavior: auto;
   }
 
-  .catalog-card,
-  .catalog-card-link,
-  .catalog-card-link svg,
+  .catalog-row-link,
+  .catalog-row-arrow,
   .docs-toc-link {
     transition: none;
   }

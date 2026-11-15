@@ -7,33 +7,12 @@ test.afterEach(async ({ page }) => {
 });
 
 for (const width of [1440, 390, 320]) {
-  test(`showcase fits all four sigils and opens the demo at ${width}px`, async ({ page }) => {
+  test(`catalog row opens the demo at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });
     await page.goto("/blocks");
     await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
 
-    const card = page.locator(".catalog-card").filter({
-      has: page.getByRole("link", { name: "Particle Menu", exact: true }),
-    });
-    await card.scrollIntoViewIfNeeded();
-    const preview = card.locator(".particle-menu-demo");
-    await expect(preview.locator("span")).toHaveText(labels);
-    for (const label of await preview.locator("span").all()) {
-      await expect(label).toHaveCSS("font-family", /^Endless/);
-    }
-    const bounds = await preview.boundingBox();
-    if (!bounds) throw new Error("Particle Menu preview has no visible bounds");
-
-    for (const item of await preview.locator("li").all()) {
-      const box = await item.boundingBox();
-      if (!box) throw new Error("Showcase sigil has no visible bounds");
-      expect(box.x).toBeGreaterThanOrEqual(bounds.x);
-      expect(box.y).toBeGreaterThanOrEqual(bounds.y);
-      expect(box.x + box.width).toBeLessThanOrEqual(bounds.x + bounds.width);
-      expect(box.y + box.height).toBeLessThanOrEqual(bounds.y + bounds.height);
-    }
-
-    await card.getByRole("link", { name: "Particle Menu", exact: true }).click();
+    await page.getByRole("link", { name: "Particle Menu", exact: true }).click();
     await expect(page).toHaveURL(/\/blocks\/particle-menu$/);
     await expect(page.getByRole("navigation", { name: "Particle menu demo" }).getByRole("button")).toHaveText(
       labels,

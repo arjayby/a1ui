@@ -264,7 +264,7 @@ test("reduced motion cross-fades the changed digits on mobile", async ({ page })
 
 test("catalog, registry, and agent docs include the rolling number", async ({ page, request }) => {
   await page.goto("/components");
-  await page.locator('.catalog-card-link[href="/components/rolling-number"]').click();
+  await page.locator('.catalog-row-link[href="/components/rolling-number"]').click();
   await expect(page.getByRole("heading", { name: "Rolling Number", exact: true })).toBeVisible();
   const item = await (await request.get("/r/rolling-number.json")).json();
   expect(item.type).toBe("registry:component");

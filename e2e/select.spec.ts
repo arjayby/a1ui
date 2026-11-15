@@ -181,7 +181,7 @@ test("reduced motion opens instantly on mobile and stays inside the viewport", a
 
 test("catalog, registry, and agent docs include the select", async ({ page, request }) => {
   await page.goto("/components");
-  await page.locator('.catalog-card-link[href="/components/select"]').click();
+  await page.locator('.catalog-row-link[href="/components/select"]').click();
   await expect(page.getByRole("heading", { name: "Select", exact: true })).toBeVisible();
   const item = await (await request.get("/r/select.json")).json();
   expect(item.type).toBe("registry:component");

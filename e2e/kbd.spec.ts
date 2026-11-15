@@ -143,7 +143,7 @@ test("labels follow the platform and presses land instantly on mobile with reduc
 
 test("catalog, registry, and agent docs include kbd", async ({ page, request }) => {
   await page.goto("/components");
-  await page.locator('.catalog-card-link[href="/components/kbd"]').click();
+  await page.locator('.catalog-row-link[href="/components/kbd"]').click();
   await expect(page.getByRole("heading", { name: "Kbd", exact: true })).toBeVisible();
   const item = await (await request.get("/r/kbd.json")).json();
   expect(item.type).toBe("registry:component");

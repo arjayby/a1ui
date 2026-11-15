@@ -175,7 +175,7 @@ test("reduced motion on mobile spreads instantly and keeps keyboard labels", asy
 
 test("catalog, registry, and agent docs include the avatar group", async ({ page, request }) => {
   await page.goto("/components");
-  await page.locator('.catalog-card-link[href="/components/avatar-group"]').click();
+  await page.locator('.catalog-row-link[href="/components/avatar-group"]').click();
   await expect(page.getByRole("heading", { name: "Avatar Group", exact: true })).toBeVisible();
   const item = await (await request.get("/r/avatar-group.json")).json();
   expect(item.type).toBe("registry:component");

@@ -133,7 +133,7 @@ test("reduced motion moves everything instantly on a phone", async ({ page }) =>
 
 test("catalog, registry, and agent docs include the pagination", async ({ page, request }) => {
   await page.goto("/components");
-  const card = page.locator('.catalog-card-link[href="/components/pagination"]');
+  const card = page.locator('.catalog-row-link[href="/components/pagination"]');
   await settle(card);
   await card.click();
   await expect(page.getByRole("heading", { name: "Pagination", exact: true })).toBeVisible();
