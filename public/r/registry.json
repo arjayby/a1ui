@@ -448,6 +448,43 @@
       "docs": "Read http://localhost:3000/docs/blocks/arc-reel.md for usage, required props, and integration instructions."
     },
     {
+      "name": "card-vortex",
+      "type": "registry:block",
+      "title": "Card Vortex",
+      "description": "A ring of link cards that fans out from the center of any element on hover, focus, or tap, each card curving into its place on the ring.",
+      "dependencies": [
+        "motion"
+      ],
+      "files": [
+        {
+          "path": "src/registry/blocks/card-vortex.tsx",
+          "type": "registry:component",
+          "target": "components/blocks/card-vortex.tsx"
+        }
+      ],
+      "categories": [
+        "navigation",
+        "gallery",
+        "animation"
+      ],
+      "meta": {
+        "a1ui": {
+          "useCases": [
+            "Revealing a handful of projects, case studies, or destinations around a logo, nav label, or button."
+          ],
+          "limitations": [
+            "Best with five to ten cards. The ring overlays nearby content and is not clipped to its parent unless an ancestor hides overflow. Supply your own artwork; demo images are not installed."
+          ],
+          "requirements": [
+            "React 19, Tailwind CSS 4, Motion, and theme tokens --background, --foreground, --muted, --border, and --ring. Use a button or link as the trigger so the keyboard can reach it."
+          ],
+          "docsUrl": "http://localhost:3000/docs/blocks/card-vortex.md",
+          "registryUrl": "http://localhost:3000/r/card-vortex.json"
+        }
+      },
+      "docs": "Read http://localhost:3000/docs/blocks/card-vortex.md for usage, required props, and integration instructions."
+    },
+    {
       "name": "task-steps",
       "type": "registry:block",
       "title": "Task Steps",

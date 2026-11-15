@@ -1027,6 +1027,14 @@ h6 {
   content: "";
 }
 
+/* Square, so the ring has the same room on every side at any width. */
+.card-vortex-demo-stage {
+  display: grid;
+  aspect-ratio: 1;
+  max-height: 31rem;
+  place-items: center;
+}
+
 .section-rail-demo {
   display: grid;
   grid-template-columns: 6rem minmax(0, 1fr);

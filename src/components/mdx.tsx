@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 
 import { ActivityPillDemo } from "@/components/block-demos/activity-pill-demo";
 import { ArcReelDemo } from "@/components/block-demos/arc-reel-demo";
+import { CardVortexDemo } from "@/components/block-demos/card-vortex-demo";
 import { AsciiTerrainDemo } from "@/components/block-demos/ascii-terrain-demo";
 import { AsciiMorphDemo } from "@/components/block-demos/ascii-morph-demo";
 import { AsciiLensDemo } from "@/components/block-demos/ascii-lens-demo";
@@ -69,6 +70,7 @@ export function getMDXComponents(components?: MDXComponents) {
     AsciiMorphDemo,
     AsciiLensDemo,
     BlockSource,
+    CardVortexDemo,
     CommandPaletteDemo,
     ComponentSource,
     Dependencies,

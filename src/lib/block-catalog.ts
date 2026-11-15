@@ -27,7 +27,7 @@ export type CatalogBlock = (typeof blocks)[number];
 const categorySlugs = [
   { title: "ASCII", slugs: ["ascii-morph", "ascii-lens", "ascii-terrain"] },
   { title: "Text Effects", slugs: ["text-scramble", "text-banner", "spiral-text", "shape-flow"] },
-  { title: "Navigation", slugs: ["section-rail", "particle-menu", "command-palette"] },
+  { title: "Navigation", slugs: ["section-rail", "particle-menu", "command-palette", "card-vortex"] },
   { title: "Carousels", slugs: ["arc-reel"] },
   { title: "Status", slugs: ["activity-pill", "task-steps"] },
 ] as const;
