@@ -1,88 +1,25 @@
 "use client";
 
 import {
-  useCallback,
+  animate,
+  cancelFrame,
+  frame,
+  motionValue,
+  spring,
+  type FrameData,
+  type KeyframeGenerator,
+  type MotionValue,
+} from "motion";
+import { motion, useMotionValue, useReducedMotion } from "motion/react";
+import {
   useEffect,
   useId,
+  useLayoutEffect,
   useMemo,
   useRef,
+  useState,
   type PointerEvent as ReactPointerEvent,
 } from "react";
-
-type CoilState = { scale: number; opacity: number; scaleVelocity?: number; opacityVelocity?: number };
-type CoilGeometry = { progress: number; radius: number };
-
-const HOLD_DURATION = 450;
-const RIPPLE_WIDTH = 0.3;
-const RIPPLE_HEIGHT = 24;
-const KEYFRAME_STEPS = 90;
-
-function smoothstep(value: number) {
-  const t = Math.min(1, Math.max(0, value));
-  return t * t * (3 - 2 * t);
-}
-
-function keyframe(state: CoilState, offset: number): Keyframe {
-  return { offset, transform: `scale(${state.scale.toFixed(5)})`, opacity: state.opacity };
-}
-
-function holdKeyframes(start: CoilState, tightenStrength: number): Keyframe[] {
-  return Array.from({ length: 91 }, (_, index) => {
-    const progress = index / 90;
-    const seconds = (progress * HOLD_DURATION) / 1000;
-    const settle = 1 - smoothstep((progress - 0.8) / 0.2);
-    const spring = (value: number, target: number, velocity = 0) => {
-      const displacement = value - target;
-      return (
-        target + (displacement + (velocity + 18 * displacement) * seconds) * Math.exp(-18 * seconds) * settle
-      );
-    };
-    return keyframe(
-      {
-        scale: spring(start.scale, 1 - tightenStrength * 0.4, start.scaleVelocity),
-        opacity: Math.min(1, Math.max(0, spring(start.opacity, 1, start.opacityVelocity))),
-      },
-      progress,
-    );
-  });
-}
-
-function rippleKeyframes(
-  coil: CoilGeometry,
-  start: CoilState,
-  tension: number,
-  duration: number,
-): Keyframe[] {
-  return Array.from({ length: KEYFRAME_STEPS + 1 }, (_, index) => {
-    const progress = index / KEYFRAME_STEPS;
-    const waveFront = progress * 1.4;
-    const attack = smoothstep(progress / 0.04);
-    const life = attack * (1 - smoothstep((progress - 0.78) / 0.22));
-    const wave = (1 - smoothstep(Math.abs(coil.progress - waveFront) / RIPPLE_WIDTH)) * life;
-    // The leading edge releases each ring, so the outward swell stays circular.
-    const releaseAmount = smoothstep((waveFront + RIPPLE_WIDTH - coil.progress) / RIPPLE_WIDTH) * attack;
-    const seconds = (progress * duration) / 1000;
-    const momentum = seconds * Math.exp(-seconds / 0.08) * (1 - smoothstep(progress / 0.2));
-    return keyframe(
-      {
-        scale:
-          start.scale +
-          (1 - start.scale) * releaseAmount +
-          (wave * RIPPLE_HEIGHT * (0.35 + tension * 0.65)) / Math.max(40, coil.radius) +
-          (start.scaleVelocity ?? 0) * momentum,
-        opacity: Math.min(
-          1,
-          Math.max(
-            0,
-            (start.opacity + (1 - start.opacity) * releaseAmount) * (1 - wave * 0.45) +
-              (start.opacityVelocity ?? 0) * momentum,
-          ),
-        ),
-      },
-      progress,
-    );
-  });
-}
 
 export interface SpiralTextProps {
   text: string;
@@ -95,12 +32,340 @@ export interface SpiralTextProps {
 }
 
 type Interaction = "resting" | "tightening" | "releasing" | "pressed-reduced";
+type CoilGeometry = { progress: number; radius: number };
+type CoilValues = { scale: MotionValue<number>; opacity: MotionValue<number> };
+// A value that follows a target with a Motion spring, advanced on the spiral's own clock so a
+// retarget always starts from the value and velocity that are on screen.
+type Follower = {
+  value: number;
+  target: number;
+  elapsed: number;
+  generator: KeyframeGenerator<number> | null;
+};
+// `releaseAt` is the moment on the wave's clock when its leading edge lets the ring go.
+type Ring = { scale: Follower; opacity: Follower; releaseAt: number };
+type Wave = { elapsed: number; duration: number; height: number; frequency: number };
+type Settings = {
+  tightenStrength: number;
+  rippleDuration: number;
+  degreesPerSecond: number;
+  rotating: boolean;
+  reducedMotion: boolean;
+};
 
-function readCoil(element: HTMLDivElement | null): CoilState {
-  if (!element) return { scale: 1, opacity: 1 };
-  const style = getComputedStyle(element);
-  const matrix = new DOMMatrixReadOnly(style.transform === "none" ? undefined : style.transform);
-  return { scale: Math.hypot(matrix.a, matrix.b), opacity: Number(style.opacity) };
+const RIPPLE_WIDTH = 0.3;
+const RIPPLE_HEIGHT = 24;
+const RIPPLE_DIM = 0.45;
+// The crest starts at the center and ends this far along the radius, past the outer ring.
+const RIPPLE_TRAVEL = 1.4;
+// Natural frequencies of the critically damped springs, in radians per second: a ring closes
+// under a press in about a third of a second, and the spin changes speed in about half.
+const GRIP_FREQUENCY = 18;
+const SPIN_FREQUENCY = 12;
+const PRESSED_OPACITY = 0.7;
+const FADE = { duration: 0.15, ease: "easeOut" } as const;
+
+const clamp = (value: number, min = 0, max = 1) => Math.min(max, Math.max(min, value));
+
+function smoothstep(value: number) {
+  const t = clamp(value);
+  return t * t * (3 - 2 * t);
+}
+
+// Height of the travelling crest at a ring, from 0 to 1, for a wave that is `progress` through.
+function crestAt(ring: number, progress: number) {
+  const life = smoothstep(progress / 0.04) * (1 - smoothstep((progress - 0.78) / 0.22));
+  return (1 - smoothstep(Math.abs(ring - progress * RIPPLE_TRAVEL) / RIPPLE_WIDTH)) * life;
+}
+
+function follower(value: number): Follower {
+  return { value, target: value, elapsed: 0, generator: null };
+}
+function velocityOf(follow: Follower) {
+  return follow.generator?.velocity?.(follow.elapsed) ?? 0;
+}
+function advance(follow: Follower, milliseconds: number) {
+  if (!follow.generator) return;
+  follow.elapsed += milliseconds;
+  // Motion's generators are analytic, so the response is the same at any refresh rate.
+  const state = follow.generator.next(follow.elapsed);
+  follow.value = state.value;
+  if (state.done) follow.generator = null;
+}
+function springTo(follow: Follower, target: number, frequency: number, velocity = velocityOf(follow)) {
+  follow.generator = spring({
+    keyframes: [follow.value, target],
+    velocity,
+    // Stiffness ω² with damping 2ω is critically damped: it settles without overshoot. Motion's
+    // duration-based springs would drop the velocity a retarget hands them, so set both directly.
+    stiffness: frequency * frequency,
+    damping: 2 * frequency,
+    mass: 1,
+    restDelta: 0.0001,
+    restSpeed: 0.001,
+  });
+  follow.target = target;
+  follow.elapsed = 0;
+}
+function jump(follow: Follower, value: number) {
+  Object.assign(follow, follower(value));
+}
+
+/**
+ * Drives the whole figure from one callback on Motion's frame loop. Each ring's scale and
+ * opacity is a spring, and the ripple is added on top of those springs, so a press, a release
+ * or a new prop only ever changes a target: nothing restarts from a stored pose.
+ */
+function createSpiralMotion(root: HTMLElement, rotation: MotionValue<number>, dim: MotionValue<number>) {
+  let settings: Settings | null = null;
+  let geometry: CoilGeometry[] = [];
+  let values: CoilValues[] = [];
+  let wave: Wave | null = null;
+  let interaction: Interaction = "resting";
+  let pointer: number | null = null;
+  let visible = true;
+  let awake = false;
+  let running = false;
+  let stirring = false;
+  let angle = rotation.get();
+  const rings: Ring[] = [];
+  // Degrees per second. Springing the speed rather than the angle lets a pause, a resume or a
+  // new rotationSpeed keep the current angle and ease the rate of turn.
+  const spin = follower(0);
+
+  const setInteraction = (value: Interaction) => {
+    interaction = value;
+    root.dataset.interaction = value;
+  };
+  const heldScale = () => 1 - (settings?.tightenStrength ?? 0) * 0.4;
+  const swellOf = (index: number) => (wave ? wave.height / Math.max(40, geometry[index].radius) : 0);
+  const releaseTime = (index: number, duration: number) =>
+    (Math.max(0, geometry[index].progress - RIPPLE_WIDTH) / RIPPLE_TRAVEL) * duration;
+
+  function show(index: number) {
+    const ring = rings[index];
+    const crest = wave ? crestAt(geometry[index].progress, wave.elapsed / wave.duration) : 0;
+    // Every glyph in a ring shares a radius, so scaling the ring keeps the swell circular.
+    values[index].scale.set(ring.scale.value + crest * swellOf(index));
+    values[index].opacity.set(clamp(ring.opacity.value * (1 - crest * RIPPLE_DIM)));
+  }
+
+  // Runs in Motion's update step, so the values it sets are rendered in the same frame.
+  function tick({ delta }: FrameData) {
+    advance(spin, delta);
+    if (spin.value !== 0) {
+      angle = (angle + (spin.value * delta) / 1000) % 360;
+      rotation.set(angle);
+    }
+    if (stirring) {
+      // Motion clamps long gaps between frames, so a stalled tab cannot skip the wave ahead.
+      if (wave) wave.elapsed = Math.min(wave.duration, wave.elapsed + delta);
+      let moving = false;
+      for (let index = 0; index < rings.length; index += 1) {
+        const ring = rings[index];
+        if (wave && wave.elapsed >= ring.releaseAt) {
+          ring.releaseAt = Infinity;
+          springTo(ring.scale, 1, wave.frequency);
+        }
+        advance(ring.scale, delta);
+        advance(ring.opacity, delta);
+        moving ||= Boolean(ring.scale.generator || ring.opacity.generator);
+        show(index);
+      }
+      if (wave && wave.elapsed >= wave.duration) wave = null;
+      if (!wave && !moving) {
+        stirring = false;
+        if (interaction === "releasing") setInteraction("resting");
+      }
+    }
+    if (!stirring && !spin.generator && spin.value === 0) stop();
+  }
+
+  function start() {
+    if (!awake || running) return;
+    frame.update(tick, true);
+    running = true;
+  }
+  function stop() {
+    if (running) cancelFrame(tick);
+    running = false;
+  }
+
+  function turn() {
+    const target =
+      settings?.rotating && interaction !== "tightening" && interaction !== "pressed-reduced"
+        ? settings.degreesPerSecond
+        : 0;
+    if (target !== spin.target) springTo(spin, target, SPIN_FREQUENCY);
+  }
+
+  // Ends any gesture and puts every ring at rest in one step, for when nothing may move.
+  function settle() {
+    wave = null;
+    stirring = false;
+    if (pointer !== null && root.hasPointerCapture?.(pointer)) root.releasePointerCapture(pointer);
+    pointer = null;
+    rings.forEach((ring, index) => {
+      jump(ring.scale, 1);
+      jump(ring.opacity, 1);
+      ring.releaseAt = Infinity;
+      show(index);
+    });
+    dim.jump(1);
+    setInteraction("resting");
+  }
+
+  function sync() {
+    if (!settings) return;
+    const wasAwake = awake;
+    awake = visible && !document.hidden && !settings.reducedMotion;
+    // Prepare visible, interactive rings before a press rather than promoting them on demand.
+    const prepare = awake && !root.closest("[inert]");
+    for (const layer of root.querySelectorAll<HTMLElement>("[data-spiral-rotation], [data-spiral-coil]")) {
+      layer.style.willChange = prepare ? "transform, opacity" : "auto";
+    }
+    if (awake) {
+      turn();
+      start();
+      return;
+    }
+    stop();
+    if (wasAwake) settle();
+    // Offscreen or in a hidden tab the spin keeps its speed for when it is seen again.
+    // Reduced motion stops it at the angle it had reached.
+    if (settings.reducedMotion) jump(spin, 0);
+  }
+
+  const observer =
+    typeof IntersectionObserver === "undefined"
+      ? null
+      : new IntersectionObserver(([entry]) => {
+          visible = entry.isIntersecting;
+          sync();
+        });
+  observer?.observe(root);
+  document.addEventListener("visibilitychange", sync);
+
+  return {
+    update(nextGeometry: CoilGeometry[], nextValues: CoilValues[], nextSettings: Settings) {
+      const retighten =
+        interaction === "tightening" && settings?.tightenStrength !== nextSettings.tightenStrength;
+      geometry = nextGeometry;
+      values = nextValues;
+      settings = nextSettings;
+      // New text keeps every ring where it is. A ring added by a higher density joins at the
+      // pose its neighbours are heading for.
+      const last = rings.at(-1);
+      rings.length = Math.min(rings.length, geometry.length);
+      while (rings.length < geometry.length) {
+        rings.push({
+          scale: follower(last?.scale.target ?? 1),
+          opacity: follower(1),
+          releaseAt: last?.releaseAt ?? Infinity,
+        });
+      }
+      rings.forEach((ring, index) => {
+        if (wave && ring.releaseAt !== Infinity) ring.releaseAt = releaseTime(index, wave.duration);
+        if (retighten) springTo(ring.scale, heldScale(), GRIP_FREQUENCY);
+        show(index);
+      });
+      stirring ||= retighten;
+      sync();
+    },
+
+    press(pointerId: number) {
+      if (!settings || pointer !== null) return;
+      if (!awake && !settings.reducedMotion) return;
+      pointer = pointerId;
+      root.setPointerCapture?.(pointerId);
+      if (settings.reducedMotion) {
+        // Reduced motion answers a press with a short fade instead of moving the rings.
+        setInteraction("pressed-reduced");
+        animate(dim, PRESSED_OPACITY, FADE);
+        return;
+      }
+      // Catch each ring where it is. A ripple in flight is folded into the ring's own spring,
+      // position and velocity both, so the grab neither snaps the ring nor stops it dead.
+      rings.forEach((ring, index) => {
+        let crest = 0;
+        let crestVelocity = 0;
+        if (wave) {
+          const progress = geometry[index].progress;
+          crest = crestAt(progress, wave.elapsed / wave.duration);
+          crestVelocity = (crest - crestAt(progress, (wave.elapsed - 1) / wave.duration)) * 1000;
+        }
+        const scaleVelocity = velocityOf(ring.scale) + crestVelocity * swellOf(index);
+        const opacityVelocity =
+          velocityOf(ring.opacity) * (1 - crest * RIPPLE_DIM) -
+          ring.opacity.value * crestVelocity * RIPPLE_DIM;
+        ring.scale.value += crest * swellOf(index);
+        ring.opacity.value = clamp(ring.opacity.value * (1 - crest * RIPPLE_DIM));
+        ring.releaseAt = Infinity;
+        springTo(ring.scale, heldScale(), GRIP_FREQUENCY, scaleVelocity);
+        springTo(ring.opacity, 1, GRIP_FREQUENCY, opacityVelocity);
+      });
+      wave = null;
+      stirring = true;
+      setInteraction("tightening");
+      turn();
+      start();
+    },
+
+    release(pointerId: number) {
+      if (!settings || pointer !== pointerId) return;
+      pointer = null;
+      if (root.hasPointerCapture?.(pointerId)) root.releasePointerCapture(pointerId);
+      if (interaction === "pressed-reduced") {
+        setInteraction("resting");
+        animate(dim, 1, FADE);
+        turn();
+        start();
+        return;
+      }
+      if (interaction !== "tightening") return;
+      const duration = settings.rippleDuration;
+      const tightest = Math.min(...rings.map((ring) => ring.scale.value));
+      const tension = clamp((1 - tightest) / (settings.tightenStrength * 0.4));
+      wave = {
+        elapsed: 0,
+        duration,
+        height: RIPPLE_HEIGHT * (0.35 + tension * 0.65),
+        // A released ring is back at rest as the crest reaches it, whatever the wave's speed.
+        frequency: 6000 / ((RIPPLE_WIDTH / RIPPLE_TRAVEL) * duration),
+      };
+      rings.forEach((ring, index) => {
+        ring.releaseAt = releaseTime(index, duration);
+        // Until the wave arrives a ring stays where it was let go, spending the inward pull
+        // it still carries instead of stopping dead.
+        springTo(ring.scale, ring.scale.value, GRIP_FREQUENCY);
+      });
+      stirring = true;
+      setInteraction("releasing");
+      turn();
+      start();
+    },
+
+    destroy() {
+      stop();
+      dim.stop();
+      observer?.disconnect();
+      document.removeEventListener("visibilitychange", sync);
+    },
+  };
+}
+
+// Motion's useReducedMotion reads the setting once, when the component mounts. Listening for
+// the change as well lets a spiral that is already turning stop without a reload.
+function useLiveReducedMotion() {
+  const [reducedMotion, setReducedMotion] = useState(useReducedMotion() ?? false);
+  useEffect(() => {
+    const preference = window.matchMedia?.("(prefers-reduced-motion: reduce)");
+    if (!preference) return;
+    const update = () => setReducedMotion(preference.matches);
+    preference.addEventListener("change", update);
+    return () => preference.removeEventListener("change", update);
+  }, []);
+  return reducedMotion;
 }
 
 const VIEWBOX_SIZE = 640;
@@ -161,67 +426,51 @@ export function SpiralText({
   const generatedId = useId();
   const gridId = `a1ui-spiral-grid-${generatedId.replaceAll(":", "")}`;
   const rootRef = useRef<HTMLDivElement>(null);
-  const rotationRef = useRef<HTMLDivElement>(null);
   const coilRefs = useRef<(HTMLDivElement | null)[]>([]);
   const canvasRefs = useRef<(HTMLCanvasElement | null)[]>([]);
-  const animationsRef = useRef<Animation[]>([]);
-  const keyframesRef = useRef<Keyframe[][]>([]);
-  const durationRef = useRef(0);
-  const interactionRef = useRef<Interaction>("resting");
-  const rotatingRef = useRef(rotating);
-  const pointerRef = useRef<number | null>(null);
-  const motionActiveRef = useRef(true);
+  const motionRef = useRef<ReturnType<typeof createSpiralMotion> | null>(null);
+  const reducedMotion = useLiveReducedMotion();
+  const rotation = useMotionValue(0);
+  const dim = useMotionValue(1);
 
   const safeTightenStrength = Math.min(0.7, Math.max(0.08, tightenStrength));
   const safeRotationSpeed = Number.isFinite(rotationSpeed) && rotationSpeed > 0 ? rotationSpeed : 1;
   const safeRippleDuration = Number.isFinite(rippleDuration) ? Math.max(300, rippleDuration) : 1800;
   const coils = useMemo(() => createGlyphLayout(text, density), [density, text]);
+  const coilCount = coils.length;
+  const coilValues = useMemo<CoilValues[]>(
+    () => Array.from({ length: coilCount }, () => ({ scale: motionValue(1), opacity: motionValue(1) })),
+    [coilCount],
+  );
 
-  const setInteraction = useCallback((value: Interaction) => {
-    interactionRef.current = value;
-    if (rootRef.current) rootRef.current.dataset.interaction = value;
-  }, []);
+  // Layout effects, so a change made mid-gesture reaches the rings before the next frame.
+  useLayoutEffect(() => {
+    if (!rootRef.current) return;
+    const spiral = createSpiralMotion(rootRef.current, rotation, dim);
+    motionRef.current = spiral;
+    return () => {
+      spiral.destroy();
+      motionRef.current = null;
+    };
+  }, [rotation, dim]);
 
-  const stopAnimation = useCallback(() => {
-    for (const animation of animationsRef.current) {
-      animation.onfinish = null;
-      animation.cancel();
-    }
-    animationsRef.current = [];
-    keyframesRef.current = [];
-  }, []);
-
-  const readMotion = () =>
-    coilRefs.current.map((element, index) => {
-      const state = readCoil(element);
-      const time = animationsRef.current[index]?.currentTime;
-      const frames = keyframesRef.current[index];
-      if (!frames || typeof time !== "number" || time < 0 || time >= durationRef.current) return state;
-      // Sample the existing browser timeline, including velocity, before replacing its motion.
-      const step = durationRef.current / (frames.length - 1);
-      const frame = Math.max(0, Math.min(frames.length - 2, Math.ceil(time / step) - 1));
-      const from = frames[frame];
-      const to = frames[frame + 1];
-      const scale = (value: Keyframe) => Number(String(value.transform).match(/scale\(([^)]+)\)/)?.[1] ?? 1);
-      return {
-        ...state,
-        scaleVelocity: ((scale(to) - scale(from)) / step) * 1000,
-        opacityVelocity: ((Number(to.opacity) - Number(from.opacity)) / step) * 1000,
-      };
+  useLayoutEffect(() => {
+    motionRef.current?.update(coils, coilValues, {
+      tightenStrength: safeTightenStrength,
+      rippleDuration: safeRippleDuration,
+      degreesPerSecond: safeRotationSpeed * 6,
+      rotating,
+      reducedMotion,
     });
-
-  const syncRotation = useCallback(() => {
-    if (rotationRef.current) {
-      const pressed = interactionRef.current === "tightening" || interactionRef.current === "pressed-reduced";
-      rotationRef.current.style.animationPlayState =
-        rotatingRef.current && motionActiveRef.current && !pressed ? "running" : "paused";
-    }
-  }, []);
-
-  useEffect(() => {
-    rotatingRef.current = rotating;
-    syncRotation();
-  }, [rotating, syncRotation]);
+  }, [
+    coils,
+    coilValues,
+    safeTightenStrength,
+    safeRippleDuration,
+    safeRotationSpeed,
+    rotating,
+    reducedMotion,
+  ]);
 
   useEffect(() => {
     const root = rootRef.current;
@@ -333,136 +582,7 @@ export function SpiralText({
     };
   }, [coils]);
 
-  const animateCoils = (frames: Keyframe[][], duration: number, phase: "tightening" | "releasing") => {
-    // One shared timeline keeps every ring synchronized. The browser interpolates transform
-    // and opacity without a JavaScript callback or DOM writes on every frame.
-    const startedAt = document.timeline.currentTime;
-    const animations: Animation[] = [];
-    for (let index = 0; index < coils.length; index += 1) {
-      const element = coilRefs.current[index];
-      if (!element) continue;
-      const last = frames[index].at(-1)!;
-      element.style.transform = String(last.transform);
-      element.style.opacity = String(last.opacity);
-      const animation = element.animate(frames[index], {
-        duration,
-        fill: "both",
-        easing: "linear",
-        id: `a1ui-spiral-${phase}`,
-      });
-      if (typeof startedAt === "number") animation.startTime = startedAt;
-      animations.push(animation);
-    }
-    animationsRef.current = animations;
-    keyframesRef.current = frames;
-    durationRef.current = duration;
-    const last = animations.at(-1);
-    if (last)
-      last.onfinish = () => {
-        if (animationsRef.current !== animations) return;
-        stopAnimation();
-        if (phase === "releasing") setInteraction("resting");
-        syncRotation();
-      };
-  };
-
-  useEffect(() => {
-    const root = rootRef.current;
-    const rotation = rotationRef.current;
-    if (!root || !rotation) return;
-    const preference = window.matchMedia("(prefers-reduced-motion: reduce)");
-    let visible = true;
-    const reset = () => {
-      stopAnimation();
-      if (pointerRef.current !== null && root.hasPointerCapture?.(pointerRef.current)) {
-        root.releasePointerCapture(pointerRef.current);
-      }
-      pointerRef.current = null;
-      for (const coil of coilRefs.current) {
-        if (!coil) continue;
-        coil.style.transform = "scale(1)";
-        coil.style.opacity = "1";
-      }
-      setInteraction("resting");
-    };
-    const syncMotion = () => {
-      const active = visible && !document.hidden && !preference.matches;
-      motionActiveRef.current = active;
-      // Prepare visible, interactive rings before a press rather than promoting them on demand.
-      const prepare = active && !root.closest("[inert]");
-      for (const coil of coilRefs.current) {
-        if (coil) coil.style.willChange = prepare ? "transform, opacity" : "auto";
-      }
-      syncRotation();
-      if (!active) reset();
-    };
-    const observer =
-      typeof IntersectionObserver === "undefined"
-        ? null
-        : new IntersectionObserver(([entry]) => {
-            visible = entry.isIntersecting;
-            syncMotion();
-          });
-    observer?.observe(root);
-    preference.addEventListener("change", syncMotion);
-    document.addEventListener("visibilitychange", syncMotion);
-    reset();
-    syncMotion();
-    return () => {
-      stopAnimation();
-      observer?.disconnect();
-      preference.removeEventListener("change", syncMotion);
-      document.removeEventListener("visibilitychange", syncMotion);
-    };
-  }, [coils, safeTightenStrength, setInteraction, stopAnimation, syncRotation]);
-
-  const handlePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (pointerRef.current !== null || (event.pointerType === "mouse" && event.button !== 0)) return;
-    pointerRef.current = event.pointerId;
-    event.currentTarget.setPointerCapture?.(event.pointerId);
-    const startingCoils = readMotion();
-    stopAnimation();
-
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      setInteraction("pressed-reduced");
-      syncRotation();
-      return;
-    }
-
-    setInteraction("tightening");
-    syncRotation();
-    animateCoils(
-      startingCoils.map((start) => holdKeyframes(start, safeTightenStrength)),
-      HOLD_DURATION,
-      "tightening",
-    );
-  };
-
-  const release = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (pointerRef.current !== event.pointerId) return;
-    pointerRef.current = null;
-    if (event.currentTarget.hasPointerCapture?.(event.pointerId)) {
-      event.currentTarget.releasePointerCapture(event.pointerId);
-    }
-    const startingCoils = readMotion();
-    stopAnimation();
-
-    if (interactionRef.current === "pressed-reduced") {
-      setInteraction("resting");
-      syncRotation();
-      return;
-    }
-
-    const minimumScale = Math.min(...startingCoils.map((coil) => coil.scale));
-    const tension = Math.min(1, Math.max(0, (1 - minimumScale) / (safeTightenStrength * 0.4)));
-    setInteraction("releasing");
-    syncRotation();
-    animateCoils(
-      coils.map((coil, index) => rippleKeyframes(coil, startingCoils[index], tension, safeRippleDuration)),
-      safeRippleDuration,
-      "releasing",
-    );
-  };
+  const release = (event: ReactPointerEvent<HTMLDivElement>) => motionRef.current?.release(event.pointerId);
 
   return (
     <div
@@ -471,12 +591,15 @@ export function SpiralText({
       aria-label={text.trim()}
       data-interaction="resting"
       className={[
-        "bg-background text-foreground relative isolate aspect-square w-full touch-none overflow-hidden select-none data-[interaction=pressed-reduced]:opacity-70",
+        "bg-background text-foreground relative isolate aspect-square w-full touch-none overflow-hidden select-none",
         className,
       ]
         .filter(Boolean)
         .join(" ")}
-      onPointerDown={handlePointerDown}
+      onPointerDown={(event) => {
+        if (event.pointerType === "mouse" && event.button !== 0) return;
+        motionRef.current?.press(event.pointerId);
+      }}
       onPointerUp={release}
       onPointerCancel={release}
       onLostPointerCapture={release}
@@ -493,17 +616,13 @@ export function SpiralText({
         </defs>
         <rect width="100%" height="100%" fill={`url(#${gridId})`} />
       </svg>
-      <div
-        ref={rotationRef}
+      <motion.div
         data-spiral-rotation=""
-        className="relative size-full animate-spin motion-reduce:animate-none"
-        style={{
-          animationDuration: `${60 / safeRotationSpeed}s`,
-          animationPlayState: rotating ? "running" : "paused",
-        }}
+        className="relative size-full"
+        style={{ rotate: rotation, opacity: dim }}
       >
         {coils.map((coil, index) => (
-          <div
+          <motion.div
             key={index}
             ref={(element) => {
               coilRefs.current[index] = element;
@@ -515,6 +634,8 @@ export function SpiralText({
               height: `${(coil.diameter / VIEWBOX_SIZE) * 100}%`,
               left: `${((VIEWBOX_SIZE - coil.diameter) / VIEWBOX_SIZE) * 50}%`,
               top: `${((VIEWBOX_SIZE - coil.diameter) / VIEWBOX_SIZE) * 50}%`,
+              scale: coilValues[index].scale,
+              opacity: coilValues[index].opacity,
             }}
           >
             <canvas
@@ -542,9 +663,9 @@ export function SpiralText({
                 {coil.characters}
               </text>
             </svg>
-          </div>
+          </motion.div>
         ))}
-      </div>
+      </motion.div>
     </div>
   );
 }

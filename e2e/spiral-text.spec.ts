@@ -1,4 +1,46 @@
+import type { Locator, Page } from "@playwright/test";
+
 import { expect, test } from "./fixtures";
+
+// The rotation layer's angle in degrees, read from the transform Motion writes.
+function angleOf(rotation: Locator) {
+  return rotation.evaluate((element) => {
+    const matrix = new DOMMatrix(getComputedStyle(element).transform);
+    return Math.atan2(matrix.b, matrix.a) * (180 / Math.PI);
+  });
+}
+
+// Whether the angle changes over a short interval. The spin eases in and out, so poll this.
+async function isTurning(page: Page, rotation: Locator) {
+  const before = await angleOf(rotation);
+  await page.waitForTimeout(150);
+  return (await angleOf(rotation)) !== before;
+}
+
+// Marks the page if cached glyphs are rasterized again from here on. A font that finishes
+// loading redraws the cache, which is correct, so redraws made while fonts load do not count:
+// on a busy machine the Next.js dev overlay's own font can arrive in the middle of a test.
+function watchForTextRedraws(page: Page) {
+  return page.evaluate(() => {
+    let fontsLoading = document.fonts.status === "loading";
+    document.fonts.addEventListener("loading", () => (fontsLoading = true));
+    // Added after the block's own listener, so it runs once that listener has redrawn.
+    document.fonts.addEventListener("loadingdone", () => (fontsLoading = false));
+    const original = CanvasRenderingContext2D.prototype.fillText;
+    CanvasRenderingContext2D.prototype.fillText = function (...args: Parameters<typeof original>) {
+      if (!fontsLoading) document.documentElement.dataset.textRedrawn = "true";
+      return original.apply(this, args);
+    };
+  });
+}
+
+function scalesOf(spiral: Locator) {
+  return spiral
+    .locator("[data-spiral-coil]")
+    .evaluateAll((elements) =>
+      elements.map((element) => new DOMMatrix(getComputedStyle(element).transform).a),
+    );
+}
 
 test.beforeEach(async ({ page }) => {
   await page.goto("/blocks/spiral-text");
@@ -21,13 +63,7 @@ test("rapid re-grabs reuse the cached text pixels", async ({ page }) => {
   await spiral.scrollIntoViewIfNeeded();
   const count = await spiral.locator("[data-spiral-coil]").count();
   await expect(spiral.locator("canvas[data-ready=true]")).toHaveCount(count);
-  await page.evaluate(() => {
-    const original = CanvasRenderingContext2D.prototype.fillText;
-    CanvasRenderingContext2D.prototype.fillText = function (...args: Parameters<typeof original>) {
-      document.documentElement.dataset.textRedrawn = "true";
-      return original.apply(this, args);
-    };
-  });
+  await watchForTextRedraws(page);
   await spiral.hover();
   for (let i = 0; i < 6; i++) {
     await page.mouse.down();
@@ -69,13 +105,7 @@ test("theme changes recolor cached text without rasterizing the glyphs again", a
   const spiral = page.getByRole("img", { name: "THE CONTENT ARCHITECTURE ·" });
   const canvas = spiral.locator("canvas").nth(5);
   await expect(canvas).toHaveAttribute("data-ready", "true");
-  await page.evaluate(() => {
-    const original = CanvasRenderingContext2D.prototype.fillText;
-    CanvasRenderingContext2D.prototype.fillText = function (...args: Parameters<typeof original>) {
-      document.documentElement.dataset.textRedrawn = "true";
-      return original.apply(this, args);
-    };
-  });
+  await watchForTextRedraws(page);
   for (const theme of ["dark", "light", "dark"]) {
     await page.getByRole("switch", { name: "Dark theme", exact: true }).click();
     await expect(page.locator("html")).toHaveClass(theme);
@@ -103,89 +133,78 @@ test("theme changes recolor cached text without rasterizing the glyphs again", a
   }
 });
 
-test("re-grabbing preserves ring velocity as well as position", async ({ page }) => {
+test("release starts a visible ripple within five frames", async ({ page }) => {
   const spiral = page.getByRole("img", { name: "THE CONTENT ARCHITECTURE ·" });
-  await spiral.hover();
-  await page.mouse.down();
-  await page.waitForTimeout(500);
-  await page.mouse.up();
-  const velocities = await spiral.evaluate((root) => {
-    const ring = root.querySelector('[data-spiral-coil="2"]')!;
-    const wave = ring.getAnimations()[0];
-    wave.pause();
-    const scale = () => new DOMMatrix(getComputedStyle(ring).transform).a;
-    wave.currentTime = 298;
-    const before = scale();
-    wave.currentTime = 300;
-    const atPress = scale();
-    root.dispatchEvent(
-      new PointerEvent("pointerdown", { bubbles: true, pointerId: 1, pointerType: "mouse", button: 0 }),
-    );
-    const hold = ring.getAnimations()[0];
-    hold.pause();
-    hold.currentTime = 0;
-    const start = scale();
-    hold.currentTime = 2;
-    return {
-      before: (atPress - before) / 0.002,
-      after: (scale() - start) / 0.002,
-      jump: Math.abs(start - atPress),
-    };
-  });
-  expect(velocities.jump).toBeLessThan(0.001);
-  expect(Math.abs(velocities.after - velocities.before)).toBeLessThan(0.35);
-});
-
-test("release starts a visible ripple within 80ms", async ({ page }) => {
-  const spiral = page.getByRole("img", { name: "THE CONTENT ARCHITECTURE ·" });
-  const inner = spiral.locator("[data-spiral-coil]").first();
   await spiral.hover();
   await page.mouse.down();
   await page.waitForTimeout(700);
-  await page.mouse.up();
-  // Read the ripple 80ms into its own timeline. A wall-clock wait would also measure how late a
-  // loaded machine renders, rather than when the ripple begins.
-  const opacity = await inner.evaluate((element) => {
-    const ripple = element.getAnimations().at(-1);
-    if (!ripple) return Number(getComputedStyle(element).opacity);
-    ripple.pause();
-    ripple.currentTime = 80;
-    const value = Number(getComputedStyle(element).opacity);
-    ripple.play();
-    return value;
+  // Count frames from the release itself. A wall-clock wait would also measure how late a
+  // loaded machine delivers the input, rather than when the ripple begins.
+  await spiral.evaluate((root) => {
+    const inner = root.querySelector("[data-spiral-coil]")!;
+    root.addEventListener(
+      "pointerup",
+      () => {
+        let frames = 0;
+        const sample = () => {
+          frames += 1;
+          if (Number(getComputedStyle(inner).opacity) < 0.9) root.dataset.rippleFrames = String(frames);
+          else if (frames < 60) requestAnimationFrame(sample);
+        };
+        requestAnimationFrame(sample);
+      },
+      { once: true },
+    );
   });
-  expect(opacity).toBeLessThan(0.9);
+  await page.mouse.up();
+  await expect(spiral).toHaveAttribute("data-ripple-frames", /^[1-5]$/);
 });
 
 test("a short hold carries its inward motion into release", async ({ page }) => {
   const spiral = page.getByRole("img", { name: "THE CONTENT ARCHITECTURE ·" });
   await spiral.hover();
-  await page.mouse.down();
-  const velocities = await spiral.evaluate((root) => {
+  // The wave takes about 700ms to reach this outer ring. Until then the ring should spend the
+  // inward speed it had at release, rather than freezing the moment the pointer lifts.
+  await spiral.evaluate((root) => {
     const ring = root.querySelector('[data-spiral-coil="11"]')!;
-    const hold = ring.getAnimations()[0];
-    hold.pause();
     const scale = () => new DOMMatrix(getComputedStyle(ring).transform).a;
-    hold.currentTime = 98;
-    const before = scale();
-    hold.currentTime = 100;
-    const atRelease = scale();
-    root.dispatchEvent(
-      new PointerEvent("pointerup", { bubbles: true, pointerId: 1, pointerType: "mouse", button: 0 }),
+    root.addEventListener(
+      "pointerup",
+      () => {
+        const atRelease = scale();
+        let tightest = atRelease;
+        let frames = 0;
+        const sample = () => {
+          frames += 1;
+          tightest = Math.min(tightest, scale());
+          if (frames < 12) requestAnimationFrame(sample);
+          else root.dataset.carried = String(atRelease - tightest);
+        };
+        requestAnimationFrame(sample);
+      },
+      { once: true },
     );
-    const wave = ring.getAnimations()[0];
-    wave.pause();
-    wave.currentTime = 0;
-    const start = scale();
-    wave.currentTime = 2;
-    return { before: (atRelease - before) / 0.002, after: (scale() - start) / 0.002 };
   });
-  expect(velocities.before).toBeLessThan(-0.5);
-  expect(Math.abs(velocities.after - velocities.before)).toBeLessThan(0.35);
+  await page.mouse.down();
+  await page.waitForTimeout(60);
+  await page.mouse.up();
+  await expect(spiral).toHaveAttribute("data-carried", /\d/);
+  expect(Number(await spiral.getAttribute("data-carried"))).toBeGreaterThan(0.002);
 });
 
-test("the running ripple does not depend on per-frame DOM writes", async ({ page }) => {
+test("the running ripple animates only transform and opacity", async ({ page }) => {
   const spiral = page.getByRole("img", { name: "THE CONTENT ARCHITECTURE ·" });
+  const count = await spiral.locator("[data-spiral-coil]").count();
+  await expect(spiral.locator("canvas[data-ready=true]")).toHaveCount(count);
+  const boxes = () =>
+    spiral.locator("[data-spiral-coil]").evaluateAll((elements) =>
+      elements.map((element) => {
+        const { width, height, left, top } = (element as HTMLElement).style;
+        const canvas = element.querySelector("canvas")!;
+        return [width, height, left, top, canvas.width, canvas.height];
+      }),
+    );
+  const resting = await boxes();
   await spiral.hover();
   await page.mouse.down();
   await page.waitForTimeout(500);
@@ -193,57 +212,35 @@ test("the running ripple does not depend on per-frame DOM writes", async ({ page
   await page.waitForTimeout(40);
   const inner = spiral.locator("[data-spiral-coil]").first();
   const before = await inner.evaluate((element) => getComputedStyle(element).transform);
+  // Record every inline style property the rings carry while the wave runs.
   await spiral.evaluate((element) => {
+    const seen = new Set<string>();
     new MutationObserver((records) => {
-      if (
-        records.some(
-          (record) => record.target instanceof HTMLElement && record.target.hasAttribute("data-spiral-coil"),
-        )
-      ) {
-        element.setAttribute("data-frame-style-write", "true");
+      for (const record of records) {
+        if (!(record.target instanceof HTMLElement) || !record.target.hasAttribute("data-spiral-coil"))
+          continue;
+        for (const property of Array.from(record.target.style)) seen.add(property);
+        element.dataset.animated = [...seen].sort().join(" ");
       }
     }).observe(element, { subtree: true, attributes: true, attributeFilter: ["style"] });
   });
   await page.waitForTimeout(200);
-  await expect(spiral).not.toHaveAttribute("data-frame-style-write", "true");
   await expect(inner).not.toHaveCSS("transform", before);
+  await expect(spiral).toHaveAttribute(
+    "data-animated",
+    "height left opacity top transform width will-change",
+  );
+  expect(await boxes()).toEqual(resting);
 });
 
 test("the shockwave stays circular and centered throughout release", async ({ page }) => {
   const spiral = page.getByRole("img", { name: "THE CONTENT ARCHITECTURE ·" });
   await spiral.hover();
   await page.mouse.down();
-  await spiral.evaluate((element) => {
-    element
-      .getAnimations({ subtree: true })
-      .filter((animation) => animation.id === "a1ui-spiral-tightening")
-      .forEach((animation) => animation.finish());
-  });
+  await expect.poll(async () => (await scalesOf(spiral))[11]).toBeCloseTo(0.86, 3);
   await page.mouse.up();
 
-  for (const time of [300, 600, 1100]) {
-    await spiral.evaluate((element, currentTime) => {
-      const animations = element
-        .getAnimations({ subtree: true })
-        .filter((animation) => animation.id === "a1ui-spiral-releasing");
-      if (!animations.length) throw new Error("No ripple animations are running");
-      for (const animation of animations) {
-        animation.pause();
-        animation.currentTime = currentTime;
-      }
-    }, time);
-    const scales = await spiral
-      .locator("[data-spiral-coil]")
-      .evaluateAll((elements) =>
-        elements.map((element) => new DOMMatrix(getComputedStyle(element).transform).a),
-      );
-    if (time === 300) {
-      expect(scales[2]).toBeGreaterThan(1);
-      expect(scales[11]).toBeCloseTo(0.86);
-    } else if (time === 1100) {
-      expect(scales[2]).toBeCloseTo(1);
-      expect(scales[11]).toBeGreaterThan(1);
-    }
+  const expectCircular = async () => {
     const radiusSpreads = await spiral.evaluate((element) => {
       const bounds = element.getBoundingClientRect();
       const center = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 };
@@ -261,7 +258,34 @@ test("the shockwave stays circular and centered throughout release", async ({ pa
     });
     expect(radiusSpreads.length).toBeGreaterThan(1);
     expect(Math.max(...radiusSpreads)).toBeLessThan(0.1);
-  }
+  };
+
+  // Each state lasts about half a second, so poll faster than the default backoff.
+  const intervals = [40];
+  // Early in the wave an inner ring swells past rest while an outer ring is still gathered.
+  await expect
+    .poll(
+      async () => {
+        const scales = await scalesOf(spiral);
+        return scales[2] > 1.02 && Math.abs(scales[11] - 0.86) < 0.005;
+      },
+      { intervals },
+    )
+    .toBe(true);
+  await expectCircular();
+  // Later the inner ring is back at rest and the swell has moved out to the outer ring.
+  await expect
+    .poll(
+      async () => {
+        const scales = await scalesOf(spiral);
+        return Math.abs(scales[2] - 1) < 0.005 && scales[11] > 1.01;
+      },
+      { intervals },
+    )
+    .toBe(true);
+  await expectCircular();
+  await expect(spiral).toHaveAttribute("data-interaction", "resting");
+  await expectCircular();
 });
 
 test("press and release animate without rebuilding glyph layout", async ({ page }) => {
@@ -285,37 +309,49 @@ test("press and release animate without rebuilding glyph layout", async ({ page 
 
 test("re-grabbing catches the moving rings without snapping or ending the new hold", async ({ page }) => {
   const spiral = page.getByRole("img", { name: "THE CONTENT ARCHITECTURE ·" });
-  const inner = spiral.locator("[data-spiral-coil]").nth(2);
-  const scale = () => inner.evaluate((element) => new DOMMatrix(getComputedStyle(element).transform).a);
   await spiral.hover();
   await page.mouse.down();
   await page.waitForTimeout(500);
   await page.mouse.up();
-  await spiral.evaluate((element) => {
-    for (const animation of element.getAnimations({ subtree: true })) {
-      if (animation.id !== "a1ui-spiral-releasing") continue;
-      animation.pause();
-      animation.currentTime = 300;
-    }
+  await page.waitForTimeout(250);
+  // Sample the ring as the press lands and on the frames after it. The listener sits on the
+  // element, so it reads the ring before the block has handled the press.
+  await spiral.evaluate((root) => {
+    const ring = root.querySelector('[data-spiral-coil="2"]')!;
+    const scale = () => new DOMMatrix(getComputedStyle(ring).transform).a;
+    root.addEventListener(
+      "pointerdown",
+      () => {
+        const samples = [scale()];
+        const sample = () => {
+          samples.push(scale());
+          if (samples.length < 5) requestAnimationFrame(sample);
+          else root.dataset.regrab = samples.join(" ");
+        };
+        requestAnimationFrame(sample);
+      },
+      { once: true },
+    );
   });
-  const before = await scale();
-  expect(before).toBeGreaterThan(1);
   await page.mouse.down();
-  // Read the starting keyframe before elapsed animation time can affect the comparison.
-  const start = await inner.evaluate((element) => {
-    const effect = element.getAnimations()[0]?.effect;
-    if (!(effect instanceof KeyframeEffect)) throw new Error("Missing tightening keyframes");
-    return new DOMMatrix(String(effect.getKeyframes()[0].transform)).a;
-  });
-  expect(Math.abs(start - before)).toBeLessThan(0.001);
+  await expect(spiral).toHaveAttribute("data-regrab", /\d/);
+  const samples = (await spiral.getAttribute("data-regrab"))!.split(" ").map(Number);
+  // The wave had swollen the ring past rest. A spring from there covers at most a quarter of
+  // the way to the gathered pose in one frame, even a late one. Snapping to rest or to that
+  // pose would cover far more.
+  expect(samples[0]).toBeGreaterThan(1.08);
+  const distance = samples[0] - 0.86;
+  for (let index = 1; index < samples.length; index++) {
+    expect(Math.abs(samples[index] - samples[index - 1])).toBeLessThan(distance * 0.35);
+  }
   await page.waitForTimeout(1900);
   await expect(spiral).toHaveAttribute("data-interaction", "tightening");
-  expect(await scale()).toBeCloseTo(0.86);
+  expect((await scalesOf(spiral))[2]).toBeCloseTo(0.86);
   await page.mouse.up();
   await expect(spiral).toHaveAttribute("data-interaction", "resting");
 });
 
-test("rapid touch presses and cancellations leave no stuck gesture or animation", async ({ page }) => {
+test("rapid touch presses and cancellations leave no stuck gesture or moving ring", async ({ page }) => {
   const spiral = page.getByRole("img", { name: "THE CONTENT ARCHITECTURE ·" });
   await spiral.scrollIntoViewIfNeeded();
   const errors: string[] = [];
@@ -337,65 +373,84 @@ test("rapid touch presses and cancellations leave no stuck gesture or animation"
     await expect(spiral).toHaveAttribute("data-interaction", "releasing");
   }
   await expect(spiral).toHaveAttribute("data-interaction", "resting");
-  const animations = await spiral.evaluate(
-    (element) =>
-      element.getAnimations({ subtree: true }).filter((animation) => animation.id.startsWith("a1ui-spiral-"))
-        .length,
-  );
-  expect(animations).toBe(0);
+  const scales = await scalesOf(spiral);
+  await page.waitForTimeout(100);
+  expect(scales.every((scale) => scale === 1)).toBe(true);
+  expect(await scalesOf(spiral)).toEqual(scales);
   expect(errors).toEqual([]);
   await session.detach();
 });
 
 test("text rotates by default while the background stays fixed", async ({ page }) => {
   const spiral = page.getByRole("img", { name: "THE CONTENT ARCHITECTURE ·" });
-  const rotatingLayer = spiral.locator("div").first();
-  const transform = () => rotatingLayer.evaluate((element) => getComputedStyle(element).transform);
+  const rotation = spiral.locator("[data-spiral-rotation]");
 
   await expect(page.getByRole("button", { name: "Rotate text" })).toHaveCount(0);
-  await expect(rotatingLayer).toHaveCSS("animation-play-state", "running");
-  const restingTransform = await transform();
-  await expect.poll(transform).not.toBe(restingTransform);
+  await expect.poll(() => isTurning(page, rotation)).toBe(true);
 
-  // Grabbing pauses the spin immediately, then release resumes it.
+  // Grabbing eases the spin to a stop, then release starts it turning again.
   await spiral.hover();
   await page.mouse.down();
   await expect(spiral).toHaveAttribute("data-interaction", "tightening");
-  await expect(rotatingLayer).toHaveCSS("animation-play-state", "paused");
+  await expect.poll(() => isTurning(page, rotation)).toBe(false);
   await page.mouse.up();
-  await expect(rotatingLayer).toHaveCSS("animation-play-state", "running");
+  await expect.poll(() => isTurning(page, rotation)).toBe(true);
   await expect(spiral).toHaveAttribute("data-interaction", "resting");
 
   await expect(spiral.locator(":scope > svg")).toHaveCSS("transform", "none");
 });
 
+test("the pause control stops the rotation at its current angle and resumes from it", async ({ page }) => {
+  const spiral = page.getByRole("img", { name: "THE CONTENT ARCHITECTURE ·" });
+  const rotation = spiral.locator("[data-spiral-rotation]");
+  await expect.poll(() => angleOf(rotation)).toBeGreaterThan(1);
+
+  await page.getByRole("button", { name: "Pause rotation" }).click();
+  const atPause = await angleOf(rotation);
+  await expect.poll(() => isTurning(page, rotation)).toBe(false);
+  // It coasts to a stop a little past where it was paused, rather than snapping back to zero.
+  const stopped = await angleOf(rotation);
+  expect(stopped).toBeGreaterThanOrEqual(atPause);
+  expect(stopped - atPause).toBeLessThan(3);
+
+  await page.getByRole("button", { name: "Resume rotation" }).click();
+  // It picks up from the angle it stopped at. The bound allows a slow machine two seconds.
+  const resumed = await angleOf(rotation);
+  expect(resumed).toBeGreaterThanOrEqual(stopped);
+  expect(resumed - stopped).toBeLessThan(12);
+  await expect.poll(() => isTurning(page, rotation)).toBe(true);
+});
+
 test("rotation respects changes to reduced motion", async ({ page }) => {
   const spiral = page.getByRole("img", { name: "THE CONTENT ARCHITECTURE ·" });
-  const rotatingLayer = spiral.locator("div").first();
-  await expect(rotatingLayer).toHaveCSS("animation-name", "spin");
+  const rotation = spiral.locator("[data-spiral-rotation]");
+  await expect.poll(() => angleOf(rotation)).toBeGreaterThan(1);
 
   await page.emulateMedia({ reducedMotion: "reduce" });
-  await expect(rotatingLayer).toHaveCSS("animation-name", "none");
-  await expect(rotatingLayer).toHaveCSS("transform", "none");
+  await expect.poll(() => isTurning(page, rotation)).toBe(false);
+  // The figure holds the angle it had reached instead of jumping back to upright.
+  const held = await angleOf(rotation);
+  expect(held).toBeGreaterThan(1);
 
   await page.emulateMedia({ reducedMotion: "no-preference" });
-  await expect(rotatingLayer).toHaveCSS("animation-name", "spin");
+  await expect.poll(() => isTurning(page, rotation)).toBe(true);
+  expect(await angleOf(rotation)).toBeGreaterThanOrEqual(held);
 });
 
 test("rotation pauses offscreen and resumes when visible", async ({ page }) => {
   const spiral = page.getByRole("img", { name: "THE CONTENT ARCHITECTURE ·" });
   const rotation = spiral.locator("[data-spiral-rotation]");
   await spiral.scrollIntoViewIfNeeded();
-  await expect(rotation).toHaveCSS("animation-play-state", "running");
+  await expect.poll(() => isTurning(page, rotation)).toBe(true);
   await spiral.hover();
   await page.mouse.down();
   await page.mouse.up();
   await expect(spiral).toHaveAttribute("data-interaction", "releasing");
   await page.getByRole("heading", { name: "API reference" }).scrollIntoViewIfNeeded();
-  await expect(rotation).toHaveCSS("animation-play-state", "paused");
+  await expect.poll(() => isTurning(page, rotation)).toBe(false);
   await expect(spiral).toHaveAttribute("data-interaction", "resting");
   await spiral.scrollIntoViewIfNeeded();
-  await expect(rotation).toHaveCSS("animation-play-state", "running");
+  await expect.poll(() => isTurning(page, rotation)).toBe(true);
 });
 
 for (const releaseOutside of [false, true]) {
@@ -424,33 +479,42 @@ for (const releaseOutside of [false, true]) {
     await page.mouse.up();
     await expect(spiral).toHaveAttribute("data-interaction", "releasing");
     await expect(spiral).toHaveAttribute("data-interaction", "resting");
-    await expect(coil).toHaveCSS("transform", "matrix(1, 0, 0, 1, 0, 0)");
+    await expect(coil).toHaveCSS("transform", restingTransform);
+    await expect(coil).toHaveCSS("opacity", "1");
     await expect(text).toHaveAttribute("x", restingX);
     await expect(text).toHaveAttribute("y", restingY);
   });
 }
 
-test("reduced motion keeps the spiral still throughout a press and release", async ({ page }) => {
+test("reduced motion answers a press with a fade and keeps the spiral still", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.reload();
+  await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
   const spiral = page.getByRole("img", { name: "THE CONTENT ARCHITECTURE ·" });
   await spiral.scrollIntoViewIfNeeded();
-  const text = spiral.locator("text").first();
-  // Observe the entire interaction so a transient geometry change also fails the test.
-  await text.evaluate((element) => {
-    const observer = new MutationObserver((records) => {
-      if (records.some((record) => ["x", "y"].includes(record.attributeName ?? ""))) {
-        element.setAttribute("data-geometry-changed", "true");
+  const rotation = spiral.locator("[data-spiral-rotation]");
+  await expect(rotation).toHaveCSS("transform", "none");
+  // Observe the entire interaction so a transient movement also fails the test.
+  await spiral.evaluate((element) => {
+    new MutationObserver((records) => {
+      for (const record of records) {
+        const target = record.target as HTMLElement;
+        const moved =
+          record.attributeName === "style"
+            ? !["", "none"].includes(target.style.transform)
+            : record.attributeName !== null;
+        if (moved) element.setAttribute("data-moved", "true");
       }
-    });
-    observer.observe(element, { attributes: true, attributeFilter: ["x", "y"] });
+    }).observe(element, { subtree: true, attributes: true, attributeFilter: ["style", "x", "y"] });
   });
-  await page.clock.install();
   await spiral.hover();
   await page.mouse.down();
   await expect(spiral).toHaveAttribute("data-interaction", "pressed-reduced");
-  await page.clock.runFor(1300);
+  await expect(rotation).toHaveCSS("opacity", "0.7");
+  await page.waitForTimeout(600);
   await page.mouse.up();
   await expect(spiral).toHaveAttribute("data-interaction", "resting");
-  await page.clock.runFor(1300);
-  await expect(text).not.toHaveAttribute("data-geometry-changed", "true");
+  await expect(rotation).toHaveCSS("opacity", "1");
+  await page.waitForTimeout(600);
+  await expect(spiral).not.toHaveAttribute("data-moved", "true");
 });
