@@ -3,6 +3,23 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ArcReel, type ArcReelProps } from "./arc-reel";
 
+// Motion keeps the requestAnimationFrame it finds when it loads, which is before the fake timers
+// exist. Hand it one that looks up the current implementation, so its springs advance with them.
+vi.hoisted(() => {
+  const real = globalThis.requestAnimationFrame;
+  const current = (callback: FrameRequestCallback) =>
+    (globalThis.requestAnimationFrame === current ? real : globalThis.requestAnimationFrame)(callback);
+  globalThis.requestAnimationFrame = current;
+});
+
+// Motion reads the reduced-motion query once per page, so tests flip the hook directly. Embla
+// watches the query itself, through the matchMedia stub below.
+const motionPreference = vi.hoisted(() => ({ reduced: false }));
+vi.mock("motion/react", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("motion/react")>()),
+  useReducedMotion: () => motionPreference.reduced,
+}));
+
 const items = [
   { id: "openai", name: "OpenAI" },
   { id: "anthropic", name: "Anthropic" },
@@ -49,6 +66,16 @@ function advance(milliseconds = 4000) {
   act(() => vi.advanceTimersByTime(milliseconds));
 }
 
+/**
+ * Advances one frame at a time with a microtask in between. Motion holds its clock still until a
+ * microtask runs, so its springs and fades only move when the frames are stepped this way.
+ */
+async function animateFor(milliseconds = 800) {
+  for (let elapsed = 0; elapsed < milliseconds; elapsed += 16) {
+    await act(async () => void vi.advanceTimersByTime(16));
+  }
+}
+
 function renderReel(props: Partial<ArcReelProps> = {}) {
   const result = render(<ArcReel items={items} {...props} />);
   advance(32);
@@ -61,6 +88,16 @@ function getViewport() {
 
 function getFrame(name: string) {
   return screen.getByRole("group", { name }).querySelector<HTMLElement>("[data-arc-reel-frame]")!;
+}
+
+function getTrack() {
+  return getViewport().firstElementChild as HTMLElement;
+}
+
+function trackOffset() {
+  const translation = getTrack().style.transform.match(/translate3d\(([^,]+)px/);
+  if (!translation) throw new Error("Track is missing its scroll transform");
+  return Number(translation[1]);
 }
 
 function projectedDepth(frame: HTMLElement) {
@@ -82,6 +119,7 @@ describe("ArcReel", () => {
 
   beforeEach(() => {
     vi.useFakeTimers();
+    motionPreference.reduced = false;
     viewportWidth = 800;
     layoutStyles = document.createElement("style");
     layoutStyles.textContent = '[aria-roledescription="slide"] { margin-right: 28px; }';
@@ -111,6 +149,9 @@ describe("ArcReel", () => {
 
   afterEach(() => {
     cleanup();
+    // Let Motion run the frame it has pending on this clock. Its loop would otherwise wait on a
+    // clock that no longer exists and never start again.
+    advance(32);
     layoutStyles.remove();
     vi.restoreAllMocks();
     vi.unstubAllGlobals();
@@ -382,12 +423,167 @@ describe("ArcReel", () => {
     expect(vi.getTimerCount()).toBe(0);
   });
 
+  it("presses an arrow on pointer-down and springs it back on release", async () => {
+    renderReel();
+    const next = screen.getByRole("button", { name: "Next provider" });
+    const previous = screen.getByRole("button", { name: "Previous provider" });
+    const scale = () => Number(next.style.transform.match(/scale\(([^)]+)\)/)?.[1] ?? 1);
+    fireEvent.pointerDown(next, { isPrimary: true, button: 0 });
+    await animateFor(64);
+    // The spring is under way before the click commits, and only the pressed arrow moves.
+    const pressing = scale();
+    expect(pressing).toBeLessThan(1);
+    expect(pressing).toBeGreaterThan(0.96);
+    expect(screen.getByRole("slider")).toHaveValue("0");
+    await animateFor();
+    expect(scale()).toBe(0.96);
+    expect(previous.style.transform).toBe("");
+
+    // A release that catches the spring mid-flight turns it around from where it is.
+    fireEvent.pointerUp(next, { isPrimary: true, button: 0 });
+    await animateFor(64);
+    fireEvent.pointerDown(next, { isPrimary: true, button: 0 });
+    const caught = scale();
+    expect(caught).toBeGreaterThan(0.96);
+    expect(caught).toBeLessThan(1);
+    await animateFor(32);
+    expect(Math.abs(scale() - caught)).toBeLessThan(0.02);
+    await animateFor();
+    expect(scale()).toBe(0.96);
+
+    fireEvent.pointerUp(next, { isPrimary: true, button: 0 });
+    await animateFor();
+    expect(scale()).toBe(1);
+    expect(next.querySelector("svg")!.style.opacity).toBe("");
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it("bends a moving reel toward the new card when an arrow is tapped mid-glide", () => {
+    renderReel();
+    const next = screen.getByRole("button", { name: "Next provider" });
+    const offsets = [trackOffset()];
+    const sample = (frames: number) => {
+      for (let frame = 0; frame < frames; frame += 1) {
+        advance(16);
+        offsets.push(trackOffset());
+      }
+    };
+    fireEvent.click(next);
+    sample(6);
+    fireEvent.click(next);
+    sample(6);
+    fireEvent.click(next);
+    sample(6);
+    expect(screen.getByRole("status")).not.toHaveTextContent("ElevenLabs, 4 of 9");
+    // Each tap moves the target without stopping or reversing the reel.
+    for (let index = 2; index < offsets.length; index += 1) {
+      expect(offsets[index]).toBeLessThan(offsets[index - 1]);
+    }
+    advance();
+    expect(screen.getByRole("status")).toHaveTextContent("ElevenLabs, 4 of 9");
+    expect(projectedDepth(getFrame("ElevenLabs, 4 of 9"))).toBeCloseTo(0);
+    expect(trackOffset()).toBeCloseTo(offsets[0] - 3 * 208);
+  });
+
+  it("dims the pressed arrow instead of scaling it with reduced motion", async () => {
+    motionPreference.reduced = true;
+    preference.matches = true;
+    renderReel();
+    const next = screen.getByRole("button", { name: "Next provider" });
+    const arrow = next.querySelector("svg")!;
+    fireEvent.pointerDown(next, { isPrimary: true, button: 0 });
+    await animateFor(400);
+    expect(arrow.style.opacity).toBe("0.5");
+    expect(next.style.transform).toBe("");
+    fireEvent.pointerUp(next, { isPrimary: true, button: 0 });
+    await animateFor(400);
+    expect(arrow.style.opacity).toBe("1");
+    expect(next.style.transform).toBe("");
+  });
+
+  it("fades the reel back in after each cut with reduced motion", async () => {
+    preference.matches = true;
+    renderReel();
+    const track = getTrack();
+    expect(track.style.opacity).toBe("1");
+    fireEvent.click(screen.getByRole("button", { name: "Next provider" }));
+    // The card is already in place; only the opacity is still moving.
+    expect(screen.getByRole("status")).toHaveTextContent("Anthropic, 2 of 9");
+    expect(projectedDepth(getFrame("Anthropic, 2 of 9"))).toBeCloseTo(0);
+    const resting = track.style.transform;
+    await animateFor(32);
+    expect(Number(track.style.opacity)).toBeGreaterThanOrEqual(0.4);
+    expect(Number(track.style.opacity)).toBeLessThan(0.5);
+    await animateFor(128);
+    expect(Number(track.style.opacity)).toBeGreaterThan(0.6);
+    expect(Number(track.style.opacity)).toBeLessThan(1);
+    await animateFor();
+    expect(track.style.opacity).toBe("1");
+    expect(track.style.transform).toBe(resting);
+
+    // Key repeat keeps the reel dim instead of flashing it on every step.
+    const dimmest: number[] = [];
+    for (let press = 0; press < 4; press += 1) {
+      fireEvent.keyDown(getViewport(), { key: "ArrowRight" });
+      await animateFor(32);
+      dimmest.push(Number(track.style.opacity));
+    }
+    expect(Math.max(...dimmest)).toBeLessThan(0.5);
+    await animateFor();
+    expect(track.style.opacity).toBe("1");
+    expect(screen.getByRole("status")).toHaveTextContent("DeepSeek, 6 of 9");
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it("cuts to the nearest card after a drag with reduced motion, and leaves a plain click alone", async () => {
+    preference.matches = true;
+    renderReel();
+    const track = getTrack();
+    const resting = trackOffset();
+    fireEvent.mouseDown(getViewport(), { button: 0, buttons: 1, clientX: 400, clientY: 100 });
+    fireEvent.mouseUp(document, { button: 0, clientX: 400, clientY: 100 });
+    await animateFor(32);
+    expect(track.style.opacity).toBe("1");
+    expect(trackOffset()).toBeCloseTo(resting);
+
+    fireEvent.mouseDown(getViewport(), { button: 0, buttons: 1, clientX: 400, clientY: 100 });
+    for (let x = 380; x >= 240; x -= 20) {
+      fireEvent.mouseMove(document, { buttons: 1, clientX: x, clientY: 100 });
+      await animateFor(16);
+    }
+    // The reel follows the pointer while it is held.
+    expect(trackOffset()).toBeLessThan(resting - 100);
+    expect(track.style.opacity).toBe("1");
+    fireEvent.mouseUp(document, { button: 0, clientX: 240, clientY: 100 });
+    const landed = trackOffset();
+    expect(Math.abs((resting - landed) % 208)).toBeCloseTo(0);
+    expect(landed).toBeLessThan(resting);
+    await animateFor(32);
+    expect(Number(track.style.opacity)).toBeLessThan(0.5);
+    await animateFor();
+    expect(trackOffset()).toBeCloseTo(landed);
+    expect(track.style.opacity).toBe("1");
+  });
+
+  it("stops the reduced-motion fade when unmounted", async () => {
+    preference.matches = true;
+    const { unmount } = renderReel();
+    fireEvent.click(screen.getByRole("button", { name: "Next provider" }));
+    await animateFor(32);
+    expect(vi.getTimerCount()).toBeGreaterThan(0);
+    unmount();
+    await animateFor(32);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
   it("disconnects observers and cancels animation when unmounted during a scroll", () => {
     const { unmount } = renderReel();
     fireEvent.click(screen.getByRole("button", { name: "Next provider" }));
     advance(48);
     expect(vi.getTimerCount()).toBeGreaterThan(0);
     unmount();
+    // Motion runs one last frame to clean up after its elements. Nothing asks for another.
+    advance(16);
     expect(vi.getTimerCount()).toBe(0);
     expect(ResizeObserverStub.instances.length).toBeGreaterThan(0);
     expect(IntersectionObserverStub.instances.length).toBeGreaterThan(0);

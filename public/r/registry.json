@@ -417,6 +417,7 @@
       "title": "Arc Reel",
       "description": "An infinitely looping reel with curved provider cards and synchronized scroll controls.",
       "dependencies": [
+        "motion",
         "embla-carousel-react@^8.6.0"
       ],
       "files": [

@@ -14,7 +14,7 @@ async function expectCentered(viewport: Locator, name: string) {
 test.beforeEach(async ({ page }) => {
   await page.goto("/blocks/arc-reel");
   await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
-  await expect(page).toHaveTitle("Arc Reel | a1ui");
+  await expect(page).toHaveTitle("Arc Reel — Animated React block | a1ui");
   await expect(page.getByRole("heading", { name: "Arc Reel", exact: true })).toBeVisible();
   await expect(page.getByRole("slider", { name: "Choose provider" })).toHaveValue("3");
 });
@@ -116,6 +116,108 @@ test("reduced motion jumps directly to the requested card", async ({ page }) => 
   const activeCard = (await carousel.locator('[aria-current="true"]').boundingBox())!;
   const frame = (await carousel.boundingBox())!;
   expect(Math.abs(activeCard.x + activeCard.width / 2 - frame.x - frame.width / 2)).toBeLessThan(2);
+});
+
+test("an arrow gives on pointer-down and springs back after the release", async ({ page }) => {
+  const carousel = page.getByRole("region", { name: "AI provider arc reel" });
+  const slider = carousel.getByRole("slider");
+  const next = carousel.getByRole("button", { name: "Next provider" });
+  const size = await next.evaluate((button: HTMLElement) => button.offsetWidth);
+  const width = () => next.evaluate((button) => button.getBoundingClientRect().width);
+
+  await next.hover();
+  expect(await width()).toBeCloseTo(size, 1);
+  await page.mouse.down();
+  await expect.poll(width).toBeCloseTo(size * 0.96, 1);
+  // The press is answered before anything is chosen. The click commits on release.
+  await expect(slider).toHaveValue("3");
+  await page.mouse.up();
+  await expect(slider).toHaveValue("4");
+  await expect.poll(width).toBeCloseTo(size, 1);
+  await expect(next.locator("svg")).toHaveCSS("opacity", "1");
+});
+
+test("arrow taps during a glide move the target without stopping the reel", async ({ page }) => {
+  const carousel = page.getByRole("region", { name: "AI provider arc reel" });
+  const viewport = carousel.getByRole("group", { name: "Reel cards.", exact: false });
+  const track = viewport.locator(":scope > div");
+  const slider = carousel.getByRole("slider");
+  const next = carousel.getByRole("button", { name: "Next provider" });
+  await next.scrollIntoViewIfNeeded();
+  const bounds = (await next.boundingBox())!;
+  const point = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 };
+
+  // Sample the rendered track until it rests on the third card along.
+  const sampling = track.evaluate(
+    (element) =>
+      new Promise<number[]>((resolve) => {
+        const scrubber = element.closest("section")!.querySelector<HTMLInputElement>('input[type="range"]')!;
+        const samples: number[] = [];
+        let still = 0;
+        const sample = () => {
+          const x = new DOMMatrixReadOnly(getComputedStyle(element).transform).m41;
+          const resting = scrubber.value === "6" && Math.abs(x - samples.at(-1)!) < 0.01;
+          still = resting ? still + 1 : 0;
+          samples.push(x);
+          if (still < 20 && samples.length < 900) requestAnimationFrame(sample);
+          else resolve(samples);
+        };
+        requestAnimationFrame(sample);
+      }),
+  );
+  // Raw clicks, so nothing waits for the pressed arrow or the reel to settle between taps.
+  await page.mouse.click(point.x, point.y);
+  await page.mouse.click(point.x, point.y);
+  await page.mouse.click(point.x, point.y);
+  const positions = await sampling;
+
+  await expect(slider).toHaveValue("6");
+  await expectCentered(viewport, "Runway, 7 of 9");
+  expect(positions[0] - positions.at(-1)!).toBeGreaterThan(500);
+  for (let index = 1; index < positions.length; index += 1) {
+    expect(positions[index]).toBeLessThanOrEqual(positions[index - 1] + 0.01);
+  }
+});
+
+test("reduced motion dims the pressed arrow and fades the reel back in after the cut", async ({ page }) => {
+  // Motion reads the preference when the arrows mount, so it is set before the page loads.
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.reload();
+  await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
+  const carousel = page.getByRole("region", { name: "AI provider arc reel" });
+  const viewport = carousel.getByRole("group", { name: "Reel cards.", exact: false });
+  const track = viewport.locator(":scope > div");
+  const slider = carousel.getByRole("slider");
+  const next = carousel.getByRole("button", { name: "Next provider" });
+  await expect(slider).toHaveValue("3");
+  await expect(track).toHaveCSS("opacity", "1");
+
+  // Watch the reel's opacity until it has dipped and recovered.
+  const dimmest = track.evaluate(
+    (element) =>
+      new Promise<number>((resolve) => {
+        let lowest = 1;
+        let frames = 0;
+        const sample = () => {
+          const opacity = Number(getComputedStyle(element).opacity);
+          lowest = Math.min(lowest, opacity);
+          frames += 1;
+          if ((lowest < 1 && opacity === 1) || frames > 600) resolve(lowest);
+          else requestAnimationFrame(sample);
+        };
+        requestAnimationFrame(sample);
+      }),
+  );
+  await next.hover();
+  await page.mouse.down();
+  await expect(next.locator("svg")).toHaveCSS("opacity", "0.5");
+  await expect(next).toHaveCSS("transform", "none");
+  await page.mouse.up();
+  await expect(slider).toHaveValue("4");
+  await expectCentered(viewport, "Mistral AI, 5 of 9");
+  expect(await dimmest).toBeLessThan(0.6);
+  await expect(track).toHaveCSS("opacity", "1");
+  await expect(next.locator("svg")).toHaveCSS("opacity", "1");
 });
 
 test("dragging crosses the seam in either direction without hitting an endpoint", async ({ page }) => {
@@ -249,7 +351,9 @@ test("touch swipes work on narrow screens without overflowing the page", async (
   await context.close();
 });
 
-test("the registry includes installable source and its carousel dependency", async ({ request }) => {
+test("the registry includes installable source and its Motion and carousel dependencies", async ({
+  request,
+}) => {
   const response = await request.get("/r/arc-reel.json");
   expect(response.ok()).toBeTruthy();
   const item = await response.json();
@@ -257,5 +361,7 @@ test("the registry includes installable source and its carousel dependency", asy
   expect(item.title).toBe("Arc Reel");
   expect(item.files[0].path).toBe("src/registry/blocks/arc-reel.tsx");
   expect(item.dependencies).toContain("embla-carousel-react@^8.6.0");
+  expect(item.dependencies).toContain("motion");
+  expect(item.files[0].content).toContain('from "motion/react"');
   expect(item.files[0].content).toContain("export function ArcReel");
 });
