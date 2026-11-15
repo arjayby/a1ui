@@ -116,7 +116,7 @@
       "type": "registry:block",
       "title": "Text Banner",
       "description": "Bold text and staggered pixel separators in a seamless, infinitely scrolling banner.",
-      "dependencies": ["clsx"],
+      "dependencies": ["clsx", "motion"],
       "files": [
         {
           "path": "src/registry/blocks/text-banner.tsx",
@@ -132,7 +132,7 @@
             "Plain text only. Repeated content is decorative and cannot contain links or controls."
           ],
           "requirements": [
-            "Supply items and a pause control using the paused prop. Requires ResizeObserver. Reduced motion displays one static sequence."
+            "Supply items and a pause control using the paused prop. Requires ResizeObserver and IntersectionObserver. Reduced motion displays one static sequence."
           ]
         }
       }

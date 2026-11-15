@@ -2,12 +2,22 @@
 
 import { clsx } from "clsx";
 import {
+  animate,
+  cancelFrame,
+  frame,
+  hover,
+  motion,
+  useInView,
+  useMotionValue,
+  type FrameData,
+} from "motion/react";
+import {
   useEffect,
   useLayoutEffect,
   useRef,
   useState,
+  useSyncExternalStore,
   type ComponentPropsWithoutRef,
-  type CSSProperties,
 } from "react";
 
 export interface TextBannerProps extends Omit<
@@ -21,6 +31,26 @@ export interface TextBannerProps extends Omit<
   pauseOnHover?: boolean;
   separator?: string;
 }
+
+// Critically damped, so the banner eases to a new speed or a stop without overshooting. A spring
+// starts from the velocity it already has: a change made mid-ease bends the motion instead of
+// cutting it, and a reversal slows through a stop rather than hitting a wall.
+const VELOCITY_SPRING = { type: "spring", visualDuration: 0.4, bounce: 0 } as const;
+
+// Motion's useReducedMotion reads the setting once. The banner also has to stop and restart when
+// the setting changes, so it subscribes to the query. The server snapshot is `false`, which keeps
+// the first client render identical to the server HTML.
+const REDUCED_MOTION = "(prefers-reduced-motion: reduce)";
+function subscribeToReducedMotion(notify: () => void) {
+  const query = window.matchMedia(REDUCED_MOTION);
+  query.addEventListener("change", notify);
+  return () => query.removeEventListener("change", notify);
+}
+const prefersReducedMotion = () => window.matchMedia(REDUCED_MOTION).matches;
+const assumeFullMotion = () => false;
+
+/** Where the track sits for a phase between 0 and 1, as a percentage of its own width. */
+const trackOffset = (phase: number, copies: number) => `${((phase - 1) * 50) / copies}%`;
 
 const styles = `
   [data-slot="text-banner"] {
@@ -42,9 +72,8 @@ const styles = `
   [data-slot="text-banner"] .a1ui-text-banner-track {
     display: flex;
     width: max-content;
-    animation: a1ui-text-banner-scroll var(--text-banner-duration, 20s) linear infinite;
-    animation-direction: var(--text-banner-direction, normal);
-    animation-play-state: var(--text-banner-play-state, paused);
+    /* Motion moves the track every frame, so it stays on its own layer. */
+    will-change: transform;
   }
   [data-slot="text-banner"] .a1ui-text-banner-group,
   [data-slot="text-banner"] .a1ui-text-banner-unit,
@@ -68,17 +97,13 @@ const styles = `
     height: 0.5em;
     flex: none;
   }
-  [data-slot="text-banner"][data-pause-on-hover="true"]:hover .a1ui-text-banner-track {
-    animation-play-state: paused;
-  }
-  @keyframes a1ui-text-banner-scroll {
-    from { transform: translateX(-50%); }
-    to { transform: translateX(0); }
-  }
+  /* Reduced motion lays the phrases out once, wrapped and centered. This is layout, so it is
+     in place before hydration; the component stops the loop from the same media query. */
   @media (prefers-reduced-motion: reduce) {
     [data-slot="text-banner"] .a1ui-text-banner-track {
       width: 100%;
-      animation: none;
+      transform: none !important;
+      will-change: auto;
     }
     [data-slot="text-banner"] .a1ui-text-banner-group {
       width: 100%;
@@ -116,13 +141,30 @@ export function TextBanner({
   ...props
 }: TextBannerProps) {
   const rootRef = useRef<HTMLDivElement>(null);
-  const trackRef = useRef<HTMLDivElement>(null);
   const unitRef = useRef<HTMLDivElement>(null);
-  const directionRef = useRef(direction);
   const [layout, setLayout] = useState({ copies: 1, unitWidth: 0 });
+  const [hovered, setHovered] = useState(false);
+  const reducedMotion = useSyncExternalStore(
+    subscribeToReducedMotion,
+    prefersReducedMotion,
+    assumeFullMotion,
+  );
+  const inView = useInView(rootRef);
   const safeSpeed = Number.isFinite(speed) ? Math.max(0, speed) : 80;
   const visibleItems = items.filter((item) => item.trim().length > 0);
   const hasItems = visibleItems.length > 0;
+  const { copies, unitWidth } = layout;
+
+  // The scroll position is one continuous value: how far the loop is through a single unit, from
+  // 0 to 1. Every unit is identical, so wrapping it lands on the same picture. Velocity is in
+  // pixels per second, positive to the right, and is the only thing the props ever change.
+  const phase = useRef(0);
+  const velocity = useMotionValue(0);
+  const x = useMotionValue(trackOffset(0, 1));
+
+  const held = paused || safeSpeed === 0 || (pauseOnHover && hovered);
+  const state = reducedMotion ? "reduced" : held ? "paused" : "running";
+  const targetVelocity = state === "running" ? (direction === "right" ? safeSpeed : -safeSpeed) : 0;
 
   useEffect(() => {
     const root = rootRef.current;
@@ -132,11 +174,13 @@ export function TextBanner({
     // The first unit includes its trailing gap. Observe it for text, font,
     // and size changes so both halves always cover the full container.
     const observer = new ResizeObserver(() => {
-      const unitWidth = unit.getBoundingClientRect().width;
-      if (unitWidth <= 0) return;
-      const copies = Math.max(1, Math.ceil(root.clientWidth / unitWidth));
+      const width = unit.getBoundingClientRect().width;
+      if (width <= 0) return;
+      const count = Math.max(1, Math.ceil(root.clientWidth / width));
       setLayout((current) =>
-        current.copies === copies && current.unitWidth === unitWidth ? current : { copies, unitWidth },
+        current.copies === count && current.unitWidth === width
+          ? current
+          : { copies: count, unitWidth: width },
       );
     });
     observer.observe(root);
@@ -144,17 +188,67 @@ export function TextBanner({
     return () => observer.disconnect();
   }, [hasItems]);
 
+  // The offset is a share of the track's width, which changes with the number of copies. Restating
+  // it in the same commit keeps the text where it was.
   useLayoutEffect(() => {
-    if (directionRef.current === direction) return;
-    directionRef.current = direction;
-    // Flipping animation-direction mirrors the loop's progress, which would make the text jump.
-    // Seek to the mirrored time so the reversal starts from the position already on screen.
-    for (const animation of trackRef.current?.getAnimations() ?? []) {
-      const duration = Number(animation.effect?.getTiming().duration);
-      const time = Number(animation.currentTime);
-      if (duration > 0 && Number.isFinite(time)) animation.currentTime = duration - (time % duration);
+    x.set(trackOffset(phase.current, copies));
+  }, [copies, x]);
+
+  useEffect(() => {
+    if (reducedMotion) {
+      velocity.jump(0);
+      return;
     }
-  }, [direction]);
+    const controls = animate(velocity, targetVelocity, VELOCITY_SPRING);
+    return () => controls.stop();
+  }, [reducedMotion, targetVelocity, velocity]);
+
+  useEffect(() => {
+    // Off screen the loop is frozen outright and later picks up at full speed: nobody sees that cut.
+    if (!inView || reducedMotion || unitWidth <= 0) return;
+    let running = false;
+
+    // Motion clamps long gaps between frames, so a stalled tab cannot fling the text forward.
+    function tick({ delta }: FrameData) {
+      const speed = velocity.get();
+      if (speed === 0) {
+        cancelFrame(tick);
+        running = false;
+        return;
+      }
+      const next = phase.current + (speed * delta) / 1000 / unitWidth;
+      phase.current = next - Math.floor(next);
+      x.set(trackOffset(phase.current, copies));
+    }
+
+    // The loop only runs while the banner is moving, and a change in velocity wakes it.
+    function wake(speed: number) {
+      if (running || speed === 0) return;
+      running = true;
+      frame.update(tick, true);
+    }
+
+    wake(velocity.get());
+    const unsubscribe = velocity.on("change", wake);
+    return () => {
+      unsubscribe();
+      cancelFrame(tick);
+    };
+  }, [copies, inView, reducedMotion, unitWidth, velocity, x]);
+
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!pauseOnHover || !root) return;
+    // Motion's hover ignores the hover a touch leaves behind, which would hold the banner still.
+    const stop = hover(root, () => {
+      setHovered(true);
+      return () => setHovered(false);
+    });
+    return () => {
+      stop();
+      setHovered(false);
+    };
+  }, [pauseOnHover, hasItems]);
 
   if (!hasItems) return null;
 
@@ -163,23 +257,17 @@ export function TextBanner({
       {...props}
       ref={rootRef}
       data-slot="text-banner"
+      data-motion={state}
       data-pause-on-hover={pauseOnHover}
       className={clsx("isolate", className)}
-      style={
-        {
-          "--text-banner-duration": `${(layout.unitWidth * layout.copies) / (safeSpeed || 80)}s`,
-          "--text-banner-direction": direction === "right" ? "normal" : "reverse",
-          "--text-banner-play-state": paused || safeSpeed === 0 || !layout.unitWidth ? "paused" : "running",
-          ...style,
-        } as CSSProperties
-      }
+      style={style}
     >
       <style>{styles}</style>
       <span className="sr-only">{visibleItems.join(" · ")}</span>
-      <div ref={trackRef} className="a1ui-text-banner-track" aria-hidden="true" dir="ltr">
+      <motion.div className="a1ui-text-banner-track" aria-hidden="true" dir="ltr" style={{ x }}>
         {[0, 1].map((group) => (
           <div key={group} className="a1ui-text-banner-group">
-            {Array.from({ length: layout.copies }, (_, copy) => (
+            {Array.from({ length: copies }, (_, copy) => (
               <div
                 key={copy}
                 ref={group === 0 && copy === 0 ? unitRef : undefined}
@@ -201,7 +289,7 @@ export function TextBanner({
             ))}
           </div>
         ))}
-      </div>
+      </motion.div>
     </div>
   );
 }

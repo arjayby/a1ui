@@ -46,15 +46,29 @@ export function BannerExample() {
   </Tab>
 </Tabs>
 
+## Behaviour
+
+[Motion](https://motion.dev) moves the banner. The scroll position is one continuous value, and the props only ever change its velocity through a critically damped spring. Pausing, resuming, changing `speed`, and flipping `direction` all continue from the text already on screen: the banner coasts to a stop, picks up again, or slows through a stop and heads back, with no jump and no hard cut. Only the track's `transform` is animated.
+
+The loop stops requesting frames while the banner is paused, at rest, or scrolled off screen.
+
+The root element carries `data-motion` with the current state: `running`, `paused`, or `reduced`.
+
+## Accessibility
+
+- The phrases are read once from visually hidden text. The moving copies are hidden from assistive technology.
+- With reduced motion turned on, the banner does not move. It shows each phrase once, centered and wrapped to fit, and it starts or stops as soon as the setting changes.
+- Moving text needs a way to stop it. Wire a control to `paused`, as the demo does.
+
 ## API reference
 
-| Prop           | Type                | Default     | Description                                                                                      |
-| -------------- | ------------------- | ----------- | ------------------------------------------------------------------------------------------------ |
-| `items`        | `readonly string[]` | Required    | Words or phrases to repeat. Blank entries are ignored.                                           |
-| `speed`        | `number`            | `80`        | Movement in pixels per second. Zero or negative values pause. Non-finite values use the default. |
-| `direction`    | `"left" \| "right"` | `"right"`   | Direction of travel. The default moves left to right.                                            |
-| `paused`       | `boolean`           | `false`     | Pauses at the current position. Clearing it resumes the loop.                                    |
-| `pauseOnHover` | `boolean`           | `false`     | Pauses while a pointer is over the banner.                                                       |
-| `separator`    | `string`            | Pixel motif | Replaces the six-pixel motif with text. An empty string removes it.                              |
-| `className`    | `string`            | None        | Adds classes to the outer element.                                                               |
-| `style`        | `CSSProperties`     | None        | Changes background, color, font size, font family, or padding.                                   |
+| Prop           | Type                | Default     | Description                                                                                                                             |
+| -------------- | ------------------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `items`        | `readonly string[]` | Required    | Words or phrases to repeat. Blank entries are ignored.                                                                                  |
+| `speed`        | `number`            | `80`        | Movement in pixels per second. A change eases from the current speed. Zero or negative values pause. Non-finite values use the default. |
+| `direction`    | `"left" \| "right"` | `"right"`   | Direction of travel. The default moves left to right. A change slows the text through a stop and continues from where it is.            |
+| `paused`       | `boolean`           | `false`     | Eases to a stop and holds the position. Clearing it eases back up to speed from the same place.                                         |
+| `pauseOnHover` | `boolean`           | `false`     | Pauses while a mouse or pen pointer is over the banner. Touch does not trigger it.                                                      |
+| `separator`    | `string`            | Pixel motif | Replaces the six-pixel motif with text. An empty string removes it.                                                                     |
+| `className`    | `string`            | None        | Adds classes to the outer element.                                                                                                      |
+| `style`        | `CSSProperties`     | None        | Changes background, color, font size, font family, or padding.                                                                          |
