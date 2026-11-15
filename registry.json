@@ -142,7 +142,7 @@
       "type": "registry:block",
       "title": "Shape Flow",
       "description": "Text that reflows around a floating ASCII duck, powered by Pretext.",
-      "dependencies": ["@chenglou/pretext@^0.0.8", "clsx"],
+      "dependencies": ["@chenglou/pretext@^0.0.8", "clsx", "motion"],
       "files": [
         {
           "path": "src/registry/blocks/shape-flow.tsx",
