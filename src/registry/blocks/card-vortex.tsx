@@ -5,6 +5,7 @@ import { useReducedMotion } from "motion/react";
 import {
   useCallback,
   useEffect,
+  useId,
   useLayoutEffect,
   useRef,
   useState,
@@ -45,17 +46,35 @@ const cardVortexTheme = {
   "--card-vortex-border": "var(--border)",
   "--card-vortex-foreground": "var(--foreground)",
   "--card-vortex-accent": "var(--ring, var(--foreground))",
+  "--card-vortex-shadow": "0 1px 2px rgb(0 0 0 / 0.06), 0 12px 28px -10px rgb(0 0 0 / 0.28)",
 } as CSSProperties;
 
 const CLOSE_DELAY = 140;
-const MIN_FIT = 0.35;
+/** Below this the titles get too small to read and the cards too small to tap. */
+const MIN_FIT = 0.75;
+/** Room kept between the ring and the edge it fits inside, in pixels. */
+const EDGE = 8;
+const FOCUSABLE = "a[href],button:not([disabled]),[tabindex]:not([tabindex='-1'])";
 
-interface Geometry {
+interface Layout {
+  fit: number;
+  reach: number;
+  offsetX: number;
+  offsetY: number;
+  cardWidth: number;
+}
+
+interface Geometry extends Omit<Layout, "reach"> {
   angle: number;
   radius: number;
   fromAngle: number;
-  fit: number;
   reducedMotion: boolean;
+}
+
+/** How far to move a ring centered at `center` so `extent` either side of it stays between `start` and `end`. */
+function shiftInto(center: number, extent: number, start: number, end: number) {
+  if (end - start <= extent * 2) return (start + end) / 2 - center;
+  return Math.min(Math.max(center, start + extent), end - extent) - center;
 }
 
 function VortexCard({
@@ -74,48 +93,70 @@ function VortexCard({
   const ref = useRef<HTMLAnchorElement>(null);
   const [progress] = useState(() => motionValue(0));
   const geometryRef = useRef(geometry);
-  const { angle, radius, fromAngle, fit, reducedMotion } = geometry;
+  const { angle, radius, fromAngle, fit, offsetX, offsetY, cardWidth, reducedMotion } = geometry;
 
-  // Each card leaves the center heading for a neighbouring position and curves
+  // Each card leaves the trigger's center heading for a neighbouring position and curves
   // round to its own, growing from a dot and fading in as it goes. The spring writes straight to the element.
   const paint = useCallback(() => {
     const element = ref.current;
     if (!element) return;
-    const { angle, radius, fromAngle, fit, reducedMotion } = geometryRef.current;
+    const { angle, radius, fromAngle, fit, offsetX, offsetY, cardWidth, reducedMotion } = geometryRef.current;
     const p = progress.get();
     const shown = Math.max(0, p);
     const travel = reducedMotion ? 1 : p;
     const theta = ((angle + fromAngle * (1 - travel)) * Math.PI) / 180;
     const distance = radius * fit * travel;
+    // When the ring is moved away from an edge, its center slides there from the trigger.
+    const x = offsetX * travel + Math.cos(theta) * distance;
+    const y = offsetY * travel + Math.sin(theta) * distance;
     // A card is a single pixel wide at the center and full size on the ring.
-    const dot = 1 / Math.max(1, element.offsetWidth);
+    const dot = 1 / Math.max(1, cardWidth);
     const scale = reducedMotion ? fit : Math.max(dot, fit * Math.min(1, shown));
-    element.style.transform = `translate(-50%,-50%) translate3d(${(Math.cos(theta) * distance).toFixed(2)}px,${(Math.sin(theta) * distance).toFixed(2)}px,0) scale(${scale.toFixed(4)})`;
+    element.style.transform = `translate(-50%,-50%) translate3d(${x.toFixed(2)}px,${y.toFixed(2)}px,0) scale(${scale.toFixed(4)})`;
     element.style.opacity = Math.min(1, shown).toFixed(3);
     element.style.visibility = shown > 0.005 ? "visible" : "hidden";
-    // Titles sit at the top of each card, so lower cards stack above higher ones.
-    element.style.zIndex = String(Math.round((Math.sin((angle * Math.PI) / 180) + 1) * 10) + 1);
   }, [progress]);
 
   useLayoutEffect(() => {
-    geometryRef.current = { angle, radius, fromAngle, fit, reducedMotion };
+    geometryRef.current = {
+      angle,
+      radius,
+      fromAngle,
+      fit,
+      offsetX,
+      offsetY,
+      cardWidth,
+      reducedMotion,
+    };
+    // Titles sit at the top of each card, so lower cards stack above higher ones.
+    if (ref.current) {
+      ref.current.style.zIndex = String(Math.round((Math.sin((angle * Math.PI) / 180) + 1) * 10) + 1);
+    }
     paint();
-  }, [angle, radius, fromAngle, fit, reducedMotion, paint]);
+  }, [angle, radius, fromAngle, fit, offsetX, offsetY, cardWidth, reducedMotion, paint]);
 
   useEffect(() => progress.on("change", paint), [progress, paint]);
 
   useEffect(() => {
     // Cards enter one after another and leave in reverse order. Both springs are
-    // critically damped, and starting from the current value keeps a reversal smooth.
+    // critically damped and start from the current value. Only a card at rest waits
+    // its turn: one that is already moving turns round at once, so it never stalls.
+    const p = progress.get();
+    const fromRest = open ? p <= 0.001 : p >= 0.999;
     const controls = reducedMotion
       ? animate(progress, open ? 1 : 0, { duration: 0.15, ease: "linear" })
       : open
-        ? animate(progress, 1, { type: "spring", stiffness: 560, damping: 48, delay: index * 0.02 })
+        ? animate(progress, 1, {
+            type: "spring",
+            stiffness: 560,
+            damping: 48,
+            delay: fromRest ? index * 0.02 : 0,
+          })
         : animate(progress, 0, {
             type: "spring",
             stiffness: 760,
             damping: 56,
-            delay: (count - 1 - index) * 0.01,
+            delay: fromRest ? (count - 1 - index) * 0.01 : 0,
           });
     return () => controls.stop();
   }, [open, index, count, reducedMotion, progress]);
@@ -133,7 +174,7 @@ function VortexCard({
       ].join(" ")}
       draggable={false}
     >
-      <span className="block rounded-[calc(var(--radius,0.5rem)+2px)] border border-[var(--card-vortex-border)] bg-[var(--card-vortex-card)] p-1 text-[var(--card-vortex-foreground)] transition-transform duration-200 ease-out group-hover/card:scale-[1.05] group-focus-visible/card:scale-[1.05] group-focus-visible/card:outline-2 group-focus-visible/card:outline-offset-2 group-focus-visible/card:outline-[var(--card-vortex-accent)] group-active/card:scale-[0.98] motion-reduce:transition-none motion-reduce:group-hover/card:scale-100 motion-reduce:group-focus-visible/card:scale-100">
+      <span className="block rounded-[calc(var(--radius,0.5rem)+2px)] border border-[var(--card-vortex-border)] bg-[var(--card-vortex-card)] p-1 text-[var(--card-vortex-foreground)] [box-shadow:var(--card-vortex-shadow)] transition-transform duration-200 ease-out group-hover/card:scale-[1.05] group-focus-visible/card:scale-[1.05] group-focus-visible/card:outline-2 group-focus-visible/card:outline-offset-2 group-focus-visible/card:outline-[var(--card-vortex-accent)] group-active/card:scale-[0.98] group-active/card:duration-100 motion-reduce:transition-none motion-reduce:group-hover/card:scale-100 motion-reduce:group-focus-visible/card:scale-100">
         <span className="flex h-6 items-center justify-between gap-2 px-1.5">
           <span className="truncate text-xs leading-none font-medium">{item.title}</span>
           <svg
@@ -172,13 +213,21 @@ export function CardVortex({
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const touchWasOpen = useRef<boolean | null>(null);
   const skipFocusOpen = useRef(false);
+  const navId = useId();
   const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
-  const [layout, setLayout] = useState({ fit: 1, reach: 0 });
+  const [layout, setLayout] = useState<Layout>({
+    fit: 1,
+    reach: 0,
+    offsetX: 0,
+    offsetY: 0,
+    cardWidth: 0,
+  });
   const reducedMotion = useReducedMotion() ?? false;
   const open = controlledOpen ?? uncontrolledOpen;
 
-  // Shrink the ring when the trigger sits too close to an edge for it to fit:
-  // the viewport's sides, or every side of a [data-card-vortex-boundary] ancestor.
+  // Fit the ring inside the viewport, or inside a [data-card-vortex-boundary] ancestor.
+  // It scales down only as far as it must to fit at all, then moves its center away
+  // from any edge it would still cross, so the cards stay readable near an edge.
   const measure = useCallback(() => {
     const root = rootRef.current;
     const card = root?.querySelector<HTMLElement>("[data-card-vortex-card]");
@@ -186,20 +235,38 @@ export function CardVortex({
     const bounds = root.getBoundingClientRect();
     const x = bounds.left + bounds.width / 2;
     const y = bounds.top + bounds.height / 2;
-    const boundary = root.closest("[data-card-vortex-boundary]")?.getBoundingClientRect();
-    const halfWidth = card.offsetWidth / 2;
+    const area = root.closest("[data-card-vortex-boundary]")?.getBoundingClientRect() ?? {
+      left: 0,
+      top: 0,
+      right: window.innerWidth,
+      bottom: window.innerHeight,
+    };
+    const left = area.left + EDGE;
+    const right = area.right - EDGE;
+    const top = area.top + EDGE;
+    const bottom = area.bottom - EDGE;
+    const cardWidth = card.offsetWidth;
+    const halfWidth = cardWidth / 2;
     const halfHeight = card.offsetHeight / 2;
-    const side = boundary
-      ? Math.min(x - boundary.left, boundary.right - x)
-      : Math.min(x, window.innerWidth - x);
-    let fit = (side - 8) / (radius + halfWidth);
-    if (boundary) {
-      fit = Math.min(fit, (Math.min(y - boundary.top, boundary.bottom - y) - 8) / (radius + halfHeight));
-    }
-    fit = Math.max(MIN_FIT, Math.min(1, fit));
-    const reach = Math.round(fit * (radius + Math.hypot(halfWidth, halfHeight)));
+    const fit = Math.max(
+      MIN_FIT,
+      Math.min(1, (right - left) / (2 * (radius + halfWidth)), (bottom - top) / (2 * (radius + halfHeight))),
+    );
+    const next: Layout = {
+      fit,
+      reach: Math.round(fit * (radius + Math.hypot(halfWidth, halfHeight))),
+      offsetX: Math.round(shiftInto(x, fit * (radius + halfWidth), left, right)),
+      offsetY: Math.round(shiftInto(y, fit * (radius + halfHeight), top, bottom)),
+      cardWidth,
+    };
     setLayout((current) =>
-      Math.abs(current.fit - fit) < 0.001 && current.reach === reach ? current : { fit, reach },
+      Math.abs(current.fit - next.fit) < 0.001 &&
+      current.reach === next.reach &&
+      current.offsetX === next.offsetX &&
+      current.offsetY === next.offsetY &&
+      current.cardWidth === next.cardWidth
+        ? current
+        : next,
     );
   }, [radius]);
 
@@ -207,11 +274,10 @@ export function CardVortex({
     (next: boolean) => {
       if (closeTimer.current) clearTimeout(closeTimer.current);
       closeTimer.current = null;
-      if (next) measure();
       setUncontrolledOpen(next);
       if (next !== open) onOpenChange?.(next);
     },
-    [measure, onOpenChange, open],
+    [onOpenChange, open],
   );
 
   const scheduleClose = () => {
@@ -231,9 +297,13 @@ export function CardVortex({
     [],
   );
 
+  // Measure before the browser paints, so the first frame of the cards already uses it.
+  useLayoutEffect(() => {
+    if (open) measure();
+  }, [open, measure]);
+
   useEffect(() => {
     if (!open) return;
-    measure();
     const closeOutside = (event: PointerEvent) => {
       if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
     };
@@ -244,6 +314,18 @@ export function CardVortex({
       document.removeEventListener("pointerdown", closeOutside);
     };
   }, [open, measure, setOpen]);
+
+  // Tell assistive technology that the trigger opens the cards' nav.
+  useEffect(() => {
+    const control = triggerRef.current?.querySelector<HTMLElement>(FOCUSABLE);
+    if (!control) return;
+    control.setAttribute("aria-expanded", String(open));
+    control.setAttribute("aria-controls", navId);
+    return () => {
+      control.removeAttribute("aria-expanded");
+      control.removeAttribute("aria-controls");
+    };
+  }, [open, navId]);
 
   if (items.length === 0) return <>{children}</>;
 
@@ -283,22 +365,24 @@ export function CardVortex({
         // Return focus to the trigger without that focus opening the ring again.
         if (!triggerRef.current?.contains(document.activeElement)) {
           skipFocusOpen.current = true;
-          triggerRef.current
-            ?.querySelector<HTMLElement>("a[href],button:not([disabled]),[tabindex]:not([tabindex='-1'])")
-            ?.focus();
+          triggerRef.current?.querySelector<HTMLElement>(FOCUSABLE)?.focus();
           skipFocusOpen.current = false;
         }
         setOpen(false);
       }}
     >
-      {/* Covers the ring while it is open so the pointer can cross the gaps between cards. */}
+      {/* Covers the ring while it is open so the pointer can cross the gaps between
+          cards. A press on it, between the cards, closes the ring. */}
       <span
         aria-hidden="true"
-        className={[
-          "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full",
-          open ? "" : "pointer-events-none",
-        ].join(" ")}
-        style={{ width: layout.reach * 2, height: layout.reach * 2 }}
+        data-card-vortex-area=""
+        className={["absolute top-1/2 left-1/2 rounded-full", open ? "" : "pointer-events-none"].join(" ")}
+        style={{
+          width: layout.reach * 2,
+          height: layout.reach * 2,
+          transform: `translate(-50%,-50%) translate(${layout.offsetX}px,${layout.offsetY}px)`,
+        }}
+        onPointerDown={() => setOpen(false)}
       />
       <div
         ref={triggerRef}
@@ -310,15 +394,19 @@ export function CardVortex({
         onPointerDown={(event) => {
           touchWasOpen.current = event.pointerType === "touch" ? open : null;
         }}
-        onClick={() => {
+        onClick={(event) => {
           // A tap toggles. Focus from the same tap may already have opened it.
-          if (touchWasOpen.current !== null) setOpen(!touchWasOpen.current);
+          const wasOpen = touchWasOpen.current;
           touchWasOpen.current = null;
+          if (wasOpen === null) return;
+          // The first tap on a link trigger opens the ring; the next one follows the link.
+          if (!wasOpen) event.preventDefault();
+          setOpen(!wasOpen);
         }}
       >
         {children}
       </div>
-      <nav aria-label={ariaLabel} className="absolute top-1/2 left-1/2 size-0">
+      <nav id={navId} aria-label={ariaLabel} className="absolute top-1/2 left-1/2 size-0">
         {items.map((item, index) => (
           <VortexCard
             key={item.id}
@@ -327,10 +415,13 @@ export function CardVortex({
             count={items.length}
             open={open}
             geometry={{
+              fit: layout.fit,
+              offsetX: layout.offsetX,
+              offsetY: layout.offsetY,
+              cardWidth: layout.cardWidth,
               angle: startAngle + (index * 360) / items.length,
               radius,
               fromAngle,
-              fit: layout.fit,
               reducedMotion,
             }}
           />

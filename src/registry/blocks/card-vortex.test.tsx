@@ -90,6 +90,63 @@ describe("CardVortex", () => {
     expect(root()).toHaveAttribute("data-state", "closed");
   });
 
+  it("opens on the first tap of a link trigger and follows the link on the second", () => {
+    render(
+      <CardVortex items={items}>
+        <a href="/work">Work</a>
+      </CardVortex>,
+    );
+    const link = screen.getByRole("link", { name: "Work" });
+    const touch = { pointerType: "touch" };
+
+    fireEvent.pointerDown(link, touch);
+    expect(fireEvent.click(link)).toBe(false);
+    expect(root()).toHaveAttribute("data-state", "open");
+
+    fireEvent.pointerDown(link, touch);
+    expect(fireEvent.click(link)).toBe(true);
+  });
+
+  it("closes on a press in the space between the cards", () => {
+    renderVortex();
+    fireEvent.pointerEnter(trigger(), mouse);
+    fireEvent.pointerDown(document.querySelector("[data-card-vortex-area]")!, { pointerType: "touch" });
+    expect(root()).toHaveAttribute("data-state", "closed");
+  });
+
+  it("marks the trigger as expanded and points it at the nav", () => {
+    renderVortex();
+    const button = screen.getByRole("button", { name: "Work" });
+    const nav = screen.getByRole("navigation", { name: "Selected work", hidden: true });
+    expect(button).toHaveAttribute("aria-expanded", "false");
+    expect(button).toHaveAttribute("aria-controls", nav.id);
+
+    fireEvent.pointerEnter(trigger(), mouse);
+    expect(button).toHaveAttribute("aria-expanded", "true");
+  });
+
+  it("moves the ring away from an edge instead of only shrinking it", () => {
+    const rect = vi
+      .spyOn(Element.prototype, "getBoundingClientRect")
+      .mockReturnValue(DOMRect.fromRect({ x: 10, y: 10, width: 40, height: 20 }));
+    const width = vi.spyOn(HTMLElement.prototype, "offsetWidth", "get").mockReturnValue(152);
+    const height = vi.spyOn(HTMLElement.prototype, "offsetHeight", "get").mockReturnValue(118);
+    vi.stubGlobal("innerWidth", 1024);
+    vi.stubGlobal("innerHeight", 768);
+    try {
+      renderVortex();
+      fireEvent.pointerEnter(trigger(), mouse);
+      // At full size the ring reaches 165 + 76 across and 165 + 59 down from its center,
+      // so it moves right and down until 8px of room is left at the top-left.
+      const area = document.querySelector<HTMLElement>("[data-card-vortex-area]")!;
+      expect(area.style.transform).toBe("translate(-50%,-50%) translate(219px,212px)");
+    } finally {
+      rect.mockRestore();
+      width.mockRestore();
+      height.mockRestore();
+    }
+  });
+
   it("closes on a press outside and on Escape", () => {
     renderVortex();
     fireEvent.pointerEnter(trigger(), mouse);

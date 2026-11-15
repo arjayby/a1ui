@@ -1035,6 +1035,14 @@ h6 {
   place-items: center;
 }
 
+/* Smaller cards on a phone, so the ring fits the frame without dropping below its minimum scale. */
+@media (max-width: 30rem) {
+  .card-vortex-demo-stage {
+    --card-vortex-card-width: 7.5rem;
+    --card-vortex-image-height: 4rem;
+  }
+}
+
 .section-rail-demo {
   display: grid;
   grid-template-columns: 6rem minmax(0, 1fr);
