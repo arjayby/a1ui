@@ -7,57 +7,97 @@ const input = '[data-slot="command-palette-input"]';
 const highlight = '[data-slot="command-palette-highlight"]';
 const row = (id: string) => `[data-slot="command-palette-item"][data-value="${id}"]`;
 
-type Frame = { scale: number; y: number; blur: number; opacity: number; top: number } | null;
+type Frame = {
+  /** Milliseconds since recording began. */
+  at: number;
+  scale: number;
+  y: number;
+  opacity: number;
+  top: number;
+  events: string;
+  /** The `data-slot` of the focused element. */
+  focus: string | null;
+} | null;
 
-// Records an element's transform, blur, opacity, and position on every frame for `ms`. Start it
-// without awaiting, act, then await it to see what happened in between.
-function watch(page: Page, selector: string, ms: number): Promise<Frame[]> {
+type Press = { key: string; ctrlKey?: boolean };
+
+// Records an element's transform, opacity, position, pointer events, and where focus is on every frame.
+// Keys in `presses` are sent from inside the page first, `gap` frames apart, to the element matching
+// `on` (or the document). They share the page's frame clock with the samples, so each one lands
+// mid-flight however busy the machine is. Recording then runs on for `ms`.
+function record(
+  page: Page,
+  selector: string,
+  ms: number,
+  presses: Press[] = [],
+  { gap = 0, on = null as string | null } = {},
+): Promise<{ frames: Frame[]; pressedAt: number[] }> {
   return page.evaluate(
-    async ([selector, ms]) => {
+    async ([selector, ms, presses, gap, on]) => {
       const frames: Frame[] = [];
+      const pressedAt: number[] = [];
       const began = performance.now();
-      while (performance.now() - began < ms) {
+      const sample = async () => {
+        // Read once the frame's own callbacks have run, so a sample is what that frame drew.
         await new Promise(requestAnimationFrame);
+        await new Promise((resolve) => setTimeout(resolve, 0));
         const element = document.querySelector<HTMLElement>(selector);
         if (!element) {
           frames.push(null);
-          continue;
+          return;
         }
         const style = getComputedStyle(element);
         const matrix = new DOMMatrix(style.transform === "none" ? undefined : style.transform);
         frames.push({
+          at: performance.now() - began,
           scale: matrix.a,
           y: matrix.f,
-          blur: Number.parseFloat(/blur\(([\d.]+)px\)/.exec(style.filter)?.[1] ?? "0"),
           opacity: Number(style.opacity),
           top: element.getBoundingClientRect().top,
+          events: style.pointerEvents,
+          focus: document.activeElement?.getAttribute("data-slot") ?? null,
         });
+      };
+      for (const press of presses) {
+        pressedAt.push(frames.length);
+        const target = (on && document.querySelector(on)) || document;
+        target.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, cancelable: true, ...press }));
+        for (let frame = 0; frame < gap; frame++) await sample();
       }
-      return frames;
+      const tail = performance.now();
+      while (performance.now() - tail < ms) await sample();
+      return { frames, pressedAt };
     },
-    [selector, ms] as const,
+    [selector, ms, presses, gap, on] as const,
   );
 }
+
+// Start it without awaiting, act, then await it to see what happened in between.
+const watch = async (page: Page, selector: string, ms: number) => (await record(page, selector, ms)).frames;
 
 const seen = (frames: Frame[]) => frames.filter((frame) => frame !== null);
 
-// Where the popup's transform origin sits on screen, next to the trigger's centre.
-function origins(page: Page) {
-  return page.evaluate(
-    ([popup, trigger]) => {
-      const element = document.querySelector<HTMLElement>(popup)!;
-      const box = document.querySelector<HTMLElement>(trigger)!.getBoundingClientRect();
-      const frame = element.offsetParent!.getBoundingClientRect();
-      const [x, y] = element.style.transformOrigin.split(" ").map(Number.parseFloat);
-      return {
-        raw: element.style.transformOrigin,
-        origin: { x: frame.left + element.offsetLeft + x, y: frame.top + element.offsetTop + y },
-        trigger: { x: box.left + box.width / 2, y: box.top + box.height / 2 },
-      };
-    },
-    [popup, trigger] as const,
+const shortcut: Press = { key: "k", ctrlKey: true };
+
+// Part-way through the surface's motion: visibly larger than at rest, and neither clear nor solid.
+const midway = (frame: NonNullable<Frame>) =>
+  frame.scale > 1.005 && frame.scale < 1.055 && frame.opacity > 0.05 && frame.opacity < 0.95;
+
+// The surface's size and opacity hang off one value, so at any opacity it has one size, whichever way
+// it is going.
+const onPath = (frame: NonNullable<Frame>) => Math.abs(frame.scale - (1.06 - 0.06 * frame.opacity)) < 0.002;
+
+// A spring covers only so much ground in the time between two samples, however many frames a busy
+// machine drops. A jump covers it in no time at all.
+const withoutJumps = (frames: NonNullable<Frame>[]) =>
+  frames.every(
+    (frame, index) =>
+      index === 0 ||
+      Math.abs(frame.scale - frames[index - 1].scale) <=
+        0.005 + (0.6 * (frame.at - frames[index - 1].at)) / 1000,
   );
-}
+
+type Marked = HTMLElement & { marked?: boolean };
 
 const activeLabel = (page: Page) =>
   page.evaluate((input) => {
@@ -91,36 +131,35 @@ test.beforeEach(async ({ page }) => {
   await expect(page.getByRole("heading", { name: "Command Palette", exact: true })).toBeVisible();
 });
 
-test("the surface scales and un-blurs out of its trigger and leaves along the same path", async ({
-  page,
-}) => {
+test("the surface settles in from slightly larger and leaves by the way it came", async ({ page }) => {
   await page.locator(trigger).scrollIntoViewIfNeeded();
-  const opening = watch(page, popup, 500);
+  const opening = watch(page, popup, 800);
   await page.locator(trigger).click();
   const opened = seen(await opening);
 
-  // Scale and blur travel together: there are frames part-way through both.
-  expect(opened.some((frame) => frame.scale > 0.5 && frame.scale < 0.97 && frame.blur > 0.3)).toBe(true);
-  const last = opened.at(-1)!;
-  expect(last.scale).toBeGreaterThan(0.99);
-  expect(last.blur).toBeLessThan(0.5);
-  expect(last.opacity).toBe(1);
-  // It never overshoots: the spring is critically damped.
-  expect(Math.max(...opened.map((frame) => frame.scale))).toBeLessThanOrEqual(1.001);
-
-  const open = await origins(page);
-  expect(Math.abs(open.origin.x - open.trigger.x)).toBeLessThan(2);
-  expect(Math.abs(open.origin.y - open.trigger.y)).toBeLessThan(2);
+  // The docs search motion: a fade with a small settle, from 1.06 down to rest.
+  expect(opened.some(midway)).toBe(true);
+  await settled(page);
+  await expect(page.locator(popup)).toHaveCSS("opacity", "1");
+  // It never overshoots: the spring is critically damped, so the surface only ever shrinks to rest.
+  const shrinking = opened.map((frame) => frame.scale);
+  expect(Math.max(...shrinking)).toBeLessThanOrEqual(1.0601);
+  expect(Math.min(...shrinking)).toBeGreaterThanOrEqual(0.9999);
+  expect(shrinking.every((scale, index) => index === 0 || scale <= shrinking[index - 1] + 0.0005)).toBe(true);
   await expect(page.locator(input)).toBeFocused();
   await expect(page.getByRole("dialog", { name: "Command palette" })).toBeVisible();
+  // The scrim fades on the same value as the surface.
+  await expect(page.locator('[data-slot="command-palette-scrim"]')).toHaveCSS("opacity", "1");
 
-  const closing = watch(page, popup, 450);
+  const closing = watch(page, popup, 700);
   await page.keyboard.press("Escape");
   const closed = seen(await closing);
-  expect(closed.some((frame) => frame.scale > 0.5 && frame.scale < 0.97 && frame.blur > 0.3)).toBe(true);
-  // Shrinking the whole way: no frame grows again on the way out.
-  const scales = closed.map((frame) => frame.scale);
-  expect(scales.every((scale, index) => index === 0 || scale <= scales[index - 1] + 0.001)).toBe(true);
+  expect(closed.some(midway)).toBe(true);
+  // Growing the whole way: no frame shrinks again on the way out.
+  const growing = closed.map((frame) => frame.scale);
+  expect(growing.every((scale, index) => index === 0 || scale >= growing[index - 1] - 0.0005)).toBe(true);
+  // The way out retraces the way in.
+  expect([...opened, ...closed].every(onPath)).toBe(true);
 
   await expect(page.locator(popup)).toHaveCount(0);
   await expect(page.locator('[data-slot="command-palette-scrim"]')).toHaveCount(0);
@@ -130,54 +169,76 @@ test("the surface scales and un-blurs out of its trigger and leaves along the sa
 test("reopening mid-exit turns the same surface around from where it is", async ({ page }) => {
   await openFromTrigger(page);
   await settled(page);
+  await page.locator(popup).evaluate((element) => ((element as Marked).marked = true));
 
-  const frames = watch(page, popup, 700);
-  await page.keyboard.press("Escape");
-  await expect(page.locator(popup)).toHaveAttribute("data-state", "closed");
-  await page.locator(trigger).click();
-  const samples = seen(await frames);
+  // Close, and open again five frames into the exit.
+  const { frames, pressedAt } = await record(page, popup, 900, [shortcut, shortcut], { gap: 5 });
+  const samples = seen(frames);
+  const turn = frames[pressedAt[1] - 1]!;
 
   await expect(page.locator(popup)).toHaveCount(1);
   await expect(page.locator(popup)).toHaveAttribute("data-state", "open");
-  // The scale dipped, then came back, without ever restarting from the closed size or jumping.
-  const scales = samples.map((frame) => frame.scale);
-  const lowest = Math.min(...scales);
-  expect(lowest).toBeLessThan(0.99);
-  expect(lowest).toBeGreaterThan(0.5);
-  for (let index = 1; index < scales.length; index++) {
-    expect(Math.abs(scales[index] - scales[index - 1])).toBeLessThan(0.2);
-  }
-  expect(scales.at(-1)).toBeCloseTo(1, 2);
+  // It is the surface that was closing, not a new one.
+  expect(await page.locator(popup).evaluate((element) => (element as Marked).marked)).toBe(true);
+  // It had swelled and faded part of the way when it was turned around.
+  expect(turn.opacity).toBeGreaterThan(0);
+  expect(turn.opacity).toBeLessThan(1);
+  expect(turn.scale).toBeGreaterThan(1);
+  // Focus was already back on the trigger by then: closing hands it back as the fade starts.
+  expect(turn.focus).toBe("command-palette-trigger");
+  // It came back along the same path, without restarting from closed or jumping.
+  expect(Math.min(...samples.map((frame) => frame.opacity))).toBeGreaterThan(0);
+  expect(withoutJumps(samples)).toBe(true);
+  expect(samples.every(onPath)).toBe(true);
+  await settled(page);
   await expect(page.locator(input)).toBeFocused();
 });
 
-test("⌘K toggles the palette, from the trigger when it is on screen and from the top centre when not", async ({
+test("⌘K toggles the palette, and pressing it again mid-flight turns it around without losing input", async ({
   page,
 }) => {
   await page.locator(trigger).scrollIntoViewIfNeeded();
   await page.keyboard.press("ControlOrMeta+k");
   await expect(page.locator(popup)).toHaveAttribute("data-state", "open");
   await expect(page.locator(input)).toBeFocused();
-  const near = await origins(page);
-  expect(Math.abs(near.origin.x - near.trigger.x)).toBeLessThan(2);
-  expect(Math.abs(near.origin.y - near.trigger.y)).toBeLessThan(2);
   // The shortcut belongs to the demo on this page: the site search stays closed.
   await expect(page.getByRole("dialog")).toHaveCount(1);
 
   await page.keyboard.press("ControlOrMeta+k");
   await expect(page.locator(popup)).toHaveCount(0);
 
-  // Scroll the trigger away, then open with the shortcut again.
+  // Open, close while it is still opening, and open again while it is still closing.
+  const { frames, pressedAt } = await record(page, popup, 900, [shortcut, shortcut, shortcut], { gap: 8 });
+  const samples = seen(frames);
+  for (const press of pressedAt.slice(1)) {
+    const turn = frames[press - 1];
+    expect(turn?.opacity).toBeGreaterThan(0);
+    expect(turn?.opacity).toBeLessThan(1);
+  }
+  // One surface the whole time, turned around from wherever it was.
+  expect(frames.slice(frames.findIndex((frame) => frame !== null)).every((frame) => frame !== null)).toBe(
+    true,
+  );
+  expect(withoutJumps(samples)).toBe(true);
+  expect(samples.every(onPath)).toBe(true);
+
+  // It ended up open, and the keyboard goes straight to it.
+  await expect(page.locator(popup)).toHaveAttribute("data-state", "open");
+  await expect(page.locator(input)).toBeFocused();
+  await page.keyboard.type("theme");
+  await expect(page.locator(input)).toHaveValue("theme");
+  expect(await activeLabel(page)).toBe("Change theme");
+  await settled(page);
+
+  await page.keyboard.press("Escape");
+  await expect(page.locator(popup)).toHaveCount(0);
+
+  // With the trigger scrolled away the shortcut still opens it, centred near the top of the screen.
   await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
   await expect(page.locator(trigger)).not.toBeInViewport();
-  const opening = watch(page, popup, 450);
   await page.keyboard.press("ControlOrMeta+k");
-  const opened = seen(await opening);
   await expect(page.locator(popup)).toHaveAttribute("data-state", "open");
-  expect((await origins(page)).raw).toBe("50% 0%");
-  // With nowhere to come from it only settles in: a small scale, never the long trip.
-  expect(Math.min(...opened.map((frame) => frame.scale))).toBeGreaterThan(0.9);
-  expect(opened.some((frame) => frame.scale < 0.995 && frame.blur > 0.3)).toBe(true);
+  await settled(page);
   const box = (await page.locator(popup).boundingBox())!;
   const viewport = page.viewportSize()!;
   expect(Math.abs(box.x + box.width / 2 - viewport.width / 2)).toBeLessThan(10);
@@ -193,9 +254,11 @@ test("results reorder by gliding, and typing mid-flight neither queues nor resta
   await openFromTrigger(page);
   await settled(page);
   const feedback = page.locator(row("feedback"));
-  await feedback.evaluate((element) => ((element as HTMLElement & { marked?: boolean }).marked = true));
+  await feedback.evaluate((element) => ((element as Marked).marked = true));
   const start = (await feedback.evaluate((element) => element.getBoundingClientRect().top)) as number;
 
+  // "Components" still matches "s" and stops matching at "se".
+  const leaving = watch(page, row("components"), 700);
   const frames = watch(page, row("feedback"), 1100);
   await page.keyboard.type("s");
   await page.waitForTimeout(70);
@@ -211,9 +274,7 @@ test("results reorder by gliding, and typing mid-flight neither queues nor resta
   ]);
   expect(await activeLabel(page)).toBe("Send feedback");
   // It is the same element as before, moved rather than recreated.
-  expect(await feedback.evaluate((element) => (element as HTMLElement & { marked?: boolean }).marked)).toBe(
-    true,
-  );
+  expect(await feedback.evaluate((element) => (element as Marked).marked)).toBe(true);
   await expect(feedback.locator("mark")).toHaveText("Se");
 
   const end = tops.at(-1)!;
@@ -228,6 +289,12 @@ test("results reorder by gliding, and typing mid-flight neither queues nor resta
     expect(tops[index - 1] - tops[index]).toBeLessThan((start - end) * 0.6);
   }
   await expect.poll(() => feedback.evaluate((element) => getComputedStyle(element).transform)).toBe("none");
+
+  // A row that stops matching gives up the pointer the moment it starts to fade, so it can neither
+  // run nor pull the highlight on its way out.
+  const fading = seen(await leaving).filter((frame) => frame.opacity < 1);
+  expect(fading.length).toBeGreaterThan(0);
+  expect(fading.every((frame) => frame.events === "none")).toBe(true);
 
   // Rows that no longer match are gone, not left behind invisible.
   await expect(page.locator('[data-slot="command-palette-item"]')).toHaveCount(4);
@@ -302,6 +369,37 @@ test("one highlight glides between rows and follows keyboard and pointer without
   await page.mouse.up();
   await expect(page.getByText("Ran “Invite a teammate”")).toBeVisible();
   await expect(page.locator(popup)).toHaveCount(0);
+});
+
+test("arrow keys pressed in quick succession redirect one glide instead of queueing", async ({ page }) => {
+  await openFromTrigger(page);
+  await settled(page);
+  const rests = [
+    (await page.locator(row("components")).boundingBox())!.y,
+    (await page.locator(row("blocks")).boundingBox())!.y,
+    (await page.locator(row("docs")).boundingBox())!.y,
+  ];
+  const to = (await page.locator(row("new-project")).boundingBox())!.y;
+
+  // Three presses, three frames apart.
+  const arrows = [{ key: "ArrowDown" }, { key: "ArrowDown" }, { key: "ArrowDown" }];
+  const { frames, pressedAt } = await record(page, highlight, 700, arrows, { gap: 3, on: input });
+  const tops = seen(frames).map((frame) => frame.top);
+
+  expect(await activeLabel(page)).toBe("New project");
+  // The second and third presses landed while the highlight was still travelling, between rows.
+  for (const press of pressedAt.slice(1)) {
+    const top = frames[press - 1]!.top;
+    expect(rests.every((rest) => Math.abs(top - rest) > 0.5)).toBe(true);
+  }
+  // It kept going down from wherever it was: it never turned back, and it came to rest once, on the
+  // last row asked for.
+  for (let index = 1; index < tops.length; index++) {
+    expect(tops[index]).toBeGreaterThanOrEqual(tops[index - 1] - 0.5);
+  }
+  await expect
+    .poll(async () => Math.abs((await page.locator(highlight).boundingBox())!.y - to))
+    .toBeLessThan(1);
 });
 
 test("nested pages open with Enter, go back with Backspace, and running an item closes the palette", async ({
@@ -383,8 +481,8 @@ test("reduced motion fades the surface and swaps results without travel", async 
   const opening = watch(page, popup, 350);
   await page.locator(trigger).click();
   const opened = seen(await opening);
-  expect(opened.every((frame) => frame.scale === 1 && frame.blur === 0)).toBe(true);
-  expect(opened.at(-1)!.opacity).toBe(1);
+  expect(opened.every((frame) => frame.scale === 1)).toBe(true);
+  await expect(page.locator(popup)).toHaveCSS("opacity", "1");
   await expect(page.locator(input)).toBeFocused();
 
   // The row is either where it was or where it ends up, never in between.
@@ -412,7 +510,7 @@ test("reduced motion fades the surface and swaps results without travel", async 
 
   const closing = watch(page, popup, 350);
   await page.keyboard.press("Escape");
-  expect(seen(await closing).every((frame) => frame.scale === 1 && frame.blur === 0)).toBe(true);
+  expect(seen(await closing).every((frame) => frame.scale === 1)).toBe(true);
   await expect(page.locator(popup)).toHaveCount(0);
   await expect(page.locator(trigger)).toBeFocused();
 });

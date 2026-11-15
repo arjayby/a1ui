@@ -5,14 +5,18 @@ import {
   animate,
   AnimatePresence,
   motion,
+  useIsPresent,
   useMotionValue,
   useReducedMotion,
+  useTransform,
   type Transition,
   type Variants,
 } from "motion/react";
 import {
+  createContext,
   useEffect,
   useEffectEvent,
+  useContext,
   useId,
   useLayoutEffect,
   useRef,
@@ -211,6 +215,36 @@ function Marked({ text, indices }: { text: string; indices: number[] }) {
   return parts;
 }
 
+/**
+ * A critically damped spring, named by how long it takes to respond in seconds. It settles without
+ * a bounce. It is given as stiffness and damping because Motion only carries the live velocity into a
+ * retarget for springs defined by their physics, and that is what lets a move be redirected mid-flight
+ * without stalling.
+ */
+function settle(response: number) {
+  const frequency = (2 * Math.PI) / response;
+  return { type: "spring", stiffness: frequency * frequency, damping: 2 * frequency, mass: 1 } as const;
+}
+
+// The surface, its scrim, the list's height, and rows and pages changing places.
+const MOVE = settle(0.35);
+// The highlight and the back button, which answer the keyboard and the pointer directly.
+const GLIDE = settle(0.22);
+// Rows, groups, pages, and the empty message appearing and leaving.
+const FADE = settle(0.15);
+// Reduced motion keeps opacity only, as a short cross-fade.
+const CROSS_FADE = { duration: 0.15, ease: "easeOut" } as const;
+
+/** An element's resting top inside an ancestor. Offsets ignore transforms, so motion in flight does not count. */
+function restingTop(element: HTMLElement, ancestor: HTMLElement | null) {
+  let top = 0;
+  for (let node: HTMLElement | null = element; node && node !== ancestor;) {
+    top += node.offsetTop;
+    node = node.offsetParent instanceof HTMLElement ? node.offsetParent : null;
+  }
+  return top;
+}
+
 const noopSubscribe = () => () => {};
 
 /** Apple keyboards label the modifier ⌘, the rest Ctrl. Assumes ⌘ until the browser can say. */
@@ -380,15 +414,32 @@ interface PaletteLayerProps {
   children: ReactNode;
 }
 
-// Mounted fresh for every opening, so the origin is measured and the panel's state starts over each time.
+// Mounted fresh for every opening, so the panel's state starts over each time.
 function PaletteLayer({ open, reducedMotion, label, finalFocus, onExited, children }: PaletteLayerProps) {
-  // The same entrance and exit as the docs search dialog: the surface settles in from slightly larger
-  // and drifts out the same way while it fades. Reduced motion keeps the fade only.
-  const ease = [0.16, 1, 0.3, 1] as const;
-  const hidden = reducedMotion ? { opacity: 0 } : { opacity: 0, scale: 1.06 };
-  const shown = reducedMotion ? { opacity: 1 } : { opacity: 1, scale: 1 };
-  const leaving = reducedMotion ? { opacity: 0 } : { opacity: 0, scale: 1.04 };
-  const transition: Transition = { duration: reducedMotion ? 0.15 : 0.3, ease };
+  // How far open the palette is drawn, from 0 to 1. The docs search dialog's motion hangs off this one
+  // value: the scrim and the surface fade with it, and the surface settles in from slightly larger.
+  // One spring moves it, so closing mid-open (or reopening mid-close) turns everything around from
+  // where it is drawn, at the speed it has, and the way out is always the way in. Reduced motion keeps
+  // the fade only.
+  //
+  // It is drawn through inline styles on purpose. Base UI waits for the popup's own animations to end
+  // before it unlocks the page and hands focus back, and a motion value is not one of them, so both
+  // happen the moment closing starts instead of after the fade.
+  const presence = useMotionValue(0);
+  const scale = useTransform(presence, [0, 1], [1.06, 1]);
+  const exited = useEffectEvent(onExited);
+  useLayoutEffect(() => {
+    // A spring's tail runs on after the eye stops seeing it. On the way out it counts as done once the
+    // surface is invisible, so the layer unmounts without waiting for the rest.
+    const spring = open ? MOVE : { ...MOVE, restDelta: 0.01, restSpeed: 0.5 };
+    const controls = animate(presence, open ? 1 : 0, {
+      ...(reducedMotion ? CROSS_FADE : spring),
+      onComplete: () => {
+        if (!open) exited();
+      },
+    });
+    return () => controls.stop();
+  }, [open, reducedMotion, presence]);
 
   return (
     <DialogPrimitive.Portal keepMounted>
@@ -398,13 +449,7 @@ function PaletteLayer({ open, reducedMotion, label, finalFocus, onExited, childr
         // A fading scrim lets clicks through, so the trigger can reopen the palette mid-exit.
         style={{ pointerEvents: open ? undefined : "none" }}
         className="bg-foreground/25 dark:bg-background/70 fixed inset-0 z-50 backdrop-blur-xs"
-        render={
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: open ? 1 : 0 }}
-            transition={{ duration: reducedMotion ? 0.15 : 0.3, ease: [0.25, 0.1, 0.25, 1] }}
-          />
-        }
+        render={<motion.div style={{ opacity: presence }} />}
       />
       <DialogPrimitive.Viewport
         data-slot="command-palette-viewport"
@@ -424,16 +469,7 @@ function PaletteLayer({ open, reducedMotion, label, finalFocus, onExited, childr
             if (!(event.target instanceof HTMLInputElement)) event.preventDefault();
           }}
           className={`${surfaceClass} relative isolate flex w-full max-w-xl flex-col overflow-hidden rounded-xl border shadow-2xl outline-none`}
-          render={
-            <motion.div
-              initial={hidden}
-              animate={open ? shown : leaving}
-              transition={transition}
-              onAnimationComplete={() => {
-                if (!open) onExited();
-              }}
-            />
-          }
+          render={<motion.div style={{ opacity: presence, scale: reducedMotion ? 1 : scale }} />}
         >
           {children}
         </DialogPrimitive.Popup>
@@ -451,12 +487,54 @@ interface PalettePanelProps {
   onRun: (item: CommandPaletteItem) => void;
 }
 
+// Whatever is on its way out stops taking the pointer at once, so a row that has already left the
+// results can neither be run nor pull the highlight while it fades.
 const pageVariants: Variants = {
   enter: (direction: number) => ({ opacity: 0, x: direction * 16 }),
-  rest: { opacity: 1, x: 0 },
-  exit: (direction: number) => ({ opacity: 0, x: direction * -16 }),
+  rest: { opacity: 1, x: 0, pointerEvents: "auto" },
+  exit: (direction: number) => ({ opacity: 0, x: direction * -16, pointerEvents: "none" }),
 };
-const fadeVariants: Variants = { enter: { opacity: 0 }, rest: { opacity: 1 }, exit: { opacity: 0 } };
+const fadeVariants: Variants = {
+  enter: { opacity: 0 },
+  rest: { opacity: 1, pointerEvents: "auto" },
+  exit: { opacity: 0, pointerEvents: "none" },
+};
+
+// The order the panel's rows are in. It is a context so that rows on their way out hear about a change
+// too, although they no longer get new props.
+const Arrangement = createContext("");
+
+/**
+ * Glides an element from where it is drawn to its new resting place whenever the arrangement changes.
+ * The offset rides one spring, retargeted from its live position and velocity, so results that change
+ * again mid-flight bend the path instead of restarting it. Nothing waits on it: the layout is already
+ * final, and only the drawing catches up.
+ */
+function useGlide(elementId: string, enabled: boolean) {
+  const arrangement = useContext(Arrangement);
+  const present = useIsPresent();
+  const y = useMotionValue(0);
+  // Where the layout puts the element, and where on screen it is heading. The two differ only for a row
+  // on its way out, which is lifted out of the flow and finishes the move it was making while it fades.
+  const place = useRef<{ base: number; goal: number } | null>(null);
+  useLayoutEffect(() => {
+    const element = document.getElementById(elementId);
+    if (!element) return;
+    const base = restingTop(element, element.closest<HTMLElement>('[role="listbox"]'));
+    const last = place.current;
+    const goal = present || !last ? base : last.goal;
+    place.current = { base, goal };
+    if (!last || (last.base === base && last.goal === goal)) return;
+    if (!enabled) {
+      y.jump(goal - base);
+      return;
+    }
+    const velocity = y.getVelocity();
+    y.jump(last.base + y.get() - base);
+    animate(y, goal - base, { ...MOVE, velocity });
+  }, [elementId, arrangement, present, enabled, y]);
+  return y;
+}
 
 function PalettePanel({ items, label, placeholder, emptyMessage, reducedMotion, onRun }: PalettePanelProps) {
   const id = useId();
@@ -498,17 +576,15 @@ function PalettePanel({ items, label, placeholder, emptyMessage, reducedMotion, 
   const active = enabled.find((row) => row.item.id === cursor.id) ?? enabled[0];
   const activeIndex = active ? enabled.indexOf(active) : -1;
 
-  const spring: Transition = reducedMotion
-    ? { duration: 0 }
-    : { type: "spring", visualDuration: 0.28, bounce: 0 };
-  const rowTransition: Transition = { layout: spring, opacity: { duration: 0.12, ease: "easeOut" } };
+  const fade: Transition = reducedMotion ? { duration: 0.1 } : FADE;
   const activeId = active?.domId;
   // Changes whenever a row could have moved: a different page, set of rows, or order.
   const arrangement = rows.map((row) => row.domId).join(" ");
 
   // Glide the highlight to the active row's resting place. It springs from wherever it is, at whatever
-  // speed it has, so the keyboard and the pointer can both redirect it mid-flight. It appears in place
-  // instead of flying in, and reduced motion moves it without travel.
+  // speed it has, so held arrow keys and a moving pointer keep redirecting one motion instead of
+  // queueing new ones. It appears in place instead of flying in, and reduced motion moves it without
+  // travel.
   const placeHighlight = useEffectEvent(() => {
     const list = listRef.current;
     const row = activeId ? document.getElementById(activeId) : null;
@@ -517,13 +593,8 @@ function PalettePanel({ items, label, placeholder, emptyMessage, reducedMotion, 
       highlightTarget.current = null;
       return;
     }
-    let top = 0;
-    for (let node: HTMLElement | null = row; node && node !== list;) {
-      top += node.offsetTop;
-      node = node.offsetParent instanceof HTMLElement ? node.offsetParent : null;
-    }
     const last = highlightTarget.current;
-    const next = { top, height: row.offsetHeight };
+    const next = { top: restingTop(row, list), height: row.offsetHeight };
     highlightTarget.current = next;
     highlightOpacity.set(1);
     if (!last || reducedMotion) {
@@ -531,9 +602,8 @@ function PalettePanel({ items, label, placeholder, emptyMessage, reducedMotion, 
       highlightHeight.jump(next.height);
       return;
     }
-    const glide = { type: "spring", visualDuration: 0.18, bounce: 0 } as const;
-    if (last.top !== next.top) animate(highlightY, next.top, glide);
-    if (last.height !== next.height) animate(highlightHeight, next.height, glide);
+    if (last.top !== next.top) animate(highlightY, next.top, GLIDE);
+    if (last.height !== next.height) animate(highlightHeight, next.height, GLIDE);
   });
   useLayoutEffect(() => {
     placeHighlight();
@@ -552,7 +622,7 @@ function PalettePanel({ items, label, placeholder, emptyMessage, reducedMotion, 
       const natural = scroller.offsetHeight;
       scroller.style.height = applied;
       if (first || reducedMotion) height.jump(natural);
-      else animate(height, natural, { type: "spring", visualDuration: 0.28, bounce: 0 });
+      else animate(height, natural, MOVE);
       first = false;
       // Rows can change height without changing order, such as when a font finishes loading.
       placeHighlight();
@@ -579,11 +649,7 @@ function PalettePanel({ items, label, placeholder, emptyMessage, reducedMotion, 
     }
     const row = active && document.getElementById(active.domId);
     if (!row) return;
-    let top = 0;
-    for (let node: HTMLElement | null = row; node && node !== scroller;) {
-      top += node.offsetTop;
-      node = node.offsetParent instanceof HTMLElement ? node.offsetParent : null;
-    }
+    const top = restingTop(row, scroller);
     const margin = 6;
     if (top - margin < scroller.scrollTop) scroller.scrollTop = top - margin;
     else if (top + row.offsetHeight + margin > scroller.scrollTop + scroller.clientHeight) {
@@ -684,9 +750,7 @@ function PalettePanel({ items, label, placeholder, emptyMessage, reducedMotion, 
               animate={{ opacity: 1, scale: 1 }}
               exit={reducedMotion ? { opacity: 0 } : { opacity: 0, scale: 0.8 }}
               whileTap={reducedMotion ? undefined : { scale: 0.95 }}
-              transition={
-                reducedMotion ? { duration: 0.1 } : { type: "spring", visualDuration: 0.2, bounce: 0 }
-              }
+              transition={reducedMotion ? { duration: 0.1 } : GLIDE}
               className="bg-foreground/8 text-foreground contrast-more:border-foreground inline-flex h-6 max-w-40 shrink-0 cursor-pointer items-center gap-1 rounded-md border border-transparent pr-2 pl-1 text-xs font-medium"
             >
               <Chevron className="size-3 shrink-0 rotate-180" />
@@ -720,8 +784,6 @@ function PalettePanel({ items, label, placeholder, emptyMessage, reducedMotion, 
 
       <motion.div
         ref={scrollerRef}
-        // Rows measure their positions inside this scroller, so scrolling does not read as movement.
-        layoutScroll
         // Browsers put a scrollable box in the tab order. Focus belongs to the input.
         tabIndex={-1}
         data-slot="command-palette-list"
@@ -742,74 +804,71 @@ function PalettePanel({ items, label, placeholder, emptyMessage, reducedMotion, 
               style={{ y: highlightY, height: highlightHeight, opacity: highlightOpacity }}
               className="bg-foreground/8 contrast-more:ring-foreground [[role=listbox]:has([role=option]:not([aria-disabled]):active)>&]:bg-foreground/12 pointer-events-none absolute inset-x-0 top-0 -z-10 rounded-lg contrast-more:ring-1 contrast-more:ring-inset"
             />
-            <AnimatePresence initial={false} mode="popLayout" custom={direction}>
-              <motion.div
-                key={pageKey}
-                role="presentation"
-                custom={direction}
-                variants={reducedMotion ? fadeVariants : pageVariants}
-                initial="enter"
-                animate="rest"
-                exit="exit"
-                transition={
-                  reducedMotion
-                    ? { duration: 0.1 }
-                    : { x: spring, opacity: { duration: 0.14, ease: "easeOut" } }
-                }
-                className="relative"
-              >
-                <AnimatePresence initial={false} mode="popLayout">
-                  {sections.map((section) => (
-                    <motion.div
-                      key={section.key}
-                      role={section.heading ? "group" : "presentation"}
-                      aria-labelledby={
-                        section.heading ? `${id}-${trail.length}-${section.order}-heading` : undefined
-                      }
-                      layout={reducedMotion ? false : "position"}
-                      variants={fadeVariants}
-                      initial="enter"
-                      animate="rest"
-                      exit="exit"
-                      transition={rowTransition}
-                      className="relative"
-                    >
-                      {section.heading && (
-                        <div
-                          id={`${id}-${trail.length}-${section.order}-heading`}
-                          className="text-muted-foreground px-2.5 pt-2.5 pb-1 text-xs font-medium"
-                        >
-                          {section.heading}
-                        </div>
-                      )}
-                      <AnimatePresence initial={false} mode="popLayout">
-                        {section.rows.map((row) => (
-                          <PaletteRow
-                            key={row.item.id}
-                            row={row}
-                            active={row === active}
+            <Arrangement value={arrangement}>
+              <AnimatePresence initial={false} mode="popLayout" custom={direction}>
+                <motion.div
+                  key={pageKey}
+                  role="presentation"
+                  custom={direction}
+                  variants={reducedMotion ? fadeVariants : pageVariants}
+                  initial="enter"
+                  animate="rest"
+                  exit="exit"
+                  transition={reducedMotion ? { duration: 0.1 } : { x: MOVE, opacity: FADE }}
+                  className="relative"
+                >
+                  <AnimatePresence initial={false} mode="popLayout">
+                    {sections.map((section) => (
+                      <motion.div
+                        key={section.key}
+                        role={section.heading ? "group" : "presentation"}
+                        aria-labelledby={
+                          section.heading ? `${id}-${trail.length}-${section.order}-heading` : undefined
+                        }
+                        variants={fadeVariants}
+                        initial="enter"
+                        animate="rest"
+                        exit="exit"
+                        transition={fade}
+                        className="relative"
+                      >
+                        {section.heading && (
+                          <PaletteHeading
+                            id={`${id}-${trail.length}-${section.order}-heading`}
                             reducedMotion={reducedMotion}
-                            transition={rowTransition}
-                            onPoint={pointAt}
-                            onPress={(item) => {
-                              if (!item.disabled) setCursor({ id: item.id, reveal: false });
-                            }}
-                            onRun={run}
-                          />
-                        ))}
-                      </AnimatePresence>
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
-              </motion.div>
-            </AnimatePresence>
+                          >
+                            {section.heading}
+                          </PaletteHeading>
+                        )}
+                        <AnimatePresence initial={false} mode="popLayout">
+                          {section.rows.map((row) => (
+                            <PaletteRow
+                              key={row.item.id}
+                              row={row}
+                              active={row === active}
+                              reducedMotion={reducedMotion}
+                              transition={fade}
+                              onPoint={pointAt}
+                              onPress={(item) => {
+                                if (!item.disabled) setCursor({ id: item.id, reveal: false });
+                              }}
+                              onRun={run}
+                            />
+                          ))}
+                        </AnimatePresence>
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+                </motion.div>
+              </AnimatePresence>
+            </Arrangement>
           </div>
           {count === 0 && (
             <motion.p
               data-slot="command-palette-empty"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ duration: 0.15, ease: "easeOut" }}
+              transition={reducedMotion ? CROSS_FADE : FADE}
               className="text-muted-foreground px-4 py-8 text-center text-sm text-balance"
             >
               {emptyMessage ?? (query.trim() ? <>No results for “{query.trim()}”</> : "Nothing here yet")}
@@ -851,6 +910,26 @@ function PalettePanel({ items, label, placeholder, emptyMessage, reducedMotion, 
   );
 }
 
+interface PaletteHeadingProps {
+  id: string;
+  reducedMotion: boolean;
+  children: ReactNode;
+}
+
+// A heading travels with its rows when the groups reorder.
+function PaletteHeading({ id, reducedMotion, children }: PaletteHeadingProps) {
+  const y = useGlide(id, !reducedMotion);
+  return (
+    <motion.div
+      id={id}
+      style={{ y }}
+      className="text-muted-foreground px-2.5 pt-2.5 pb-1 text-xs font-medium"
+    >
+      {children}
+    </motion.div>
+  );
+}
+
 interface PaletteRowProps {
   row: Row;
   active: boolean;
@@ -875,12 +954,13 @@ function PaletteRow({
 }: PaletteRowProps) {
   const { item, domId, indices } = row;
   const nested = Boolean(item.children?.length);
+  // The row takes its new place in the layout at once and glides to it when the results reorder.
+  const y = useGlide(domId, !reducedMotion);
 
   return (
     <motion.div
       ref={ref}
-      // Position only: a row keeps its size and glides to its new place when the results reorder.
-      layout={reducedMotion ? false : "position"}
+      style={{ y }}
       variants={fadeVariants}
       initial="enter"
       animate="rest"
@@ -904,6 +984,8 @@ function PaletteRow({
       onClick={() => onRun(item)}
       className="group relative flex min-h-11 cursor-default items-center gap-3 rounded-lg px-2.5 py-1.5 text-sm select-none"
     >
+      {/* The icon only changes color, between two theme tokens. There is nothing to redirect, so it is
+          the one transition left to CSS. */}
       {item.icon && (
         <span
           aria-hidden="true"
