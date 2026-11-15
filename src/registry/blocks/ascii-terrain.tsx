@@ -21,7 +21,13 @@ type Point = { x: number; z: number; screenX: number; screenY: number; baseY: nu
 type Ripple = { x: number; z: number; started: number; released?: number };
 // A value that follows a target with a Motion spring, advanced on the terrain's own clock
 // so pausing, scrolling offscreen, or hiding the tab freezes it exactly where it was.
-type Follower = { value: number; target: number; elapsed: number; generator: KeyframeGenerator<number> };
+type Follower = {
+  value: number;
+  target: number;
+  elapsed: number;
+  done: boolean;
+  generator: KeyframeGenerator<number>;
+};
 type Controls = {
   sync: () => void;
   move: (x: number, y: number) => void;
@@ -42,26 +48,32 @@ const smoothstep = (value: number) => {
 // because Motion's duration-based springs drop the velocity a retarget hands them.
 // 144 and 24 keep the damping ratio at exactly 1.
 const hillSpring = { stiffness: 144, damping: 24, mass: 1, restDelta: 0.0001, restSpeed: 0.001 };
+// Under reduced motion a ripple is a glow that fades in and back out where it was sent.
+const glowRise = 0.12;
+const glowFall = 0.6;
 
 function follower(value: number): Follower {
   return {
     value,
     target: value,
     elapsed: 0,
+    done: true,
     generator: spring({ ...hillSpring, keyframes: [value, value] }),
   };
 }
 function advance(follow: Follower, milliseconds: number) {
+  if (follow.done) return;
   follow.elapsed += milliseconds;
-  follow.value = follow.generator.next(follow.elapsed).value;
+  const state = follow.generator.next(follow.elapsed);
+  follow.value = state.value;
+  follow.done = state.done;
 }
 function springTo(follow: Follower, target: number) {
   if (target === follow.target) return;
   // Retargeting from the current value and velocity keeps every reversal smooth.
-  const velocity = follow.generator.velocity?.(follow.elapsed) ?? 0;
+  const velocity = follow.done ? 0 : (follow.generator.velocity?.(follow.elapsed) ?? 0);
   follow.generator = spring({ ...hillSpring, keyframes: [follow.value, target], velocity });
-  follow.target = target;
-  follow.elapsed = 0;
+  Object.assign(follow, { target, elapsed: 0, done: false });
 }
 function jump(follow: Follower, value: number) {
   Object.assign(follow, follower(value));
@@ -85,6 +97,7 @@ export function AsciiTerrain({
   const pausedRef = useRef(paused);
   const pressRef = useRef("");
   const timeRef = useRef(0);
+  const driftRef = useRef(0);
   const instructionsId = useId();
   const spacing = clamp(finite(cellSize, 10), 6, 24);
   const height = clamp(finite(amplitude, 1), 0, 2);
@@ -105,6 +118,7 @@ export function AsciiTerrain({
     if (!root || !canvas || !context) return;
 
     const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    let wasStill = motion.matches;
     let visible = false;
     let running = false;
     let width = 0;
@@ -114,7 +128,8 @@ export function AsciiTerrain({
     let points: Point[] = [];
     let ripples: Ripple[] = [];
     const pointer = { x: follower(0), z: follower(0), strength: follower(0), targetX: 0, targetZ: 0 };
-    // Reduced motion keeps the landscape still and answers input with an instant highlight.
+    // Reduced motion keeps every glyph in place and answers input with light instead: an instant
+    // highlight where a hill would rise, and a glow that fades where a ripple would spread.
     const still = () => motion.matches;
     const aim = (x: number, z: number) => {
       pointer.targetX = x;
@@ -131,14 +146,14 @@ export function AsciiTerrain({
       if (still()) jump(pointer.strength, active ? 1 : 0);
       else springTo(pointer.strength, active ? 1 : 0);
     };
-    // Without the frame loop running, input under reduced motion repaints directly.
-    const repaintIfStill = () => {
-      if (still()) draw();
-    };
-
-    const canInteract = () => interactive && !pausedRef.current && !root.closest("[inert]");
-    const canMove = () => !pausedRef.current && !still() && !root.closest("[inert]");
+    const canMove = () => !pausedRef.current && !root.closest("[inert]");
+    const canInteract = () => interactive && canMove();
     const canAnimate = () => visible && !document.hidden && canMove() && width > 0 && viewHeight > 0;
+    // The landscape only drifts when it has a speed and some height to show it. Otherwise the
+    // frame loop runs just while a hill is still settling or a ripple is still fading.
+    const drifts = rate > 0 && height > 0;
+    const settled = () => pointer.x.done && pointer.z.done && pointer.strength.done;
+    const moving = () => ripples.length > 0 || !settled() || (drifts && !still());
 
     function draw() {
       if (!context || !canvas) return;
@@ -149,16 +164,14 @@ export function AsciiTerrain({
       context.fillStyle = color;
       const time = timeRef.current;
       const reduced = still();
-      const drift = time * rate * 0.16;
+      const drift = driftRef.current;
       const waves = ripples.map((ripple) => {
         const age = time - ripple.started;
         const release = ripple.released === undefined ? 1 : 1 - smoothstep((time - ripple.released) / 0.24);
-        return {
-          x: ripple.x,
-          z: ripple.z,
-          radius: age * 0.85,
-          strength: smoothstep(age / 0.24) * Math.exp(-age * 1.2) * release * 0.3,
-        };
+        const envelope = reduced
+          ? smoothstep(age / glowRise) * (1 - smoothstep((age - glowRise) / glowFall)) * 0.5
+          : smoothstep(age / 0.24) * Math.exp(-age * 1.2) * 0.3;
+        return { x: ripple.x, z: ripple.z, radius: age * 0.85, strength: envelope * release };
       });
 
       for (const point of points) {
@@ -173,16 +186,19 @@ export function AsciiTerrain({
         point.baseY = viewHeight * (0.28 + depth * 0.56 - level * 0.25);
         const distance = Math.hypot(x - pointer.x.value, z - pointer.z.value);
         const hill = Math.exp(-distance * distance * 10) * pointer.strength.value * 0.65;
-        // Under reduced motion the hill brightens glyphs in place instead of raising them.
+        // Under reduced motion hills and ripples brighten glyphs in place instead of moving them.
+        let glow = reduced ? hill : 0;
         if (!reduced) level += hill;
         for (const wave of waves) {
-          const front = Math.hypot(x - wave.x, z - wave.z) - wave.radius;
-          level += Math.cos(front * 13) * Math.exp(-front * front * 5) * wave.strength;
+          const reach = Math.hypot(x - wave.x, z - wave.z);
+          const front = reach - wave.radius;
+          if (reduced) glow += Math.exp(-reach * reach * 4) * wave.strength;
+          else level += Math.cos(front * 13) * Math.exp(-front * front * 5) * wave.strength;
         }
 
         point.screenX = width / 2 + x * width * 0.43 * (0.62 + depth * 0.38);
         point.screenY = viewHeight * (0.28 + depth * 0.56 - level * 0.25);
-        const shade = clamp((level + (reduced ? hill : 0) + 0.12) / 1.15, 0, 1);
+        const shade = clamp((level + glow + 0.12) / 1.15, 0, 1);
         const edge = Math.min(1, (1 - Math.abs(x)) * 8, (1 - Math.abs(z)) * 8);
         context.globalAlpha = (0.24 + shade * 0.7) * (0.45 + depth * 0.55) * edge;
         context.fillText(glyphs[Math.round(shade * (glyphs.length - 1))], point.screenX, point.screenY);
@@ -196,16 +212,21 @@ export function AsciiTerrain({
       if (!canAnimate()) return stop();
       // Motion clamps long gaps between frames, so a stalled tab cannot fling the terrain forward.
       timeRef.current += delta / 1000;
+      // Drift adds up frame by frame, so it holds still under reduced motion while a glow fades.
+      if (!still()) driftRef.current += (delta / 1000) * rate * 0.16;
       // Motion's generators are analytic, so the response is the same at any refresh rate.
       advance(pointer.x, delta);
       advance(pointer.z, delta);
       advance(pointer.strength, delta);
+      const life = still() ? glowRise + glowFall : 4;
       ripples = ripples.filter(
         (ripple) =>
-          timeRef.current - ripple.started < 4 &&
+          timeRef.current - ripple.started < life &&
           (ripple.released === undefined || timeRef.current - ripple.released < 0.24),
       );
       draw();
+      // Everything has come to rest, so the loop rests too until the next input wakes it.
+      if (!moving()) stop();
     }
 
     function stop() {
@@ -213,10 +234,25 @@ export function AsciiTerrain({
       running = false;
     }
 
+    function wake() {
+      if (running || !canAnimate() || !moving()) return;
+      frame.render(tick, true);
+      running = true;
+    }
+
+    // Input wakes the loop. A highlight under reduced motion has nothing to animate, so it
+    // paints at once instead of waiting for a frame.
+    function respond() {
+      if (still()) draw();
+      wake();
+    }
+
     function sync() {
       stop();
-      if (still()) {
-        // Settle any hill or ripple in flight so the reduced view starts from the bare landscape.
+      if (still() !== wasStill) {
+        wasStill = still();
+        // Hills and ripples do not translate between the moving and the still view, so each
+        // starts from the bare landscape.
         jump(pointer.x, pointer.targetX);
         jump(pointer.z, pointer.targetZ);
         jump(pointer.strength, 0);
@@ -224,10 +260,7 @@ export function AsciiTerrain({
       }
       root!.dataset.motion = motion.matches ? "reduced" : pausedRef.current ? "paused" : "running";
       draw();
-      if (canAnimate()) {
-        frame.render(tick, true);
-        running = true;
-      }
+      wake();
     }
 
     function resize() {
@@ -287,19 +320,19 @@ export function AsciiTerrain({
           }
           aim(nearest.x, nearest.z);
           activate(true);
-          repaintIfStill();
+          respond();
         }
       },
       leave() {
         if (!pointer.strength.target) return;
         activate(false);
-        repaintIfStill();
+        respond();
       },
       key(key) {
         if (!canInteract()) return;
         if (key === "Escape") {
           activate(false);
-          repaintIfStill();
+          respond();
           return;
         }
         activate(true);
@@ -310,10 +343,10 @@ export function AsciiTerrain({
         if (key === "ArrowUp") z = clamp(z - 0.12, -0.9, 0.9);
         if (key === "ArrowDown") z = clamp(z + 0.12, -0.9, 0.9);
         aim(x, z);
-        repaintIfStill();
+        respond();
       },
       ripple() {
-        if (!interactive || !canMove()) return;
+        if (!canInteract()) return;
         const active = ripples.filter((ripple) => ripple.released === undefined);
         if (active.length >= 6) active[0].released = timeRef.current;
         // Fade retiring waves instead of removing a visible wave on the seventh click.
@@ -321,6 +354,7 @@ export function AsciiTerrain({
           ...ripples.slice(-23),
           { x: pointer.targetX, z: pointer.targetZ, started: timeRef.current },
         ];
+        wake();
       },
     };
 
@@ -406,7 +440,7 @@ export function AsciiTerrain({
           <span id={instructionsId} className="sr-only">
             Move the pointer or use arrow keys to raise hills. Click, press Enter, or press Space to send a
             ripple. Home centers the hill. Escape releases it. Interactions stop while paused. With reduced
-            motion, the terrain stays still and highlights where you point instead.
+            motion, the terrain stays still: it highlights where you point and glows where you click.
           </span>
         </>
       ) : null}

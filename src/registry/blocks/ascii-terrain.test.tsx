@@ -212,6 +212,60 @@ describe("AsciiTerrain", () => {
     expect(pending.size).toBe(0);
   });
 
+  it("answers a press under reduced motion with a glow that fades in place", () => {
+    render(<AsciiTerrain />);
+    const control = screen.getByRole("button");
+    advance(100);
+    setReduced(true);
+    const still = [...painted];
+    expect(pending.size).toBeLessThanOrEqual(1);
+    fireEvent.click(control);
+    advance(34);
+    // Fading in from nothing, so the first frames stay close to the bare landscape.
+    const early = painted.filter(([glyph], index) => glyph !== still[index][0]).length;
+    advance(100);
+    const peak = painted.filter(([glyph], index) => glyph !== still[index][0]).length;
+    expect(peak).toBeGreaterThan(early);
+    // Neither the glow nor the drift moves a glyph while it plays.
+    expect(painted.map(([, x, y]) => [x, y])).toEqual(still.map(([, x, y]) => [x, y]));
+    advance(800);
+    expect(painted).toEqual(still);
+    advance(34);
+    expect(pending.size).toBe(0);
+  });
+
+  it("rests the frame loop once a still terrain settles and wakes on input", () => {
+    render(<AsciiTerrain speed={0} />);
+    const control = screen.getByRole("button");
+    advance(100);
+    expect(pending.size).toBe(0);
+    const flat = [...painted];
+    fireEvent.pointerMove(control, { clientX: 400, clientY: 230 });
+    expect(pending.size).toBe(1);
+    advance(3000);
+    expect(pending.size).toBe(0);
+    const raised = [...painted];
+    expect(raised).not.toEqual(flat);
+    fireEvent.pointerLeave(control);
+    expect(pending.size).toBe(1);
+    advance(3000);
+    expect(pending.size).toBe(0);
+    expect(painted).toEqual(flat);
+    fireEvent.click(control);
+    expect(pending.size).toBe(1);
+    advance(6000);
+    expect(pending.size).toBe(0);
+  });
+
+  it("drifts from where it was when the speed changes", () => {
+    const { rerender } = render(<AsciiTerrain />);
+    advance(2000);
+    rerender(<AsciiTerrain paused />);
+    const before = [...painted];
+    rerender(<AsciiTerrain paused speed={3} />);
+    expect(painted).toEqual(before);
+  });
+
   it("updates interaction motion on every display frame", () => {
     render(<AsciiTerrain speed={0} />);
     fireEvent.keyDown(screen.getByRole("button"), { key: "ArrowRight" });
@@ -271,7 +325,6 @@ describe("AsciiTerrain", () => {
     expect(painted).not.toEqual(stopped);
     setReduced(true);
     const reduced = [...painted];
-    fireEvent.click(screen.getByRole("button"));
     advance(300);
     expect(painted).toEqual(reduced);
     expect(pending.size).toBe(0);

@@ -149,7 +149,7 @@
             "Procedural illustration only. No geographic data or persistent terrain editing. JavaScript is required to draw."
           ],
           "requirements": [
-            "Supply a pause control for automatic motion. Requires Canvas 2D, ResizeObserver, and IntersectionObserver. Reduced motion shows a static landscape."
+            "Supply a pause control for automatic motion. Requires Canvas 2D, ResizeObserver, and IntersectionObserver. Reduced motion shows a static landscape that answers input with light instead of movement."
           ],
           "docsUrl": "http://localhost:3000/docs/blocks/ascii-terrain.md",
           "registryUrl": "http://localhost:3000/r/ascii-terrain.json"
