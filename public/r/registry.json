@@ -271,6 +271,9 @@
       "type": "registry:block",
       "title": "Section Rail",
       "description": "A compact reading rail that tracks progress through page sections.",
+      "dependencies": [
+        "motion"
+      ],
       "files": [
         {
           "path": "src/registry/blocks/section-rail.tsx",

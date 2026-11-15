@@ -1,6 +1,37 @@
 "use client";
 
-import { useEffect, useRef, useState, type ComponentPropsWithoutRef, type CSSProperties } from "react";
+import { cancelFrame, frame } from "motion";
+import { AnimatePresence, motion, useReducedMotion, type Transition, type Variants } from "motion/react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type ComponentPropsWithoutRef,
+  type CSSProperties,
+  type MouseEventHandler,
+} from "react";
+
+// Every tick is one bar of this length, scaled from its left edge, so a change of length never
+// touches layout.
+const TICK_LENGTH = 24;
+
+// Critically damped with about a 0.25s response, so a tick settles without overshooting. Written
+// as stiffness and damping because Motion drops velocity on duration-based springs, and a tick is
+// retargeted mid-flight whenever the reader keeps scrolling or sweeps the pointer along the rail.
+const SPRING: Transition = { type: "spring", stiffness: 600, damping: 49 };
+// Reduced motion: lengths change at once and only the opacity cross-fades.
+const FADE: Transition = { duration: 0, opacity: { duration: 0.15, ease: "easeOut" } };
+
+// The pressed tick is the highlighted one, at full length. It gives under the pointer, or dims
+// with reduced motion.
+const PRESS: Variants = { pressed: { scaleX: 0.75 } };
+const PRESS_FADE: Variants = { pressed: { opacity: 0.6 } };
+
+// The label grows out of its tick and returns along the same path.
+const LABEL_SHOWN = { opacity: 1, x: 0, scale: 1 };
+const LABEL_HIDDEN = { opacity: 0, x: -4, scale: 0.96 };
+const LABEL_FADE: Transition = { duration: 0.12, ease: "easeOut" };
+const LABEL_SPRING: Transition = { ...SPRING, opacity: LABEL_FADE };
 
 export interface SectionRailItem {
   id: string;
@@ -39,6 +70,15 @@ function isAtScrollEnd(scrollContainer: Window | HTMLElement) {
   return scrollHeight > window.innerHeight && window.scrollY + window.innerHeight >= scrollHeight - 1;
 }
 
+/** Whether focus arrived from the keyboard. Browsers without the selector count every focus. */
+function isFocusVisible(element: Element) {
+  try {
+    return element.matches(":focus-visible");
+  } catch {
+    return true;
+  }
+}
+
 export function SectionRail({
   sections,
   activeOffset = 0.36,
@@ -49,6 +89,7 @@ export function SectionRail({
   ...props
 }: SectionRailProps) {
   const navRef = useRef<HTMLElement>(null);
+  const reducedMotion = useReducedMotion() ?? false;
   const activeMarkerWidth = activeMarkerLength === "long" ? 20 : 12;
   const [activeIndex, setActiveIndex] = useState(0);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
@@ -65,7 +106,6 @@ export function SectionRail({
     if (!nav || trackedSections.length === 0) return;
 
     const scrollContainer = getScrollContainer(nav);
-    let frame = 0;
 
     const update = () => {
       if (isAtScrollEnd(scrollContainer)) {
@@ -87,17 +127,16 @@ export function SectionRail({
       setActiveIndex(nextActiveIndex);
     };
 
-    const scheduleUpdate = () => {
-      window.cancelAnimationFrame(frame);
-      frame = window.requestAnimationFrame(update);
-    };
+    // Motion's frame loop measures in its read phase, before the tick springs write, and keeps one
+    // pending measurement however many scroll events arrive in a frame.
+    const scheduleUpdate = () => frame.read(update);
 
     update();
     scrollContainer.addEventListener("scroll", scheduleUpdate, { passive: true });
     window.addEventListener("resize", scheduleUpdate);
 
     return () => {
-      window.cancelAnimationFrame(frame);
+      cancelFrame(update);
       scrollContainer.removeEventListener("scroll", scheduleUpdate);
       window.removeEventListener("resize", scheduleUpdate);
     };
@@ -132,61 +171,125 @@ export function SectionRail({
           }
 
           return (
-            <li key={id}>
-              <a
-                href={`#${id}`}
-                aria-current={state === "active" ? "location" : undefined}
-                aria-label={label}
-                data-state={state}
-                className="group relative -mx-3 flex min-h-3 min-w-14 items-center px-3 no-underline"
-                onClick={(event) => {
-                  if (
-                    event.defaultPrevented ||
-                    event.button !== 0 ||
-                    event.altKey ||
-                    event.ctrlKey ||
-                    event.metaKey ||
-                    event.shiftKey
-                  )
-                    return;
-                  const nav = navRef.current;
-                  const target = event.currentTarget.ownerDocument.getElementById(id);
-                  if (!nav || !target) return;
-                  const container = getScrollContainer(nav);
-                  if (!(container instanceof HTMLElement) || !container.contains(target)) return;
+            <SectionRailMarker
+              key={id}
+              id={id}
+              label={label}
+              state={state}
+              length={markerWidth}
+              opacity={markerOpacity}
+              reducedMotion={reducedMotion}
+              onClick={(event) => {
+                if (
+                  event.defaultPrevented ||
+                  event.button !== 0 ||
+                  event.altKey ||
+                  event.ctrlKey ||
+                  event.metaKey ||
+                  event.shiftKey
+                )
+                  return;
+                const nav = navRef.current;
+                const target = event.currentTarget.ownerDocument.getElementById(id);
+                if (!nav || !target) return;
+                const container = getScrollContainer(nav);
+                if (!(container instanceof HTMLElement) || !container.contains(target)) return;
 
-                  event.preventDefault();
-                  container.scrollTo({
-                    top:
-                      container.scrollTop +
-                      target.getBoundingClientRect().top -
-                      container.getBoundingClientRect().top -
-                      container.clientTop,
-                    behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
-                      ? "instant"
-                      : "smooth",
-                  });
-                  window.history.replaceState(window.history.state, "", event.currentTarget.href);
-                }}
-                onPointerEnter={() => setHoveredIndex(index)}
-                onFocus={() => {
-                  setHoveredIndex(null);
-                  setFocusedIndex(index);
-                }}
-              >
-                <span
-                  aria-hidden="true"
-                  className="h-0.5 bg-current transition-[width,opacity] duration-150 ease-out motion-reduce:transition-none"
-                  style={{ width: markerWidth, opacity: markerOpacity }}
-                />
-                <span className="bg-popover/80 text-popover-foreground border-border [@media(prefers-reduced-transparency:reduce)]:bg-popover pointer-events-none absolute left-9 w-max max-w-52 -translate-x-1 rounded-sm border px-2 py-1 text-[0.6875rem] opacity-0 backdrop-blur-xl backdrop-saturate-150 transition-[opacity,translate] duration-100 group-hover:translate-x-0 group-hover:opacity-100 group-focus-visible:translate-x-0 group-focus-visible:opacity-100 motion-reduce:transition-none [@media(prefers-reduced-transparency:reduce)]:backdrop-blur-none">
-                  {label}
-                </span>
-              </a>
-            </li>
+                event.preventDefault();
+                // The browser's own smooth scroll yields to the wheel, touch and keyboard the
+                // moment the reader takes over, which a scripted scroll would have to fight.
+                container.scrollTo({
+                  top:
+                    container.scrollTop +
+                    target.getBoundingClientRect().top -
+                    container.getBoundingClientRect().top -
+                    container.clientTop,
+                  behavior: reducedMotion ? "instant" : "smooth",
+                });
+                window.history.replaceState(window.history.state, "", event.currentTarget.href);
+              }}
+              onHover={() => setHoveredIndex(index)}
+              onFocus={() => {
+                setHoveredIndex(null);
+                setFocusedIndex(index);
+              }}
+            />
           );
         })}
       </ol>
     </nav>
+  );
+}
+
+function SectionRailMarker({
+  id,
+  label,
+  state,
+  length,
+  opacity,
+  reducedMotion,
+  onClick,
+  onHover,
+  onFocus,
+}: SectionRailItem & {
+  state: "complete" | "active" | "pending";
+  length: number;
+  opacity: number;
+  reducedMotion: boolean;
+  onClick: MouseEventHandler<HTMLAnchorElement>;
+  onHover: () => void;
+  onFocus: () => void;
+}) {
+  // The label shows under the pointer and on keyboard focus, as :hover and :focus-visible would.
+  const [hovered, setHovered] = useState(false);
+  const [focusVisible, setFocusVisible] = useState(false);
+  const labelHidden = reducedMotion ? { opacity: 0 } : LABEL_HIDDEN;
+
+  return (
+    <li>
+      <motion.a
+        href={`#${id}`}
+        aria-current={state === "active" ? "location" : undefined}
+        aria-label={label}
+        data-state={state}
+        className="relative -mx-3 flex min-h-3 min-w-14 items-center px-3 no-underline"
+        // Feedback starts on pointer-down, or on Enter, and the tick picks it up as a variant.
+        whileTap="pressed"
+        onClick={onClick}
+        onPointerEnter={() => {
+          setHovered(true);
+          onHover();
+        }}
+        onPointerLeave={() => setHovered(false)}
+        onFocus={(event) => {
+          setFocusVisible(isFocusVisible(event.currentTarget));
+          onFocus();
+        }}
+        onBlur={() => setFocusVisible(false)}
+      >
+        <motion.span
+          aria-hidden="true"
+          className="h-0.5 origin-left bg-current"
+          style={{ width: TICK_LENGTH }}
+          initial={false}
+          animate={{ scaleX: length / TICK_LENGTH, opacity }}
+          variants={reducedMotion ? PRESS_FADE : PRESS}
+          transition={reducedMotion ? FADE : SPRING}
+        />
+        <AnimatePresence>
+          {(hovered || focusVisible) && (
+            <motion.span
+              className="bg-popover/80 text-popover-foreground border-border [@media(prefers-reduced-transparency:reduce)]:bg-popover pointer-events-none absolute left-9 w-max max-w-52 origin-left rounded-sm border px-2 py-1 text-[0.6875rem] backdrop-blur-xl backdrop-saturate-150 [@media(prefers-reduced-transparency:reduce)]:backdrop-blur-none"
+              initial={labelHidden}
+              animate={LABEL_SHOWN}
+              exit={labelHidden}
+              transition={reducedMotion ? LABEL_FADE : LABEL_SPRING}
+            >
+              {label}
+            </motion.span>
+          )}
+        </AnimatePresence>
+      </motion.a>
+    </li>
   );
 }

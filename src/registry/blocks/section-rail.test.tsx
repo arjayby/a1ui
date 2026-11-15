@@ -1,7 +1,14 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { SectionRail } from "./section-rail";
+
+// Motion reads the reduced-motion query once per page, so tests flip the hook directly.
+const motionPreference = vi.hoisted(() => ({ reduced: false }));
+vi.mock("motion/react", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("motion/react")>()),
+  useReducedMotion: () => motionPreference.reduced,
+}));
 
 const sections = [
   { id: "start", label: "Start" },
@@ -27,6 +34,25 @@ function addTrackedSection(id: string, top: number, parent: HTMLElement = docume
   return section;
 }
 
+const tick = (link: HTMLElement) => link.querySelector<HTMLElement>("[aria-hidden='true']")!;
+
+/** A tick is a 24px bar that Motion scales from its left edge, so its length is read from the transform. */
+function tickLength(marker: HTMLElement) {
+  const scale = /scaleX\(([\d.]+)\)/.exec(marker.style.transform);
+  return Number((Number(scale ? scale[1] : 1) * 24).toFixed(2));
+}
+
+/** Waits for the springs to settle on each tick's `[length, opacity]`. */
+function expectTicks(markers: HTMLElement[], expected: Record<number, [length: number, opacity: number]>) {
+  return waitFor(() => {
+    for (const [index, [length, opacity]] of Object.entries(expected)) {
+      const marker = markers[Number(index)];
+      expect(tickLength(marker)).toBe(length);
+      expect(Number(marker.style.opacity)).toBe(opacity);
+    }
+  });
+}
+
 describe("SectionRail", () => {
   beforeEach(() => {
     vi.stubGlobal("innerHeight", 1000);
@@ -34,6 +60,7 @@ describe("SectionRail", () => {
   });
 
   afterEach(() => {
+    motionPreference.reduced = false;
     vi.restoreAllMocks();
     vi.unstubAllGlobals();
   });
@@ -84,22 +111,19 @@ describe("SectionRail", () => {
     );
   });
 
-  it("moves highlighting between focused links and clears it when focus leaves", () => {
+  it("moves highlighting between focused links and clears it when focus leaves", async () => {
     render(<SectionRail sections={sections} />);
     const links = screen.getAllByRole("link");
-    const markers = links.map((link) => link.querySelector("[aria-hidden='true']"));
+    const markers = links.map(tick);
 
     fireEvent.focus(links[1]);
-    expect(markers[1]).toHaveStyle({ width: "24px", opacity: "1" });
+    await expectTicks(markers, { 1: [24, 1] });
     fireEvent.blur(links[1], { relatedTarget: links[2] });
     fireEvent.focus(links[2], { relatedTarget: links[1] });
-    expect(markers[2]).toHaveStyle({ width: "24px", opacity: "1" });
-    expect(markers[1]).toHaveStyle({ width: "20px", opacity: "0.8" });
+    await expectTicks(markers, { 2: [24, 1], 1: [20, 0.8] });
 
     fireEvent.blur(links[2], { relatedTarget: document.body });
-    expect(markers[0]).toHaveStyle({ width: "20px", opacity: "1" });
-    expect(markers[1]).toHaveStyle({ width: "12px", opacity: "0.25" });
-    expect(markers[2]).toHaveStyle({ width: "12px", opacity: "0.25" });
+    await expectTicks(markers, { 0: [20, 1], 1: [12, 0.25], 2: [12, 0.25] });
   });
 
   it("skips missing section elements while preserving marker indexes", () => {
@@ -169,17 +193,19 @@ describe("SectionRail", () => {
     expect(screen.getByRole("list")).toHaveStyle({ gap: "0.5rem" });
   });
 
-  it("supports a short active marker without dimming its active color", () => {
+  it("supports a short active marker without dimming its active color", async () => {
     const { rerender } = render(<SectionRail sections={sections} activeMarkerLength="short" />);
-    const activeMarker = screen.getByRole("link", { name: "Start" }).querySelector("[aria-hidden='true']");
+    const activeMarker = tick(screen.getByRole("link", { name: "Start" }));
 
-    expect(activeMarker).toHaveStyle({ width: "12px", opacity: "1" });
+    // The first render is already at rest: nothing animates in on mount.
+    expect(tickLength(activeMarker)).toBe(12);
+    expect(activeMarker).toHaveStyle({ opacity: "1" });
 
     rerender(<SectionRail sections={sections} activeMarkerLength="long" />);
-    expect(activeMarker).toHaveStyle({ width: "20px", opacity: "1" });
+    await expectTicks([activeMarker], { 0: [20, 1] });
   });
 
-  it("tapers nearby markers around the hovered or focused section", () => {
+  it("tapers nearby markers around the hovered or focused section", async () => {
     const nearbySections = [
       { id: "one", label: "One" },
       { id: "two", label: "Two" },
@@ -190,19 +216,125 @@ describe("SectionRail", () => {
     render(<SectionRail sections={nearbySections} />);
 
     const links = screen.getAllByRole("link");
-    const markers = links.map((link) => link.querySelector("[aria-hidden='true']"));
+    const markers = links.map(tick);
 
     fireEvent.pointerEnter(links[2]);
-    expect(markers[2]).toHaveStyle({ width: "24px", opacity: "1" });
-    expect(markers[1]).toHaveStyle({ width: "20px", opacity: "0.8" });
-    expect(markers[0]).toHaveStyle({ width: "16px", opacity: "1" });
-    expect(markers[3]).toHaveStyle({ width: "20px", opacity: "0.8" });
-    expect(markers[4]).toHaveStyle({ width: "16px", opacity: "0.6" });
+    await expectTicks(markers, { 2: [24, 1], 1: [20, 0.8], 0: [16, 1], 3: [20, 0.8], 4: [16, 0.6] });
 
     fireEvent.pointerLeave(screen.getByRole("list"));
     fireEvent.focus(links[1]);
-    expect(markers[1]).toHaveStyle({ width: "24px", opacity: "1" });
-    expect(markers[0]).toHaveStyle({ width: "20px", opacity: "1" });
+    await expectTicks(markers, { 1: [24, 1], 0: [20, 1] });
+  });
+
+  it("retargets a tick that is still moving instead of restarting it", async () => {
+    render(<SectionRail sections={sections} />);
+    const links = screen.getAllByRole("link");
+    const marker = tick(links[2]);
+
+    fireEvent.pointerEnter(links[2]);
+    await waitFor(() => expect(tickLength(marker)).toBeGreaterThan(12));
+    const midFlight = tickLength(marker);
+    expect(midFlight).toBeLessThan(24);
+
+    // The pointer moves on before the tick arrives: it heads for the new length from where it is.
+    fireEvent.pointerEnter(links[0]);
+    await expectTicks([marker], { 0: [16, 0.6] });
+  });
+
+  it("keeps every tick the same size in layout and scales it from its left edge", () => {
+    render(<SectionRail sections={sections} />);
+    const markers = screen.getAllByRole("link").map(tick);
+
+    for (const marker of markers) {
+      expect(marker).toHaveStyle({ width: "24px" });
+      expect(marker).toHaveClass("origin-left");
+    }
+    expect(markers.map(tickLength)).toEqual([20, 12, 12]);
+  });
+
+  it("gives on pointer-down and springs back on release", async () => {
+    render(<SectionRail sections={sections} />);
+    const link = screen.getByRole("link", { name: "Details" });
+    const marker = tick(link);
+
+    fireEvent.pointerEnter(link);
+    fireEvent.pointerDown(link, { isPrimary: true, button: 0 });
+    await expectTicks([marker], { 0: [18, 1] });
+
+    fireEvent.pointerUp(link, { isPrimary: true, button: 0 });
+    await expectTicks([marker], { 0: [24, 1] });
+  });
+
+  it("dims the pressed tick instead of moving it with reduced motion", async () => {
+    motionPreference.reduced = true;
+    render(<SectionRail sections={sections} />);
+    const link = screen.getByRole("link", { name: "Details" });
+    const marker = tick(link);
+
+    fireEvent.pointerEnter(link);
+    fireEvent.pointerDown(link, { isPrimary: true, button: 0 });
+    await expectTicks([marker], { 0: [24, 0.6] });
+
+    fireEvent.pointerUp(link, { isPrimary: true, button: 0 });
+    await expectTicks([marker], { 0: [24, 1] });
+  });
+
+  it("shows a label under the pointer and takes it back along the same path", async () => {
+    render(<SectionRail sections={sections} />);
+    const link = screen.getByRole("link", { name: "Details" });
+    expect(screen.queryByText("Details")).not.toBeInTheDocument();
+
+    fireEvent.pointerEnter(link);
+    const label = screen.getByText("Details");
+    expect(label).toHaveClass("origin-left");
+    // It starts nudged toward its tick, slightly small and transparent.
+    expect(label).toHaveStyle({ opacity: "0" });
+    expect(label.style.transform).toBe("translateX(-4px) scale(0.96)");
+    await waitFor(() => {
+      expect(label).toHaveStyle({ opacity: "1" });
+      expect(label.style.transform).toBe("none");
+    });
+
+    fireEvent.pointerLeave(link);
+    await waitFor(() => expect(label.style.transform).toContain("scale(0.9"));
+    await waitFor(() => expect(screen.queryByText("Details")).not.toBeInTheDocument());
+  });
+
+  it("only cross-fades the label with reduced motion", async () => {
+    motionPreference.reduced = true;
+    render(<SectionRail sections={sections} />);
+    const link = screen.getByRole("link", { name: "Details" });
+
+    fireEvent.pointerEnter(link);
+    const label = screen.getByText("Details");
+    expect(label).toHaveStyle({ opacity: "0" });
+    expect(label.style.transform).toBe("");
+    await waitFor(() => expect(label).toHaveStyle({ opacity: "1" }));
+    expect(label.style.transform).toBe("none");
+
+    fireEvent.pointerLeave(link);
+    await waitFor(() => expect(screen.queryByText("Details")).not.toBeInTheDocument());
+  });
+
+  it("shows the label on keyboard focus and hides it on blur", async () => {
+    render(<SectionRail sections={sections} />);
+    const link = screen.getByRole("link", { name: "Finish" });
+    vi.spyOn(link, "matches").mockImplementation((selector) => selector === ":focus-visible");
+
+    act(() => link.focus());
+    expect(screen.getByText("Finish")).toBeInTheDocument();
+
+    act(() => link.blur());
+    await waitFor(() => expect(screen.queryByText("Finish")).not.toBeInTheDocument());
+  });
+
+  it("leaves the label out when focus comes from the pointer", () => {
+    render(<SectionRail sections={sections} />);
+    const link = screen.getByRole("link", { name: "Finish" });
+    vi.spyOn(link, "matches").mockReturnValue(false);
+
+    act(() => link.focus());
+    expect(screen.queryByText("Finish")).not.toBeInTheDocument();
   });
 
   it("tracks sections inside a scroll container", async () => {
@@ -249,10 +381,7 @@ describe("SectionRail", () => {
   });
 
   it.each([false, true])("confines link jumps to the scroll panel with reduced motion %s", (reduced) => {
-    vi.stubGlobal(
-      "matchMedia",
-      vi.fn(() => ({ matches: reduced })),
-    );
+    motionPreference.reduced = reduced;
     const panel = document.createElement("div");
     const reactRoot = document.createElement("div");
     panel.style.overflowY = "auto";

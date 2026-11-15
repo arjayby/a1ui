@@ -71,9 +71,54 @@ for (const activation of ["click", "keyboard"] as const) {
   });
 }
 
+test("markers spring with a transform and show a label that leaves again", async ({ page }) => {
+  const demo = page.getByRole("region", { name: "Scrollable Section Rail demo" });
+  const rail = demo.getByRole("navigation", { name: "Demo sections" });
+  const link = rail.getByRole("link", { name: "Structure", exact: true });
+  const marker = link.locator("[aria-hidden='true']");
+  const label = link.getByText("Structure");
+  const length = () => marker.evaluate((element) => Math.round(element.getBoundingClientRect().width));
+  await demo.scrollIntoViewIfNeeded();
+
+  // Every tick is the same 24px bar in layout; its length on screen comes from the transform.
+  await expect(marker).toHaveCSS("width", "24px");
+  expect(await length()).toBe(12);
+  await expect(label).toHaveCount(0);
+
+  await link.hover();
+  await expect.poll(length).toBe(24);
+  await expect(label).toBeVisible();
+  await expect(label).toHaveCSS("opacity", "1");
+
+  // Pointer-down is answered straight away, before the click commits on release.
+  await page.mouse.down();
+  await expect.poll(length).toBe(18);
+  await page.mouse.up();
+  await expect.poll(length).toBe(24);
+
+  await page.mouse.move(0, 0);
+  await expect(label).toHaveCount(0);
+  await expect(link).toHaveAttribute("aria-current", "location");
+});
+
+test("keyboard focus shows the label of the focused marker", async ({ page }) => {
+  const demo = page.getByRole("region", { name: "Scrollable Section Rail demo" });
+  const first = demo.getByRole("link", { name: "Overview", exact: true });
+  await demo.focus();
+  await page.keyboard.press("Tab");
+  await expect(first).toBeFocused();
+  await expect(first.getByText("Overview")).toBeVisible();
+  await page.keyboard.press("Tab");
+  await expect(first.getByText("Overview")).toHaveCount(0);
+  await expect(demo.getByRole("link", { name: "Goals", exact: true }).getByText("Goals")).toBeVisible();
+});
+
 test("mobile rail jumps stay inside the panel and respect reduced motion", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
+  // Motion reads the preference when the rail mounts, so it is set before the page loads.
   await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.reload();
+  await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
   const demo = page.getByRole("region", { name: "Scrollable Section Rail demo" });
   await demo.scrollIntoViewIfNeeded();
   const outerScrollTop = await page.evaluate(() => window.scrollY);
@@ -84,4 +129,9 @@ test("mobile rail jumps stay inside the panel and respect reduced motion", async
   );
   expect(await demo.evaluate((element) => element.scrollTop)).toBeGreaterThan(1000);
   expect(await page.evaluate(() => window.scrollY)).toBe(outerScrollTop);
+
+  // The label fades in where it sits instead of sliding out of its tick.
+  const label = demo.getByRole("link", { name: "Motion", exact: true }).getByText("Motion");
+  await expect(label).toBeVisible();
+  await expect(label).toHaveCSS("transform", "none");
 });
