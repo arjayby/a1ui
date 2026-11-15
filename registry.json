@@ -26,7 +26,7 @@
             "Shows one activity at a time; a new one replaces the last. It is not a queue or a notification stack, and it does not dismiss by swipe."
           ],
           "requirements": [
-            "React 19, Tailwind CSS 4, Motion, and theme colors including popover, primary, muted, and destructive. Render one pill near the root and drive it with useActivity or the activity prop. Reduced motion swaps size and content with a cross-fade."
+            "React 19, Tailwind CSS 4, Motion, and theme colors including popover, primary, muted, and destructive. Render one pill near the root and drive it with useActivity or the activity prop. Reduced motion swaps size and content with a cross-fade and holds the running ring and bar still."
           ]
         }
       }
