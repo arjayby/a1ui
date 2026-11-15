@@ -54,9 +54,16 @@ async function sample(target: Locator, act: () => Promise<unknown>, read: string
 
 const height = "element.getBoundingClientRect().height";
 const scaleY = "new DOMMatrix(getComputedStyle(element).transform).d";
+const opacity = "Number(getComputedStyle(element).opacity)";
+// The sine of the angle an element has been turned through.
+const turn = "new DOMMatrix(getComputedStyle(element).transform).b";
 const heightOf = (target: Locator) => target.evaluate((element) => element.getBoundingClientRect().height);
 const scaleOf = (target: Locator) =>
   target.evaluate((element) => new DOMMatrix(getComputedStyle(element).transform).d);
+const opacityOf = (target: Locator) =>
+  target.evaluate((element) => Number(getComputedStyle(element).opacity));
+const surface = (row: Locator) => row.locator('[data-slot="task-steps-row"]');
+const spinner = (row: Locator) => row.locator('[data-slot="task-steps-spinner"]');
 
 test("narrates the job as an ordered list with a live clock in a fixed column", async ({ page }) => {
   await open(page, { clock: true });
@@ -103,6 +110,110 @@ test("narrates the job as an ordered list with a live clock in a fixed column", 
   // With time flowing again, the closed panel settles at zero.
   await page.clock.resume();
   await expect.poll(() => heightOf(panel(queue))).toBe(0);
+});
+
+test("a step's label, clock and icon change together on one spring", async ({ page }) => {
+  await open(page);
+  const queue = step(page, "Queue");
+  const label = queue.locator('[data-slot="task-steps-label"]');
+  const colour = () => label.evaluate((element) => getComputedStyle(element).color);
+  const quiet = await colour();
+
+  // The label and the clock mix their colour from numbers on the row, which Motion springs.
+  const ink = await sample(
+    surface(queue),
+    () => button(page, "Run job").click(),
+    'Number(element.style.getPropertyValue("--task-steps-ink"))',
+    700,
+  );
+  expect(ink[0]).toBe(0);
+  expect(ink.some((value) => value > 0.05 && value < 0.95)).toBe(true);
+  // Critically damped: it rises to its target and never passes it.
+  expect(Math.max(...ink)).toBeLessThanOrEqual(1);
+  for (let i = 1; i < ink.length; i++) expect(ink[i]).toBeGreaterThanOrEqual(ink[i - 1]);
+  expect(ink.at(-1)).toBeCloseTo(1, 2);
+  expect(await colour()).not.toBe(quiet);
+  await expect(surface(queue)).toHaveCSS("--task-steps-clock", "1");
+  await expect(time(queue).locator("> span")).toHaveCSS("opacity", "1");
+
+  // The running arc turns, driven by Motion rather than a CSS keyframe animation.
+  await expect(spinner(queue)).toHaveCSS("animation-name", "none");
+  const turning = await sample(spinner(queue), async () => {}, turn, 300);
+  expect(new Set(turning.map((value) => value.toFixed(2))).size).toBeGreaterThan(3);
+});
+
+test("a row dims on pointer-down, before the click lands, and springs back on release", async ({ page }) => {
+  await open(page);
+  const queue = step(page, "Queue");
+  const trigger = queue.getByRole("button", { name: "Queue" });
+  await expect(trigger).toHaveAttribute("aria-expanded", "false");
+  await surface(queue).hover();
+  expect(await opacityOf(surface(queue))).toBe(1);
+
+  // Pressing is not eased in: the row is either at rest or fully dimmed, and nothing has toggled yet.
+  const pressing = await sample(surface(queue), () => page.mouse.down(), opacity, 250);
+  expect(pressing.every((value) => value === 1 || value === 0.7)).toBe(true);
+  expect(pressing.at(-1)).toBe(0.7);
+  await expect(trigger).toHaveAttribute("aria-expanded", "false");
+
+  const releasing = await sample(surface(queue), () => page.mouse.up(), opacity, 700);
+  // It comes back on the spring from where it was held, without dipping again on the way.
+  expect(Math.min(...releasing)).toBeGreaterThanOrEqual(0.7);
+  expect(releasing.some((value) => value > 0.72 && value < 0.98)).toBe(true);
+  for (let i = 1; i < releasing.length; i++) expect(releasing[i]).toBeGreaterThanOrEqual(releasing[i - 1]);
+  await expect.poll(() => opacityOf(surface(queue))).toBe(1);
+  await expect(trigger).toHaveAttribute("aria-expanded", "true");
+
+  // Dragging away before letting go cancels the press: the row recovers and the step stays as it was.
+  await surface(queue).hover();
+  await page.mouse.down();
+  await expect.poll(() => opacityOf(surface(queue))).toBe(0.7);
+  await page.mouse.move(4, 4);
+  await page.mouse.up();
+  await expect.poll(() => opacityOf(surface(queue))).toBe(1);
+  await expect(trigger).toHaveAttribute("aria-expanded", "true");
+});
+
+// The height of a step's panel, or -1 while the step has none.
+const panelHeight =
+  "element.querySelector('[data-slot=\"task-steps-panel\"]')?.getBoundingClientRect().height ?? -1";
+
+test("detail that arrives after its row opens from nothing", async ({ page }) => {
+  // Stop the clock 200ms before Install dependencies prints its first line. Until then it has nothing to show.
+  await open(page, { clock: true });
+  await runJobFor(page, 2300);
+  const install = step(page, "Install dependencies");
+  await expect(install).toHaveAttribute("aria-current", "step");
+  await expect(panel(install)).toHaveCount(0);
+  await expect(install.getByRole("button")).toHaveCount(0);
+
+  // The panel's height is a spring on the page clock, so letting time flow lets it run.
+  const arriving = await sample(install, () => page.clock.resume(), panelHeight, 900);
+  const present = arriving.filter((value) => value >= 0);
+  expect(arriving[0]).toBe(-1);
+  // One line of log makes a panel 48px tall. It starts well short of that rather than appearing whole.
+  expect(present[0]).toBeLessThan(24);
+  expect(Math.max(...present)).toBeGreaterThan(40);
+  await expect(install.getByRole("button")).toHaveAttribute("aria-expanded", "true");
+  await expect(install.locator('[data-slot="task-steps-chevron"]')).toBeVisible();
+});
+
+test("detail that is taken away closes its panel before it goes", async ({ page }) => {
+  await open(page);
+  await button(page, "Run job").click();
+  const install = step(page, "Install dependencies");
+  // By the second log line the panel has had half a second to open on the first.
+  await expect(install.getByRole("log")).toContainText("Lockfile is up to date", { timeout: 15_000 });
+
+  // Reset clears the log, so the step is left with nothing to show.
+  const leaving = await sample(install, () => button(page, "Reset").click(), panelHeight, 1200);
+  const tallest = Math.max(...leaving);
+  expect(tallest).toBeGreaterThan(40);
+  expect(leaving.some((value) => value > 1 && value < tallest - 1)).toBe(true);
+  expect(leaving.at(-1)).toBe(-1);
+  await expect(panel(install)).toHaveCount(0);
+  await expect(install.getByRole("button")).toHaveCount(0);
+  await expect(install.locator('[data-slot="task-steps-chevron"]')).toHaveCount(0);
 });
 
 test("a jump across several steps retargets every part at once", async ({ page }) => {
@@ -222,7 +333,10 @@ test("reduced motion stops the spinner and changes heights at once", async ({ pa
   await open(page, { clock: true });
   await runJobFor(page, 1200);
   const queue = step(page, "Queue");
-  await expect(queue.locator('[data-slot="task-steps-spinner"]')).toHaveCSS("animation-name", "none");
+  // The arc is drawn but nothing turns it: no transform, and no animation of any kind on it.
+  await expect(spinner(queue)).toHaveCount(1);
+  await expect(spinner(queue)).toHaveCSS("transform", "none");
+  expect(await spinner(queue).evaluate((element) => element.getAnimations().length)).toBe(0);
   // The clock still counts, so the step reads as running.
   await expect(time(queue)).toHaveText("1s");
 

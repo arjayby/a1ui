@@ -5,6 +5,20 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { TaskSteps, type TaskStep, type TaskStepStatus } from "./task-steps";
 
+// Motion's frame loop captures requestAnimationFrame when it loads. Route it through a timeout
+// installed before imports, so the fake clock drives Motion's springs as well as the step clocks.
+vi.hoisted(() => {
+  globalThis.requestAnimationFrame = (callback) =>
+    setTimeout(() => callback(performance.now()), 16) as unknown as number;
+});
+
+// Motion reads the reduced-motion query once and then listens to it, so every test shares one.
+const motionQuery = Object.assign(new EventTarget(), { matches: false });
+function setReducedMotion(reduced: boolean) {
+  motionQuery.matches = reduced;
+  motionQuery.dispatchEvent(new Event("change"));
+}
+
 const job = (statuses: TaskStepStatus[], extra: Partial<TaskStep>[] = []): TaskStep[] =>
   ["Install", "Build", "Deploy"].map((label, index) => ({
     id: label.toLowerCase(),
@@ -18,6 +32,19 @@ const row = (label: string) =>
 const time = (label: string) => row(label).querySelector('[data-slot="task-steps-time"]');
 const status = (label: string) => row(label).querySelector('[data-slot="task-steps-status"]');
 const panel = (label: string) => row(label).querySelector('[data-slot="task-steps-panel"]');
+const surface = (label: string) => row(label).querySelector('[data-slot="task-steps-row"]') as HTMLElement;
+const spinner = (label: string) =>
+  row(label).querySelector('[data-slot="task-steps-spinner"]') as SVGGElement | null;
+// Motion starts an animation, and reports a finished exit, through a promise, so tests that watch
+// one advance the clock asynchronously.
+const advance = (milliseconds: number) => act(() => vi.advanceTimersByTimeAsync(milliseconds));
+// Long enough for every spring to come to rest and for anything on its way out to leave. React
+// removes what has left when the first pass ends, and the second gives Motion the frame it takes
+// to go idle.
+async function settle() {
+  await advance(1500);
+  await advance(100);
+}
 const politeMessage = () => screen.getByRole("status");
 const alertMessage = () => screen.getByRole("alert");
 
@@ -25,11 +52,16 @@ describe("TaskSteps", () => {
   beforeEach(() => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-01-01T00:00:00Z"));
-    vi.stubGlobal("matchMedia", () => Object.assign(new EventTarget(), { matches: false }));
+    vi.stubGlobal("matchMedia", () => motionQuery);
+    // Motion restores the scroll position after it measures a panel's natural height; jsdom cannot scroll.
+    vi.stubGlobal("scrollTo", vi.fn());
   });
 
-  afterEach(() => {
+  afterEach(async () => {
     cleanup();
+    setReducedMotion(false);
+    // Let Motion's shared loop run its last requested frame, so the next test starts idle.
+    await vi.advanceTimersByTimeAsync(100);
     vi.useRealTimers();
     vi.unstubAllGlobals();
   });
@@ -108,7 +140,7 @@ describe("TaskSteps", () => {
     expect(time("Build")).toHaveTextContent("43s");
   });
 
-  it("restarts the clock when a failed step runs again, and clears it on a reset", () => {
+  it("restarts the clock when a failed step runs again, and clears it on a reset", async () => {
     const { rerender } = render(<TaskSteps steps={job(["running"])} />);
     act(() => vi.advanceTimersByTime(5000));
     rerender(<TaskSteps steps={job(["failed"])} />);
@@ -118,6 +150,8 @@ describe("TaskSteps", () => {
     act(() => vi.advanceTimersByTime(2000));
     expect(time("Install")).toHaveTextContent("2s");
     rerender(<TaskSteps steps={job(["pending"])} />);
+    // The time fades out with the rest of the step, and then nothing is left ticking or animating.
+    await settle();
     expect(time("Install")).toHaveTextContent("");
     expect(vi.getTimerCount()).toBe(0);
   });
@@ -193,7 +227,7 @@ describe("TaskSteps", () => {
     expect(politeMessage()).toHaveTextContent("Deploy: Skipped");
   });
 
-  it("takes a jump across several steps as one update and one announcement", () => {
+  it("takes a jump across several steps as one update and one announcement", async () => {
     const { rerender } = render(<TaskSteps steps={job(["running"])} />);
     act(() => vi.advanceTimersByTime(1500));
     const before = politeMessage().firstElementChild;
@@ -209,6 +243,9 @@ describe("TaskSteps", () => {
     expect(politeMessage().children).toHaveLength(1);
     expect(politeMessage().firstElementChild).not.toBe(before);
     expect(screen.getByRole("list").querySelector("[aria-current]")).toBeNull();
+    // Once the springs have settled, the arc has gone and no clock or animation is left running.
+    await settle();
+    expect(spinner("Install")).toBeNull();
     expect(vi.getTimerCount()).toBe(0);
   });
 
@@ -239,6 +276,140 @@ describe("TaskSteps", () => {
     rerender(<TaskSteps steps={job(["done"])} {...props} />);
     expect(time("Install")).toHaveTextContent("1000ms");
     expect(politeMessage()).toHaveTextContent("Install: Terminé, 1000ms");
+  });
+
+  it("dims a row on pointer-down, before the click, and restores it on release", async () => {
+    const { rerender } = render(<TaskSteps steps={job(["done"], [{ detail: "Added 412 packages." }])} />);
+    const install = within(row("Install")).getByRole("button", { name: "Install" });
+    expect(surface("Install").style.opacity).toBe("1");
+
+    fireEvent.pointerDown(install, { isPrimary: true });
+    // One frame: the dim is not eased in.
+    await advance(17);
+    expect(surface("Install").style.opacity).toBe("0.7");
+    // Held, it stays dimmed, and nothing has been toggled yet.
+    await advance(600);
+    expect(surface("Install").style.opacity).toBe("0.7");
+    expect(install).toHaveAttribute("aria-expanded", "false");
+
+    fireEvent.pointerUp(install, { isPrimary: true });
+    await advance(60);
+    const returning = Number(surface("Install").style.opacity);
+    expect(returning).toBeGreaterThan(0.7);
+    expect(returning).toBeLessThan(1);
+    await settle();
+    expect(surface("Install").style.opacity).toBe("1");
+
+    // A step that loses its detail while it is held has no button left to release it, so it recovers.
+    fireEvent.pointerDown(install, { isPrimary: true });
+    await advance(17);
+    expect(surface("Install").style.opacity).toBe("0.7");
+    rerender(<TaskSteps steps={job(["done"])} />);
+    await advance(17);
+    expect(surface("Install").style.opacity).toBe("1");
+    fireEvent.pointerUp(document.body, { isPrimary: true });
+  });
+
+  it("moves a step's label and clock colour on one spring with its status", async () => {
+    const mix = (label: string, name: string) => Number(surface(label).style.getPropertyValue(name));
+    const { rerender } = render(<TaskSteps steps={job(["pending"])} />);
+    expect(mix("Install", "--task-steps-ink")).toBe(0);
+    expect(mix("Install", "--task-steps-clock")).toBe(0);
+
+    rerender(<TaskSteps steps={job(["running"])} />);
+    await advance(100);
+    const ink = mix("Install", "--task-steps-ink");
+    expect(ink).toBeGreaterThan(0);
+    expect(ink).toBeLessThan(1);
+    expect(mix("Install", "--task-steps-clock")).toBe(ink);
+
+    // Finishing mid-way retargets the clock from where it is; the label carries on to full strength.
+    rerender(<TaskSteps steps={job(["done"])} />);
+    await advance(32);
+    const clock = mix("Install", "--task-steps-clock");
+    expect(clock).toBeGreaterThan(0);
+    expect(clock).toBeLessThan(1);
+    expect(mix("Install", "--task-steps-ink")).toBeGreaterThanOrEqual(ink);
+    await settle();
+    expect(mix("Install", "--task-steps-ink")).toBe(1);
+    expect(mix("Install", "--task-steps-clock")).toBe(0);
+  });
+
+  it("fades a drawn status word out when the step runs again, reading only the new status", async () => {
+    const words = () => [...row("Install").querySelectorAll('[data-slot="task-steps-status"]')];
+    const { rerender } = render(<TaskSteps steps={job(["failed"])} />);
+    expect(words().map((word) => word.textContent)).toEqual(["Failed"]);
+    // A word that is there from the start is not faded in.
+    expect((words()[0] as HTMLElement).style.opacity).toBe("1");
+
+    rerender(<TaskSteps steps={job(["running"])} />);
+    expect(words().map((word) => word.textContent)).toEqual(["Failed", "Running"]);
+    expect(words()[0]).toHaveAttribute("aria-hidden", "true");
+    expect(words()[1]).toHaveClass("sr-only");
+    await settle();
+    expect(words().map((word) => word.textContent)).toEqual(["Running"]);
+
+    rerender(<TaskSteps steps={job(["failed"])} />);
+    expect((words()[0] as HTMLElement).style.opacity).toBe("0");
+    expect(words()[0]).not.toHaveAttribute("aria-hidden");
+    await settle();
+    expect((words()[0] as HTMLElement).style.opacity).toBe("1");
+  });
+
+  it("opens a panel that arrives with a step's first log line, and closes one that is taken away", async () => {
+    const { rerender } = render(<TaskSteps steps={job(["running"])} />);
+    expect(panel("Install")).toBeNull();
+
+    rerender(<TaskSteps steps={job(["running"], [{ logs: ["resolving"] }])} />);
+    expect(within(row("Install")).getByRole("button", { name: "Install" })).toHaveAttribute(
+      "aria-expanded",
+      "true",
+    );
+    // It starts closed and opens on the spring, rather than appearing at full height.
+    expect((panel("Install") as HTMLElement).style.height).toBe("0px");
+    expect((panel("Install") as HTMLElement).style.opacity).toBe("0");
+    await settle();
+    expect((panel("Install") as HTMLElement).style.opacity).toBe("1");
+
+    // A later line fades in; the one that came with the panel did not need to.
+    rerender(<TaskSteps steps={job(["running"], [{ logs: ["resolving", "linking"] }])} />);
+    const lines = [...within(row("Install")).getByRole("log").children] as HTMLElement[];
+    expect(lines.map((line) => line.textContent)).toEqual(["resolving", "linking"]);
+    expect(lines.map((line) => line.style.opacity)).toEqual(["1", "0"]);
+    await settle();
+    expect(lines[1].style.opacity).toBe("1");
+
+    // With its detail gone the step is no longer a button, and the panel closes before it leaves.
+    rerender(<TaskSteps steps={job(["running"])} />);
+    expect(within(row("Install")).queryByRole("button")).toBeNull();
+    expect(panel("Install")).toHaveTextContent("resolvinglinking");
+    expect(panel("Install")!.firstElementChild).toHaveAttribute("inert");
+    await settle();
+    expect(panel("Install")).toBeNull();
+  });
+
+  it("turns the running arc until it has closed, and holds it still under reduced motion", async () => {
+    const { rerender, unmount } = render(<TaskSteps steps={job(["running"])} />);
+    await advance(250);
+    const quarter = spinner("Install")!.style.transform;
+    expect(quarter).toMatch(/^rotate\(\d+(\.\d+)?deg\)$/);
+    expect(quarter).not.toBe("rotate(0deg)");
+
+    // The arc keeps turning while it closes into the ring, then it is gone.
+    rerender(<TaskSteps steps={job(["done"])} />);
+    await advance(100);
+    expect(spinner("Install")!.style.transform).not.toBe(quarter);
+    await settle();
+    expect(spinner("Install")).toBeNull();
+    unmount();
+
+    setReducedMotion(true);
+    render(<TaskSteps steps={job(["running"])} />);
+    await advance(1250);
+    expect(spinner("Install")).not.toBeNull();
+    expect(spinner("Install")!.style.transform).toBe("");
+    // The clock is what still shows the step running.
+    expect(time("Install")).toHaveTextContent("1s");
   });
 
   it("renders on the server without reading the clock or browser preferences", () => {
