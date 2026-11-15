@@ -53,13 +53,26 @@ export function ScrambleExample() {
   </Tab>
 </Tabs>
 
+## Behavior
+
+- Changing `text` turns the whole phrase into noise at once, in the shape of the new phrase, then resolves it one character at a time from left to right. The first quarter of `duration` is noise only.
+- A new `text` in the middle of a scramble retargets from what is on screen. Characters that are still scrambling keep their glyph and their rhythm, the ones that had resolved dissolve back into noise, and the reveal runs to the latest value.
+- Motion drives the reveal on its frame loop. Characters resolve on the frame they are due, and the noise changes once every `interval`.
+- The first render shows `text` as it is. Only changes animate.
+
+## Accessibility
+
+- Screen readers get the final text as soon as it changes. The scrambling characters are hidden from them.
+- Add `aria-live="polite"` and `aria-atomic="true"` when a change should be announced.
+- With reduced motion, the new text appears at once and fades in over 200 ms, with no scrambled characters. `disabled` and a `duration` of zero show it with no fade.
+
 ## API reference
 
-| Prop         | Type      | Default                                     | Description                                                                        |
-| ------------ | --------- | ------------------------------------------- | ---------------------------------------------------------------------------------- |
-| `text`       | `string`  | Required                                    | The final value. Changing it starts a scramble.                                    |
-| `duration`   | `number`  | `800`                                       | Total animation time in milliseconds. Zero or negative values resolve immediately. |
-| `interval`   | `number`  | `40`                                        | Time between character changes in milliseconds, with a `16ms` minimum.             |
-| `characters` | `string`  | `ABCDEFGHJKLMNPQRSTUVWXYZ0123456789#%&@$?/` | Replacement characters. Whitespace is ignored. An empty pool resolves immediately. |
-| `disabled`   | `boolean` | `false`                                     | Shows the final text immediately and stops any active animation.                   |
-| `className`  | `string`  | None                                        | Styles the outer span. Typography inherits from its parent.                        |
+| Prop         | Type      | Default                                     | Description                                                                                  |
+| ------------ | --------- | ------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| `text`       | `string`  | Required                                    | The final value. Changing it starts a scramble, or retargets one that is running.            |
+| `duration`   | `number`  | `800`                                       | Time from a change to the resolved text, in milliseconds. Zero or less resolves immediately. |
+| `interval`   | `number`  | `40`                                        | Time between changes of the noise in milliseconds, with a `16ms` minimum.                    |
+| `characters` | `string`  | `ABCDEFGHJKLMNPQRSTUVWXYZ0123456789#%&@$?/` | Replacement characters. Whitespace is ignored. An empty pool resolves immediately.           |
+| `disabled`   | `boolean` | `false`                                     | Shows the final text immediately and stops any active animation.                             |
+| `className`  | `string`  | None                                        | Styles the outer span. Typography inherits from its parent.                                  |

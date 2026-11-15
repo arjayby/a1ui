@@ -41,14 +41,39 @@ test("randomizes the phrase and scrambles every character while keeping the fina
   await expect(scramble).toHaveAttribute("data-state", "idle");
 });
 
-test("reduced motion updates immediately without intermediate characters", async ({ page }) => {
+test("reduced motion shows the new text at once and fades it in without intermediate characters", async ({
+  page,
+}) => {
+  // Motion reads the preference once per page, so set it before the page loads.
   await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.reload();
+  await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
   const scramble = page.locator('.text-scramble-demo [data-slot="text-scramble"]');
-  await page.getByRole("button", { name: "Randomize phrase", exact: true }).click();
-  await expect(scramble).toHaveAttribute("data-state", "idle");
+  const visual = scramble.locator('[aria-hidden="true"]');
+  const fades = visual.evaluate((element) => {
+    const seen: string[] = [];
+    const sample = () => {
+      seen.push(`${element.textContent}:${getComputedStyle(element).opacity}`);
+      if (element.getAnimations().length > 0 || seen.length < 3) requestAnimationFrame(sample);
+    };
+    return new Promise<string[]>((resolve) => {
+      const buttons = Array.from(document.querySelectorAll("button"));
+      buttons.find((button) => button.textContent?.includes("Randomize phrase"))!.click();
+      // React commits the click in a microtask, so the first sample waits for it.
+      queueMicrotask(sample);
+      setTimeout(() => resolve(seen), 400);
+    });
+  });
+
+  const seen = await fades;
   const phrase = await scramble.locator(".sr-only").textContent();
   expect(["MAKE IT COUNT.", "MAKE IT YOURS."]).toContain(phrase);
-  await expect(scramble.locator('[aria-hidden="true"]')).toHaveText(phrase!);
+  // Every frame already shows the final phrase; only its opacity changes.
+  expect(seen.every((frame) => frame.startsWith(`${phrase}:`))).toBe(true);
+  expect(seen.some((frame) => Number(frame.split(":")[1]) < 1)).toBe(true);
+  await expect(scramble).toHaveAttribute("data-state", "idle");
+  await expect(visual).toHaveText(phrase!);
+  await expect(visual).toHaveCSS("opacity", "1");
   await expect(scramble).toMatchAriaSnapshot(`- text: ${phrase}`);
 });
 

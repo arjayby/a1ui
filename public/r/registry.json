@@ -237,6 +237,9 @@
       "type": "registry:block",
       "title": "Text Scramble",
       "description": "Reveals new text from left to right through a scramble of random characters.",
+      "dependencies": [
+        "motion"
+      ],
       "files": [
         {
           "path": "src/registry/blocks/text-scramble.tsx",
@@ -258,7 +261,7 @@
             "The initial text does not animate. Animation starts when the text prop changes."
           ],
           "requirements": [
-            "Update the text prop to animate. Use a monospace font to reduce width shifts."
+            "Motion. Update the text prop to animate. Use a monospace font to reduce width shifts. Reduced motion replaces the scramble with a short fade."
           ],
           "docsUrl": "http://localhost:3000/docs/blocks/text-scramble.md",
           "registryUrl": "http://localhost:3000/r/text-scramble.json"
