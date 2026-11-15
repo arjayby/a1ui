@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { AgentInstall } from "@/components/agent-install";
 import { CatalogList } from "@/components/catalog-list";
 import { components } from "@/lib/component-catalog";
 import { collectionStructuredData, componentsGroup, JsonLd, pageMetadata } from "@/lib/seo";
@@ -20,6 +21,7 @@ export default function ComponentsPage() {
         <p className="stipple-eyebrow">a1ui / Component library</p>
         <h1 className="page-heading">Components</h1>
         <p className="page-description">{description}</p>
+        <AgentInstall kind="component" />
       </header>
       <CatalogList group="components" items={components} />
     </div>

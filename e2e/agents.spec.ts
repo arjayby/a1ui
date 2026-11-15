@@ -77,6 +77,23 @@ test("copy prompts support both discovery and a chosen block", async ({ page, co
   expect(selected).not.toContain("[describe what you want]");
 });
 
+test("each catalog copies a discovery prompt for its own kind", async ({ page, context }) => {
+  await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+  for (const [path, kind] of [
+    ["/blocks", "block"],
+    ["/components", "component"],
+  ]) {
+    await page.goto(path);
+    await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
+    const copyButton = page.getByRole("button", { name: "Copy prompt for agent" });
+    await copyButton.click();
+    await expect(copyButton).toHaveAttribute("data-state", "copied");
+    const prompt = await page.evaluate(() => navigator.clipboard.readText());
+    expect(prompt).toContain("/llms.txt");
+    expect(prompt).toContain(`Choose and install the a1ui ${kind} best suited for this request`);
+  }
+});
+
 test("a blocked clipboard provides a selectable prompt on mobile", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.addInitScript(() => {
