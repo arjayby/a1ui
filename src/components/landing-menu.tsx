@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 
 import { componentPreviews } from "@/components/landing-previews";
 import { components } from "@/lib/component-catalog";
@@ -20,6 +20,10 @@ const sections = {
 };
 
 type SectionId = keyof typeof sections;
+
+// The block sets its theme inline, so overrides go through its style prop. The page background
+// behind each preview lets muted surfaces, such as chips and key caps, stand out from it.
+const vortexStyle = { "--card-vortex-image": "var(--background)" } as CSSProperties;
 
 function PreviewStage({ children }: { children: ReactNode }) {
   // A live render of the component, for looking at only: the card itself is the link.
@@ -67,6 +71,7 @@ function SectionVortex({ id, control }: { id: SectionId; control: ReactNode }) {
       onOpenChange={changeOpen}
       ariaLabel={`${label} previews`}
       className="landing-vortex"
+      style={vortexStyle}
     >
       {control}
     </CardVortex>
