@@ -1,6 +1,7 @@
 "use client";
 
 import { clsx } from "clsx";
+import { cancelFrame, frame, spring, type FrameData, type KeyframeGenerator } from "motion";
 import { useEffect, useId, useRef, useState, type CSSProperties } from "react";
 
 export type AsciiLensProps = {
@@ -18,6 +19,17 @@ export type AsciiLensProps = {
 };
 
 type Cell = { x: number; y: number; glyph: string; opacity: number; angle: number; scatter: number };
+type Rest = { restDelta: number; restSpeed: number };
+// A value that follows a target with a Motion spring, advanced by the lens's own frame callback
+// so scrolling offscreen or hiding the tab freezes it exactly where it was.
+type Follower = {
+  value: number;
+  target: number;
+  elapsed: number;
+  done: boolean;
+  rest: Rest;
+  generator: KeyframeGenerator<number>;
+};
 type Controls = {
   move: (clientX: number, clientY: number) => void;
   key: (key: string) => void;
@@ -27,6 +39,45 @@ type Controls = {
 const defaultCharacters = ".:-=+*#%@";
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 const finite = (value: number, fallback: number) => (Number.isFinite(value) ? value : fallback);
+// Critically damped with a response of about 0.3 seconds (2π / √400), so the lens opens, closes
+// and catches up briskly and settles without overshoot. Stiffness and damping, not a duration,
+// because Motion's duration-based springs drop the velocity a retarget hands them.
+// 400 and 40 keep the damping ratio at exactly 1.
+const lensSpring = { stiffness: 400, damping: 40, mass: 1 };
+// Where a spring counts as settled: a twentieth of a pixel for the lens position, and a
+// two-thousandth of the way for its opening.
+const pixels: Rest = { restDelta: 0.05, restSpeed: 0.5 };
+const fraction: Rest = { restDelta: 0.0005, restSpeed: 0.005 };
+
+function follower(value: number, rest: Rest): Follower {
+  return {
+    value,
+    target: value,
+    elapsed: 0,
+    done: true,
+    rest,
+    generator: spring({ ...lensSpring, ...rest, keyframes: [value, value] }),
+  };
+}
+function advance(follow: Follower, milliseconds: number) {
+  if (follow.done) return;
+  follow.elapsed += milliseconds;
+  const state = follow.generator.next(follow.elapsed);
+  follow.value = state.value;
+  follow.done = state.done;
+}
+function springTo(follow: Follower, target: number, from = follow.value) {
+  if (target === follow.target && from === follow.value) return;
+  // Retargeting from the on-screen value with the current velocity keeps every change of
+  // direction smooth.
+  const velocity = follow.done ? 0 : (follow.generator.velocity?.(follow.elapsed) ?? 0);
+  follow.generator = spring({ ...lensSpring, ...follow.rest, keyframes: [from, target], velocity });
+  const state = follow.generator.next(0);
+  Object.assign(follow, { value: state.value, target, elapsed: 0, done: state.done });
+}
+function jump(follow: Follower, value: number) {
+  Object.assign(follow, { value, target: value, done: true });
+}
 
 function cover(image: HTMLImageElement, width: number, height: number) {
   const scale = Math.max(width / image.naturalWidth, height / image.naturalHeight);
@@ -78,18 +129,23 @@ export function AsciiLens({
     let cells: Cell[] = [];
     let color = "";
     let font = "monospace";
-    let frame = 0;
+    let running = false;
     let visible = true;
     let loaded = false;
     let sampleLoaded = false;
     let imageFailed = false;
-    const lens = { x: 0, y: 0, targetX: 0, targetY: 0, strength: 0, active: false };
+    // Where the lens rests, and whether the pointer is carrying it. The followers hold how far
+    // the drawn lens still is from that point, and how far open it is from 0 to 1.
+    const lens = { x: 0, y: 0, tracking: false };
+    const offsetX = follower(0, pixels);
+    const offsetY = follower(0, pixels);
+    const opening = follower(0, fraction);
 
+    // Reduced motion keeps the lens from growing or gliding: it cross-fades in place at full size.
+    const still = () => motion.matches;
+    const atRest = () => offsetX.done && offsetY.done && opening.done;
+    const canAnimate = () => visible && !document.hidden && loaded && width > 0 && height > 0;
     const canInteract = () => interactive && visible && !document.hidden && !root.closest("[inert]");
-    const cancel = () => {
-      if (frame) cancelAnimationFrame(frame);
-      frame = 0;
-    };
 
     function draw() {
       if (!context || !canvas || !loaded || !width || !height) return;
@@ -98,73 +154,115 @@ export function AsciiLens({
       context.textAlign = "center";
       context.textBaseline = "middle";
       context.fillStyle = color;
-      const activeRadius = lensRadius * lens.strength;
+      const reduced = still();
+      const open = clamp(opening.value, 0, 1);
+      const radius = reduced ? (open > 0 ? lensRadius : 0) : lensRadius * open;
+      const reveal = reduced ? open : 1;
+      const x = lens.x + offsetX.value;
+      const y = lens.y + offsetY.value;
       const scatterWidth = spacing * 2.8;
-
-      for (const cell of cells) {
-        const distance = Math.hypot(cell.x - lens.x, cell.y - lens.y);
-        if (activeRadius > 0 && distance < activeRadius - spacing * 0.6) continue;
-        const rim = activeRadius > 0 && Math.abs(distance - activeRadius) < scatterWidth;
-        const scatter =
-          rim && !motion.matches ? (1 - Math.abs(distance - activeRadius) / scatterWidth) * lens.strength : 0;
-        context.globalAlpha = cell.opacity * (rim ? 0.65 + scatter * 0.35 : 1);
+      const write = (cell: Cell, scatter: number) =>
         context.fillText(
           cell.glyph,
           cell.x + Math.cos(cell.angle) * cell.scatter * scatter * spacing * 2.3,
           cell.y + Math.sin(cell.angle) * cell.scatter * scatter * spacing * 2.3,
         );
+
+      for (const cell of cells) {
+        const distance = Math.hypot(cell.x - x, cell.y - y);
+        // Glyphs under the opaque photograph are never seen. While it fades in they still are.
+        if (reveal === 1 && radius > 0 && distance < radius - spacing * 0.6) continue;
+        // 1 on the rim of the lens, falling to 0 at the edges of the band of loose glyphs.
+        const rim = radius > 0 ? Math.max(0, 1 - Math.abs(distance - radius) / scatterWidth) : 0;
+        const scatter = reduced ? 0 : rim * open;
+        // The band dims as the lens opens, so it neither pops in nor out.
+        context.globalAlpha = cell.opacity * (rim > 0 ? 1 - (open - scatter) * 0.35 : 1);
+        write(cell, scatter);
       }
       context.globalAlpha = 1;
 
-      if (activeRadius > 0) {
+      if (radius > 0) {
         const crop = cover(samplingImage, width, height);
         context.save();
         context.beginPath();
-        context.arc(lens.x, lens.y, activeRadius, 0, Math.PI * 2);
+        context.arc(x, y, radius, 0, Math.PI * 2);
         context.clip();
+        context.globalAlpha = reveal;
         context.drawImage(samplingImage, crop.x, crop.y, crop.width, crop.height);
         context.restore();
+        context.globalAlpha = 1;
         // Repaint scattered rim glyphs over the photograph so they read as loose type.
-        if (!motion.matches) {
+        if (!reduced) {
           context.fillStyle = color;
           for (const cell of cells) {
-            const distance = Math.hypot(cell.x - lens.x, cell.y - lens.y);
-            const edge = Math.abs(distance - activeRadius);
-            if (edge > scatterWidth || distance >= activeRadius) continue;
-            const scatter = (1 - edge / scatterWidth) * lens.strength;
+            const distance = Math.hypot(cell.x - x, cell.y - y);
+            const edge = Math.abs(distance - radius);
+            if (edge > scatterWidth || distance >= radius) continue;
+            const scatter = (1 - edge / scatterWidth) * open;
             context.globalAlpha = cell.opacity * scatter * 0.85;
-            context.fillText(
-              cell.glyph,
-              cell.x + Math.cos(cell.angle) * cell.scatter * scatter * spacing * 2.3,
-              cell.y + Math.sin(cell.angle) * cell.scatter * scatter * spacing * 2.3,
-            );
+            write(cell, scatter);
           }
           context.globalAlpha = 1;
         }
       }
     }
 
-    function tick() {
-      frame = 0;
-      if (!canInteract()) return;
-      const easing = motion.matches ? 1 : 0.22;
-      lens.x += (lens.targetX - lens.x) * easing;
-      lens.y += (lens.targetY - lens.y) * easing;
-      lens.strength += ((lens.active ? 1 : 0) - lens.strength) * easing;
-      if (Math.abs(lens.strength) < 0.002 && !lens.active) lens.strength = 0;
+    // Runs in Motion's render step, after any other Motion animations update this frame.
+    function tick({ delta }: FrameData) {
+      running = false;
+      if (!canAnimate()) return;
+      // Motion's generators are analytic, so the response is the same at any refresh rate, and
+      // Motion clamps long gaps between frames, so a stalled tab cannot fling the lens forward.
+      advance(offsetX, delta);
+      advance(offsetY, delta);
+      advance(opening, delta);
       draw();
-      if (
-        Math.abs(lens.targetX - lens.x) > 0.25 ||
-        Math.abs(lens.targetY - lens.y) > 0.25 ||
-        (lens.active ? lens.strength < 0.998 : lens.strength > 0)
-      )
-        frame = requestAnimationFrame(tick);
+      // Only a lens that is still moving asks for another frame, so one at rest costs nothing.
+      if (!atRest()) request();
     }
 
-    function schedule() {
-      if (frame) return;
-      if (canInteract()) frame = requestAnimationFrame(tick);
-      else draw();
+    function stop() {
+      if (running) cancelFrame(tick);
+      running = false;
+    }
+
+    // Draws on Motion's next frame. Input calls this too, so a pointer move paints once.
+    function request() {
+      if (running || !canAnimate()) return;
+      frame.render(tick);
+      running = true;
+    }
+
+    function sync() {
+      stop();
+      draw();
+      if (!atRest()) request();
+    }
+
+    function onMotion() {
+      if (still()) {
+        // Land a lens in flight, so the reduced view starts from where it was heading.
+        jump(offsetX, 0);
+        jump(offsetY, 0);
+        jump(opening, opening.target);
+      }
+      sync();
+    }
+
+    // Moves the point the lens rests at. A lens on screen springs there from where it is drawn
+    // now, keeping its velocity. A closed one, or any lens under reduced motion, is simply there.
+    function aim(x: number, y: number) {
+      const fromX = lens.x + offsetX.value - x;
+      const fromY = lens.y + offsetY.value - y;
+      lens.x = x;
+      lens.y = y;
+      if (still() || opening.value < 0.001) {
+        jump(offsetX, 0);
+        jump(offsetY, 0);
+      } else {
+        springTo(offsetX, 0, fromX);
+        springTo(offsetY, 0, fromY);
+      }
     }
 
     function sample() {
@@ -210,7 +308,8 @@ export function AsciiLens({
       }
       loaded = true;
       setResult({ src, status: "ready" });
-      draw();
+      // Input that arrived while the image was loading opens the lens now.
+      sync();
     }
 
     function resize() {
@@ -243,59 +342,58 @@ export function AsciiLens({
       loaded = false;
       setResult({ src, status: "failed" });
     }
-    function onVisibility() {
-      if (document.hidden) cancel();
-      else schedule();
-    }
-    function onMotion() {
-      cancel();
-      schedule();
-    }
 
     controlsRef.current = {
       move(clientX, clientY) {
         if (!canInteract()) return;
         const bounds = root.getBoundingClientRect();
         if (!bounds.width || !bounds.height || !width || !height) return;
-        // The lens stays under the pointer 1:1. Only its opening and closing,
-        // and keyboard steps, ease toward their targets.
-        lens.x = lens.targetX = clamp(((clientX - bounds.left) * width) / bounds.width, 0, width);
-        lens.y = lens.targetY = clamp(((clientY - bounds.top) * height) / bounds.height, 0, height);
-        lens.active = true;
-        schedule();
+        const x = clamp(((clientX - bounds.left) * width) / bounds.width, 0, width);
+        const y = clamp(((clientY - bounds.top) * height) / bounds.height, 0, height);
+        // The lens stays under the pointer 1:1. A pointer that arrives while the lens is open
+        // somewhere else pulls it over on the spring, and keeps carrying it while it catches up.
+        if (lens.tracking) {
+          lens.x = x;
+          lens.y = y;
+        } else {
+          aim(x, y);
+        }
+        lens.tracking = true;
+        springTo(opening, 1);
+        request();
       },
       key(key) {
         if (!canInteract()) return;
+        lens.tracking = false;
         if (key === "Escape") {
-          lens.active = false;
+          springTo(opening, 0);
         } else {
-          if (!lens.active) {
-            lens.x = lens.targetX = width / 2;
-            lens.y = lens.targetY = height / 2;
-          }
-          lens.active = true;
+          // A lens that is closed or closing reopens from the centre.
+          let { x, y } = opening.target ? lens : { x: width / 2, y: height / 2 };
           if (key === "Home") {
-            lens.targetX = width / 2;
-            lens.targetY = height / 2;
+            x = width / 2;
+            y = height / 2;
           }
-          if (key === "ArrowLeft") lens.targetX = clamp(lens.targetX - spacing * 3, 0, width);
-          if (key === "ArrowRight") lens.targetX = clamp(lens.targetX + spacing * 3, 0, width);
-          if (key === "ArrowUp") lens.targetY = clamp(lens.targetY - spacing * 3, 0, height);
-          if (key === "ArrowDown") lens.targetY = clamp(lens.targetY + spacing * 3, 0, height);
+          if (key === "ArrowLeft") x = clamp(x - spacing * 3, 0, width);
+          if (key === "ArrowRight") x = clamp(x + spacing * 3, 0, width);
+          if (key === "ArrowUp") y = clamp(y - spacing * 3, 0, height);
+          if (key === "ArrowDown") y = clamp(y + spacing * 3, 0, height);
+          aim(x, y);
+          springTo(opening, 1);
         }
-        schedule();
+        request();
       },
       leave() {
-        lens.active = false;
-        schedule();
+        lens.tracking = false;
+        springTo(opening, 0);
+        request();
       },
     };
 
     const resizeObserver = new ResizeObserver(resize);
     const intersectionObserver = new IntersectionObserver(([entry]) => {
       visible = entry.isIntersecting;
-      if (!visible) cancel();
-      else schedule();
+      sync();
     });
     const themeObserver = new MutationObserver(resize);
     for (let ancestor: HTMLElement | null = root; ancestor; ancestor = ancestor.parentElement) {
@@ -307,7 +405,7 @@ export function AsciiLens({
     resizeObserver.observe(root);
     intersectionObserver.observe(root);
     motion.addEventListener("change", onMotion);
-    document.addEventListener("visibilitychange", onVisibility);
+    document.addEventListener("visibilitychange", sync);
     document.fonts?.addEventListener("loadingdone", resize);
     // Set crossOrigin before src so the request uses CORS mode from the start.
     samplingImage.crossOrigin = "anonymous";
@@ -317,7 +415,7 @@ export function AsciiLens({
     if (image.complete && !image.naturalWidth) onImageError();
 
     return () => {
-      cancel();
+      stop();
       controlsRef.current = null;
       image.removeEventListener("error", onImageError);
       samplingImage.removeEventListener("load", onSampleLoad);
@@ -327,7 +425,7 @@ export function AsciiLens({
       intersectionObserver.disconnect();
       themeObserver.disconnect();
       motion.removeEventListener("change", onMotion);
-      document.removeEventListener("visibilitychange", onVisibility);
+      document.removeEventListener("visibilitychange", sync);
       document.fonts?.removeEventListener("loadingdone", resize);
       canvas.width = canvas.height = 0;
     };
@@ -374,6 +472,10 @@ export function AsciiLens({
             aria-describedby={instructionsId}
             className="focus-visible:outline-ring absolute inset-0 size-full cursor-crosshair touch-pan-y border-0 bg-transparent p-0 focus-visible:-outline-offset-4"
             onPointerMove={(event) => {
+              if (event.isPrimary) controlsRef.current?.move(event.clientX, event.clientY);
+            }}
+            onPointerDown={(event) => {
+              // A finger has no hover, so the lens opens under it the moment it lands.
               if (event.isPrimary) controlsRef.current?.move(event.clientX, event.clientY);
             }}
             onPointerLeave={() => controlsRef.current?.leave()}

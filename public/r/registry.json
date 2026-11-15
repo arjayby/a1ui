@@ -86,7 +86,8 @@
       "title": "ASCII Lens",
       "description": "An image rendered as ASCII, with a circular lens that reveals the original.",
       "dependencies": [
-        "clsx"
+        "clsx",
+        "motion"
       ],
       "files": [
         {
@@ -110,7 +111,7 @@
             "Remote images must allow canvas pixel reads through CORS; otherwise ASCII sampling falls back to the original image."
           ],
           "requirements": [
-            "Supply an image URL and alt text. Requires Canvas 2D, ResizeObserver, and IntersectionObserver. Remote images need anonymous CORS permission for ASCII sampling."
+            "Supply an image URL and alt text. Requires Motion, Canvas 2D, ResizeObserver, and IntersectionObserver. Remote images need anonymous CORS permission for ASCII sampling. Reduced motion cross-fades the lens in place at full size."
           ],
           "docsUrl": "http://localhost:3000/docs/blocks/ascii-lens.md",
           "registryUrl": "http://localhost:3000/r/ascii-lens.json"
