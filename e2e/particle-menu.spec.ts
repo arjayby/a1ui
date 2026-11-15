@@ -216,3 +216,61 @@ test.describe("particle menu demo", () => {
     });
   });
 });
+
+// Motion fades the items on the browser's own animation timeline, which a paused test clock does
+// not advance, so these run in real time.
+test.describe("particle menu item feedback", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto("/blocks/particle-menu");
+    await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
+    await page.getByRole("navigation", { name: "Particle menu demo" }).scrollIntoViewIfNeeded();
+  });
+
+  test("pressing dims an item on pointer down or Enter and it fades back on release", async ({ page }) => {
+    const button = page
+      .getByRole("navigation", { name: "Particle menu demo" })
+      .getByRole("button", { name: "Grace", exact: true });
+    await expect(button).toHaveCSS("opacity", "1");
+
+    await button.locator("svg").hover();
+    await page.mouse.down();
+    await expect(button).toHaveCSS("opacity", "0.6");
+    await page.mouse.up();
+    await expect(button).toHaveCSS("opacity", "1");
+
+    await page.mouse.move(0, 0);
+    await button.focus();
+    await page.keyboard.down("Enter");
+    await expect(button).toHaveCSS("opacity", "0.6");
+    await page.keyboard.up("Enter");
+    await expect(button).toHaveCSS("opacity", "1");
+  });
+
+  test.describe("with reduced motion", () => {
+    test.use({ contextOptions: { reducedMotion: "reduce" } });
+
+    test("hover and keyboard focus dim an item instead of scattering its sigil", async ({ page }) => {
+      const menu = page.getByRole("navigation", { name: "Particle menu demo" });
+      const grace = menu.getByRole("button", { name: "Grace", exact: true });
+      const runes = menu.getByRole("button", { name: "Runes", exact: true });
+      const resting = await grace.locator("path").getAttribute("d");
+
+      await grace.locator("svg").hover();
+      await expect(grace).toHaveCSS("opacity", "0.75");
+      await page.mouse.down();
+      await expect(grace).toHaveCSS("opacity", "0.6");
+      await page.mouse.up();
+      await expect(grace).toHaveCSS("opacity", "0.75");
+      await page.mouse.move(0, 0);
+      await expect(grace).toHaveCSS("opacity", "1");
+
+      await grace.focus();
+      await page.keyboard.press("Tab");
+      await expect(runes).toBeFocused();
+      await expect(runes).toHaveCSS("opacity", "0.75");
+      await page.keyboard.press("Tab");
+      await expect(runes).toHaveCSS("opacity", "1");
+      expect((await grace.locator("path").getAttribute("d")) === resting).toBe(true);
+    });
+  });
+});
