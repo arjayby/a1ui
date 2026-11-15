@@ -1,7 +1,7 @@
 "use client";
 
 import { cancelFrame, frame, spring, type FrameData, type KeyframeGenerator } from "motion";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, type ReactNode } from "react";
 
 /** Grainy sigils filled with fine particles. */
 export type GrainShape = "grace" | "runes" | "ashes" | "oaths";
@@ -22,6 +22,8 @@ export interface ParticleMenuProps {
   ariaLabel?: string;
   strength?: number;
   radius?: number;
+  /** Wraps an item's link or button, for example to attach a popover or a Card Vortex to it. */
+  renderItem?: (item: ParticleMenuItem, control: ReactNode) => ReactNode;
   className?: string;
 }
 
@@ -735,10 +737,12 @@ function ParticleMenuEntry({
   item,
   strength,
   radius,
+  renderItem,
 }: {
   item: ParticleMenuItem;
   strength: number;
   radius: number;
+  renderItem?: ParticleMenuProps["renderItem"];
 }) {
   const itemRef = useRef<HTMLLIElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
@@ -974,19 +978,19 @@ function ParticleMenuEntry({
   const className =
     "text-foreground flex cursor-pointer flex-col items-center gap-2 rounded-sm bg-transparent px-3 pt-1 pb-4 font-sans no-underline outline-offset-4 transition-opacity duration-150 select-none focus-visible:outline-1 focus-visible:outline-current active:opacity-60 active:duration-0 motion-reduce:hover:opacity-75 motion-reduce:active:opacity-60";
 
-  return (
-    <li ref={itemRef}>
-      {item.href !== undefined ? (
-        <a href={item.href} onClick={item.onSelect} className={className}>
-          {content}
-        </a>
-      ) : (
-        <button type="button" onClick={item.onSelect} className={className}>
-          {content}
-        </button>
-      )}
-    </li>
-  );
+  const control =
+    item.href !== undefined ? (
+      <a href={item.href} onClick={item.onSelect} className={className}>
+        {content}
+      </a>
+    ) : (
+      <button type="button" onClick={item.onSelect} className={className}>
+        {content}
+      </button>
+    );
+
+  // The particles follow the item's first link or button, so a wrapper must render the control first.
+  return <li ref={itemRef}>{renderItem ? renderItem(item, control) : control}</li>;
 }
 
 export function ParticleMenu({
@@ -994,6 +998,7 @@ export function ParticleMenu({
   ariaLabel = "Particle menu",
   strength = 1,
   radius = 38,
+  renderItem,
   className,
 }: ParticleMenuProps) {
   const safeStrength = Number.isFinite(strength) ? Math.min(2, Math.max(0, strength)) : 1;
@@ -1003,7 +1008,13 @@ export function ParticleMenu({
     <nav aria-label={ariaLabel} className={className}>
       <ul className="m-0 flex list-none flex-wrap items-center justify-center gap-x-4 gap-y-6 p-0">
         {items.map((item) => (
-          <ParticleMenuEntry key={item.id} item={item} strength={safeStrength} radius={safeRadius} />
+          <ParticleMenuEntry
+            key={item.id}
+            item={item}
+            strength={safeStrength}
+            radius={safeRadius}
+            renderItem={renderItem}
+          />
         ))}
       </ul>
     </nav>

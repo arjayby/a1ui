@@ -163,4 +163,25 @@ describe("ParticleMenu", () => {
     expect(onSelect).toHaveBeenCalledOnce();
     unmount();
   });
+
+  it("lets renderItem wrap a control while the particles still follow it", () => {
+    const { container } = render(
+      <ParticleMenu
+        items={[{ id: "grace", label: "Grace", shape: "grace", href: "/grace" }, ...items.slice(1)]}
+        renderItem={(item, control) => (
+          <div data-testid={`wrap-${item.id}`}>
+            {control}
+            <a href="/extra">Extra</a>
+          </div>
+        )}
+      />,
+    );
+    const link = screen.getByRole("link", { name: "Grace" });
+    expect(screen.getByTestId("wrap-grace")).toContainElement(link);
+    const path = container.querySelector("path")!;
+    const resting = path.getAttribute("d");
+    fireEvent.pointerEnter(link, { clientX: 60, clientY: 60 });
+    act(() => vi.advanceTimersByTime(100));
+    expect(path.getAttribute("d")).not.toBe(resting);
+  });
 });

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { HydrationMarker } from "@/components/hydration-marker";
+import { LandingMenu } from "@/components/landing-menu";
 import { ThemeSwitch } from "@/components/site-navigation";
 import { blocks } from "@/lib/block-catalog";
 import { components } from "@/lib/component-catalog";
@@ -15,7 +16,6 @@ import {
   siteTitle,
 } from "@/lib/seo";
 import { AsciiMorph } from "@/registry/blocks/ascii-morph";
-import { ParticleMenu, type ParticleMenuItem } from "@/registry/blocks/particle-menu";
 
 import "./landing.css";
 
@@ -46,13 +46,6 @@ const structuredData = [
   },
 ];
 
-const menu: ParticleMenuItem[] = [
-  { id: "components", label: "Components", shape: "ring", href: "/components" },
-  { id: "blocks", label: "Blocks", shape: "lattice", href: "/blocks" },
-  { id: "agents", label: "For agents", shape: "halo", href: "/agents" },
-  { id: "github", label: "GitHub", shape: "spiral", href: repositoryUrl },
-];
-
 export default function HomePage() {
   return (
     <main className="landing">
@@ -78,7 +71,7 @@ export default function HomePage() {
         </footer>
       </article>
 
-      <ParticleMenu items={menu} ariaLabel="Main navigation" className="landing-menu" />
+      <LandingMenu githubUrl={repositoryUrl} />
     </main>
   );
 }

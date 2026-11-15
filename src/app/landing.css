@@ -9,6 +9,8 @@
   justify-content: center;
   gap: var(--space-24);
   padding: var(--space-12);
+  /* An open Card Vortex's hover area can reach past a phone's edges; it must not widen the page. */
+  overflow-x: clip;
 }
 
 /* The Stipple WindowCard: the one place on the page where cobalt fills an area. */
@@ -115,15 +117,15 @@
   text-underline-offset: 3px;
 }
 
-.landing-menu ul {
+.landing-menu > ul {
   gap: 40px 56px;
 }
 /* The particles are the page's dotted picture: cobalt-ink on paper. */
-.landing-menu svg {
+.landing-menu svg:not(.landing-vortex nav *) {
   color: var(--cobalt-ink);
 }
 /* Navigation labels; the hovered one turns cobalt-ink. */
-.landing-menu span {
+.landing-menu span:not(.landing-vortex nav *) {
   font-family: var(--font-sans);
   font-size: var(--type-body-size);
   letter-spacing: var(--type-label-tracking);
@@ -131,12 +133,12 @@
   white-space: nowrap;
   transition: color var(--motion-fast) ease;
 }
-.landing-menu :is(a, button):hover span {
+.landing-menu :is(a, button):hover > span:not(.landing-vortex nav *) {
   color: var(--cobalt-ink);
 }
 
 @media (max-width: 1200px) {
-  .landing-menu ul {
+  .landing-menu > ul {
     display: grid;
     width: fit-content;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -153,19 +155,54 @@
     gap: 40px;
     padding: var(--space-4) var(--space-4) var(--space-12);
   }
-  .landing-menu ul {
+  .landing-menu > ul {
     gap: 24px 16px;
   }
-  .landing-menu svg {
+  .landing-menu svg:not(.landing-vortex nav *) {
     width: 88px;
     height: 88px;
   }
-  .landing-menu span {
+  .landing-menu span:not(.landing-vortex nav *) {
     font-size: var(--type-label-size);
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .landing-menu span {
+  .landing-menu span:not(.landing-vortex nav *) {
     transition: none;
+  }
+}
+
+/* Components fans out a Card Vortex of live previews, at the block's own card size.
+   The menu rules above skip everything inside the cards' nav. */
+.landing-vortex {
+  --card-vortex-z: 50;
+}
+.landing-preview {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: var(--space-2);
+  pointer-events: none;
+  user-select: none;
+}
+.landing-preview .landing-preview-banner {
+  font-size: 2rem;
+}
+.landing-preview .landing-preview-spiral {
+  width: 100%;
+  height: 100%;
+}
+/* The block demo's phone size, so the ring fits a phone without dropping below its minimum scale. */
+@media (max-width: 30rem) {
+  .landing-vortex {
+    --card-vortex-card-width: 7.5rem;
+    --card-vortex-image-height: 4rem;
+  }
+  .landing-preview {
+    padding: var(--space-1);
+    zoom: 0.8;
   }
 }
