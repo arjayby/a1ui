@@ -143,6 +143,137 @@ test("progress keeps the label still and its figures tabular while the value cou
   await expect(root.getByRole("status")).toHaveText("Uploaded");
 });
 
+test("the running ring and bar loop on transform, and progress fills by transform, not width", async ({
+  page,
+}) => {
+  const demo = stage(page);
+  const pill = pillOf(page);
+  const present = '[data-slot="activity-pill-layer"]:not([inert])';
+
+  await demo.getByRole("button", { name: "Deploy" }).click();
+  await expect(pill).toHaveAttribute("data-status", "running");
+  await pill.click();
+  await expect(pill.locator(`${present} [data-slot="activity-pill-track"]`)).toBeVisible();
+
+  const running = await pill.evaluate(async (shell, layer) => {
+    const glyph = shell.querySelector(`${layer} [data-slot="activity-pill-glyph"]`)!;
+    const sweep = shell.querySelector(`${layer} [data-slot="activity-pill-track"]`)!.firstElementChild!;
+    const turns = new Set<string>();
+    const slides = new Set<string>();
+    const began = performance.now();
+    while (performance.now() - began < 400) {
+      await new Promise(requestAnimationFrame);
+      turns.add(getComputedStyle(glyph).transform);
+      slides.add(getComputedStyle(sweep).transform);
+    }
+    const loops = shell
+      .getAnimations({ subtree: true })
+      .filter((animation) => animation.effect?.getComputedTiming().iterations === Infinity);
+    return {
+      turns: turns.size,
+      slides: slides.size,
+      loops: loops.length,
+      // Motion runs both loops; no CSS keyframes are involved.
+      css: loops.filter((animation) => animation instanceof CSSAnimation).length,
+      names: [getComputedStyle(glyph).animationName, getComputedStyle(sweep).animationName],
+    };
+  }, present);
+  expect(running.turns).toBeGreaterThan(5);
+  expect(running.slides).toBeGreaterThan(5);
+  expect(running.loops).toBe(2);
+  expect(running.css).toBe(0);
+  expect(running.names).toEqual(["none", "none"]);
+
+  // Pressing the demo's button counts as an outside press, so the pill is opened again.
+  await demo.getByRole("button", { name: "Upload" }).click();
+  await expect(pill).toHaveAttribute("data-status", "progress");
+  const progress = await pill.evaluate(async (shell, layer) => {
+    if (shell.dataset.state !== "expanded") {
+      shell.querySelector<HTMLButtonElement>('[data-slot="activity-pill-toggle"]')!.click();
+    }
+    const frames: { value: number; offset: number; shift: number; fill: number; track: number }[] = [];
+    const transitions = new Set<string>();
+    const began = performance.now();
+    while (performance.now() - began < 9000 && shell.dataset.status === "progress") {
+      await new Promise(requestAnimationFrame);
+      const bar = shell.querySelector('[role="progressbar"]');
+      const ring = shell.querySelector(`${layer} [data-slot="activity-pill-ring"]`);
+      const fill = shell.querySelector<HTMLElement>(`${layer} [data-slot="activity-pill-fill"]`);
+      if (!bar || !ring || !fill) continue;
+      transitions.add(getComputedStyle(fill).transitionDuration);
+      transitions.add(getComputedStyle(ring).transitionDuration);
+      frames.push({
+        value: Number(bar.getAttribute("aria-valuenow")),
+        offset: Number(ring.getAttribute("stroke-dashoffset")),
+        shift: new DOMMatrix(getComputedStyle(fill).transform).m41,
+        // Layout width, which a transform does not change.
+        fill: fill.offsetWidth,
+        track: fill.parentElement!.offsetWidth,
+      });
+    }
+    return { frames, transitions: [...transitions] };
+  }, present);
+
+  const { frames } = progress;
+  expect(frames.length).toBeGreaterThan(50);
+  const circumference = 2 * Math.PI * 8;
+  for (const [index, frame] of frames.entries()) {
+    // The fill never changes width. It slides, and the ring unwinds with it.
+    expect(frame.fill).toBe(frame.track);
+    expect(frame.shift).toBeLessThanOrEqual(0.5);
+    expect(frame.shift / frame.track).toBeCloseTo(-frame.offset / circumference, 1);
+    if (index > 0) {
+      expect(frame.offset).toBeLessThanOrEqual(frames[index - 1].offset + 0.01);
+      expect(frame.shift).toBeGreaterThanOrEqual(frames[index - 1].shift - 0.5);
+    }
+  }
+  // A spring carries the fill between figures, so it takes far more positions than there are
+  // figures, and it stays just behind the figure it is chasing.
+  const figures = new Set(frames.map(({ value }) => value)).size;
+  expect(new Set(frames.map(({ offset }) => offset.toFixed(3))).size).toBeGreaterThan(figures * 2);
+  expect(frames[0].shift).toBeLessThan(-frames[0].track * 0.5);
+  expect(frames.at(-1)!.shift).toBeGreaterThan(-frames[0].track * 0.05);
+  expect(progress.transitions).toEqual(["0s"]);
+});
+
+test("the pill and its actions give under a press from pointer-down, before anything commits", async ({
+  page,
+}) => {
+  const demo = stage(page);
+  const pill = pillOf(page);
+  const scaleOf = (target: Locator) =>
+    target.evaluate((element) => new DOMMatrix(getComputedStyle(element).transform).a);
+
+  // The upload is the longest of the demo's runs, which leaves time to press twice.
+  await demo.getByRole("button", { name: "Upload" }).click();
+  await expect(pill).toHaveAttribute("data-status", "progress");
+  await settled(pill);
+  const box = (await pill.boundingBox())!;
+
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await page.mouse.down();
+  await expect.poll(() => scaleOf(pill)).toBeCloseTo(0.97, 2);
+  await expect(pill).toHaveAttribute("data-state", "compact");
+  await page.mouse.up();
+  await expect(pill).toHaveAttribute("data-state", "expanded");
+  await expect.poll(() => scaleOf(pill)).toBe(1);
+  await settled(pill);
+
+  // An action shrinks on its own, without taking the shell with it.
+  const cancel = pill.getByRole("button", { name: "Cancel" });
+  const target = (await cancel.boundingBox())!;
+  await page.mouse.move(target.x + target.width / 2, target.y + target.height / 2);
+  await page.mouse.down();
+  await expect.poll(() => scaleOf(cancel)).toBeCloseTo(0.96, 2);
+  expect(await scaleOf(pill)).toBe(1);
+  // Dragging away before letting go cancels the press.
+  await page.mouse.move(box.x + box.width / 2, box.y + 400);
+  await page.mouse.up();
+  await expect.poll(() => scaleOf(cancel)).toBe(1);
+  await expect(pill).toHaveAttribute("data-status", "progress");
+  await expect(pill).toHaveAttribute("data-state", "expanded");
+});
+
 test("an error stays, expands with Enter, collapses on Escape and outside press, and retries", async ({
   page,
 }) => {
@@ -348,6 +479,48 @@ test("reduced motion changes size at once, cross-fades the content, and does not
   expect(change.layers).toBe(2);
   expect(change.filters).toEqual(["none"]);
   await expect(pill.locator('[data-slot="activity-pill-layer"]')).toHaveCount(1);
+});
+
+test("reduced motion holds the running ring and bar still, and a press does not shrink the pill", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  const demo = stage(page);
+  const pill = pillOf(page);
+  const present = '[data-slot="activity-pill-layer"]:not([inert])';
+
+  await demo.getByRole("button", { name: "Deploy" }).click();
+  await expect(pill).toHaveAttribute("data-status", "running");
+  await pill.click();
+  await expect(pill.locator(`${present} [data-slot="activity-pill-track"]`)).toBeVisible();
+
+  // Nothing spins, sweeps, or pulses without end.
+  const still = await pill.evaluate(async (shell, layer) => {
+    const glyph = shell.querySelector(`${layer} [data-slot="activity-pill-glyph"]`)!;
+    const bar = shell.querySelector(`${layer} [data-slot="activity-pill-track"]`)!.firstElementChild!;
+    const poses = new Set<string>();
+    const began = performance.now();
+    while (performance.now() - began < 300) {
+      await new Promise(requestAnimationFrame);
+      const { transform, opacity } = getComputedStyle(glyph);
+      const barStyle = getComputedStyle(bar);
+      poses.add([transform, opacity, barStyle.transform, barStyle.opacity].join());
+    }
+    const loops = shell
+      .getAnimations({ subtree: true })
+      .filter((animation) => animation.effect?.getComputedTiming().iterations === Infinity);
+    return { poses: [...poses], loops: loops.length };
+  }, present);
+  expect(still.poses).toEqual(["none,1,none,1"]);
+  expect(still.loops).toBe(0);
+
+  const box = (await pill.boundingBox())!;
+  await page.mouse.move(box.x + box.width / 2, box.y + 20);
+  await page.mouse.down();
+  await page.waitForTimeout(150);
+  expect(await pill.evaluate((element) => getComputedStyle(element).transform)).toBe("none");
+  await page.mouse.up();
+  await expect(pill).toHaveAttribute("data-state", "compact");
 });
 
 test("the surface is translucent, and solid when transparency is reduced", async ({ page }) => {

@@ -4,9 +4,15 @@ import {
   animate,
   AnimatePresence,
   motion,
+  motionValue,
   useIsPresent,
   useMotionValue,
   useReducedMotion,
+  useTransform,
+  type AnimationOptions,
+  type DOMKeyframesDefinition,
+  type HTMLMotionProps,
+  type MotionValue,
 } from "motion/react";
 import {
   useCallback,
@@ -172,11 +178,32 @@ const spring = (response: number) => ({
 });
 const SIZE_SPRING = spring(0.35);
 const MOVE_SPRING = spring(0.4);
+// Opacity and blur ride springs as well, so a fade that is turned around keeps its pace. Content
+// arrives in step with the shell and leaves a little faster, so two labels never read at once.
+const ENTER_SPRING = spring(0.35);
+const EXIT_SPRING = spring(0.2);
+/** The shell's own fade as it arrives and leaves. */
+const FADE_SPRING = spring(0.3);
+// A press lands at once and lets go a little slower.
+const PRESS_SPRING = spring(0.15);
+const RELEASE_SPRING = spring(0.3);
+const PROGRESS_SPRING = spring(0.3);
+const DRAW_SPRING = spring(0.4);
 /** How far the pill travels to and from its edge, in pixels: its own height plus the inset. */
 const TRAVEL = 56;
 
+// The two loops that run while there is no value to show. Nothing can interrupt or retarget a
+// loop, so these keep a set pace, and they animate `transform` alone so the compositor can run
+// them while the main thread is busy with the work they stand for.
+const SPIN: DOMKeyframesDefinition = { transform: ["rotate(0deg)", "rotate(360deg)"] };
+const SPIN_LOOP: AnimationOptions = { duration: 1, ease: "linear", repeat: Infinity };
+const SWEEP: DOMKeyframesDefinition = { transform: ["translateX(-100%)", "translateX(250%)"] };
+const SWEEP_LOOP: AnimationOptions = { duration: 1.3, ease: "easeInOut", repeat: Infinity };
+
 const CHECK = "M6.25 10.5 L8.9 13.1 L13.9 7.4";
 const BANG = "M10 6 L10 10.75 M10 13.9 L10 14";
+/** Circumference of the glyph's ring, which has a radius of 8. */
+const RING = 2 * Math.PI * 8;
 
 const clampValue = (value: number | undefined) =>
   Number.isFinite(value) ? Math.min(100, Math.max(0, Math.round(value as number))) : 0;
@@ -184,6 +211,26 @@ const clampValue = (value: number | undefined) =>
 const subscribeNever = () => () => {};
 
 const keyOf = (activity: Activity) => `${activity.id ?? ""}|${activity.status}|${activity.title}`;
+
+/**
+ * Runs a loop on an element for as long as `enabled` holds. It is started by hand because the
+ * first layer mounts inside an `AnimatePresence` with `initial={false}`, which also holds back the
+ * mount animation of everything inside that layer.
+ */
+function useLoop<T extends Element>(
+  keyframes: DOMKeyframesDefinition,
+  options: AnimationOptions,
+  enabled: boolean,
+) {
+  const ref = useRef<T>(null);
+  useLayoutEffect(() => {
+    const element = ref.current;
+    if (!element || !enabled) return;
+    const controls = animate(element, keyframes, options);
+    return () => controls.stop();
+  }, [keyframes, options, enabled]);
+  return ref;
+}
 
 export function ActivityPill({
   activity,
@@ -289,6 +336,7 @@ function Pill({
   const toggleRef = useRef<HTMLButtonElement>(null);
   const [expanded, setExpanded] = useState(false);
   const [hovered, setHovered] = useState(false);
+  const [pressed, setPressed] = useState(false);
   const [keyboardFocused, setKeyboardFocused] = useState(false);
   const activityKey = keyOf(activity);
   // The state the pill was last toggled in, so the check draws in once and not on every toggle.
@@ -296,6 +344,20 @@ function Pill({
 
   const busy = status === "running" || status === "progress";
   const value = clampValue(activity.value);
+
+  // Progress as a fraction, shared by the ring and the bar so they fill as one. Each state of the
+  // activity gets its own value: a new run starts at its own figure instead of unwinding from the
+  // last one, and a layer on its way out keeps the figure it was showing.
+  const [progress, setProgress] = useState(() => ({ key: activityKey, fraction: motionValue(value / 100) }));
+  if (progress.key !== activityKey) setProgress({ key: activityKey, fraction: motionValue(value / 100) });
+  const { fraction } = progress;
+  useEffect(() => {
+    if (reducedMotion) return fraction.jump(value / 100);
+    if (fraction.get() === value / 100) return;
+    // A figure that arrives mid-flight retargets the spring, which keeps the speed it has.
+    const controls = animate(fraction, value / 100, PROGRESS_SPRING);
+    return () => controls.stop();
+  }, [fraction, value, reducedMotion]);
 
   // One shell, two motion values, one spring. A new size retargets the spring from wherever the
   // shell is and however fast it is moving, so a state change mid-morph never restarts it.
@@ -395,7 +457,7 @@ function Pill({
     >
       <Glyph
         status={status}
-        value={value}
+        progress={fraction}
         draw={!reducedMotion && toggledIn !== activityKey}
         still={reducedMotion}
       />
@@ -418,7 +480,12 @@ function Pill({
   const actions: ReactNode[] = [];
   if (!busy) {
     actions.push(
-      <Action key="dismiss" data-slot="activity-pill-dismiss" onClick={() => act(onLeave)}>
+      <Action
+        key="dismiss"
+        data-slot="activity-pill-dismiss"
+        still={reducedMotion}
+        onClick={() => act(onLeave)}
+      >
         {labels.dismiss}
       </Action>,
     );
@@ -429,6 +496,7 @@ function Pill({
         key="view"
         data-slot="activity-pill-view"
         primary={status === "success"}
+        still={reducedMotion}
         onClick={() => act(onView)}
       >
         {labels.view}
@@ -437,14 +505,25 @@ function Pill({
   }
   if (busy && onCancel) {
     actions.push(
-      <Action key="cancel" data-slot="activity-pill-cancel" onClick={() => act(onCancel)}>
+      <Action
+        key="cancel"
+        data-slot="activity-pill-cancel"
+        still={reducedMotion}
+        onClick={() => act(onCancel)}
+      >
         {labels.cancel}
       </Action>,
     );
   }
   if (status === "error" && onRetry) {
     actions.push(
-      <Action key="retry" data-slot="activity-pill-retry" primary onClick={() => act(onRetry)}>
+      <Action
+        key="retry"
+        data-slot="activity-pill-retry"
+        primary
+        still={reducedMotion}
+        onClick={() => act(onRetry)}
+      >
         {labels.retry}
       </Action>,
     );
@@ -457,14 +536,17 @@ function Pill({
       data-status={status}
       data-state={expanded ? "expanded" : "compact"}
       inert={!present}
-      className="border-border bg-popover/80 text-popover-foreground has-[[data-slot=activity-pill-toggle]:focus-visible]:ring-ring/30 data-[status=error]:border-destructive/40 contrast-more:border-foreground contrast-more:bg-popover [@media(prefers-reduced-transparency:reduce)]:bg-popover pointer-events-auto relative shrink-0 overflow-hidden rounded-[22px] border text-sm leading-5 font-medium shadow-lg backdrop-blur-xl backdrop-saturate-150 transition-[scale] duration-200 ease-out select-none has-[[data-slot=activity-pill-toggle]:active]:scale-[0.97] has-[[data-slot=activity-pill-toggle]:active]:duration-75 has-[[data-slot=activity-pill-toggle]:focus-visible]:ring-3 motion-reduce:scale-100! motion-reduce:transition-none contrast-more:backdrop-filter-none [@media(prefers-reduced-transparency:reduce)]:backdrop-filter-none"
-      // In from the anchored edge, and back out the way it came.
+      className="border-border bg-popover/80 text-popover-foreground has-[[data-slot=activity-pill-toggle]:focus-visible]:ring-ring/30 data-[status=error]:border-destructive/40 contrast-more:border-foreground contrast-more:bg-popover [@media(prefers-reduced-transparency:reduce)]:bg-popover pointer-events-auto relative shrink-0 overflow-hidden rounded-[22px] border text-sm leading-5 font-medium shadow-lg backdrop-blur-xl backdrop-saturate-150 select-none has-[[data-slot=activity-pill-toggle]:focus-visible]:ring-3 contrast-more:backdrop-filter-none [@media(prefers-reduced-transparency:reduce)]:backdrop-filter-none"
+      // In from the anchored edge, and back out the way it came. With reduced motion it fades in
+      // place. The whole shell gives a little under a press, from the moment the pointer lands.
       initial={{ opacity: 0, y: reducedMotion ? 0 : (top ? -1 : 1) * TRAVEL }}
-      animate={{ opacity: 1, y: 0 }}
+      animate={{ opacity: 1, y: 0, scale: pressed && !reducedMotion ? 0.97 : 1 }}
       exit={{ opacity: 0, y: reducedMotion ? 0 : (top ? -1 : 1) * TRAVEL }}
-      transition={
-        reducedMotion ? { duration: 0.2 } : { ...MOVE_SPRING, opacity: { duration: 0.2, ease: "easeOut" } }
-      }
+      transition={{
+        ...MOVE_SPRING,
+        opacity: FADE_SPRING,
+        scale: pressed ? PRESS_SPRING : RELEASE_SPRING,
+      }}
       onPointerEnter={() => setHovered(true)}
       onPointerLeave={() => setHovered(false)}
       onFocus={(event) => {
@@ -481,7 +563,7 @@ function Pill({
       }}
     >
       {/* The whole surface is one button. Content sits above it and lets presses through. */}
-      <button
+      <motion.button
         ref={toggleRef}
         type="button"
         data-slot="activity-pill-toggle"
@@ -489,6 +571,15 @@ function Pill({
         aria-expanded={expanded}
         aria-controls={expanded ? panelId : undefined}
         className="hover:bg-foreground/4 active:bg-foreground/8 absolute inset-0 cursor-pointer rounded-[inherit] outline-none"
+        // Motion's press starts on pointer-down, or on Enter, and ends wherever the pointer lifts.
+        onTapStart={() => setPressed(true)}
+        onTap={() => setPressed(false)}
+        onTapCancel={() => setPressed(false)}
+        onKeyDown={(event) => {
+          if (event.key === " ") setPressed(true);
+        }}
+        onKeyUp={() => setPressed(false)}
+        onBlur={() => setPressed(false)}
         onClick={() => {
           setExpanded((open) => !open);
           setToggledIn(activityKey);
@@ -532,22 +623,7 @@ function Pill({
                     </p>
                   )}
                   {busy && (
-                    <div aria-hidden="true" className="bg-foreground/10 h-1 overflow-hidden rounded-full">
-                      {status === "progress" ? (
-                        <div
-                          className="bg-foreground h-full rounded-full transition-[width] duration-300 ease-out motion-reduce:transition-none"
-                          style={{ width: `${value}%` }}
-                        />
-                      ) : reducedMotion ? (
-                        <div className="bg-foreground/50 h-full animate-pulse" />
-                      ) : (
-                        <motion.div
-                          className="bg-foreground h-full w-2/5 rounded-full"
-                          animate={{ x: ["-100%", "250%"] }}
-                          transition={{ duration: 1.3, ease: "easeInOut", repeat: Infinity }}
-                        />
-                      )}
-                    </div>
+                    <Track determinate={status === "progress"} progress={fraction} still={reducedMotion} />
                   )}
                   {actions.length > 0 && (
                     <div className="pointer-events-auto flex justify-end gap-2">{actions}</div>
@@ -602,12 +678,14 @@ function Layer({
       data-slot="activity-pill-layer"
       inert={!present}
       className={`pointer-events-none absolute inset-0 flex ${align}`}
+      // Out the way it came in: the same fade and blur in both directions, each on a spring, so
+      // a layer called back while it is leaving turns around from where it is.
       initial={away}
       animate={{
         ...(blur ? { opacity: 1, filter: "blur(0px)" } : { opacity: 1 }),
-        transition: { duration: 0.24, delay: 0.04, ease: "easeOut" },
+        transition: ENTER_SPRING,
       }}
-      exit={{ ...away, transition: { duration: 0.14, ease: "easeOut" } }}
+      exit={{ ...away, transition: EXIT_SPRING }}
     >
       <div ref={ref} className="shrink-0">
         {children}
@@ -616,38 +694,91 @@ function Layer({
   );
 }
 
+/** The expanded track: a fill that follows progress, or a sweep while there is no value yet. */
+function Track({
+  determinate,
+  progress,
+  still,
+}: {
+  determinate: boolean;
+  progress: MotionValue<number>;
+  still: boolean;
+}) {
+  // The fill is as wide as the track and slides in from the left, so only `transform` changes and
+  // its leading end stays round.
+  const x = useTransform(progress, (fraction) => `${(fraction - 1) * 100}%`);
+  const sweep = useLoop<HTMLDivElement>(SWEEP, SWEEP_LOOP, !determinate && !still);
+
+  return (
+    <div
+      aria-hidden="true"
+      data-slot="activity-pill-track"
+      className="bg-foreground/10 h-1 overflow-hidden rounded-full"
+    >
+      {determinate ? (
+        <motion.div
+          data-slot="activity-pill-fill"
+          className="bg-foreground h-full rounded-full"
+          style={{ x }}
+        />
+      ) : still ? (
+        // Reduced motion holds a dimmed, full bar still.
+        <div className="bg-foreground/50 h-full" />
+      ) : (
+        <div
+          ref={sweep}
+          className="bg-foreground h-full w-2/5 rounded-full"
+          style={{ transform: "translateX(-100%)" }}
+        />
+      )}
+    </div>
+  );
+}
+
 function Action({
   primary,
+  still,
   className,
   ...props
-}: ComponentPropsWithoutRef<"button"> & { primary?: boolean }) {
+}: HTMLMotionProps<"button"> & { primary?: boolean; still: boolean }) {
   return (
-    <button
+    <motion.button
       type="button"
-      className={`focus-visible:ring-ring/30 inline-flex h-7 items-center rounded-md px-2.5 text-xs font-medium transition-[scale,background-color] duration-200 ease-out outline-none focus-visible:ring-3 active:scale-[0.96] active:duration-75 motion-reduce:transition-none motion-reduce:active:scale-100 motion-reduce:active:opacity-70 pointer-coarse:h-9 pointer-coarse:px-3.5 ${
+      className={`focus-visible:ring-ring/30 inline-flex h-7 items-center rounded-md px-2.5 text-xs font-medium transition-[background-color] duration-200 ease-out outline-none focus-visible:ring-3 pointer-coarse:h-9 pointer-coarse:px-3.5 ${
         primary
           ? "bg-primary text-primary-foreground hover:bg-primary/90"
           : "border-border hover:bg-muted border"
       } ${className ?? ""}`}
+      // Feedback lands on pointer-down; the click still commits on release over the button.
+      // Reduced motion dims the button instead of shrinking it.
+      whileTap={{ ...(still ? { opacity: 0.7 } : { scale: 0.96 }), transition: PRESS_SPRING }}
+      transition={RELEASE_SPRING}
       {...props}
     />
   );
 }
 
-/** A ring that spins while running, fills with progress, and holds a check or a mark at the end. */
+/**
+ * A ring that spins while running, fills with progress, and holds a check or a mark at the end.
+ * With reduced motion the running arc holds still.
+ */
 function Glyph({
   status,
-  value,
+  progress,
   draw,
   still,
 }: {
   status: ActivityStatus;
-  value: number;
+  progress: MotionValue<number>;
   draw: boolean;
   still: boolean;
 }) {
+  const spinner = useLoop<SVGSVGElement>(SPIN, SPIN_LOOP, status === "running" && !still);
+  const offset = useTransform(progress, (fraction) => RING * (1 - fraction));
+
   return (
     <svg
+      ref={spinner}
       aria-hidden="true"
       data-slot="activity-pill-glyph"
       viewBox="0 0 20 20"
@@ -662,28 +793,29 @@ function Glyph({
           : status === "success"
             ? "text-[var(--status-success,#15803d)]"
             : ""
-      } ${status === "running" ? (still ? "animate-pulse" : "animate-spin") : ""}`}
+      }`}
     >
       <circle cx={10} cy={10} r={8} opacity={status === "error" ? 0.35 : 0.2} />
       {status === "running" && <circle cx={10} cy={10} r={8} pathLength={1} strokeDasharray="0.28 1" />}
       {status === "progress" && (
-        <circle
-          cx={10}
-          cy={10}
-          r={8}
-          pathLength={1}
-          strokeDasharray={1}
-          strokeDashoffset={1 - value / 100}
-          transform="rotate(-90 10 10)"
-          className="transition-[stroke-dashoffset] duration-300 ease-out motion-reduce:transition-none"
-        />
+        <g transform="rotate(-90 10 10)">
+          <motion.circle
+            data-slot="activity-pill-ring"
+            cx={10}
+            cy={10}
+            r={8}
+            strokeDasharray={RING}
+            strokeDashoffset={offset}
+          />
+        </g>
       )}
       {status === "success" && (
         <motion.path
           d={CHECK}
           initial={draw ? { pathLength: 0 } : false}
           animate={{ pathLength: 1 }}
-          transition={{ duration: 0.3, delay: 0.1, ease: [0.65, 0, 0.35, 1] }}
+          // It starts a beat late, once the layer it sits in has begun to show.
+          transition={{ ...DRAW_SPRING, delay: 0.1 }}
         />
       )}
       {status === "error" && <path d={BANG} />}

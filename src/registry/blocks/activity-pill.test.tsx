@@ -3,8 +3,19 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ActivityPill, createActivityController, useActivity, type Activity } from "./activity-pill";
 
+const motionPreference = vi.hoisted(() => ({ reduced: false }));
+vi.mock("motion/react", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("motion/react")>()),
+  useReducedMotion: () => motionPreference.reduced,
+}));
+
 const pill = () => document.querySelector<HTMLElement>('[data-slot="activity-pill"]');
 const toggle = () => document.querySelector<HTMLButtonElement>('[data-slot="activity-pill-toggle"]')!;
+const glyphs = () => [...document.querySelectorAll<SVGElement>('[data-slot="activity-pill-glyph"]')];
+/** Circumference of the glyph's ring, which the progress arc is measured against. */
+const RING = 2 * Math.PI * 8;
+const ringOffset = () =>
+  Number(document.querySelector('[data-slot="activity-pill-ring"]')!.getAttribute("stroke-dashoffset"));
 
 describe("createActivityController", () => {
   it("moves one activity from running to progress to success", () => {
@@ -66,6 +77,7 @@ describe("ActivityPill", () => {
 
   afterEach(() => {
     cleanup();
+    motionPreference.reduced = false;
     vi.useRealTimers();
     vi.unstubAllGlobals();
   });
@@ -111,6 +123,82 @@ describe("ActivityPill", () => {
     expect(screen.getByRole("progressbar")).toHaveAttribute("aria-valuenow", "100");
     rerender(<ActivityPill activity={{ status: "progress", title: "Uploading", value: Number.NaN }} />);
     expect(screen.getByRole("progressbar")).toHaveAttribute("aria-valuenow", "0");
+  });
+
+  it("fills the ring and the bar from one Motion value, by stroke offset and by transform", async () => {
+    const view = (id: string, value: number) => (
+      <ActivityPill activity={{ id, status: "progress", title: "Uploading", value }} />
+    );
+    const { rerender } = render(view("a", 25));
+    expect(ringOffset()).toBeCloseTo(RING * 0.75, 3);
+
+    fireEvent.click(toggle());
+    const fill = () =>
+      document.querySelector<HTMLElement>(
+        '[data-slot="activity-pill-layer"]:not([inert]) [data-slot="activity-pill-fill"]',
+      )!;
+    // The fill is as wide as its track and slides in, so no width is ever animated.
+    expect(fill().style.transform).toBe("translateX(-75%)");
+    expect(fill().style.width).toBe("");
+    expect(pill()!.querySelector('[class*="animate-"], [class*="transition-[width]"]')).toBeNull();
+
+    // A later value in the same run springs there, passing through the values in between.
+    const ring = document.querySelector('[data-slot="activity-pill-ring"]')!;
+    const seen: number[] = [];
+    const observer = new MutationObserver(() => seen.push(ringOffset()));
+    observer.observe(ring, { attributes: true, attributeFilter: ["stroke-dashoffset"] });
+    rerender(view("a", 75));
+    await waitFor(() => expect(ringOffset()).toBeCloseTo(RING * 0.25, 3));
+    expect(fill().style.transform).toBe("translateX(-25%)");
+    expect(seen.filter((offset) => offset > RING * 0.26 && offset < RING * 0.74).length).toBeGreaterThan(1);
+
+    // A new run starts at its own figure instead of unwinding from the last one.
+    seen.length = 0;
+    rerender(view("b", 0));
+    await waitFor(() => expect(ringOffset()).toBeCloseTo(RING, 3));
+    expect(seen.filter((offset) => offset < RING * 0.99)).toEqual([]);
+    observer.disconnect();
+  });
+
+  it("spins the running ring with Motion, and holds every indicator still with reduced motion", async () => {
+    const running: Activity = { status: "running", title: "Deploying" };
+    const { unmount } = render(<ActivityPill activity={running} />);
+    await waitFor(() => expect(glyphs()[0].style.transform).toMatch(/^rotate\((?!0deg)/));
+    expect(glyphs()[0]).not.toHaveClass("animate-spin");
+    unmount();
+
+    motionPreference.reduced = true;
+    render(<ActivityPill activity={running} />);
+    fireEvent.click(toggle());
+    await new Promise((resolve) => setTimeout(resolve, 120));
+    expect(glyphs().length).toBeGreaterThan(0);
+    for (const glyph of glyphs()) expect(glyph.style.transform).toBe("");
+    // The expanded bar is a still, dimmed bar: no sweep and no pulse.
+    const track = document.querySelector('[data-slot="activity-pill-track"]')!;
+    expect(track.firstElementChild).not.toHaveAttribute("style");
+    expect(pill()!.querySelector('[class*="animate-"]')).toBeNull();
+  });
+
+  it("gives under a press from pointer-down, and stays put with reduced motion", async () => {
+    const running: Activity = { status: "running", title: "Deploying" };
+    const press = { isPrimary: true, pointerType: "mouse", button: 0 };
+    const { unmount } = render(<ActivityPill activity={running} />);
+    await waitFor(() => expect(pill()!.style.transform).toBe("none"));
+
+    fireEvent.pointerDown(toggle(), press);
+    await waitFor(() => expect(pill()!.style.transform).toBe("scale(0.97)"));
+    // Nothing has been committed yet: that happens on release.
+    expect(pill()).toHaveAttribute("data-state", "compact");
+    fireEvent.pointerUp(toggle(), press);
+    await waitFor(() => expect(pill()!.style.transform).toBe("none"));
+    unmount();
+
+    motionPreference.reduced = true;
+    render(<ActivityPill activity={running} />);
+    fireEvent.pointerDown(toggle(), press);
+    await new Promise((resolve) => setTimeout(resolve, 120));
+    expect(pill()!.style.transform).not.toContain("scale");
+    fireEvent.pointerUp(toggle(), press);
   });
 
   it("expands on press to show detail and actions, and collapses on Escape or an outside press", () => {

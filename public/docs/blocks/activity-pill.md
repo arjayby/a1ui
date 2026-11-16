@@ -65,7 +65,9 @@ export function Uploader() {
 
 Render one pill near the root of the app. It is hidden while `activity` is `null`, enters from the edge it is anchored to, and leaves the same way. Press it, or focus it and press Enter, to expand it; press outside or press Escape to collapse it. A success leaves after `successDuration`, and the clock waits while the pointer or keyboard focus is on the pill. An error stays until it is dismissed or retried.
 
-The shell changes size on one spring while the content cross-fades, and a change that arrives mid-morph retargets the spring from the live size. With reduced motion, the size changes at once and the content cross-fades.
+Motion drives every animation. The shell changes size on one spring while the content cross-fades, and a change that arrives mid-morph retargets the spring from the live size. The ring and the bar follow `value` on a spring of their own, and the bar fills by `transform`, so nothing is laid out again as it grows. The pill and its action buttons shrink slightly from the moment they are pressed.
+
+With reduced motion, the size and the progress change at once, the content cross-fades, the running ring and bar hold still, and a press dims an action button instead of shrinking it.
 
 ### ActivityPill
 
