@@ -4,6 +4,14 @@ import { Switch as SwitchPrimitive } from "@base-ui/react/switch";
 import { motion, useReducedMotion } from "motion/react";
 import { useId, useState, type ReactNode } from "react";
 
+// A critically damped spring, the one Motion resolves `visualDuration` with no bounce to. Written as
+// stiffness and damping because Motion drops velocity on time-defined springs, and a second flip
+// turns the thumb back while it is still crossing the track.
+function criticalSpring(visualDuration: number) {
+  const omega = (2 * Math.PI) / (visualDuration * 1.2);
+  return { type: "spring", stiffness: omega * omega, damping: 2 * omega } as const;
+}
+
 // Track 44 × 24 with 2px padding and a 20px thumb: 20px of travel.
 const THUMB = 20;
 const PRESSED_THUMB = 25;
@@ -48,8 +56,7 @@ export function Switch({
   const squash = pressed && !disabled && !reducedMotion;
   const width = squash ? PRESSED_THUMB : THUMB;
   const visualDuration = reducedMotion ? 0 : Number.isFinite(duration) ? Math.max(0, duration) : 0.3;
-  const transition =
-    visualDuration === 0 ? { duration: 0 } : ({ type: "spring", visualDuration, bounce: 0 } as const);
+  const transition = visualDuration === 0 ? { duration: 0 } : criticalSpring(visualDuration);
   const release = () => setPressed(false);
 
   const control = (
