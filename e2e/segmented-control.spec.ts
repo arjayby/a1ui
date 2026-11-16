@@ -236,6 +236,9 @@ test("is a radio group for the keyboard, in both writing directions", async ({ p
   await page.keyboard.press("ArrowDown");
   await page.keyboard.press("Tab");
   for (const name of names) await expect(radio(name)).not.toBeFocused();
+  // Let the thumb come to rest on Week first. While it is still crossing Month from the keys
+  // above, a press there picks the thumb up instead of choosing the option.
+  await expect.poll(async () => (await measure(view)).position).toBeCloseTo(1, 2);
   await radio("Month").click();
   await expect(radio("Month")).toHaveAttribute("aria-checked", "true");
   await expect.poll(async () => (await measure(view)).position).toBeCloseTo(2, 2);
