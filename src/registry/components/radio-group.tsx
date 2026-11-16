@@ -5,6 +5,14 @@ import { RadioGroup as RadioGroupPrimitive } from "@base-ui/react/radio-group";
 import { LayoutGroup, motion, useReducedMotion, type Transition } from "motion/react";
 import { createContext, useContext, useId, useState, type ReactNode } from "react";
 
+// A critically damped spring, the one Motion resolves `visualDuration` with no bounce to. Written as
+// stiffness and damping because Motion drops velocity on time-defined springs, and a quick tap
+// releases the radio while it is still shrinking.
+function criticalSpring(visualDuration: number) {
+  const omega = (2 * Math.PI) / (visualDuration * 1.2);
+  return { type: "spring", stiffness: omega * omega, damping: 2 * omega } as const;
+}
+
 type RadioGroupVariant = "default" | "card";
 
 type RadioGroupContextValue = {
@@ -60,6 +68,8 @@ export function RadioGroup({
   const [popIn, setPopIn] = useState(false);
   const current = value === undefined ? internalValue : value;
   const visualDuration = reducedMotion ? 0 : Number.isFinite(duration) ? Math.max(0, duration) : 0.35;
+  // Time-defined on purpose: it only runs layout animations and the first pop-in, which Motion
+  // always starts from rest.
   const transition: Transition =
     visualDuration === 0 ? { duration: 0 } : { type: "spring", visualDuration, bounce: 0 };
 
@@ -132,7 +142,7 @@ export function RadioGroupItem({
       render={
         <motion.span
           whileTap={disabled || group.instant ? undefined : { scale: 0.86 }}
-          transition={{ type: "spring", visualDuration: 0.2, bounce: 0 }}
+          transition={criticalSpring(0.2)}
         />
       }
       className={`border-muted-foreground/50 hover:border-muted-foreground/80 bg-background data-checked:border-primary focus-visible:ring-ring/30 relative inline-grid size-[18px] shrink-0 cursor-pointer place-items-center rounded-full border shadow-xs transition-colors duration-150 outline-none focus-visible:ring-3 data-disabled:cursor-not-allowed ${label ? "mt-px" : `data-disabled:opacity-50 ${className ?? ""}`}`}
