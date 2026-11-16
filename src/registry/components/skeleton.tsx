@@ -14,6 +14,14 @@ import {
   type RefObject,
 } from "react";
 
+// A critically damped spring, the one Motion resolves `visualDuration` with no bounce to. Written as
+// stiffness and damping because Motion drops velocity on time-defined springs, and loading can flip
+// back while a swap is still running.
+function criticalSpring(visualDuration: number) {
+  const omega = (2 * Math.PI) / (visualDuration * 1.2);
+  return { type: "spring", stiffness: omega * omega, damping: 2 * omega } as const;
+}
+
 // Motion's useReducedMotion reads the media query on the first client render, which the server
 // cannot know. Applying it only after hydration keeps the client's first render identical to the
 // server HTML; React re-renders with the real preference right after hydrating.
@@ -330,8 +338,7 @@ function Reveal({
   const prefersReducedMotion = useReducedMotion();
   const reducedMotion = hydrated && prefersReducedMotion === true;
   const seconds = reducedMotion ? 0 : Number.isFinite(duration) ? Math.max(0, duration) : 0.4;
-  const transition =
-    seconds === 0 ? { duration: 0 } : { type: "spring" as const, visualDuration: seconds, bounce: 0 };
+  const transition = seconds === 0 ? { duration: 0 } : criticalSpring(seconds);
   const visible = usePlaceholderTiming(loading, delay, minVisible);
   const overlay = fallback === undefined;
   const container = useRef<HTMLDivElement>(null);
@@ -397,7 +404,8 @@ function Reveal({
     const controls = animate(
       element,
       { height: [`${from}px`, `${to}px`] },
-      { type: "spring", visualDuration: seconds, bounce: 0, delay: to < from ? seconds * 0.3 : 0 },
+      // A shrink waits out its delay at rest, so it starts without the height's earlier velocity.
+      to < from ? { ...criticalSpring(seconds), delay: seconds * 0.3, velocity: 0 } : criticalSpring(seconds),
     );
     heightAnimation.current = controls;
     controls.then(() => {
