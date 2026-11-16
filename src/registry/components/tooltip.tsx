@@ -15,6 +15,14 @@ import {
   type ReactNode,
 } from "react";
 
+// A critically damped spring, the one Motion resolves `visualDuration` with no bounce to. Written as
+// stiffness and damping because Motion drops velocity on time-defined springs, and a pointer that
+// comes straight back reopens the tooltip while it is still leaving.
+function criticalSpring(visualDuration: number) {
+  const omega = (2 * Math.PI) / (visualDuration * 1.2);
+  return { type: "spring", stiffness: omega * omega, damping: 2 * omega } as const;
+}
+
 type Side = "top" | "bottom" | "left" | "right" | "inline-start" | "inline-end";
 type Align = "start" | "center" | "end";
 
@@ -340,9 +348,7 @@ function TooltipSurface({
                   instant
                     ? { duration: 0 }
                     : {
-                        type: "spring",
-                        visualDuration: seconds,
-                        bounce: 0,
+                        ...criticalSpring(seconds),
                         opacity: { duration: seconds * (state.open ? 0.5 : 0.7), ease: "easeOut" },
                       }
                 }
