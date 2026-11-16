@@ -254,8 +254,10 @@ export function TaskSteps({
 
 // Every part of a step moves on this one spring, so a change of status reads as a single change
 // and anything caught mid-way carries on from where it is. Critically damped: nothing here is
-// thrown, so nothing overshoots.
-const SPRING: Transition = { type: "spring", visualDuration: 0.3, bounce: 0 };
+// thrown, so nothing overshoots. It has a 0.36s response and is written as stiffness and damping,
+// because Motion drops velocity on time-defined springs and a step caught mid-way would stall.
+const FREQUENCY = (2 * Math.PI) / 0.36;
+const SPRING: Transition = { type: "spring", stiffness: FREQUENCY * FREQUENCY, damping: 2 * FREQUENCY };
 // Reduced motion keeps opacity and colour, as a short cross-fade, and holds everything else still.
 const FADE: Transition = { duration: 0.15, ease: "linear" };
 const INSTANT: Transition = { duration: 0 };
