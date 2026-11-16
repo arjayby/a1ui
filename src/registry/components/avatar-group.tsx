@@ -44,8 +44,12 @@ const GroupContext = createContext<GroupContextValue | null>(null);
 const LabelBelowContext = createContext(false);
 
 // Spreading, lifting, and fanning are discrete state changes, so they settle without overshoot.
+// This is the spring Motion resolves `visualDuration` to, written as stiffness and damping because
+// Motion drops velocity on time-defined springs, and a pointer that leaves early reverses these mid-flight.
 function springFor(seconds: number, bounce = 0): Transition {
-  return seconds ? { type: "spring", visualDuration: seconds, bounce } : { duration: 0 };
+  if (!seconds) return { duration: 0 };
+  const omega = (2 * Math.PI) / (seconds * 1.2);
+  return { type: "spring", stiffness: omega * omega, damping: 2 * (1 - bounce) * omega };
 }
 
 function useSeconds(duration: number | undefined, fallback: number) {
@@ -148,9 +152,7 @@ export function Avatar({ name, src, tone, size, duration, className }: AvatarPro
             initial={{ opacity: 0, y: below ? -4 : 4, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: below ? -2 : 2, scale: 0.95 }}
-            transition={
-              seconds ? { type: "spring", visualDuration: seconds * 0.6, bounce: 0 } : { duration: 0 }
-            }
+            transition={springFor(seconds * 0.6)}
           >
             {name}
           </motion.span>
@@ -337,6 +339,8 @@ export function AvatarGroup({
                       scale: 1,
                       opacity: 1,
                       rotate: 0,
+                      // Time-defined on purpose: each avatar waits out its delay at rest, so there
+                      // is no velocity to carry into this spring.
                       transition: seconds
                         ? {
                             type: "spring",
