@@ -6,6 +6,14 @@ import { useId, useRef, useState, type ReactNode } from "react";
 
 import { Label } from "@/components/ui/label";
 
+// A critically damped spring, the one Motion resolves `visualDuration` with no bounce to. Written as
+// stiffness and damping because Motion drops velocity on time-defined springs, and a quick tap or a
+// tag removed as it arrives reverses these while they are still moving.
+function criticalSpring(visualDuration: number) {
+  const omega = (2 * Math.PI) / (visualDuration * 1.2);
+  return { type: "spring", stiffness: omega * omega, damping: 2 * omega } as const;
+}
+
 export interface TagInputProps {
   /** Visible label for the field. */
   label: ReactNode;
@@ -151,7 +159,7 @@ export function TagInput({
                   exit={
                     reducedMotion ? { opacity: 0, transition: { duration: 0 } } : { opacity: 0, scale: 0.8 }
                   }
-                  transition={{ type: "spring", duration: reducedMotion ? 0 : 0.3, bounce: 0 }}
+                  transition={reducedMotion ? { duration: 0 } : criticalSpring(0.17)}
                 >
                   <span className="truncate">{tag}</span>
                   <motion.button
@@ -169,7 +177,7 @@ export function TagInput({
                     }}
                     // Squashes on press; the tag is removed only when the click commits.
                     whileTap={reducedMotion ? undefined : { scale: 0.85 }}
-                    transition={{ type: "spring", visualDuration: 0.15, bounce: 0 }}
+                    transition={criticalSpring(0.15)}
                   >
                     <XIcon aria-hidden="true" weight="bold" className="size-3" />
                   </motion.button>
