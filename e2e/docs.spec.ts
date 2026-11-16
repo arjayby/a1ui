@@ -30,12 +30,14 @@ test("catalog opens block documentation in the agreed order", async ({ page }) =
     .last()
     .click();
   await expect(page).toHaveURL(/\/blocks\/section-rail$/);
-  await expect(page.locator(".docs-article-body h2")).toHaveText([
+  // The standard sections come in order; a block may add its own before the API reference.
+  const sections = page.locator(".docs-article-body h2");
+  await expect(sections.last()).toHaveText("API reference");
+  expect((await sections.allTextContents()).slice(0, 4)).toEqual([
     "Demo",
     "Installation",
     "Dependencies",
     "Code",
-    "API reference",
   ]);
 });
 

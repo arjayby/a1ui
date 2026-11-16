@@ -5,12 +5,15 @@ for (const { name, title, type } of registry.items) {
   test(`${title} documentation supports installation and source tabs`, async ({ page }) => {
     await page.goto(`/${type === "registry:block" ? "blocks" : "components"}/${name}`);
     await expect(page.getByRole("heading", { level: 1, name: title, exact: true })).toBeVisible();
-    await expect(page.getByRole("navigation", { name: "On this page" }).getByRole("link")).toHaveText([
+    // Every page keeps the standard sections in order. A page may add its own, such as
+    // Behaviour or Accessibility, between the code and the API reference.
+    const sections = page.getByRole("navigation", { name: "On this page" }).getByRole("link");
+    await expect(sections.last()).toHaveText("API reference");
+    expect((await sections.allTextContents()).slice(0, 4)).toEqual([
       "Demo",
       "Installation",
       "Dependencies",
       "Code",
-      "API reference",
     ]);
 
     const install = page.getByRole("tablist", { name: "Package manager" });
