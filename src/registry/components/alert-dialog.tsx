@@ -14,6 +14,14 @@ import {
 
 import { Button } from "@/components/ui/button";
 
+// A critically damped spring, the one Motion resolves `visualDuration` with no bounce to. Written as
+// stiffness and damping because Motion drops velocity on time-defined springs, and the dialog can
+// reopen while its exit is still running.
+function criticalSpring(visualDuration: number) {
+  const omega = (2 * Math.PI) / (visualDuration * 1.2);
+  return { type: "spring", stiffness: omega * omega, damping: 2 * omega } as const;
+}
+
 // A damped side-to-side shake, in pixels, played when the backdrop is clicked.
 const SHAKE = [0, -10, 9, -6, 4, -2, 0];
 
@@ -108,8 +116,7 @@ export function AlertDialogContent({
   const [scope, animate] = useAnimate<HTMLDivElement>();
   const [shaking, setShaking] = useState(false);
   const { seconds } = dialog;
-  const enter: Transition =
-    seconds === 0 ? { duration: 0 } : { type: "spring", visualDuration: seconds, bounce: 0 };
+  const enter: Transition = seconds === 0 ? { duration: 0 } : criticalSpring(seconds);
   const exit: Transition = { duration: seconds * 0.6, ease: [0.4, 0, 1, 1] };
   const transition = dialog.open ? enter : exit;
 
