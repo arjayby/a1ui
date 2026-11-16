@@ -48,11 +48,46 @@ test("hovering the trigger brings the cards into a ring inside the frame", async
   await expect(cards).toHaveCount(0);
 });
 
-test("a card is a link that opens its page", async ({ page }) => {
+test("a card lifts under the pointer, dips from the press and opens its page", async ({ page }) => {
   const stage = page.locator(".card-vortex-demo-stage");
+  const card = stage.getByRole("link", { name: "Arc Reel" });
+  const scale = (part: string) =>
+    card.locator(part).evaluate((element) => new DOMMatrix(getComputedStyle(element).transform).a);
+
   await stage.getByRole("button", { name: "Blocks" }).hover();
-  await stage.getByRole("link", { name: "Arc Reel" }).click();
+  await card.hover();
+  await expect.poll(() => scale("[data-card-vortex-surface]")).toBeCloseTo(1.05, 2);
+  await expect.poll(() => scale("svg")).toBeCloseTo(1.1, 2);
+
+  // The dip answers the button going down, before the click that follows the release.
+  await page.mouse.down();
+  await expect.poll(() => scale("[data-card-vortex-surface]")).toBeCloseTo(0.98, 2);
+  await expect(page).toHaveURL(/\/blocks\/card-vortex$/);
+
+  await page.mouse.up();
   await expect(page).toHaveURL(/\/blocks\/arc-reel$/);
+});
+
+test("with reduced motion a card keeps its size and dims while it is pressed", async ({ page }) => {
+  // Motion reads the preference when the page loads.
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.reload();
+  await expect(page.locator("html")).toHaveAttribute("data-hydrated", "true");
+
+  const stage = page.locator(".card-vortex-demo-stage");
+  const card = stage.getByRole("link", { name: "Arc Reel" });
+  const surface = card.locator("[data-card-vortex-surface]");
+  const style = (name: "opacity" | "transform") =>
+    surface.evaluate((element, property) => getComputedStyle(element)[property], name);
+
+  await stage.getByRole("button", { name: "Blocks" }).hover();
+  await card.hover();
+  await expect(card).toHaveCSS("opacity", "1");
+  expect(await style("transform")).toBe("none");
+
+  await page.mouse.down();
+  await expect.poll(() => style("opacity")).toBe("0.8");
+  expect(await style("transform")).toBe("none");
 });
 
 test("the keyboard opens the ring, reaches the cards and Escape closes it", async ({ page }) => {

@@ -1,7 +1,7 @@
 "use client";
 
 import { animate, motionValue } from "motion";
-import { useReducedMotion } from "motion/react";
+import { motion, useReducedMotion, type Transition, type Variants } from "motion/react";
 import {
   useCallback,
   useEffect,
@@ -55,6 +55,20 @@ const MIN_FIT = 0.75;
 /** Room kept between the ring and the edge it fits inside, in pixels. */
 const EDGE = 8;
 const FOCUSABLE = "a[href],button:not([disabled]),[tabindex]:not([tabindex='-1'])";
+
+// A card lifts under the pointer or keyboard focus and dips the moment it is pressed.
+// Nothing here carries momentum, so both springs are critically damped; each one starts
+// from the scale on screen, so a press during the lift, or a release, never jumps.
+const LIFT: Transition = { type: "spring", visualDuration: 0.2, bounce: 0 };
+const PRESS: Transition = { type: "spring", visualDuration: 0.1, bounce: 0 };
+const surfaceVariants: Variants = {
+  hover: { scale: 1.05 },
+  focus: { scale: 1.05 },
+  press: { scale: 0.98, transition: PRESS },
+};
+const iconVariants: Variants = { hover: { scale: 1.1 } };
+// With reduced motion nothing changes size: a press dims the card instead.
+const stillSurfaceVariants: Variants = { press: { opacity: 0.8, transition: { duration: 0.1 } } };
 
 interface Layout {
   fit: number;
@@ -161,38 +175,50 @@ function VortexCard({
     return () => controls.stop();
   }, [open, index, count, reducedMotion, progress]);
 
+  // The link names the gestures; the surface and the icon inside it answer them. Motion
+  // has nothing to animate on the link itself, so its transform stays with paint above.
   return (
-    <a
+    <motion.a
       ref={ref}
       href={item.href}
       target={item.target}
       rel={item.rel}
       data-card-vortex-card=""
+      whileHover="hover"
+      whileFocus="focus"
+      whileTap="press"
       className={[
         "group/card invisible absolute top-1/2 left-1/2 block w-[var(--card-vortex-card-width,9.5rem)] opacity-0 will-change-transform outline-none hover:z-30! focus-visible:z-30!",
         open ? "" : "pointer-events-none",
       ].join(" ")}
       draggable={false}
     >
-      <span className="block rounded-[calc(var(--radius,0.5rem)+2px)] border border-[var(--card-vortex-border)] bg-[var(--card-vortex-card)] p-1 text-[var(--card-vortex-foreground)] [box-shadow:var(--card-vortex-shadow)] transition-transform duration-200 ease-out group-hover/card:scale-[1.05] group-focus-visible/card:scale-[1.05] group-focus-visible/card:outline-2 group-focus-visible/card:outline-offset-2 group-focus-visible/card:outline-[var(--card-vortex-accent)] group-active/card:scale-[0.98] group-active/card:duration-100 motion-reduce:transition-none motion-reduce:group-hover/card:scale-100 motion-reduce:group-focus-visible/card:scale-100">
+      <motion.span
+        data-card-vortex-surface=""
+        variants={reducedMotion ? stillSurfaceVariants : surfaceVariants}
+        transition={reducedMotion ? { duration: 0.1 } : LIFT}
+        className="block rounded-[calc(var(--radius,0.5rem)+2px)] border border-[var(--card-vortex-border)] bg-[var(--card-vortex-card)] p-1 text-[var(--card-vortex-foreground)] [box-shadow:var(--card-vortex-shadow)] group-focus-visible/card:outline-2 group-focus-visible/card:outline-offset-2 group-focus-visible/card:outline-[var(--card-vortex-accent)]"
+      >
         <span className="flex h-6 items-center justify-between gap-2 px-1.5">
           <span className="truncate text-xs leading-none font-medium">{item.title}</span>
-          <svg
+          <motion.svg
             aria-hidden="true"
             viewBox="0 0 16 16"
             fill="none"
             stroke="currentColor"
             strokeWidth="1.5"
-            className="size-3 shrink-0 transition-transform duration-200 ease-out group-hover/card:scale-110 motion-reduce:transition-none"
+            variants={reducedMotion ? undefined : iconVariants}
+            transition={LIFT}
+            className="size-3 shrink-0"
           >
             <path d="M9.5 2.5h4v4M13.5 2.5 9 7M6.5 13.5h-4v-4M2.5 13.5 7 9" />
-          </svg>
+          </motion.svg>
         </span>
         <span className="relative mt-1 block h-[var(--card-vortex-image-height,5rem)] overflow-hidden rounded-[var(--radius,0.5rem)] bg-[var(--card-vortex-image)]">
           {item.image}
         </span>
-      </span>
-    </a>
+      </motion.span>
+    </motion.a>
   );
 }
 

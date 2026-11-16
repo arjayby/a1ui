@@ -3,6 +3,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { CardVortex, type CardVortexProps } from "./card-vortex";
 
+// Motion's frame loop captures requestAnimationFrame when it loads. Route it through a stand-in
+// installed before imports that looks up setTimeout on each call, so fake timers drive it.
+vi.hoisted(() => {
+  globalThis.requestAnimationFrame = (callback) =>
+    setTimeout(() => callback(performance.now()), 16) as unknown as number;
+});
+
 const items = [
   { id: "hades", title: "Hades", href: "/work/hades" },
   { id: "raus", title: "Raus", href: "/work/raus" },
@@ -20,15 +27,37 @@ const renderVortex = (props: Partial<CardVortexProps> = {}) =>
 const root = () => document.querySelector("[data-card-vortex]") as HTMLElement;
 const trigger = () => document.querySelector("[data-card-vortex-trigger]") as HTMLElement;
 const mouse = { pointerType: "mouse" };
+// Testing Library sends pointerEnter and pointerLeave as over and out, which Motion's own
+// listeners on a card never hear, so this dispatches the event itself.
+const point = (type: string, target: Element) =>
+  fireEvent(
+    target,
+    new PointerEvent(type, { pointerType: "mouse", isPrimary: true, bubbles: !/enter|leave/.test(type) }),
+  );
+/** Runs the clock until Motion's springs have come to rest. */
+const settle = () => act(() => vi.advanceTimersByTimeAsync(1000));
+// Motion reads the motion preference once and then listens to that same query for changes,
+// so every test shares one.
+const preference = Object.assign(new EventTarget(), { matches: false });
+const setReducedMotion = (reduced: boolean) => {
+  preference.matches = reduced;
+  preference.dispatchEvent(new Event("change"));
+};
 
 describe("CardVortex", () => {
   beforeEach(() => {
-    vi.useFakeTimers();
-    vi.stubGlobal("matchMedia", () => Object.assign(new EventTarget(), { matches: false }));
+    // Motion times frames with performance.now(), so fake it along with the timers.
+    vi.useFakeTimers({
+      toFake: ["setTimeout", "clearTimeout", "setInterval", "clearInterval", "Date", "performance"],
+    });
+    vi.stubGlobal("matchMedia", () => preference);
   });
 
   afterEach(() => {
     cleanup();
+    setReducedMotion(false);
+    // Let Motion's shared loop drain its last requested frame so the next test starts idle.
+    act(() => void vi.advanceTimersByTime(100));
     vi.useRealTimers();
     vi.unstubAllGlobals();
   });
@@ -91,9 +120,10 @@ describe("CardVortex", () => {
   });
 
   it("opens on the first tap of a link trigger and follows the link on the second", () => {
+    // A link within the page, because jsdom cannot follow one to another document.
     render(
       <CardVortex items={items}>
-        <a href="/work">Work</a>
+        <a href="#work">Work</a>
       </CardVortex>,
     );
     const link = screen.getByRole("link", { name: "Work" });
@@ -145,6 +175,81 @@ describe("CardVortex", () => {
       width.mockRestore();
       height.mockRestore();
     }
+  });
+
+  it("turns a card round from where it is when the ring reopens mid-close", async () => {
+    const ring = (open: boolean) => (
+      <CardVortex items={items} open={open}>
+        <button type="button">Work</button>
+      </CardVortex>
+    );
+    const { rerender } = render(ring(true));
+    const card = document.querySelector<HTMLElement>("[data-card-vortex-card]")!;
+    const opacity = () => Number(card.style.opacity);
+    await settle();
+    expect(opacity()).toBe(1);
+
+    rerender(ring(false));
+    await act(() => vi.advanceTimersByTimeAsync(80));
+    const midway = opacity();
+    expect(midway).toBeGreaterThan(0);
+    expect(midway).toBeLessThan(1);
+
+    // One frame later the card is still beside where it was: no jump, and no wait for its turn.
+    rerender(ring(true));
+    await act(() => vi.advanceTimersByTimeAsync(16));
+    expect(Math.abs(opacity() - midway)).toBeLessThan(0.15);
+    await settle();
+    expect(opacity()).toBe(1);
+  });
+
+  it("lifts a card under the pointer and dips it from pointer-down", async () => {
+    renderVortex({ open: true });
+    const card = document.querySelector<HTMLElement>("[data-card-vortex-card]")!;
+    const surface = card.querySelector<HTMLElement>("[data-card-vortex-surface]")!;
+    const icon = surface.querySelector("svg")!;
+    await settle();
+    const placed = card.style.transform;
+    expect(placed).toContain("translate3d(");
+
+    point("pointerenter", card);
+    await settle();
+    expect(surface.style.transform).toBe("scale(1.05)");
+    expect(icon.style.transform).toBe("scale(1.1)");
+
+    // The press starts on pointer-down, not on the click that follows.
+    point("pointerdown", card);
+    await settle();
+    expect(surface.style.transform).toBe("scale(0.98)");
+
+    point("pointerup", card);
+    await settle();
+    expect(surface.style.transform).toBe("scale(1.05)");
+
+    point("pointerleave", card);
+    await settle();
+    expect(surface.style.transform).toBe("none");
+    expect(icon.style.transform).toBe("none");
+    // Only the parts inside the card answer the pointer: its place on the ring is untouched.
+    expect(card.style.transform).toBe(placed);
+  });
+
+  it("dims a pressed card instead of resizing it with reduced motion", async () => {
+    setReducedMotion(true);
+    renderVortex({ open: true });
+    const card = document.querySelector<HTMLElement>("[data-card-vortex-card]")!;
+    const surface = card.querySelector<HTMLElement>("[data-card-vortex-surface]")!;
+    await settle();
+
+    point("pointerenter", card);
+    point("pointerdown", card);
+    await settle();
+    expect(surface.style.transform).toBe("");
+    expect(surface.style.opacity).toBe("0.8");
+
+    point("pointerup", card);
+    await settle();
+    expect(surface.style.opacity).toBe("1");
   });
 
   it("closes on a press outside and on Escape", () => {

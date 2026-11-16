@@ -59,6 +59,7 @@ export function WorkLink() {
 
 - **Trigger.** The children are the trigger, and they can be any element: a logo, a nav label, a button. The ring is centered on them and laid over the page, so it takes no space in the layout.
 - **Motion.** Each card animates on its own. It starts at the trigger's center, heads out 45 degrees clockwise of its final position, so the top card sets off toward the top right, and curves round into place while it grows from a single pixel to full size and fades from transparent to opaque. Cards enter in turn, stay upright and settle without overshooting. They shrink back to a pixel and fade out at the center the same way in reverse order. Moving the pointer back before they finish turns each card round at once from where it is, without waiting for its turn.
+- **Cards.** A card grows a little under the pointer or keyboard focus, and dips the moment it is pressed, before the click. Motion springs drive both from the size the card has on screen, so pressing a card while it is still growing never jumps. A touch does not count as the pointer resting on a card, so a tap never leaves one enlarged.
 - **Staying open.** The ring stays open while the pointer is on the trigger, on a card, or anywhere inside the ring, and closes shortly after it leaves. A click or tap in the space between the cards closes it.
 - **Fitting.** The ring fits inside the viewport. If the trigger is too close to an edge, such as a link in a header, the ring moves away from that edge and the cards curve out to it from the trigger. If the viewport is too small for the full ring, the ring and its cards also scale down, but never below 75%, so the titles stay readable. Put `data-card-vortex-boundary` on an ancestor to fit the ring inside that element instead.
 - **Images.** `image` fills a frame as wide as the card and `--card-vortex-image-height` (`5rem`) tall. Give an `<img>` the classes `size-full object-cover`, or use your framework's image component with `fill`.
@@ -69,7 +70,7 @@ export function WorkLink() {
 - Focusing the trigger with the keyboard opens the ring, and Tab then moves through the cards in order. Escape closes it and returns focus to the trigger. Use a button or a link as the trigger so it can be focused.
 - The trigger's button or link gets `aria-expanded` and `aria-controls` pointing at the cards' `nav`.
 - On a touch screen, a tap on the trigger opens the ring and a tap outside the cards closes it. If the trigger is a link, the first tap opens the ring and a second tap follows the link.
-- Under `prefers-reduced-motion`, the cards fade in at their final positions with no sliding or scaling.
+- Under `prefers-reduced-motion`, the cards fade in at their final positions with no sliding or scaling. A card keeps its size under the pointer and focus, and dims while it is pressed.
 
 ## API reference
 
