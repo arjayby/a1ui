@@ -58,9 +58,15 @@ const FOCUSABLE = "a[href],button:not([disabled]),[tabindex]:not([tabindex='-1']
 
 // A card lifts under the pointer or keyboard focus and dips the moment it is pressed.
 // Nothing here carries momentum, so both springs are critically damped; each one starts
-// from the scale on screen, so a press during the lift, or a release, never jumps.
-const LIFT: Transition = { type: "spring", visualDuration: 0.2, bounce: 0 };
-const PRESS: Transition = { type: "spring", visualDuration: 0.1, bounce: 0 };
+// from the scale on screen, so a press during the lift, or a release, never jumps. They are
+// named by response time and written as stiffness and damping, because Motion drops velocity on
+// time-defined springs and these are retargeted mid-flight all the time.
+function settle(response: number): Transition {
+  const frequency = (2 * Math.PI) / response;
+  return { type: "spring", stiffness: frequency * frequency, damping: 2 * frequency };
+}
+const LIFT = settle(0.24);
+const PRESS = settle(0.12);
 const surfaceVariants: Variants = {
   hover: { scale: 1.05 },
   focus: { scale: 1.05 },
