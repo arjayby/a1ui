@@ -37,9 +37,13 @@ function usePopover(part: string) {
   return context;
 }
 
-// Critically damped: opening, closing, and morphing settle without overshoot.
+// Critically damped: opening, closing, and morphing settle without overshoot. This is the spring
+// Motion resolves `visualDuration` to, written as stiffness and damping because Motion drops velocity
+// on time-defined springs, and the popover can reopen while its exit is still running.
 function spring(seconds: number): Transition {
-  return seconds === 0 ? { duration: 0 } : { type: "spring", visualDuration: seconds, bounce: 0 };
+  if (seconds === 0) return { duration: 0 };
+  const omega = (2 * Math.PI) / (seconds * 1.2);
+  return { type: "spring", stiffness: omega * omega, damping: 2 * omega };
 }
 
 export interface PopoverProps {
