@@ -5,10 +5,18 @@ import { ToggleGroup as ToggleGroupPrimitive } from "@base-ui/react/toggle-group
 import { AnimatePresence, motion, useReducedMotion, type Transition } from "motion/react";
 import { Children, createContext, useContext, useEffect, useState, type ReactNode } from "react";
 
+// A critically damped spring, the one Motion resolves `visualDuration` with no bounce to. Written as
+// stiffness and damping because Motion drops velocity on time-defined springs, and a quick tap or a
+// second toggle reverses a chip while it is still moving.
+function criticalSpring(visualDuration: number) {
+  const omega = (2 * Math.PI) / (visualDuration * 1.2);
+  return { type: "spring", stiffness: omega * omega, damping: 2 * omega } as const;
+}
+
 type ChipGroupVariant = "muted" | "outline";
 
 // Chips shrink the moment they are pressed and settle back without overshoot on release.
-const PRESS: Transition = { type: "spring", visualDuration: 0.2, bounce: 0 };
+const PRESS: Transition = criticalSpring(0.2);
 
 type ChipGroupContextValue = {
   value: readonly string[];
@@ -65,8 +73,7 @@ export function ChipGroup({
   const [internalValue, setInternalValue] = useState<string[]>(defaultValue ?? []);
   const current = value ?? internalValue;
   const seconds = reducedMotion ? 0 : Number.isFinite(duration) ? Math.max(0, duration) : 0.35;
-  const transition: Transition =
-    seconds === 0 ? { duration: 0 } : { type: "spring", visualDuration: seconds, bounce: 0 };
+  const transition: Transition = seconds === 0 ? { duration: 0 } : criticalSpring(seconds);
 
   return (
     <ChipGroupContext.Provider value={{ value: current, variant, seconds, transition }}>
@@ -152,7 +159,7 @@ export function ChipGroupItem({
                 group.seconds === 0
                   ? { duration: 0 }
                   : {
-                      scale: { type: "spring", visualDuration: group.seconds * 0.5, bounce: 0 },
+                      scale: criticalSpring(group.seconds * 0.5),
                       opacity: { duration: group.seconds * 0.5 },
                     },
             }}
