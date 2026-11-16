@@ -45,12 +45,9 @@ for (const { name, title, type } of registry.items) {
 
     await page.setViewportSize({ width: 390, height: 844 });
     await expect(toc).toBeHidden();
-    // The API reference ends the page; multi-part components list one table per part.
-    expect(
-      await page.evaluate(() =>
-        document.querySelector(".docs-article-body")?.lastElementChild?.classList.contains("docs-table"),
-      ),
-    ).toBe(true);
+    // The API reference is the final section. It may close with notes on its tables or a
+    // part that has no table of its own.
+    await expect(page.locator(".docs-article-body h2").last()).toHaveText("API reference");
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   });
 }

@@ -114,6 +114,8 @@ test("sidebar keeps its dot across selection, groups, history, and scrolling", a
 
   await page.goBack();
   await expect(sidebar.getByRole("link", { name: "Menu", exact: true })).toHaveAttribute("data-highlighted");
+  // Categories start closed, so the block's category has to be opened to reach its link.
+  await sidebar.getByRole("button", { name: "Text Effects", exact: true }).click();
   await sidebar.getByRole("link", { name: "Text Scramble", exact: true }).click();
   await expect(page).toHaveURL(/\/blocks\/text-scramble$/);
   await expect(sidebar.locator('[aria-current="page"]')).toHaveAttribute("data-highlighted");

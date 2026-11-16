@@ -82,7 +82,8 @@ test("desktop sidebar can scroll to its final block", async ({ page }) => {
   const closed = blocksNav.locator('button[aria-expanded="false"]');
   while ((await closed.count()) > 0) await closed.first().click();
   const finalLink = blocksNav.getByRole("link").last();
-  await expect(finalLink).toHaveText("Arc Reel");
+  // Status is the last category in the block catalog, and Task Steps its last block.
+  await expect(finalLink).toHaveText("Task Steps");
 
   await sidebar.evaluate((element) => {
     element.scrollTop = element.scrollHeight;
