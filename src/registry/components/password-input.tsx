@@ -16,6 +16,14 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
+// A critically damped spring, the one Motion resolves `visualDuration` with no bounce to. Written as
+// stiffness and damping because Motion drops velocity on time-defined springs, and a quick tap, a
+// second toggle or the next keystroke reverses these while they are still moving.
+function criticalSpring(visualDuration: number) {
+  const omega = (2 * Math.PI) / (visualDuration * 1.2);
+  return { type: "spring", stiffness: omega * omega, damping: 2 * omega } as const;
+}
+
 // Motion's useReducedMotion reads the media query on the first client render, which the server
 // cannot know. Applying it only after hydration keeps the client's first render identical to the
 // server HTML; React re-renders with the real preference right after hydrating.
@@ -171,7 +179,7 @@ export function PasswordInput({
           onClick={() => setVisible((current) => !current)}
           // Squashes on press, before the click commits the toggle.
           whileTap={reducedMotion ? undefined : { scale: 0.88 }}
-          transition={{ type: "spring", visualDuration: 0.15, bounce: 0 }}
+          transition={criticalSpring(0.15)}
         >
           <AnimatePresence initial={false} mode="popLayout">
             <motion.span
@@ -180,7 +188,7 @@ export function PasswordInput({
               initial={reducedMotion ? false : { opacity: 0, scale: 0.6, filter: "blur(4px)" }}
               animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
               exit={reducedMotion ? { opacity: 0, transition: { duration: 0 } } : { opacity: 0, scale: 0.6 }}
-              transition={{ type: "spring", duration: reducedMotion ? 0 : 0.25, bounce: 0 }}
+              transition={reducedMotion ? { duration: 0 } : criticalSpring(0.14)}
             >
               {visible ? (
                 <EyeSlashIcon aria-hidden="true" className="size-4" />
@@ -213,6 +221,8 @@ export function PasswordInput({
                   initial={false}
                   animate={{ scaleX: index < passed ? 1 : 0 }}
                   transition={{
+                    // Time-defined on purpose: all but the first segment wait out a delay at rest,
+                    // so there is no velocity to carry into this spring.
                     type: "spring",
                     duration: reducedMotion ? 0 : 0.35,
                     bounce: 0,
@@ -270,7 +280,7 @@ export function PasswordInput({
                                 ? { opacity: 0, transition: { duration: 0 } }
                                 : { opacity: 0, scale: 0.5 }
                             }
-                            transition={{ type: "spring", duration: reducedMotion ? 0 : 0.3, bounce: 0 }}
+                            transition={reducedMotion ? { duration: 0 } : criticalSpring(0.17)}
                           >
                             {met ? (
                               <CheckIcon weight="bold" className="size-3.5 text-(--status-success)" />
