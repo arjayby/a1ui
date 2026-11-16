@@ -221,8 +221,14 @@ function createSpiralMotion(root: HTMLElement, rotation: MotionValue<number>, di
     awake = visible && !document.hidden && !settings.reducedMotion;
     // Prepare visible, interactive rings before a press rather than promoting them on demand.
     const prepare = awake && !root.closest("[inert]");
-    for (const layer of root.querySelectorAll<HTMLElement>("[data-spiral-rotation], [data-spiral-coil]")) {
+    for (const layer of root.querySelectorAll<HTMLElement>("[data-spiral-coil]")) {
       layer.style.willChange = prepare ? "transform, opacity" : "auto";
+    }
+    // The spin turns the whole spiral every frame, pressable or not. Without its own layer, every
+    // glyph is repainted each frame, which kept the main thread busy inside inert previews.
+    const spinLayer = root.querySelector<HTMLElement>("[data-spiral-rotation]");
+    if (spinLayer) {
+      spinLayer.style.willChange = prepare || (awake && settings.rotating) ? "transform, opacity" : "auto";
     }
     if (awake) {
       turn();

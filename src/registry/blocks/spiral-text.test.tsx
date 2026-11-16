@@ -473,4 +473,23 @@ describe("SpiralText", () => {
     await advance(500);
     expect(angleOf(graphic)).toBeGreaterThan(angle);
   });
+
+  it("keeps the spinning layer promoted inside an inert container, but not the rings", () => {
+    const { rerender } = render(
+      <div inert>
+        <SpiralText text="LOOK ONLY · " />
+      </div>,
+    );
+    const graphic = document.querySelector<HTMLElement>("[data-spiral-rotation]")!;
+    // The spin still turns the whole figure each frame; the rings only move on a press.
+    expect(graphic).toHaveStyle({ willChange: "transform, opacity" });
+    expect(coils(graphic)[0]).toHaveStyle({ willChange: "auto" });
+
+    rerender(
+      <div inert>
+        <SpiralText text="LOOK ONLY · " rotating={false} />
+      </div>,
+    );
+    expect(graphic).toHaveStyle({ willChange: "auto" });
+  });
 });
