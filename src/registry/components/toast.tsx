@@ -4,6 +4,14 @@ import { Toast as ToastPrimitive } from "@base-ui/react/toast";
 import { motion, useReducedMotion, type PanInfo, type Transition } from "motion/react";
 import { useLayoutEffect, useRef, useState, type ReactNode, type Ref } from "react";
 
+// A critically damped spring, the one Motion resolves `visualDuration` with no bounce to. Written as
+// stiffness and damping because Motion drops velocity on time-defined springs, and a new toast or a
+// hover restacks the deck while it is still moving.
+function criticalSpring(visualDuration: number) {
+  const omega = (2 * Math.PI) / (visualDuration * 1.2);
+  return { type: "spring", stiffness: omega * omega, damping: 2 * omega } as const;
+}
+
 export type ToastType = "default" | "success" | "error" | "loading";
 export type ToastPosition =
   "top-left" | "top-center" | "top-right" | "bottom-left" | "bottom-center" | "bottom-right";
@@ -163,8 +171,7 @@ function ToastItem({
 
   // Up the screen for a bottom deck, down for a top one.
   const away = top ? 1 : -1;
-  const spring: Transition =
-    seconds === 0 ? { duration: 0 } : { type: "spring", visualDuration: seconds, bounce: 0 };
+  const spring: Transition = seconds === 0 ? { duration: 0 } : criticalSpring(seconds);
 
   return (
     <ToastPrimitive.Root
