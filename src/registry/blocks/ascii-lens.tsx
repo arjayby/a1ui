@@ -327,6 +327,17 @@ export function AsciiLens({
       sample();
     }
 
+    // An ancestor's class or style changes for many reasons besides a new theme: one that is
+    // being animated rewrites its style every frame. Only a new colour or font repaints the
+    // glyphs, and neither changes the canvas size or what was sampled from the image.
+    function themed() {
+      const computed = getComputedStyle(root!);
+      if (computed.color === color && computed.fontFamily === font) return;
+      color = computed.color;
+      font = computed.fontFamily;
+      sync();
+    }
+
     function onSampleLoad() {
       if (sampleLoaded) return;
       sampleLoaded = true;
@@ -395,9 +406,9 @@ export function AsciiLens({
       visible = entry.isIntersecting;
       sync();
     });
-    const themeObserver = new MutationObserver(resize);
+    const themeObserver = new MutationObserver(themed);
     for (let ancestor: HTMLElement | null = root; ancestor; ancestor = ancestor.parentElement) {
-      themeObserver.observe(ancestor, { attributes: true, attributeFilter: ["class", "style", "inert"] });
+      themeObserver.observe(ancestor, { attributes: true, attributeFilter: ["class", "style"] });
     }
     image.addEventListener("error", onImageError);
     samplingImage.addEventListener("load", onSampleLoad);

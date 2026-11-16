@@ -125,6 +125,7 @@ export function AsciiTerrain({
     let viewHeight = 0;
     let color = "";
     let fontFamily = "monospace";
+    let inert = false;
     let points: Point[] = [];
     let ripples: Ripple[] = [];
     const pointer = { x: follower(0), z: follower(0), strength: follower(0), targetX: 0, targetZ: 0 };
@@ -293,7 +294,22 @@ export function AsciiTerrain({
       const computed = getComputedStyle(root!);
       color = computed.color;
       fontFamily = computed.fontFamily;
+      inert = root!.closest("[inert]") !== null;
       sync();
+    }
+
+    // An ancestor's class or style changes for many reasons besides a new theme: one that is
+    // being animated rewrites its style every frame. Only a change the canvas shows repaints it.
+    function themed() {
+      const computed = getComputedStyle(root!);
+      if (
+        computed.color === color &&
+        computed.fontFamily === fontFamily &&
+        (root!.closest("[inert]") !== null) === inert
+      ) {
+        return;
+      }
+      appearance();
     }
 
     controlsRef.current = {
@@ -363,7 +379,7 @@ export function AsciiTerrain({
       visible = entry.isIntersecting;
       sync();
     });
-    const themeObserver = new MutationObserver(appearance);
+    const themeObserver = new MutationObserver(themed);
     for (let ancestor: HTMLElement | null = root; ancestor; ancestor = ancestor.parentElement) {
       themeObserver.observe(ancestor, { attributes: true, attributeFilter: ["class", "style", "inert"] });
     }

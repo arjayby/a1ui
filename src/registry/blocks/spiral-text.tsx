@@ -478,9 +478,12 @@ export function SpiralText({
     reducedMotion,
   ]);
 
+  // The glyphs are drawn once into a bitmap per ring. This holds inside an inert container too:
+  // a spiral left as SVG text inside a card that is being scaled has every glyph painted again
+  // each frame, where a bitmap is only moved.
   useEffect(() => {
     const root = rootRef.current;
-    if (!root || root.closest("[inert]") || !document.fonts) return;
+    if (!root || !document.fonts) return;
     const canvases = canvasRefs.current.slice(0, coils.length);
     const masks = canvases.map(() => document.createElement("canvas"));
     const layers = coilRefs.current.slice(0, coils.length);

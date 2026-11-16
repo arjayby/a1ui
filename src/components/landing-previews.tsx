@@ -228,9 +228,8 @@ function TextScramblePreview() {
 }
 
 function SpiralTextPreview() {
-  // The block spins its coils from JavaScript, and inside an inert card it skips promoting them to
-  // their own layer, so every frame repainted thousands of SVG glyphs. Here the coils hold still
-  // and a CSS animation turns them on the compositor instead.
+  // The block spins its coils from JavaScript, on the same thread that flies the cards. Here the
+  // coils hold still and a CSS animation turns them on the compositor instead.
   return <SpiralText text="A1UI · " density={0.65} rotating={false} className="landing-preview-spiral" />;
 }
 
