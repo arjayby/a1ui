@@ -1,6 +1,14 @@
 "use client";
 
 import useEmblaCarousel from "embla-carousel-react";
+import {
+  animate,
+  motion,
+  useMotionValue,
+  useReducedMotion,
+  type Transition,
+  type Variants,
+} from "motion/react";
 import { useEffect, useId, useRef, useState, type CSSProperties, type ReactNode } from "react";
 
 export interface ArcReelItem {
@@ -18,7 +26,24 @@ export interface ArcReelProps {
   style?: CSSProperties;
 }
 
+// Embla owns the reel: 1:1 dragging, release momentum and the settle onto a card. It watches this
+// query itself and jumps instead of sliding while it matches, so the reel follows a change of
+// preference straight away. Motion animates everything else.
 const motionQuery = "(prefers-reduced-motion: reduce)";
+
+// Critically damped with about a 0.2s response, so a pressed arrow gives and returns without
+// overshooting. Written as stiffness and damping because Motion drops velocity on duration-based
+// springs, and a quick second tap catches the button while it is still moving.
+const PRESS: Transition = { type: "spring", stiffness: 900, damping: 60 };
+const PRESSED: Variants = { pressed: { scale: 0.96 } };
+// Reduced motion: the arrow dims under the pointer instead of the button giving.
+const PRESSED_DIM: Variants = { pressed: { opacity: 0.5 } };
+const DIM: Transition = { duration: 0.1, ease: "easeOut" };
+
+// Reduced motion: the reel dims where Embla cuts to the new card and fades back, so the change
+// reads as a cross-fade. The slow start keeps key repeat and scrubbing from flickering.
+const CUT_OPACITY = 0.4;
+const CUT_FADE: Transition = { duration: 0.25, ease: "easeInOut" };
 
 const arcReelTheme = {
   "--arc-reel-background": "var(--background)",
@@ -50,6 +75,10 @@ export function ArcReel({ items, initialIndex = 0, ariaLabel = "Arc Reel", class
   const sliderTargetRef = useRef<number | null>(null);
   const [position, setPosition] = useState(startIndex);
   const currentIndex = items.length ? position % items.length : 0;
+  const reducedMotion = useReducedMotion() ?? false;
+  const reelOpacity = useMotionValue(1);
+
+  useEffect(() => () => reelOpacity.stop(), [reelOpacity]);
 
   useEffect(() => {
     if (!api) return;
@@ -85,8 +114,11 @@ export function ArcReel({ items, initialIndex = 0, ariaLabel = "Arc Reel", class
           ? 0
           : Math.min(1, (cycleProgress * items.length) / Math.max(1, items.length - 1));
 
-      // Embla emits scroll updates on its animation frame. Keep the moving
-      // geometry out of React and only render again when the nearest card changes.
+      // Embla emits scroll updates inside its own animation frame, right after
+      // it moves the track. Write the projection here, in that same frame: a
+      // motion value would hand it to Motion's frame loop, which renders one
+      // frame later, and the cards would trail the track they ride on. React
+      // only renders again when the nearest card changes.
       frames.forEach((frame, frameIndex) => {
         if (!frame) return;
         // Include Embla's slide relocation so the projection stays continuous
@@ -144,9 +176,19 @@ export function ArcReel({ items, initialIndex = 0, ariaLabel = "Arc Reel", class
       draw();
     };
 
+    const softenCut = () => {
+      if (engine.options.duration !== 0) return;
+      reelOpacity.jump(CUT_OPACITY);
+      animate(reelOpacity, 1, CUT_FADE);
+    };
+
     const finishDrag = () => {
-      if (window.matchMedia(motionQuery).matches) {
-        api.scrollTo(api.selectedScrollSnap(), true);
+      if (engine.options.duration === 0) {
+        // Reduced motion: no glide after the release. Cut to the card nearest
+        // the projected landing point, unless the reel never left its card.
+        const released = engine.location.get();
+        api.scrollTo(api.selectedScrollSnap());
+        if (Math.abs(engine.location.get() - released) > 1) softenCut();
         return;
       }
       // Free dragging has already projected the release momentum into the
@@ -167,6 +209,7 @@ export function ArcReel({ items, initialIndex = 0, ariaLabel = "Arc Reel", class
       .on("settle", syncControls)
       .on("pointerDown", syncControls)
       .on("reInit", measure)
+      .on("select", softenCut)
       .on("pointerUp", finishDrag);
 
     return () => {
@@ -175,9 +218,10 @@ export function ArcReel({ items, initialIndex = 0, ariaLabel = "Arc Reel", class
         .off("settle", syncControls)
         .off("pointerDown", syncControls)
         .off("reInit", measure)
+        .off("select", softenCut)
         .off("pointerUp", finishDrag);
     };
-  }, [api, items, copyCount, slideCount]);
+  }, [api, items, copyCount, slideCount, reelOpacity]);
 
   const goTo = (index: number, fromSlider = false) => {
     sliderTargetRef.current = fromSlider ? index : null;
@@ -190,14 +234,15 @@ export function ArcReel({ items, initialIndex = 0, ariaLabel = "Arc Reel", class
         : delta < -items.length / 2
           ? delta + items.length
           : delta;
-    api.scrollTo(selected + shortest, window.matchMedia(motionQuery).matches);
+    api.scrollTo(selected + shortest);
   };
 
+  // Embla moves its target by one card and keeps the reel's velocity, so a tap
+  // during a glide bends the motion toward the new card instead of restarting it.
   const step = (direction: "previous" | "next") => {
     sliderTargetRef.current = null;
-    const jump = window.matchMedia(motionQuery).matches;
-    if (direction === "previous") api?.scrollPrev(jump);
-    else api?.scrollNext(jump);
+    if (direction === "previous") api?.scrollPrev();
+    else api?.scrollNext();
   };
 
   if (items.length === 0) return null;
@@ -237,7 +282,7 @@ export function ArcReel({ items, initialIndex = 0, ariaLabel = "Arc Reel", class
           goTo(destinations[event.key]);
         }}
       >
-        <div className="flex items-center will-change-transform">
+        <motion.div className="flex items-center will-change-transform" style={{ opacity: reelOpacity }}>
           {Array.from({ length: slideCount }, (_, slideIndex) => {
             const index = slideIndex % items.length;
             const item = items[index];
@@ -284,29 +329,17 @@ export function ArcReel({ items, initialIndex = 0, ariaLabel = "Arc Reel", class
               </div>
             );
           })}
-        </div>
+        </motion.div>
       </div>
 
       <div className="relative flex items-center justify-center gap-5 pb-[var(--arc-reel-controls-padding,1.75rem)]">
-        <button
-          type="button"
-          aria-label="Previous provider"
-          aria-controls={viewportId}
+        <ReelButton
+          direction="previous"
+          controls={viewportId}
           disabled={items.length < 2}
+          reducedMotion={reducedMotion}
           onClick={() => step("previous")}
-          className="grid size-11 shrink-0 cursor-pointer place-items-center rounded-sm transition-[background-color,scale] duration-150 ease-out hover:bg-[var(--arc-reel-image)] focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-[var(--arc-reel-accent)] disabled:cursor-default disabled:opacity-25 motion-safe:enabled:active:scale-[0.96] motion-reduce:transition-none motion-reduce:enabled:active:bg-[var(--arc-reel-image)]"
-        >
-          <svg
-            aria-hidden="true"
-            className="size-5"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.4"
-          >
-            <path d="M20 12H4m7-7-7 7 7 7" />
-          </svg>
-        </button>
+        />
 
         <div className="relative flex h-11 w-36 items-center rounded-sm has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-[var(--arc-reel-accent)]">
           <span aria-hidden="true" className="h-px w-full bg-[var(--arc-reel-border)]">
@@ -332,29 +365,60 @@ export function ArcReel({ items, initialIndex = 0, ariaLabel = "Arc Reel", class
           />
         </div>
 
-        <button
-          type="button"
-          aria-label="Next provider"
-          aria-controls={viewportId}
+        <ReelButton
+          direction="next"
+          controls={viewportId}
           disabled={items.length < 2}
+          reducedMotion={reducedMotion}
           onClick={() => step("next")}
-          className="grid size-11 shrink-0 cursor-pointer place-items-center rounded-sm transition-[background-color,scale] duration-150 ease-out hover:bg-[var(--arc-reel-image)] focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-[var(--arc-reel-accent)] disabled:cursor-default disabled:opacity-25 motion-safe:enabled:active:scale-[0.96] motion-reduce:transition-none motion-reduce:enabled:active:bg-[var(--arc-reel-image)]"
-        >
-          <svg
-            aria-hidden="true"
-            className="size-5"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.4"
-          >
-            <path d="M4 12h16m-7-7 7 7-7 7" />
-          </svg>
-        </button>
+        />
       </div>
       <span role="status" className="sr-only">
         {items[currentIndex].name}, {currentIndex + 1} of {items.length}
       </span>
     </section>
+  );
+}
+
+function ReelButton({
+  direction,
+  controls,
+  disabled,
+  reducedMotion,
+  onClick,
+}: {
+  direction: "previous" | "next";
+  controls: string;
+  disabled: boolean;
+  reducedMotion: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <motion.button
+      type="button"
+      aria-label={direction === "previous" ? "Previous provider" : "Next provider"}
+      aria-controls={controls}
+      disabled={disabled}
+      onClick={onClick}
+      // Feedback lands on pointer-down, or on Enter, and springs back from wherever the button is
+      // on release. The click still commits on release over the button.
+      whileTap={disabled ? undefined : "pressed"}
+      variants={reducedMotion ? undefined : PRESSED}
+      transition={PRESS}
+      className="grid size-11 shrink-0 cursor-pointer place-items-center rounded-sm transition-[background-color] duration-150 ease-out hover:bg-[var(--arc-reel-image)] focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-[var(--arc-reel-accent)] disabled:cursor-default disabled:opacity-25 motion-reduce:transition-none"
+    >
+      <motion.svg
+        aria-hidden="true"
+        variants={reducedMotion ? PRESSED_DIM : undefined}
+        transition={DIM}
+        className="size-5"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.4"
+      >
+        <path d={direction === "previous" ? "M20 12H4m7-7-7 7 7 7" : "M4 12h16m-7-7 7 7-7 7"} />
+      </motion.svg>
+    </motion.button>
   );
 }

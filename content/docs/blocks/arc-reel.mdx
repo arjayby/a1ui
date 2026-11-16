@@ -46,6 +46,20 @@ export function Providers() {
   </Tab>
 </Tabs>
 
+## Behaviour
+
+- **Reel.** [Embla Carousel](https://www.embla-carousel.com) owns the reel. Cards follow the pointer one to one while you drag. A release carries its momentum to the card nearest where the flick would land, and you can catch the reel again at any point. The arc is drawn from Embla's scroll position in the same frame, so the cards never trail the track.
+- **Motion.** [Motion](https://motion.dev) drives everything else that animates.
+- **Arrows.** An arrow gives on pointer-down, or on Enter, and springs back on release without overshooting. Tapping an arrow while the reel is moving shifts the target by one card and keeps the reel's speed, so repeated taps bend one glide instead of restarting it.
+- **Scrubber.** The marker follows the reel one to one. Clicking or dragging the line, or pressing the arrow keys on it, eases to that card by the shorter way round.
+- **Looping.** The reel loops in both directions. A list too short to fill the viewport is repeated as often as needed.
+
+## Accessibility
+
+- The reel is a region named by `ariaLabel` with the carousel role description. Each card is a slide named after its item and position, the centered one has `aria-current`, and a status line announces it. Repeated copies of a short list are hidden from assistive technology.
+- With the reel focused, the left and right arrow keys step one card, and Home and End go to the first and last. The scrubber is a native range input.
+- Under `prefers-reduced-motion`, the reel cuts to the chosen card instead of sliding, then fades back in from a dimmed frame. A drag still follows the pointer, and its release cuts to the nearest card. The pressed arrow dims instead of giving. The reel follows a change of the preference straight away; the arrows read it when the block mounts.
+
 ## API reference
 
 | Prop           | Type            | Default      | Description                                             |
