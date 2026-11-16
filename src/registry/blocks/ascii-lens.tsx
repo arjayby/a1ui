@@ -2,7 +2,7 @@
 
 import { clsx } from "clsx";
 import { cancelFrame, frame, spring, type FrameData, type KeyframeGenerator } from "motion";
-import { useEffect, useId, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useId, useImperativeHandle, useRef, useState, type CSSProperties, type Ref } from "react";
 
 export type AsciiLensProps = {
   src: string;
@@ -14,8 +14,16 @@ export type AsciiLensProps = {
   /** Printable characters ordered from light to dark. */
   characters?: string;
   interactive?: boolean;
+  /** Opens and moves the lens from code, such as a self-running preview. */
+  ref?: Ref<AsciiLensHandle>;
   className?: string;
   style?: CSSProperties;
+};
+
+export type AsciiLensHandle = {
+  /** Opens the lens at a point from 0 to 1 across and down the image, or glides an open one there. */
+  show: (x: number, y: number) => void;
+  hide: () => void;
 };
 
 type Cell = { x: number; y: number; glyph: string; opacity: number; angle: number; scatter: number };
@@ -34,6 +42,7 @@ type Controls = {
   move: (clientX: number, clientY: number) => void;
   key: (key: string) => void;
   leave: () => void;
+  show: (x: number, y: number) => void;
 };
 
 const defaultCharacters = ".:-=+*#%@";
@@ -99,6 +108,7 @@ export function AsciiLens({
   radius = 92,
   characters = defaultCharacters,
   interactive = true,
+  ref,
   className,
   style,
 }: AsciiLensProps) {
@@ -114,6 +124,17 @@ export function AsciiLens({
   const ready = result?.src === src && result.status === "ready";
   const failed = result?.src === src && result.status === "failed";
   const unsupported = result?.src === src && result.status === "unsupported";
+
+  // Calls from code are not input, so they also work without the controls and inside an inert
+  // container, where a preview has nothing for a visitor to operate.
+  useImperativeHandle(
+    ref,
+    () => ({
+      show: (x, y) => controlsRef.current?.show(x, y),
+      hide: () => controlsRef.current?.leave(),
+    }),
+    [],
+  );
 
   useEffect(() => {
     const root = rootRef.current;
@@ -397,6 +418,13 @@ export function AsciiLens({
       leave() {
         lens.tracking = false;
         springTo(opening, 0);
+        request();
+      },
+      show(x, y) {
+        if (!width || !height) return;
+        lens.tracking = false;
+        aim(clamp(finite(x, 0.5), 0, 1) * width, clamp(finite(y, 0.5), 0, 1) * height);
+        springTo(opening, 1);
         request();
       },
     };

@@ -2,7 +2,7 @@
 
 import { clsx } from "clsx";
 import { cancelFrame, frame, spring, type FrameData, type KeyframeGenerator } from "motion";
-import { useEffect, useId, useRef, type CSSProperties } from "react";
+import { useEffect, useId, useImperativeHandle, useRef, type CSSProperties, type Ref } from "react";
 
 export type AsciiTerrainProps = {
   cellSize?: number;
@@ -13,8 +13,15 @@ export type AsciiTerrainProps = {
   paused?: boolean;
   interactive?: boolean;
   ariaLabel?: string;
+  /** Sends ripples from code, such as a self-running preview. */
+  ref?: Ref<AsciiTerrainHandle>;
   className?: string;
   style?: CSSProperties;
+};
+
+export type AsciiTerrainHandle = {
+  /** Sends a ripple from a point on the ground: each of x and z runs from -1 to 1, 0 the centre. */
+  ripple: (x?: number, z?: number) => void;
 };
 
 type Point = { x: number; z: number; screenX: number; screenY: number; baseY: number };
@@ -34,6 +41,7 @@ type Controls = {
   leave: () => void;
   key: (key: string) => void;
   ripple: () => void;
+  send: (x: number, z: number) => void;
 };
 
 const ramp = ".:-=+*#%@";
@@ -88,6 +96,7 @@ export function AsciiTerrain({
   paused = false,
   interactive = true,
   ariaLabel = "ASCII terrain with rolling hills",
+  ref,
   className,
   style,
 }: AsciiTerrainProps) {
@@ -110,6 +119,10 @@ export function AsciiTerrain({
     pausedRef.current = paused;
     controlsRef.current?.sync();
   }, [paused]);
+
+  // A ripple sent from code is not input, so it also runs without the controls and inside an
+  // inert container, where the landscape itself holds still.
+  useImperativeHandle(ref, () => ({ ripple: (x = 0, z = 0) => controlsRef.current?.send(x, z) }), []);
 
   useEffect(() => {
     const root = rootRef.current;
@@ -149,12 +162,19 @@ export function AsciiTerrain({
     };
     const canMove = () => !pausedRef.current && !root.closest("[inert]");
     const canInteract = () => interactive && canMove();
-    const canAnimate = () => visible && !document.hidden && canMove() && width > 0 && viewHeight > 0;
+    // An inert terrain is a still picture, apart from ripples sent to it from code.
+    const canAnimate = () =>
+      visible &&
+      !document.hidden &&
+      !pausedRef.current &&
+      (!inert || ripples.length > 0) &&
+      width > 0 &&
+      viewHeight > 0;
     // The landscape only drifts when it has a speed and some height to show it. Otherwise the
     // frame loop runs just while a hill is still settling or a ripple is still fading.
     const drifts = rate > 0 && height > 0;
     const settled = () => pointer.x.done && pointer.z.done && pointer.strength.done;
-    const moving = () => ripples.length > 0 || !settled() || (drifts && !still());
+    const moving = () => ripples.length > 0 || !settled() || (drifts && !still() && !inert);
 
     function draw() {
       if (!context || !canvas) return;
@@ -214,7 +234,7 @@ export function AsciiTerrain({
       // Motion clamps long gaps between frames, so a stalled tab cannot fling the terrain forward.
       timeRef.current += delta / 1000;
       // Drift adds up frame by frame, so it holds still under reduced motion while a glow fades.
-      if (!still()) driftRef.current += (delta / 1000) * rate * 0.16;
+      if (!still() && !inert) driftRef.current += (delta / 1000) * rate * 0.16;
       // Motion's generators are analytic, so the response is the same at any refresh rate.
       advance(pointer.x, delta);
       advance(pointer.z, delta);
@@ -312,6 +332,14 @@ export function AsciiTerrain({
       appearance();
     }
 
+    function send(x: number, z: number) {
+      const active = ripples.filter((ripple) => ripple.released === undefined);
+      if (active.length >= 6) active[0].released = timeRef.current;
+      // Fade retiring waves instead of removing a visible wave on the seventh click.
+      ripples = [...ripples.slice(-23), { x, z, started: timeRef.current }];
+      wake();
+    }
+
     controlsRef.current = {
       sync,
       move(clientX, clientY) {
@@ -362,15 +390,10 @@ export function AsciiTerrain({
         respond();
       },
       ripple() {
-        if (!canInteract()) return;
-        const active = ripples.filter((ripple) => ripple.released === undefined);
-        if (active.length >= 6) active[0].released = timeRef.current;
-        // Fade retiring waves instead of removing a visible wave on the seventh click.
-        ripples = [
-          ...ripples.slice(-23),
-          { x: pointer.targetX, z: pointer.targetZ, started: timeRef.current },
-        ];
-        wake();
+        if (canInteract()) send(pointer.targetX, pointer.targetZ);
+      },
+      send(x, z) {
+        if (!pausedRef.current) send(clamp(finite(x, 0), -1, 1), clamp(finite(z, 0), -1, 1));
       },
     };
 

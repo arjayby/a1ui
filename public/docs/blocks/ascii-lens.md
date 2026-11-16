@@ -57,13 +57,14 @@ export function PortfolioCard() {
 
 ## API reference
 
-| Prop          | Type            | Default       | Description                                                                                                                          |
-| ------------- | --------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `src`         | `string`        | Required      | Image URL. Same-origin URLs work without extra server configuration.                                                                 |
-| `alt`         | `string`        | Required      | Description read by assistive technology.                                                                                            |
-| `cellSize`    | `number`        | `10`          | Character spacing in CSS pixels, clamped to 6–24.                                                                                    |
-| `radius`      | `number`        | `92`          | Circular reveal radius in CSS pixels, clamped to 32–240. The lens springs open to this size, or fades in at it under reduced motion. |
-| `characters`  | `string`        | `".:-=+*#%@"` | Printable ASCII from light to dark, up to 32 characters.                                                                             |
-| `interactive` | `boolean`       | `true`        | Adds pointer, touch, and keyboard lens controls. False renders static ASCII.                                                         |
-| `className`   | `string`        | None          | Classes for the outer element. Its default aspect ratio is 4:3.                                                                      |
-| `style`       | `CSSProperties` | None          | Inline size, background, or text color.                                                                                              |
+| Prop          | Type              | Default       | Description                                                                                                                                                                                                          |
+| ------------- | ----------------- | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src`         | `string`          | Required      | Image URL. Same-origin URLs work without extra server configuration.                                                                                                                                                 |
+| `alt`         | `string`          | Required      | Description read by assistive technology.                                                                                                                                                                            |
+| `cellSize`    | `number`          | `10`          | Character spacing in CSS pixels, clamped to 6–24.                                                                                                                                                                    |
+| `radius`      | `number`          | `92`          | Circular reveal radius in CSS pixels, clamped to 32–240. The lens springs open to this size, or fades in at it under reduced motion.                                                                                 |
+| `characters`  | `string`          | `".:-=+*#%@"` | Printable ASCII from light to dark, up to 32 characters.                                                                                                                                                             |
+| `interactive` | `boolean`         | `true`        | Adds pointer, touch, and keyboard lens controls. False renders static ASCII.                                                                                                                                         |
+| `ref`         | `AsciiLensHandle` | None          | Drives the lens from code: `show(x, y)` opens it at a point from 0 to 1 across and down the image, or glides an open lens there, and `hide()` closes it. Works with `interactive` off and inside an inert container. |
+| `className`   | `string`          | None          | Classes for the outer element. Its default aspect ratio is 4:3.                                                                                                                                                      |
+| `style`       | `CSSProperties`   | None          | Inline size, background, or text color.                                                                                                                                                                              |

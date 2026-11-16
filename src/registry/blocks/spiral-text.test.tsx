@@ -1,7 +1,9 @@
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { SpiralText } from "./spiral-text";
+import { createRef } from "react";
+
+import { SpiralText, type SpiralTextHandle } from "./spiral-text";
 
 // Motion's frame loop captures requestAnimationFrame when it loads, so route it through a
 // stand-in installed before imports that each test points at its own manual queue.
@@ -491,5 +493,29 @@ describe("SpiralText", () => {
       </div>,
     );
     expect(graphic).toHaveStyle({ willChange: "auto" });
+  });
+
+  it("presses and releases from code inside an inert container, and yields to a real pointer", async () => {
+    const ref = createRef<SpiralTextHandle>();
+    render(
+      <div inert>
+        <SpiralText ref={ref} text="LOOK ONLY · " />
+      </div>,
+    );
+    const graphic = screen.getByRole("img", { hidden: true });
+    act(() => ref.current!.press());
+    expect(graphic).toHaveAttribute("data-interaction", "tightening");
+    await advance(2000);
+    for (const coil of coils(graphic)) expect(scaleOf(coil)).toBeCloseTo(0.86, 4);
+
+    // A pointer that arrives during the press from code does not take it over or end it.
+    fireEvent.pointerDown(graphic, { pointerId: 1 });
+    fireEvent.pointerUp(graphic, { pointerId: 1 });
+    expect(graphic).toHaveAttribute("data-interaction", "tightening");
+
+    act(() => ref.current!.release());
+    expect(graphic).toHaveAttribute("data-interaction", "releasing");
+    await advance(1900);
+    expectResting(graphic);
   });
 });

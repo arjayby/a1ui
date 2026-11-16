@@ -6,10 +6,10 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { z } from "zod";
 
 import { ArcReel, type ArcReelItem } from "@/registry/blocks/arc-reel";
-import { AsciiLens } from "@/registry/blocks/ascii-lens";
-import { AsciiTerrain } from "@/registry/blocks/ascii-terrain";
+import { AsciiLens, type AsciiLensHandle } from "@/registry/blocks/ascii-lens";
+import { AsciiTerrain, type AsciiTerrainHandle } from "@/registry/blocks/ascii-terrain";
 import { ParticleMenu, type ParticleMenuItem } from "@/registry/blocks/particle-menu";
-import { SpiralText } from "@/registry/blocks/spiral-text";
+import { SpiralText, type SpiralTextHandle } from "@/registry/blocks/spiral-text";
 import { TaskSteps, type TaskStep } from "@/registry/blocks/task-steps";
 import { TextBanner } from "@/registry/blocks/text-banner";
 import { TextScramble } from "@/registry/blocks/text-scramble";
@@ -216,8 +216,24 @@ function ArcReelPreview() {
   );
 }
 
+// Where each click lands on the ground, from -1 to 1 across and from back to front.
+const terrainClicks = [
+  [-0.35, 0.1],
+  [0.4, -0.2],
+  [0, 0.45],
+  [-0.5, -0.4],
+  [0.45, 0.35],
+];
+
 function AsciiTerrainPreview() {
-  return <AsciiTerrain interactive={false} cellSize={7} className="landing-preview-fill" />;
+  const ref = useRef<AsciiTerrainHandle>(null);
+  // Clicks only: each sends a ripple, and no hill follows a pointer between them.
+  const tick = useTick(1500);
+  useEffect(() => {
+    const [x, z] = terrainClicks[tick % terrainClicks.length];
+    ref.current?.ripple(x, z);
+  }, [tick]);
+  return <AsciiTerrain ref={ref} interactive={false} cellSize={7} className="landing-preview-fill" />;
 }
 
 const words = ["HELLO", "BLOCKS", "A1UI"];
@@ -230,7 +246,24 @@ function TextScramblePreview() {
 function SpiralTextPreview() {
   // The block spins its coils from JavaScript, on the same thread that flies the cards. Here the
   // coils hold still and a CSS animation turns them on the compositor instead.
-  return <SpiralText text="A1UI · " density={0.65} rotating={false} className="landing-preview-spiral" />;
+  const ref = useRef<SpiralTextHandle>(null);
+  // A click every few beats: the press tightens the rings and letting go sends the ripple out.
+  const tick = useTick(450);
+  const beat = tick % 6;
+  useEffect(() => {
+    if (beat === 1) ref.current?.press();
+    if (beat === 2) ref.current?.release();
+  }, [beat]);
+  return (
+    <SpiralText
+      ref={ref}
+      text="A1UI · "
+      density={0.65}
+      rippleDuration={1200}
+      rotating={false}
+      className="landing-preview-spiral"
+    />
+  );
 }
 
 const stepLabels = ["Build", "Deploy"];
@@ -249,12 +282,32 @@ function TaskStepsPreview() {
   );
 }
 
+// The path a pointer takes over the image, as fractions of its width and height. Null lifts it away.
+const lensPath: ([number, number] | null)[] = [
+  [0.28, 0.4],
+  [0.5, 0.58],
+  [0.74, 0.42],
+  [0.6, 0.68],
+  [0.36, 0.62],
+  null,
+];
+
 function AsciiLensPreview() {
+  const ref = useRef<AsciiLensHandle>(null);
+  // The lens glides to each point on its own spring, as it does when a pointer carries it.
+  const tick = useTick(800);
+  useEffect(() => {
+    const point = lensPath[tick % lensPath.length];
+    if (point) ref.current?.show(...point);
+    else ref.current?.hide();
+  }, [tick]);
   return (
     <AsciiLens
+      ref={ref}
       src="/images/arc-reel/city.webp"
       alt=""
       cellSize={6}
+      radius={32}
       interactive={false}
       className="landing-preview-fill"
     />
@@ -264,22 +317,66 @@ function AsciiLensPreview() {
 const particleItems: ParticleMenuItem[] = [
   { id: "grace", label: "Grace", shape: "grace" },
   { id: "runes", label: "Runes", shape: "runes" },
-  { id: "ashes", label: "Ashes", shape: "ashes" },
-  { id: "oaths", label: "Oaths", shape: "oaths" },
 ];
 
+/** How long a pointer takes to cross one symbol, and how often it sets off across the next. */
+const SWEEP = 700;
+const SWEEP_EVERY = 1900;
+
 function ParticleMenuPreview() {
-  return <ParticleMenu items={particleItems} ariaLabel="" className="landing-preview-particles" />;
+  const ref = useRef<HTMLSpanElement>(null);
+  // The grains follow pointer events on each item, so the preview sends its own: a pointer that
+  // crosses one symbol, leaves, then crosses the next. They don't bubble, so the card and the
+  // ring around it never see them.
+  useEffect(() => {
+    let turn = 0;
+    let frame = 0;
+    const sweep = () => {
+      const controls = ref.current?.querySelectorAll<HTMLElement>("a, button");
+      const control = controls?.[turn++ % (controls.length || 1)];
+      const bounds = control?.querySelector("svg")?.getBoundingClientRect();
+      if (!control || !bounds?.width) return;
+      // Alternate direction, on a slight diagonal so the grains part to both sides.
+      const forward = turn % 2 === 1;
+      const start = performance.now();
+      const step = (now: number) => {
+        const progress = Math.min(1, (now - start) / SWEEP);
+        const across = forward ? progress : 1 - progress;
+        control.dispatchEvent(
+          new PointerEvent(progress < 1 ? "pointermove" : "pointerleave", {
+            clientX: bounds.left + bounds.width * (0.1 + across * 0.8),
+            clientY: bounds.top + bounds.height * (0.35 + progress * 0.3),
+            pointerType: "mouse",
+          }),
+        );
+        if (progress < 1) frame = requestAnimationFrame(step);
+      };
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(step);
+    };
+    const first = setTimeout(sweep, 250);
+    const timer = setInterval(sweep, SWEEP_EVERY);
+    return () => {
+      clearTimeout(first);
+      clearInterval(timer);
+      cancelAnimationFrame(frame);
+    };
+  }, []);
+  return (
+    <span ref={ref} className="landing-preview-particles">
+      <ParticleMenu items={particleItems} ariaLabel="" />
+    </span>
+  );
 }
 
 /** In ring order: the first sits at the top and the rest go round clockwise. */
 export const blockPreviews: Record<string, () => ReactNode> = {
-  "text-banner": TextBannerPreview,
+  "particle-menu": ParticleMenuPreview,
   "arc-reel": ArcReelPreview,
   "ascii-terrain": AsciiTerrainPreview,
   "text-scramble": TextScramblePreview,
   "spiral-text": SpiralTextPreview,
   "task-steps": TaskStepsPreview,
   "ascii-lens": AsciiLensPreview,
-  "particle-menu": ParticleMenuPreview,
+  "text-banner": TextBannerPreview,
 };

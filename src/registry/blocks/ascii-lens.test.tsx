@@ -1,7 +1,9 @@
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { AsciiLens } from "./ascii-lens";
+import { createRef } from "react";
+
+import { AsciiLens, type AsciiLensHandle } from "./ascii-lens";
 
 // Motion's frame loop captures requestAnimationFrame when it loads, so route it through a
 // stand-in installed before imports that each test points at its own manual queue.
@@ -365,5 +367,35 @@ describe("AsciiLens", () => {
     expect(container.querySelector('[data-slot="ascii-lens"]')).toHaveAttribute("data-state", "failed");
     expect(screen.getByText("Image unavailable")).toBeVisible();
     expect(screen.queryByRole("button")).toBeNull();
+  });
+
+  it("opens, glides and closes the lens from code, with no controls and inside an inert container", () => {
+    const ref = createRef<AsciiLensHandle>();
+    render(
+      <div inert>
+        <AsciiLens ref={ref} src="/portrait.webp" alt="Studio portrait" interactive={false} />
+      </div>,
+    );
+    act(() => fireEvent.load(samplers[0]));
+    expect(screen.queryByRole("button")).toBeNull();
+
+    act(() => ref.current!.show(0.25, 0.5));
+    advance(1000);
+    const first = lens();
+    expect(first.radius).toBeCloseTo(92, 0);
+
+    // A second point pulls the open lens over on its spring instead of jumping it there.
+    act(() => ref.current!.show(0.75, 0.5));
+    advance(51);
+    expect(lens().x).toBeGreaterThan(first.x);
+    expect(lens().x).toBeLessThan(first.x * 3 - 1);
+    advance(1000);
+    expect(lens().x).toBeCloseTo(first.x * 3, 0);
+    expect(lens().y).toBeCloseTo(first.y, 0);
+
+    act(() => ref.current!.hide());
+    advance(1000);
+    expect(pending.size).toBe(0);
+    expect(lens().radius).toBeLessThan(1);
   });
 });

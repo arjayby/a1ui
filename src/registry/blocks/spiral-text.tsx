@@ -14,11 +14,13 @@ import { motion, useMotionValue, useReducedMotion } from "motion/react";
 import {
   useEffect,
   useId,
+  useImperativeHandle,
   useLayoutEffect,
   useMemo,
   useRef,
   useState,
   type PointerEvent as ReactPointerEvent,
+  type Ref,
 } from "react";
 
 export interface SpiralTextProps {
@@ -28,8 +30,20 @@ export interface SpiralTextProps {
   rippleDuration?: number;
   rotating?: boolean;
   rotationSpeed?: number;
+  /** Presses and releases the spiral from code, such as a self-running preview. */
+  ref?: Ref<SpiralTextHandle>;
   className?: string;
 }
+
+export interface SpiralTextHandle {
+  /** Tightens the rings, as a held pointer does. A pointer already holding them wins. */
+  press: () => void;
+  /** Lets go of a press made from code, which sends the ripple out. */
+  release: () => void;
+}
+
+// The pointer id that stands for a press made from code. Real pointer ids are never negative.
+const FROM_CODE = -1;
 
 type Interaction = "resting" | "tightening" | "releasing" | "pressed-reduced";
 type CoilGeometry = { progress: number; radius: number };
@@ -283,7 +297,7 @@ function createSpiralMotion(root: HTMLElement, rotation: MotionValue<number>, di
       if (!settings || pointer !== null) return;
       if (!awake && !settings.reducedMotion) return;
       pointer = pointerId;
-      root.setPointerCapture?.(pointerId);
+      if (pointerId !== FROM_CODE) root.setPointerCapture?.(pointerId);
       if (settings.reducedMotion) {
         // Reduced motion answers a press with a short fade instead of moving the rings.
         setInteraction("pressed-reduced");
@@ -427,6 +441,7 @@ export function SpiralText({
   rippleDuration = 1800,
   rotating = true,
   rotationSpeed = 1,
+  ref,
   className,
 }: SpiralTextProps) {
   const generatedId = useId();
@@ -590,6 +605,16 @@ export function SpiralText({
       }
     };
   }, [coils]);
+
+  // A press from code is not input, so it also works inside an inert container.
+  useImperativeHandle(
+    ref,
+    () => ({
+      press: () => motionRef.current?.press(FROM_CODE),
+      release: () => motionRef.current?.release(FROM_CODE),
+    }),
+    [],
+  );
 
   const release = (event: ReactPointerEvent<HTMLDivElement>) => motionRef.current?.release(event.pointerId);
 

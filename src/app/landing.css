@@ -245,18 +245,19 @@
 .landing-preview-reel [aria-roledescription="slide"] > div {
   padding: 2px;
 }
-/* The four symbols in a row, without their labels. */
+/* Two symbols side by side, without their labels. At the top of the ring the cards either side
+   cover the edges of this one, so the pair keeps to the middle that stays in view. */
 .landing-preview .landing-preview-particles ul {
   flex-wrap: nowrap;
-  gap: 0;
+  gap: var(--space-1);
 }
 .landing-preview .landing-preview-particles :is(a, button) {
   padding: 0;
   gap: 0;
 }
 .landing-preview .landing-preview-particles svg {
-  width: 1.875rem;
-  height: 1.875rem;
+  width: 2.25rem;
+  height: 2.25rem;
 }
 .landing-preview .landing-preview-particles span {
   display: none;

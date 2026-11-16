@@ -1,7 +1,9 @@
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { AsciiTerrain } from "./ascii-terrain";
+import { createRef } from "react";
+
+import { AsciiTerrain, type AsciiTerrainHandle } from "./ascii-terrain";
 
 // Motion's frame loop captures requestAnimationFrame when it loads, so route it through a
 // stand-in installed before imports that each test points at its own manual queue.
@@ -357,6 +359,34 @@ describe("AsciiTerrain", () => {
         ([glyph, x, y]) => ".:-=+*#%@".includes(glyph) && Number.isFinite(x) && Number.isFinite(y),
       ),
     ).toBe(true);
+    expect(pending.size).toBe(0);
+  });
+
+  it("ripples from code inside an inert container while the landscape holds still", () => {
+    const ref = createRef<AsciiTerrainHandle>();
+    render(
+      <div inert>
+        <AsciiTerrain ref={ref} interactive={false} />
+      </div>,
+    );
+    const still = JSON.stringify(painted);
+    expect(pending.size).toBe(0);
+
+    act(() => ref.current!.ripple(0.2, -0.1));
+    expect(pending.size).toBe(1);
+    advance(500);
+    expect(JSON.stringify(painted)).not.toBe(still);
+
+    // Once the ripple has died away the loop rests, on the landscape it started from.
+    advance(4000);
+    expect(pending.size).toBe(0);
+    expect(JSON.stringify(painted)).toBe(still);
+  });
+
+  it("ignores a ripple sent from code while paused", () => {
+    const ref = createRef<AsciiTerrainHandle>();
+    render(<AsciiTerrain ref={ref} paused />);
+    act(() => ref.current!.ripple());
     expect(pending.size).toBe(0);
   });
 });
