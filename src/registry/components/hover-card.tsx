@@ -4,6 +4,14 @@ import { PreviewCard } from "@base-ui/react/preview-card";
 import { AnimatePresence, animate, motion, stagger as staggerDelay, useReducedMotion } from "motion/react";
 import { createContext, useCallback, useContext, useState, type ReactNode } from "react";
 
+// A critically damped spring, the one Motion resolves `visualDuration` with no bounce to. Written as
+// stiffness and damping because Motion drops velocity on time-defined springs, and a pointer that
+// comes straight back reopens the card while it is still leaving.
+function criticalSpring(visualDuration: number) {
+  const omega = (2 * Math.PI) / (visualDuration * 1.2);
+  return { type: "spring", stiffness: omega * omega, damping: 2 * omega } as const;
+}
+
 type Side = "top" | "right" | "bottom" | "left";
 
 type HoverCardContextValue = {
@@ -148,6 +156,7 @@ export function HoverCardContent({
         items,
         { opacity: [0, 1], y: [6, 0] },
         {
+          // Time-defined on purpose: this plays once per mount, from rest.
           type: "spring",
           visualDuration: seconds * 0.8,
           bounce: 0,
@@ -193,9 +202,7 @@ export function HoverCardContent({
                             transition: { duration: Math.min(0.15, seconds * 0.45), ease: [0.4, 0, 1, 1] },
                           }
                     }
-                    transition={
-                      seconds === 0 ? { duration: 0 } : { type: "spring", visualDuration: seconds, bounce: 0 }
-                    }
+                    transition={seconds === 0 ? { duration: 0 } : criticalSpring(seconds)}
                   />
                 );
               }}
