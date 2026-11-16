@@ -10,6 +10,14 @@ import {
   type ReactNode,
 } from "react";
 
+// A critically damped spring, the one Motion resolves `visualDuration` with no bounce to. Written as
+// stiffness and damping because Motion drops velocity on time-defined springs, and a quick tap
+// releases the thumb while it is still pressing in.
+function criticalSpring(visualDuration: number) {
+  const omega = (2 * Math.PI) / (visualDuration * 1.2);
+  return { type: "spring", stiffness: omega * omega, damping: 2 * omega } as const;
+}
+
 type SegmentedControlSize = "sm" | "md" | "lg";
 
 // Gap between the track and the thumb in pixels. The track's p-[3px] must match it.
@@ -190,7 +198,7 @@ export function SegmentedControl<T extends string = string>({
       samples: [{ time: event.timeStamp, at }],
     };
     setDragging(true);
-    if (!reducedMotion) animate(press, PRESS, { type: "spring", visualDuration: 0.15, bounce: 0 });
+    if (!reducedMotion) animate(press, PRESS, criticalSpring(0.15));
   }
 
   function follow(event: ReactPointerEvent<HTMLDivElement>) {
@@ -219,7 +227,7 @@ export function SegmentedControl<T extends string = string>({
     drag.current = null;
     suppressClick.current = true;
     setDragging(false);
-    animate(press, 0, { type: "spring", visualDuration: 0.2, bounce: 0 });
+    animate(press, 0, criticalSpring(0.2));
     let target = selectedIndex;
     let velocity = 0;
     if (active.moved && !cancelled) {
