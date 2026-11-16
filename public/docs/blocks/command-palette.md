@@ -80,9 +80,11 @@ export function SiteCommands() {
 
 ## API reference
 
-- The surface settles in from slightly larger as it fades in, and drifts a little larger as it fades out, matching the docs search dialog.
-- Typing filters labels and keywords with a fuzzy match that favors word starts and unbroken runs. Matched characters are wrapped in `mark`. Rows keep their identity and glide to their new places; typing again mid-flight retargets them from where they are.
-- One highlight follows both the keyboard and the pointer. Rows that move or scroll under a resting pointer do not take it.
+- The surface settles in from slightly larger as it fades in and leaves by the same path, like the docs search dialog. One spring drives the surface and its scrim, so pressing the shortcut again mid-flight turns the palette around from where it is.
+- Closing never holds up input: focus returns and the page unlocks as the fade starts, not when it ends.
+- Typing filters labels and keywords with a fuzzy match that favors word starts and unbroken runs. Matched characters are wrapped in `mark`. Rows keep their identity and glide to their new places; typing again mid-flight redirects them from where they are, at the speed they have. A row that stops matching gives up the pointer as it starts to fade.
+- One highlight follows both the keyboard and the pointer, and held arrow keys redirect its glide instead of queueing new ones. Pressing a row lands the highlight before the click commits. Rows that move or scroll under a resting pointer do not take it.
+- Every move and fade is a critically damped Motion spring: nothing bounces, and a move that is redirected keeps its speed.
 - An item with `children` opens a nested page. Backspace on an empty query, or the back button beside the input, returns to the page it came from.
 - Focus stays in the input. Arrow keys, Home, and End move the highlight, Enter runs it, Escape closes, and focus returns to the control that opened the palette.
 - With reduced motion the surface and rows only fade. With reduced transparency or increased contrast the surface is solid.

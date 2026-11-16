@@ -415,7 +415,7 @@
             "Filters the items it is given in memory; it does not fetch results. Shortcut hints on items are labels and are not bound. One palette should own the ⌘K shortcut per page."
           ],
           "requirements": [
-            "React 19.2, Tailwind CSS 4, Motion, Base UI, and theme colors. Give every item a stable id that is unique among its siblings. Reduced motion replaces the scale, blur, and row travel with short fades."
+            "React 19.2, Tailwind CSS 4, Motion, Base UI, and theme colors. Give every item a stable id that is unique among its siblings. Reduced motion keeps short fades and drops the scale and the travel of rows and the highlight."
           ],
           "docsUrl": "http://localhost:3000/docs/blocks/command-palette.md",
           "registryUrl": "http://localhost:3000/r/command-palette.json"

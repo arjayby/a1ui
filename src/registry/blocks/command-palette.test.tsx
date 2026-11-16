@@ -294,6 +294,29 @@ describe("CommandPalette", () => {
     expect(activeName()).toBe("Documentation");
   });
 
+  it("turns the same dialog around when the shortcut is pressed again before its exit ends", async () => {
+    render(<Example />);
+    const input = await openPalette();
+    await waitFor(() => expect(input).toHaveFocus());
+    fireEvent.change(input, { target: { value: "pro" } });
+    const dialog = screen.getByRole("dialog");
+
+    fireEvent.keyDown(document, { key: "k", metaKey: true });
+    expect(dialog).toHaveAttribute("data-state", "closed");
+    // While it leaves it is still drawn, but out of reach.
+    expect(dialog).toBeInTheDocument();
+    expect(dialog).toHaveAttribute("inert");
+
+    fireEvent.keyDown(document, { key: "k", metaKey: true });
+    expect(dialog).toHaveAttribute("data-state", "open");
+    expect(dialog).not.toHaveAttribute("inert");
+
+    // The exit it was part-way through never finishes, so nothing unmounts it afterwards.
+    await new Promise((resolve) => setTimeout(resolve, 600));
+    expect(screen.getByRole("dialog")).toBe(dialog);
+    expect(screen.getByRole("combobox")).toHaveValue("pro");
+  });
+
   it("can be controlled without the built-in trigger", async () => {
     function Controlled() {
       const [open, setOpen] = useState(false);
