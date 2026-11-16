@@ -35,11 +35,33 @@ function advance(milliseconds: number) {
   for (let i = 0; i < milliseconds; i += 17) frame();
 }
 
+// Motion reads the clock once per task and reports a finished animation through a promise, so
+// tests that follow one of its own animations let microtasks run between frames.
+async function play(milliseconds: number, step = 17) {
+  for (let i = 0; i < milliseconds; i += step) {
+    frame(step);
+    await act(async () => {});
+  }
+}
+
 function positions() {
   return [...document.querySelectorAll("svg text")].map((element) => [
     Number(element.getAttribute("x")),
     Number(element.getAttribute("y")),
   ]);
+}
+
+/** The farthest any glyph moved between two samples. */
+function travel(from: number[][], to: number[][]) {
+  return Math.max(...to.map((point, i) => Math.hypot(point[0] - from[i][0], point[1] - from[i][1])));
+}
+
+const stage = () => document.querySelector<SVGSVGElement>("svg")!;
+
+/** The scale Motion has written to the stage, or 1 when it has written none. */
+function scale() {
+  const match = /scale\(([\d.e-]+)\)/.exec(stage().style.transform);
+  return match ? Number(match[1]) : 1;
 }
 
 beforeEach(() => {
@@ -92,7 +114,11 @@ describe("AsciiMorph", () => {
     const nodes = [...document.querySelectorAll("svg text")];
     const glyphs = nodes.map((node) => node.textContent);
     expect(pending.size).toBe(0);
+    const resting = positions();
     fireEvent.click(control);
+    // The glyphs move on the first frame after the click.
+    frame();
+    expect(travel(resting, positions())).toBeGreaterThan(0);
     for (let click = 0; click < 8; click++) {
       advance(85);
       const previous = positions();
@@ -167,13 +193,6 @@ describe("AsciiMorph", () => {
   });
 
   it("cross-fades in place under reduced motion, including a live preference change", async () => {
-    // Motion reports a finished fade through a promise, so let microtasks run between frames.
-    async function play(milliseconds: number) {
-      for (let i = 0; i < milliseconds; i += 17) {
-        frame();
-        await act(async () => {});
-      }
-    }
     render(<AsciiMorph />);
     const control = screen.getByRole("button");
     const art = document.querySelector<SVGGElement>("svg g")!;
@@ -217,16 +236,20 @@ describe("AsciiMorph", () => {
     render(<AsciiMorph />);
     fireEvent.click(screen.getByRole("button"));
     advance(100);
-    setVisible(false);
+    const previous = positions();
+    frame();
     const before = positions();
+    const step = travel(previous, before);
+    setVisible(false);
     advance(5000);
     expect(pending.size).toBe(0);
     expect(positions()).toEqual(before);
     setVisible(true);
+    // The first frame back moves the glyphs one frame on, however long the block was away.
     frame(5000);
-    expect(positions()).toEqual(before);
-    frame();
-    expect(positions()).not.toEqual(before);
+    const resumed = positions();
+    expect(travel(before, resumed)).toBeGreaterThan(0);
+    expect(travel(before, resumed)).toBeLessThan(step * 1.5);
     const hidden = vi.spyOn(document, "hidden", "get").mockReturnValue(true);
     act(() => document.dispatchEvent(new Event("visibilitychange")));
     const stopped = positions();
@@ -236,11 +259,109 @@ describe("AsciiMorph", () => {
     hidden.mockReturnValue(false);
     act(() => document.dispatchEvent(new Event("visibilitychange")));
     frame(5000);
-    expect(positions()).toEqual(stopped);
+    const shown = positions();
+    expect(travel(stopped, shown)).toBeGreaterThan(0);
+    expect(travel(stopped, shown)).toBeLessThan(step * 1.5);
+    // A hidden tab runs no frames, so the one already requested runs on return. It is capped at 32ms.
+    hidden.mockReturnValue(true);
+    act(() => document.dispatchEvent(new Event("visibilitychange")));
+    hidden.mockReturnValue(false);
+    act(() => document.dispatchEvent(new Event("visibilitychange")));
+    frame(5000);
+    expect(travel(shown, positions())).toBeLessThan(step * 3);
+    expect(document.querySelector('[data-slot="ascii-morph"]')).toHaveAttribute("data-state", "morphing");
+  });
+
+  it("gives under a press from pointer-down and turns round mid-press without a jump", async () => {
+    render(<AsciiMorph />);
+    const control = screen.getByRole("button");
+    const resting = positions();
+    fireEvent.pointerDown(control);
+    await play(51);
+    expect(scale()).toBeGreaterThan(0.97);
+    expect(scale()).toBeLessThan(1);
+    // The morph waits for the click that follows the release.
+    expect(positions()).toEqual(resting);
+    const previous = scale();
+    await play(1, 1);
+    const before = scale();
+    fireEvent.pointerUp(control);
+    expect(scale()).toBe(before);
+    await play(1, 1);
+    const after = scale();
+    // The stage keeps its speed through the release, so it is still giving a millisecond later.
+    expect(after).toBeLessThan(before);
+    expect(Math.abs(after - before - (before - previous))).toBeLessThan(0.0001);
+    await play(1000);
+    expect(scale()).toBe(1);
+    expect(pending.size).toBe(0);
+
+    // Sliding off a held stage cancels the press, and sliding back resumes it.
+    fireEvent.pointerDown(control);
+    await play(1000);
+    expect(scale()).toBe(0.97);
+    expect(pending.size).toBe(0);
+    fireEvent.pointerLeave(control);
+    await play(1000);
+    expect(scale()).toBe(1);
+    fireEvent.pointerEnter(control, { buttons: 1 });
+    await play(1000);
+    expect(scale()).toBe(0.97);
+    // The pointer comes up somewhere else on the page.
+    fireEvent.pointerLeave(control);
+    fireEvent.pointerUp(document.body);
+    fireEvent.pointerEnter(control, { buttons: 1 });
+    await play(1000);
+    expect(scale()).toBe(1);
+
+    // Space and Enter press the stage while they are held, and a secondary mouse button does not.
+    fireEvent.keyDown(control, { key: " " });
+    await play(1000);
+    expect(scale()).toBe(0.97);
+    fireEvent.keyUp(control, { key: " " });
+    await play(1000);
+    expect(scale()).toBe(1);
+    fireEvent.pointerDown(control, { pointerType: "mouse", button: 2 });
+    await play(1000);
+    expect(scale()).toBe(1);
+    expect(positions()).toEqual(resting);
+    expect(pending.size).toBe(0);
+  });
+
+  it("dims under a press instead of moving when motion is reduced, and releases a press it can no longer end", async () => {
+    const { rerender } = render(<AsciiMorph />);
+    const control = screen.getByRole("button");
+    setReduced(true);
+    fireEvent.pointerDown(control);
+    await play(34);
+    expect(Number(stage().style.opacity)).toBeGreaterThan(0.7);
+    expect(Number(stage().style.opacity)).toBeLessThan(1);
+    await play(200);
+    expect(stage().style.opacity).toBe("0.7");
+    expect(scale()).toBe(1);
+    fireEvent.pointerUp(control);
+    await play(200);
+    expect(stage().style.opacity).toBe("1");
+    expect(scale()).toBe(1);
+    expect(pending.size).toBe(0);
+
+    // A press made with motion on is undone in full after the preference changes mid-press.
+    setReduced(false);
+    fireEvent.pointerDown(control);
+    await play(1000);
+    expect(scale()).toBe(0.97);
+    setReduced(true);
+    // The button goes away while it is held.
+    rerender(<AsciiMorph interactive={false} />);
+    await play(1000);
+    expect(scale()).toBe(1);
+    expect(stage().style.opacity).toBe("1");
+    expect(pending.size).toBe(0);
   });
 
   it("cleans up frames and listeners under Strict Mode and unmount", () => {
     const removeDocumentListener = vi.spyOn(document, "removeEventListener");
+    const removeWindowListener = vi.spyOn(window, "removeEventListener");
     const { unmount } = render(
       <StrictMode>
         <AsciiMorph />
@@ -248,6 +369,9 @@ describe("AsciiMorph", () => {
     );
     fireEvent.click(screen.getByRole("button"));
     advance(100);
+    // Unmount with the morph travelling and a press still giving.
+    fireEvent.pointerDown(screen.getByRole("button"));
+    frame();
     expect(pending.size).toBe(1);
     unmount();
     frame();
@@ -255,9 +379,12 @@ describe("AsciiMorph", () => {
     expect(disconnect).toHaveBeenCalledTimes(2);
     expect(removeMotionListener).toHaveBeenCalledTimes(2);
     expect(removeDocumentListener.mock.calls.filter(([name]) => name === "visibilitychange")).toHaveLength(2);
-    // A media event after unmount must not schedule work.
+    expect(removeWindowListener.mock.calls.filter(([name]) => name === "pointerup")).toHaveLength(2);
+    expect(removeWindowListener.mock.calls.filter(([name]) => name === "pointercancel")).toHaveLength(2);
+    // A media event or a pointer coming up after unmount must not schedule work.
     setReduced(true);
     setReduced(false);
+    fireEvent.pointerUp(document.body);
     expect(pending.size).toBe(0);
   });
 

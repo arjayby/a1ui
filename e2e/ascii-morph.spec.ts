@@ -1,5 +1,5 @@
 import { type Locator } from "@playwright/test";
-import { expect, test } from "./fixtures";
+import { expect, revealed, test } from "./fixtures";
 
 const coordinates = (art: Locator) =>
   art
@@ -101,6 +101,48 @@ test("paints continuous travel on display frames through rapid clicks", async ({
   expect(result.maximumStep).toBeLessThan(32);
   expect(result.sameGlyphs).toBe(true);
   await expect(root).toHaveAttribute("data-state", "idle");
+});
+
+test("gives under the pointer from the press and morphs on release", async ({ page }) => {
+  await revealed(page);
+  const root = page.locator('[data-slot="ascii-morph"]');
+  const art = root.locator("svg");
+  const scale = () => art.evaluate((node) => new DOMMatrix(getComputedStyle(node).transform).a);
+  const opacity = () => art.evaluate((node) => Number(getComputedStyle(node).opacity));
+  await root.scrollIntoViewIfNeeded();
+  const box = (await root.boundingBox())!;
+  const globe = await coordinates(art);
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await page.mouse.down();
+  await expect.poll(scale).toBeCloseTo(0.97, 4);
+  // The stage shrinks about its center.
+  const pressed = (await art.boundingBox())!;
+  expect(pressed.width).toBeCloseTo(box.width * 0.97, 0);
+  expect(pressed.x + pressed.width / 2).toBeCloseTo(box.x + box.width / 2, 0);
+  expect(pressed.y + pressed.height / 2).toBeCloseTo(box.y + box.height / 2, 0);
+  // Holding the press starts nothing.
+  await expect(root).toHaveAttribute("data-state", "idle");
+  expect(await coordinates(art)).toEqual(globe);
+  // Sliding off cancels the press, and sliding back resumes it.
+  await page.mouse.move(box.x + box.width / 2, box.y - 8);
+  await expect.poll(scale).toBe(1);
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await expect.poll(scale).toBeCloseTo(0.97, 4);
+  await page.mouse.up();
+  await expect(root).toHaveAttribute("data-shape", "flower");
+  await expect.poll(scale).toBe(1);
+  await expect(root).toHaveAttribute("data-state", "idle");
+
+  // Under reduced motion the stage dims instead of moving.
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await expect(root).toHaveAttribute("data-motion", "reduced");
+  await page.mouse.down();
+  await expect.poll(opacity).toBeCloseTo(0.7, 4);
+  expect(await scale()).toBe(1);
+  await page.mouse.up();
+  await expect(root).toHaveAttribute("data-shape", "a1");
+  await expect.poll(opacity).toBe(1);
+  expect(await scale()).toBe(1);
 });
 
 test("honors live reduced motion and keeps both theme and responsive geometry", async ({ page }) => {

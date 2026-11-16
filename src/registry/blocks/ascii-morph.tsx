@@ -157,6 +157,19 @@ function springsFor(settlingTime: number): Curves {
   });
 }
 
+// A press makes the stage give a little and return, critically damped with about a 0.2s response.
+// Written as physics rather than a duration, so Motion keeps the stage's velocity when a quick tap
+// lets go mid-press.
+const GIVE = {
+  type: "spring",
+  stiffness: 1000,
+  damping: 2 * Math.sqrt(1000),
+  restDelta: 0.0005,
+  restSpeed: 0.005,
+} as const;
+// Under reduced motion the stage dims instead of moving.
+const DIM = { duration: 0.1, ease: "easeOut" } as const;
+
 export function AsciiMorph({
   shape,
   defaultShape = "globe",
@@ -174,23 +187,30 @@ export function AsciiMorph({
   // live coordinates, so an unrelated render cannot reset a travelling glyph.
   const [initialPoints] = useState(() => shapes[current]);
   const rootRef = useRef<HTMLDivElement>(null);
+  const stageRef = useRef<SVGSVGElement>(null);
   const artRef = useRef<SVGGElement>(null);
   const textRefs = useRef<(SVGTextElement | null)[]>([]);
   const selectionRef = useRef(current);
   const engineRef = useRef<{
     configure: (next: AsciiMorphShape, duration: number, interactive: boolean) => void;
+    /** A key went down on the stage or came up. */
+    press: (down: boolean) => void;
+    /** A pointer went down on the stage, or came up anywhere. */
+    hold: (down: boolean) => void;
+    /** The pointer left the stage, or came back over it still down. Only a held one changes anything. */
+    hover: (over: boolean) => void;
   } | null>(null);
   const instructionsId = useId();
   const statusId = useId();
 
   useEffect(() => {
     const root = rootRef.current;
+    const stage = stageRef.current;
     const art = artRef.current;
-    if (!root || !art) return;
+    if (!root || !stage || !art) return;
     const particles: Particle[] = initialPoints.map((point) => ({ ...point, ox: 0, oy: 0, vx: 0, vy: 0 }));
     let target = initialPoints;
     let running = false;
-    let fresh = true;
     let moving = false;
     let visible = true;
     let enabled = true;
@@ -243,8 +263,6 @@ export function AsciiMorph({
 
     function start() {
       if (running) return;
-      // A suspended tab resumes from the last painted state, so the first frame adds no time.
-      fresh = true;
       frame.render(tick, true);
       running = true;
     }
@@ -259,9 +277,10 @@ export function AsciiMorph({
 
     // Runs in Motion's render step, after any other Motion animations update this frame.
     function tick({ delta }: FrameData) {
-      // A long frame advances at most 32ms, avoiding a visible leap after a main-thread stall.
-      elapsed += fresh ? 0 : Math.min(delta, 32);
-      fresh = false;
+      // The glyphs move on the first frame after a click. Motion reports its default delta when
+      // its loop wakes, and a long frame advances at most 32ms, so neither a main-thread stall nor
+      // a suspended tab causes a visible leap.
+      elapsed += Math.min(delta, 32);
       const at = sample();
       let unsettled = false;
       particles.forEach((particle, i) => {
@@ -314,6 +333,26 @@ export function AsciiMorph({
       );
     }
 
+    // Press feedback starts on pointer-down, ahead of the click that starts the morph.
+    let held = false;
+    let pressed: "scale" | "opacity" | null = null;
+    let give: ReturnType<typeof animate> | null = null;
+    let dim: ReturnType<typeof animate> | null = null;
+    function press(down: boolean) {
+      if (down === Boolean(pressed)) return;
+      // A release undoes what its press did, even if the motion preference changed in between.
+      const feedback = pressed ?? (media.matches ? "opacity" : "scale");
+      pressed = down ? feedback : null;
+      // Each animation starts from the value on screen, and the spring keeps its velocity.
+      if (feedback === "scale") give = animate(stage!, { scale: down ? 0.97 : 1 }, GIVE);
+      else dim = animate(stage!, { opacity: down ? 0.7 : 1 }, DIM);
+    }
+    function hold(down: boolean) {
+      held = down;
+      press(down);
+    }
+    const lift = () => hold(false);
+
     function sync() {
       root!.dataset.motion = media.matches ? "reduced" : enabled ? "enabled" : "static";
       if (media.matches && enabled && moving) {
@@ -334,6 +373,8 @@ export function AsciiMorph({
       configure(next, milliseconds, isInteractive) {
         const time = Number.isFinite(milliseconds) ? Math.min(4000, Math.max(400, milliseconds)) : 1200;
         enabled = isInteractive;
+        // The button is gone, so nothing else would release a press that was under way.
+        if (!enabled) hold(false);
         // Retargeting changes only the destination or the springs; position and velocity
         // survive repeated clicks and duration changes mid-flight.
         if (time !== settlingTime) {
@@ -347,6 +388,12 @@ export function AsciiMorph({
         }
         sync();
       },
+      press,
+      hold,
+      // Sliding off a held stage cancels the press, and sliding back resumes it.
+      hover(over) {
+        if (held) press(over);
+      },
     };
     const observer = new IntersectionObserver(([entry]) => {
       visible = entry.isIntersecting;
@@ -355,14 +402,23 @@ export function AsciiMorph({
     observer.observe(root);
     media.addEventListener("change", sync);
     document.addEventListener("visibilitychange", sync);
+    // A pointer that slid off the stage comes up somewhere else.
+    window.addEventListener("pointerup", lift);
+    window.addEventListener("pointercancel", lift);
     return () => {
       stop();
       disposed = true;
       fade?.stop();
+      give?.stop();
+      dim?.stop();
       art.style.opacity = "";
+      stage.style.opacity = "";
+      stage.style.transform = "";
       observer.disconnect();
       media.removeEventListener("change", sync);
       document.removeEventListener("visibilitychange", sync);
+      window.removeEventListener("pointerup", lift);
+      window.removeEventListener("pointercancel", lift);
       engineRef.current = null;
     };
   }, [initialPoints]);
@@ -389,15 +445,15 @@ export function AsciiMorph({
       data-state="idle"
       role={interactive ? undefined : "img"}
       aria-label={interactive ? undefined : `ASCII ${names[current]}`}
-      className={clsx("group/ascii-morph text-foreground relative isolate w-full", className)}
+      className={clsx("text-foreground relative isolate w-full", className)}
       style={style}
     >
-      {/* Pressing the stage gives way at once; the morph itself starts on release. */}
       <svg
+        ref={stageRef}
         data-slot="ascii-morph-art"
         viewBox="0 0 480 400"
         aria-hidden="true"
-        className="pointer-events-none block size-full transition-[scale,opacity] duration-150 ease-out select-none motion-safe:group-has-[>button:active]/ascii-morph:scale-[0.97] motion-reduce:transition-none motion-reduce:group-has-[>button:active]/ascii-morph:opacity-70"
+        className="pointer-events-none block size-full select-none"
         style={{ aspectRatio: "6 / 5" }}
       >
         <g
@@ -431,11 +487,23 @@ export function AsciiMorph({
             aria-describedby={`${instructionsId} ${statusId}`}
             className="focus-visible:outline-ring absolute inset-0 size-full cursor-pointer touch-manipulation rounded-[inherit] border-0 bg-transparent p-0 focus-visible:outline-2 focus-visible:-outline-offset-4"
             onClick={() => cycle()}
+            // The stage gives way the moment it is pressed; the morph itself starts on release.
+            onPointerDown={(event) => {
+              if (event.pointerType !== "mouse" || event.button === 0) engineRef.current?.hold(true);
+            }}
+            onPointerEnter={(event) => engineRef.current?.hover(event.buttons === 1)}
+            onPointerLeave={() => engineRef.current?.hover(false)}
+            onBlur={() => engineRef.current?.hold(false)}
             onKeyDown={(event) => {
               if (["ArrowRight", "ArrowDown", "ArrowLeft", "ArrowUp"].includes(event.key)) {
                 event.preventDefault();
                 cycle(event.key === "ArrowLeft" || event.key === "ArrowUp" ? -1 : 1);
+              } else if ((event.key === " " || event.key === "Enter") && !event.repeat) {
+                engineRef.current?.press(true);
               }
+            }}
+            onKeyUp={(event) => {
+              if (event.key === " " || event.key === "Enter") engineRef.current?.press(false);
             }}
           />
           <span id={instructionsId} className="sr-only">
