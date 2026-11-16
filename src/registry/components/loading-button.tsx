@@ -26,11 +26,20 @@ const animations = {
 
 const visible = { opacity: 1, scale: 1, rotate: 0, rotateX: 0, y: 0, filter: "blur(0px)" };
 
-// Movement settles on a critically damped spring; opacity and blur fade over the same time.
+// Movement settles on a critically damped spring; opacity and blur fade over the same time. The
+// spring is the one Motion resolves `visualDuration` to, written as stiffness and damping because
+// Motion drops velocity on time-defined springs, and a fast result swaps the label again mid-move.
 function swapTransition(seconds: number) {
   if (seconds === 0) return { duration: 0 };
   const fade = { type: "tween", duration: seconds } as const;
-  return { type: "spring", visualDuration: seconds, bounce: 0, opacity: fade, filter: fade } as const;
+  const omega = (2 * Math.PI) / (seconds * 1.2);
+  return {
+    type: "spring",
+    stiffness: omega * omega,
+    damping: 2 * omega,
+    opacity: fade,
+    filter: fade,
+  } as const;
 }
 
 // Feedback lands on pointer-down; the click still commits on release over the button.
