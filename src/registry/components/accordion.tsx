@@ -4,6 +4,14 @@ import { Accordion as AccordionPrimitive } from "@base-ui/react/accordion";
 import { animate, motion, stagger, useReducedMotion, type Transition } from "motion/react";
 import { createContext, useContext, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 
+// A critically damped spring, the one Motion resolves `visualDuration` with no bounce to. Written as
+// stiffness and damping because Motion drops velocity on time-defined springs, and a second click
+// turns the icon back while it is still turning.
+function criticalSpring(visualDuration: number) {
+  const omega = (2 * Math.PI) / (visualDuration * 1.2);
+  return { type: "spring", stiffness: omega * omega, damping: 2 * omega } as const;
+}
+
 type AccordionIcon = "chevron" | "plus";
 
 type AccordionContextValue = {
@@ -120,9 +128,7 @@ export function AccordionTrigger({ className, children }: AccordionTriggerProps)
   const accordion = useAccordion("AccordionTrigger");
   const { open } = useAccordionItem("AccordionTrigger");
   const transition: Transition =
-    accordion.seconds === 0
-      ? { duration: 0 }
-      : { type: "spring", visualDuration: accordion.seconds, bounce: 0 };
+    accordion.seconds === 0 ? { duration: 0 } : criticalSpring(accordion.seconds);
 
   return (
     <AccordionPrimitive.Header data-slot="accordion-header" className="flex">
