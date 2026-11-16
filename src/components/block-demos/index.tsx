@@ -65,7 +65,7 @@ const demoSections = [
     description:
       "Choose a marker to move smoothly to its section. Only the document panel scrolls; the surrounding page stays where you left it. Try jumping to Overview or Summary to see how a longer movement feels compared with moving to a nearby topic.",
     context:
-      "The active marker follows the content during the transition. If your device requests reduced motion, the panel jumps directly to the destination instead. You can also scroll manually at any time and let the rail track your position.",
+      "The active marker follows the content during the transition. Each marker springs to its new length from wherever it is, so the rail keeps up when you change direction. If your device requests reduced motion, the panel jumps directly to the destination and the markers cross-fade instead.",
   },
   {
     id: "rail-demo-accessibility",
@@ -79,7 +79,7 @@ const demoSections = [
     id: "rail-demo-performance",
     label: "Performance",
     description:
-      "Scrolling should feel responsive even in a long document. Position updates are scheduled with the browser's animation frames, so repeated scroll events can share one calculation. The rail only needs to track the section positions and the current reading line.",
+      "Scrolling should feel responsive even in a long document. Position updates are scheduled on Motion's frame loop, so repeated scroll events can share one calculation. Markers change length with a transform, so the animation never asks the browser to lay out the page again.",
     context:
       "Resizing the window triggers another position check because paragraphs may wrap and sections may move. The same outline can therefore work on a wide desktop layout and a narrow mobile panel without maintaining a separate set of section offsets.",
   },

@@ -21,7 +21,7 @@ bun: bunx --bun shadcn@latest add http://localhost:3000/r/section-rail.json --ye
 
 ## Dependencies
 
-None.
+- `motion`
 
 ## Code
 
@@ -57,6 +57,20 @@ export function ArticlePage() {
 [Complete source and dependencies](http://localhost:3000/r/section-rail.json). Each file's content is embedded in the registry JSON.
 
 
+
+## Behaviour
+
+- **Tracking.** The active marker belongs to the last section whose top has crossed the reading line, which sits `activeOffset` of the way down the nearest scroll container, or the window when there is none. At the end of the scroll range the last section is active.
+- **Motion.** [Motion](https://motion.dev) drives every animation. Markers change length and opacity on a spring that settles without overshooting. A marker that is still moving heads for its new target from wherever it is, so the rail keeps up while you scroll or sweep the pointer along it.
+- **Press.** The marker you press shortens on pointer-down, or on Enter, and springs back on release.
+- **Labels.** A label grows out of its marker under the pointer or on keyboard focus, and returns along the same path when you move on.
+- **Jumps.** Inside a scroll container, choosing a marker scrolls only that container and updates the URL hash. It uses the browser's smooth scrolling, so the wheel, touch, or keyboard can take over at any point.
+
+## Accessibility
+
+- The rail is a `nav` named by `ariaLabel`. Each marker is a link named after its section, and the active one has `aria-current="location"`.
+- Under `prefers-reduced-motion`, markers change length at once and cross-fade, labels fade without sliding, the pressed marker dims instead of shortening, and jumps are instant. The preference is read when the rail mounts.
+- Under `prefers-reduced-transparency`, the label's translucent surface becomes solid.
 
 ## API reference
 
