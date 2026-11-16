@@ -60,6 +60,12 @@ export function ResultsStatus({ pending }: { pending: boolean }) {
 | `tumble`   | A square that hops through a quarter turn and lands flat before the next.                        |
 | `line`     | A pill that stretches across a track. It fills its container, so give it a width.                |
 
+## Accessibility
+
+The root has `role="status"`, so screen readers announce its text when the loader appears. Say what is loading with `label` or `aria-label` when "Loading" is too vague.
+
+With reduced motion, the shape holds still and its opacity breathes instead, so the loader still reads as working.
+
 ## API reference
 
 | Prop         | Type                                                                                                                              | Default     | Description                                                                                                                                              |
@@ -70,9 +76,3 @@ export function ResultsStatus({ pending }: { pending: boolean }) {
 | `label`      | `ReactNode`                                                                                                                       | None        | Visible text beside the animation, or above the track for `line`. It replaces the hidden `aria-label` text.                                              |
 | `aria-label` | `string`                                                                                                                          | `"Loading"` | Visually hidden text announced when there is no visible label.                                                                                           |
 | `className`  | `string`                                                                                                                          | None        | Additional classes on the root element. The loader draws in `currentColor`, so a text color class recolors it, and a width class sizes the `line` track. |
-
-## Accessibility
-
-The root has `role="status"`, so screen readers announce its text when the loader appears. Say what is loading with `label` or `aria-label` when "Loading" is too vague.
-
-With reduced motion, the shape holds still and its opacity breathes instead, so the loader still reads as working.
