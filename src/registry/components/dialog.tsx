@@ -6,6 +6,14 @@ import { createContext, useContext, useState, type ComponentProps, type ReactNod
 
 import { Button } from "@/components/ui/button";
 
+// A critically damped spring, the one Motion resolves `visualDuration` with no bounce to. Written as
+// stiffness and damping because Motion drops velocity on time-defined springs, and the trigger can
+// reopen the dialog while its exit is still running.
+function criticalSpring(visualDuration: number) {
+  const omega = (2 * Math.PI) / (visualDuration * 1.2);
+  return { type: "spring", stiffness: omega * omega, damping: 2 * omega } as const;
+}
+
 type DialogContextValue = {
   open: boolean;
   /** Stays true while the exit animation plays, then the popup unmounts. */
@@ -148,8 +156,7 @@ function DialogLayer({
     : sheet
       ? { opacity: 0, y: "100%", scale: 1 }
       : { opacity: 0, y: 0, scale: 0.94 };
-  const enter: Transition =
-    time === 0 ? { duration: 0 } : { type: "spring", visualDuration: time, bounce: 0 };
+  const enter: Transition = time === 0 ? { duration: 0 } : criticalSpring(time);
   const exit: Transition = { duration: time * 0.6, ease: [0.4, 0, 1, 1] };
 
   return (
