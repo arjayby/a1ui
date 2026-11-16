@@ -94,9 +94,13 @@ const settleSpring = { type: "spring", stiffness: frequency ** 2, damping: 2 * f
 // Bounce is reserved for a flick: only a release that carried momentum overshoots.
 const throwSpring = { type: "spring", stiffness: frequency ** 2, damping: 1.6 * frequency } as const;
 const flickSpeed = 500;
-// The duck lifts the moment it is pressed and sets down a little slower on release.
-const liftSpring = { type: "spring", visualDuration: 0.15, bounce: 0 } as const;
-const dropSpring = { type: "spring", visualDuration: 0.3, bounce: 0 } as const;
+// The duck lifts the moment it is pressed (a 0.18s response) and sets down a little slower on
+// release (0.36s). Both are critically damped, and physics-defined like the springs above, so a
+// tap that lets go mid-lift keeps the scale's velocity.
+const liftFrequency = (2 * Math.PI) / 0.18;
+const liftSpring = { type: "spring", stiffness: liftFrequency ** 2, damping: 2 * liftFrequency } as const;
+const dropFrequency = (2 * Math.PI) / 0.36;
+const dropSpring = { type: "spring", stiffness: dropFrequency ** 2, damping: 2 * dropFrequency } as const;
 // Reduced motion: the held duck dims instead of lifting.
 const fade = { duration: 0.15, ease: "easeOut" } as const;
 const deceleration = 0.998;
