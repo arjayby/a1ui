@@ -60,6 +60,8 @@ const steps: TaskStep[] = [
 
 - **Timing.** The block starts a step's clock when it first sees the step running and stops it when the step is done or failed. To show times from your server instead, pass `startedAt` for a running step and `durationMs` for a finished one.
 - **Detail.** A step with `detail` or `logs` opens while it runs and closes when it is done. A failed step stays open so the reason stays on screen. Anyone can open or close a step, and that choice holds until the step changes status. A long log scrolls inside the step and follows its newest line until the reader scrolls up.
+- **Motion.** [Motion](https://motion.dev) drives every animation, on one critically damped spring. When a step changes status its icon, label, timer, status word and connector change together, so it reads as a single change. Detail that arrives later, such as a step's first log line, opens from nothing, and detail that is taken away closes the same way.
+- **Press.** A row with detail dims on pointer-down, before the click lands, and springs back on release. Dragging off the row before letting go cancels the press. A panel that is toggled again while it is still moving turns round from its current height.
 - **Jumps.** Status can change by any amount in one render, such as several steps finishing together or a failure part-way through. Every icon, connector and panel springs to its new target from wherever it is, and the changes are read out as one announcement.
 - **Progress or Task Steps.** Use [Progress](http://localhost:3000/components/progress) with `variant="steps"` for a single value shown as segments. Use Task Steps when each step has a name, a state and a duration of its own.
 
@@ -69,7 +71,7 @@ const steps: TaskStep[] = [
 - Each row states its status in words. Failed and skipped rows show the word; the others keep it for screen readers. Colour and icon shape repeat it.
 - A step starting, finishing or being skipped is announced politely. A failure is announced assertively. Steps already under way when the block mounts are not announced.
 - A step with detail is a disclosure button with `aria-expanded`; Enter and Space toggle it. A closed panel is `inert`. The log can be focused and scrolled with the keyboard, and it does not read each line as it arrives.
-- Under `prefers-reduced-motion`, icons cross-fade, the spinner stops turning, the connector fades and panels change height at once. The timer keeps counting, so a running step still reads as running.
+- Under `prefers-reduced-motion`, icons, status words, times and log lines cross-fade, the spinner stops turning, the connector fades and panels change height at once. The timer keeps counting, so a running step still reads as running.
 
 ## API reference
 

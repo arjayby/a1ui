@@ -1,8 +1,19 @@
 "use client";
 
-import { AnimatePresence, motion, useReducedMotion, type Transition } from "motion/react";
 import {
+  AnimatePresence,
+  animate,
+  motion,
+  useIsPresent,
+  useMotionValue,
+  useReducedMotion,
+  type MotionStyle,
+  type Transition,
+} from "motion/react";
+import {
+  memo,
   useCallback,
+  useEffect,
   useId,
   useLayoutEffect,
   useRef,
@@ -241,12 +252,24 @@ export function TaskSteps({
   );
 }
 
-function springFor(reducedMotion: boolean): Transition {
-  // Critically damped: nothing here is thrown, so nothing overshoots.
-  return reducedMotion
-    ? { duration: 0.15, ease: "linear" }
-    : { type: "spring", visualDuration: 0.3, bounce: 0 };
-}
+// Every part of a step moves on this one spring, so a change of status reads as a single change
+// and anything caught mid-way carries on from where it is. Critically damped: nothing here is
+// thrown, so nothing overshoots.
+const SPRING: Transition = { type: "spring", visualDuration: 0.3, bounce: 0 };
+// Reduced motion keeps opacity and colour, as a short cross-fade, and holds everything else still.
+const FADE: Transition = { duration: 0.15, ease: "linear" };
+const INSTANT: Transition = { duration: 0 };
+const springFor = (reducedMotion: boolean) => (reducedMotion ? FADE : SPRING);
+
+// How far a row dims while it is held.
+const PRESSED = 0.7;
+
+// The label and the clock mix their colour from a 0 to 1 custom property on the row. Motion springs
+// the number and CSS turns it into a colour, so the text changes with the icon in any colour format.
+const LABEL_INK =
+  "text-[color-mix(in_oklab,var(--color-foreground)_calc(var(--task-steps-ink)*100%),var(--color-muted-foreground))]";
+const CLOCK_INK =
+  "text-[color-mix(in_oklab,var(--color-foreground)_calc(var(--task-steps-clock)*100%),var(--color-muted-foreground))]";
 
 function StepRow({
   step,
@@ -276,18 +299,21 @@ function StepRow({
 }) {
   const { status, label, detail, logs } = step;
   const hasLogs = Boolean(logs?.length);
-  const hasPanel = hasLogs || (detail !== undefined && detail !== null && detail !== false);
+  const hasDetail = detail !== undefined && detail !== null && detail !== false;
+  const hasPanel = hasLogs || hasDetail;
   const quiet = status === "pending" || status === "skipped";
   // Failed and skipped rows say so in words; the other statuses are read out but not drawn.
   const worded = status === "failed" || status === "skipped";
   const transition = springFor(reducedMotion);
+  // The button owns the press and the row shows it, so both are bound to this one value. It drops
+  // the moment the pointer goes down, before the click lands, and springs back from wherever it is.
+  const dim = useMotionValue(1);
+  useEffect(() => {
+    // A step that loses its detail while it is held has no button left to let go of it.
+    if (!hasPanel) dim.jump(1);
+  }, [hasPanel, dim]);
   const labelText = (
-    <span
-      data-slot="task-steps-label"
-      className={`min-w-0 text-sm leading-5 transition-colors duration-200 ${
-        quiet ? "text-muted-foreground" : "text-foreground"
-      }`}
-    >
+    <span data-slot="task-steps-label" className={`min-w-0 text-sm leading-5 ${LABEL_INK}`}>
       {label}
     </span>
   );
@@ -320,88 +346,148 @@ function StepRow({
           />
         </span>
       )}
-      <div
+      <motion.div
         data-slot="task-steps-row"
-        className={`relative flex items-start gap-3 rounded-md px-2 py-1.5 ${
-          hasPanel
-            ? "hover:bg-muted transition-[background-color,opacity] duration-150 has-[button:active]:opacity-70 has-[button:active]:duration-0"
-            : ""
+        // The hover tint is a colour-only CSS transition. Everything else on the row is Motion's.
+        className={`relative isolate flex items-start gap-3 rounded-md px-2 py-1.5 ${
+          hasPanel ? "hover:bg-muted transition-[background-color] duration-150" : ""
         }`}
+        style={{ opacity: dim }}
+        initial={false}
+        animate={{ "--task-steps-ink": quiet ? 0 : 1, "--task-steps-clock": status === "running" ? 1 : 0 }}
+        transition={transition}
       >
         <StepIcon status={status} reducedMotion={reducedMotion} />
         <div className="flex min-w-0 flex-1 flex-wrap items-start gap-x-2">
-          {hasPanel ? (
-            <button
-              type="button"
-              id={`${id}-trigger`}
-              data-slot="task-steps-trigger"
-              aria-expanded={open}
-              aria-controls={`${id}-panel`}
-              onClick={onToggle}
-              // The button's overlay makes the whole row the target and carries the focus ring.
-              className="focus-visible:after:ring-ring flex min-w-0 cursor-pointer items-start gap-1.5 text-left outline-none after:absolute after:inset-0 after:rounded-md focus-visible:after:ring-2"
-            >
-              {labelText}
-              <span aria-hidden="true" className="text-muted-foreground flex h-5 shrink-0 items-center">
-                <motion.svg
-                  data-slot="task-steps-chevron"
-                  viewBox="0 0 16 16"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth={1.5}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="size-3.5"
-                  initial={false}
-                  animate={{ rotate: open ? 90 : 0 }}
-                  transition={reducedMotion ? { duration: 0 } : transition}
+          <span className="flex min-w-0 items-start gap-1.5">
+            {hasPanel ? (
+              <motion.button
+                type="button"
+                id={`${id}-trigger`}
+                data-slot="task-steps-trigger"
+                aria-expanded={open}
+                aria-controls={`${id}-panel`}
+                onClick={onToggle}
+                style={{ "--task-steps-dim": dim } as MotionStyle}
+                initial={false}
+                animate={{ "--task-steps-dim": 1 }}
+                whileTap={{ "--task-steps-dim": PRESSED, transition: INSTANT }}
+                transition={transition}
+                // The button's overlay makes the whole row the target and carries the focus ring. It
+                // sits above the parts that fade, which would otherwise stack over it.
+                className="focus-visible:after:ring-ring flex min-w-0 cursor-pointer items-start text-left outline-none after:absolute after:inset-0 after:z-1 after:rounded-md focus-visible:after:ring-2"
+              >
+                {labelText}
+              </motion.button>
+            ) : (
+              labelText
+            )}
+            {/* The chevron arrives with a step's first detail and leaves the way it came. */}
+            <AnimatePresence initial={false}>
+              {hasPanel && (
+                <motion.span
+                  key="chevron"
+                  aria-hidden="true"
+                  className="text-muted-foreground flex h-5 shrink-0 items-center"
+                  initial={{ opacity: 0, scale: reducedMotion ? 1 : 0.5 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: reducedMotion ? 1 : 0.5 }}
+                  transition={transition}
                 >
-                  <path d="M6 4 L10 8 L6 12" />
-                </motion.svg>
-              </span>
-            </button>
-          ) : (
-            labelText
-          )}
-          <span
-            key={worded ? "worded" : "read"}
-            data-slot="task-steps-status"
-            className={
-              worded
-                ? `text-xs leading-5 transition-opacity duration-200 motion-reduce:transition-none starting:opacity-0 ${
-                    status === "failed" ? "text-destructive" : "text-muted-foreground"
-                  }`
-                : "sr-only"
-            }
-          >
-            {statusLabel}
+                  <motion.svg
+                    data-slot="task-steps-chevron"
+                    viewBox="0 0 16 16"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={1.5}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="size-3.5"
+                    initial={false}
+                    animate={{ rotate: open ? 90 : 0 }}
+                    transition={reducedMotion ? INSTANT : transition}
+                  >
+                    <path d="M6 4 L10 8 L6 12" />
+                  </motion.svg>
+                </motion.span>
+              )}
+            </AnimatePresence>
           </span>
+          {/* One cell, so a word that replaces another cross-fades in place. */}
+          <span className="grid">
+            <AnimatePresence initial={false}>
+              {worded && (
+                <StatusWord key={status} failed={status === "failed"} transition={transition}>
+                  {statusLabel}
+                </StatusWord>
+              )}
+            </AnimatePresence>
+          </span>
+          {!worded && (
+            <span data-slot="task-steps-status" className="sr-only">
+              {statusLabel}
+            </span>
+          )}
         </div>
         <StepTime
           status={status}
           startedAt={startedAt}
           durationMs={durationMs}
           formatDuration={formatDuration}
+          transition={transition}
         />
-      </div>
-      {hasPanel && (
-        <StepPanel id={id} open={open} reducedMotion={reducedMotion}>
-          {detail !== undefined && detail !== null && detail !== false && (
-            <div data-slot="task-steps-detail" className="text-muted-foreground text-sm leading-5">
-              {detail}
-            </div>
-          )}
-          {hasLogs && <StepLog labelledBy={`${id}-trigger`} lines={logs ?? []} />}
-        </StepPanel>
-      )}
+      </motion.div>
+      {/* Detail can arrive after its row, with a step's first log line, and can be taken away again. */}
+      <AnimatePresence initial={false}>
+        {hasPanel && (
+          <StepPanel key="panel" id={id} open={open} reducedMotion={reducedMotion}>
+            {hasDetail && (
+              <div data-slot="task-steps-detail" className="text-muted-foreground text-sm leading-5">
+                {detail}
+              </div>
+            )}
+            {hasLogs && <StepLog labelledBy={`${id}-trigger`} lines={logs ?? []} transition={transition} />}
+          </StepPanel>
+        )}
+      </AnimatePresence>
     </li>
+  );
+}
+
+// The drawn status word fades in and out on the step's spring. A word on its way out is no longer
+// read: the row's current status is.
+function StatusWord({
+  failed,
+  transition,
+  children,
+}: {
+  failed: boolean;
+  transition: Transition;
+  children: ReactNode;
+}) {
+  const present = useIsPresent();
+
+  return (
+    <motion.span
+      data-slot="task-steps-status"
+      aria-hidden={present ? undefined : true}
+      className={`col-start-1 row-start-1 text-xs leading-5 ${
+        failed ? "text-destructive" : "text-muted-foreground"
+      }`}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={transition}
+    >
+      {children}
+    </motion.span>
   );
 }
 
 /**
  * One icon that changes in place. The spinner's arc closes into a ring, the ring fills, and the
- * check or cross is drawn on top. Each part springs to its own target, so a status that changes
- * again mid-way just retargets from wherever the part is.
+ * check or cross is drawn on top. Each part springs to its own target on the step's spring, so a
+ * status that changes again mid-way just retargets from wherever the part is.
  */
 function StepIcon({ status, reducedMotion }: { status: TaskStepStatus; reducedMotion: boolean }) {
   const filled = status === "done" || status === "failed";
@@ -413,6 +499,13 @@ function StepIcon({ status, reducedMotion }: { status: TaskStepStatus; reducedMo
     exit: { pathLength: reducedMotion ? 1 : 0, opacity: 0 },
     transition,
   };
+  // One disc per colour. They share a size, so done to failed is a cross-fade, and each keeps its
+  // own colour while it leaves.
+  const disc = (shown: boolean) => ({
+    initial: false as const,
+    animate: { scale: filled || reducedMotion ? 1 : 0.5, opacity: shown ? 1 : 0 },
+    transition,
+  });
 
   return (
     <span aria-hidden="true" data-slot="task-steps-icon" className="relative block size-5 shrink-0">
@@ -439,33 +532,19 @@ function StepIcon({ status, reducedMotion }: { status: TaskStepStatus; reducedMo
           cx={10}
           cy={10}
           r={8}
-          className={`transition-[fill] duration-150 ${
-            status === "failed" ? "fill-destructive" : "fill-foreground"
-          }`}
-          initial={false}
-          animate={{ scale: filled || reducedMotion ? 1 : 0.5, opacity: filled ? 1 : 0 }}
-          transition={transition}
+          className="fill-foreground"
+          {...disc(status === "done")}
+        />
+        <motion.circle
+          data-slot="task-steps-disc"
+          cx={10}
+          cy={10}
+          r={8}
+          className="fill-destructive"
+          {...disc(status === "failed")}
         />
         <AnimatePresence initial={false}>
-          {status === "running" && (
-            // The arc stays mounted, and turning, until it has finished closing.
-            <g
-              key="spinner"
-              data-slot="task-steps-spinner"
-              className="origin-center motion-safe:animate-spin"
-            >
-              <motion.circle
-                cx={10}
-                cy={10}
-                r={7.25}
-                className="stroke-foreground"
-                initial={{ pathLength: reducedMotion ? 0.28 : 0, opacity: 0 }}
-                animate={{ pathLength: 0.28, opacity: 1 }}
-                exit={{ pathLength: reducedMotion ? 0.28 : 1, opacity: 0 }}
-                transition={transition}
-              />
-            </g>
-          )}
+          {status === "running" && <StepSpinner key="spinner" reducedMotion={reducedMotion} />}
           {status === "done" && (
             <motion.path
               key="check"
@@ -498,6 +577,42 @@ function StepIcon({ status, reducedMotion }: { status: TaskStepStatus; reducedMo
         </AnimatePresence>
       </svg>
     </span>
+  );
+}
+
+/**
+ * The running arc. It is drawn in when a step starts and closes into the ring when the step
+ * stops, turning until it has gone. The turn is a loop started in an effect rather than an
+ * `animate` prop: the icon skips animation on its first render, and a step that is already running
+ * when the block mounts must still turn. Under reduced motion the arc holds still, and the step's
+ * clock is what shows it is running.
+ */
+function StepSpinner({ reducedMotion }: { reducedMotion: boolean }) {
+  const group = useRef<SVGGElement>(null);
+
+  useEffect(() => {
+    if (reducedMotion || !group.current) return;
+    const turn = animate(
+      group.current,
+      { transform: ["rotate(0deg)", "rotate(360deg)"] },
+      { duration: 1, ease: "linear", repeat: Infinity },
+    );
+    return () => turn.stop();
+  }, [reducedMotion]);
+
+  return (
+    <g ref={group} data-slot="task-steps-spinner" className="origin-center">
+      <motion.circle
+        cx={10}
+        cy={10}
+        r={7.25}
+        className="stroke-foreground"
+        initial={{ pathLength: reducedMotion ? 0.28 : 0, opacity: 0 }}
+        animate={{ pathLength: 0.28, opacity: 1 }}
+        exit={{ pathLength: reducedMotion ? 0.28 : 1, opacity: 0 }}
+        transition={springFor(reducedMotion)}
+      />
+    </g>
   );
 }
 
@@ -535,11 +650,13 @@ function StepTime({
   startedAt,
   durationMs,
   formatDuration,
+  transition,
 }: {
   status: TaskStepStatus;
   startedAt: number | undefined;
   durationMs: number | undefined;
   formatDuration: (milliseconds: number, running: boolean) => string;
+  transition: Transition;
 }) {
   const running = status === "running";
   const seconds = useElapsedSeconds(running ? startedAt : undefined);
@@ -553,18 +670,31 @@ function StepTime({
     <span
       data-slot="task-steps-time"
       // A fixed column of tabular figures: the row does not move as the digits change.
-      className={`w-[7ch] shrink-0 text-right font-mono text-xs leading-5 whitespace-nowrap tabular-nums transition-colors duration-200 ${
-        running ? "text-foreground" : "text-muted-foreground"
-      }`}
+      className={`w-[7ch] shrink-0 text-right font-mono text-xs leading-5 whitespace-nowrap tabular-nums ${CLOCK_INK}`}
     >
-      {text}
+      {/* The time fades in when the step starts and out when it is reset; the digits themselves just tick. */}
+      <AnimatePresence initial={false}>
+        {text !== "" && (
+          <motion.span
+            key="time"
+            className="block"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={transition}
+          >
+            {text}
+          </motion.span>
+        )}
+      </AnimatePresence>
     </span>
   );
 }
 
 /**
  * The panel's height follows its measured content on a spring, so opening, closing, and a log
- * that grows a line at a time are all the same motion and can interrupt one another.
+ * that grows a line at a time are all the same motion and can interrupt one another. Each starts
+ * from the height on screen, and the panel fades in and out with the same height it opens to.
  */
 function StepPanel({
   id,
@@ -579,6 +709,10 @@ function StepPanel({
 }) {
   const content = useRef<HTMLDivElement>(null);
   const [height, setHeight] = useState<number | null>(null);
+  // False once the step has lost its detail and the panel is closing for good.
+  const present = useIsPresent();
+  const transition = springFor(reducedMotion);
+  const closed = { height: 0, opacity: 0 };
 
   useLayoutEffect(() => {
     const element = content.current;
@@ -598,25 +732,57 @@ function StepPanel({
       data-slot="task-steps-panel"
       data-open={open ? "" : undefined}
       className="overflow-hidden"
-      initial={false}
-      animate={{ height: open ? (height ?? "auto") : 0, opacity: open ? 1 : 0 }}
-      transition={{
-        height: reducedMotion ? { duration: 0 } : springFor(false),
-        opacity: reducedMotion ? { duration: 0.15, ease: "linear" } : springFor(false),
-      }}
+      // A panel that arrives after its row opens from nothing, and one that is taken away closes the same way.
+      initial={closed}
+      animate={open ? { height: height ?? "auto", opacity: 1 } : closed}
+      exit={closed}
+      // Under reduced motion the height changes at once and the content cross-fades.
+      transition={reducedMotion ? { ...transition, height: INSTANT } : transition}
     >
       {/* A closed panel stays mounted for measuring, but out of reach of focus and screen readers. */}
-      <div ref={content} inert={!open} className="pt-1 pr-2 pb-2 pl-10">
+      <div ref={content} inert={!open || !present} className="pt-1 pr-2 pb-2 pl-10">
         {children}
       </div>
     </motion.div>
   );
 }
 
-function StepLog({ labelledBy, lines }: { labelledBy: string; lines: string[] }) {
+// A log only grows, so a line fades in once and is not rendered again as more arrive.
+const LogLine = memo(function LogLine({
+  line,
+  fresh,
+  transition,
+}: {
+  line: string;
+  fresh: boolean;
+  transition: Transition;
+}) {
+  return (
+    <motion.div
+      className="break-words whitespace-pre-wrap"
+      initial={fresh ? { opacity: 0 } : false}
+      animate={{ opacity: 1 }}
+      transition={transition}
+    >
+      {line}
+    </motion.div>
+  );
+});
+
+function StepLog({
+  labelledBy,
+  lines,
+  transition,
+}: {
+  labelledBy: string;
+  lines: string[];
+  transition: Transition;
+}) {
   const scroller = useRef<HTMLDivElement>(null);
   // Follow the newest line until the reader scrolls up to look at an older one.
   const pinned = useRef(true);
+  // Lines already there when the log mounts arrive with its panel; only later ones fade in.
+  const [mountedWith] = useState(lines.length);
 
   useLayoutEffect(() => {
     const element = scroller.current;
@@ -639,12 +805,7 @@ function StepLog({ labelledBy, lines }: { labelledBy: string; lines: string[] })
       className="bg-muted text-muted-foreground focus-visible:ring-ring max-h-40 overflow-y-auto rounded-md px-3 py-2 font-mono text-xs leading-5 outline-none not-first:mt-2 focus-visible:ring-2"
     >
       {lines.map((line, index) => (
-        <div
-          key={index}
-          className="break-words whitespace-pre-wrap transition-opacity duration-200 motion-reduce:transition-none starting:opacity-0"
-        >
-          {line}
-        </div>
+        <LogLine key={index} line={line} fresh={index >= mountedWith} transition={transition} />
       ))}
     </div>
   );
