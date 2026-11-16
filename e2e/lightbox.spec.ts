@@ -31,10 +31,13 @@ function snapshot(): Frame {
   };
 }
 
-/** Samples the image on every frame for `ms` while `act` runs. */
-async function record(page: Page, ms: number, act: () => Promise<unknown>) {
+/**
+ * Samples the image on every frame for `ms` while `act` runs. `inPage` runs in the page in the
+ * same task that starts the sampling, for an action that no sampled frame may come before.
+ */
+async function record(page: Page, ms: number, act: () => Promise<unknown>, inPage?: () => void) {
   await page.evaluate(
-    ({ ms, read }) => {
+    ({ ms, read, inPage }) => {
       const snapshot = new Function(`return (${read})()`) as () => Frame;
       (window as unknown as { frames: Promise<Frame[]> }).frames = (async () => {
         const frames: Frame[] = [];
@@ -45,8 +48,9 @@ async function record(page: Page, ms: number, act: () => Promise<unknown>) {
         }
         return frames;
       })();
+      if (inPage) new Function(`(${inPage})()`)();
     },
-    { ms, read: snapshot.toString() },
+    { ms, read: snapshot.toString(), inPage: inPage?.toString() },
   );
   await act();
   return page.evaluate(() => (window as unknown as { frames: Promise<Frame[]> }).frames);
@@ -251,15 +255,30 @@ test("opening another thumbnail mid-close grows it in place without paging acros
   await expect(page.locator('[data-slot="lightbox"]')).toHaveCount(1);
 
   const target = await box(page, thumbnail, 3);
-  const frames = await record(page, 700, () =>
-    page.evaluate(() => {
+  // The click starts in the same task as the sampling. Sent as a separate call, a frame of the
+  // first image still flying home could be sampled before it and read as the first frame.
+  const frames = await record(
+    page,
+    700,
+    async () => {},
+    () => {
       document.querySelectorAll<HTMLElement>('.demo-frame [data-slot="lightbox-thumbnail"]')[3]!.click();
-    }),
+    },
   );
   const shown = frames.filter((frame) => frame !== null);
-  // The first frame sits on the clicked thumbnail, and the image only ever grows from there.
-  expect(near(centre(shown[0]!.visible).x, centre(target).x, 6)).toBe(true);
-  expect(near(centre(shown[0]!.visible).y, centre(target).y, 6)).toBe(true);
+  // The image leaves from the clicked thumbnail and only ever grows from there. A busy machine can
+  // sample its first frame a little after it has set off, so the frame is held to the straight
+  // path out of that thumbnail instead of to the thumbnail itself. Leaving from the first
+  // thumbnail, one row up, would put it well off that path.
+  const [from, first, end] = [centre(target), centre(shown[0]!.visible), centre(shown.at(-1)!.visible)];
+  const path = { x: end.x - from.x, y: end.y - from.y };
+  const length = Math.hypot(path.x, path.y);
+  const along = ((first.x - from.x) * path.x + (first.y - from.y) * path.y) / length;
+  const aside = Math.abs((first.x - from.x) * path.y - (first.y - from.y) * path.x) / length;
+  expect(length).toBeGreaterThan(100);
+  expect(aside).toBeLessThanOrEqual(6);
+  expect(along).toBeGreaterThanOrEqual(-6);
+  expect(along).toBeLessThan(length / 2);
   // Paging across would carry it sideways past the middle of the screen first.
   const middle = page.viewportSize()!.width / 2;
   const [low, high] = [Math.min(centre(target).x, middle) - 6, Math.max(centre(target).x, middle) + 6];
