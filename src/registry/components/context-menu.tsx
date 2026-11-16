@@ -68,9 +68,13 @@ const LastHighlightContext = createContext<[string | null, Dispatch<SetStateActi
 );
 const RadioGroupContext = createContext("");
 
-// Critically damped: the menu settles without overshoot.
+// Critically damped: the menu settles without overshoot. This is the spring Motion resolves
+// `visualDuration` to, written as stiffness and damping because Motion drops velocity on time-defined
+// springs, and a second right-click reopens the menu while it is still closing.
 function spring(seconds: number): Transition {
-  return seconds === 0 ? { duration: 0 } : { type: "spring", visualDuration: seconds, bounce: 0 };
+  if (seconds === 0) return { duration: 0 };
+  const omega = (2 * Math.PI) / (seconds * 1.2);
+  return { type: "spring", stiffness: omega * omega, damping: 2 * omega };
 }
 
 function assignRef<T>(ref: Ref<T> | undefined, value: T | null) {
