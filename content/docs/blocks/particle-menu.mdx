@@ -44,6 +44,20 @@ export function SiteNavigation() {
   </Tab>
 </Tabs>
 
+## Behaviour
+
+- **Scatter.** Each symbol is a field of grains. The pointer pushes the grains within `radius` away from it, and a moving pointer hands them some of its speed, so a swipe carries them along its path. A grain always carries on from where it is, at the speed it has, so changing direction or leaving mid-flight never restarts it.
+- **Settling.** Under a resting pointer, a held finger or keyboard focus, the grains settle without overshooting. Only a moving pointer gives them a slight spring. After the pointer leaves they drift home slowly, and the symbol's exact outline is restored.
+- **Press.** An item dims the moment the pointer or the Enter key goes down, and fades back on release.
+- **Idle.** Nothing runs while every grain is at rest or the tab is hidden.
+
+## Accessibility
+
+- Each item is a native link when it has an `href` and a button otherwise, inside a `nav` named by `ariaLabel`. The symbols are hidden from screen readers, which read the `label`.
+- Keyboard focus scatters a symbol from its center, as hovering does, and outlines the item.
+- On a touch screen, holding an item scatters its symbol, and lifting the finger lets it return.
+- Under `prefers-reduced-motion`, the symbols stay still. Hovering or focusing an item dims it slightly instead, and pressing still dims it. The menu follows the setting as it changes.
+
 ## API reference
 
 | Prop         | Type                           | Default           | Description                                                                                                     |

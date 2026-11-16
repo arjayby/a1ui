@@ -77,7 +77,7 @@ describe("ParticleMenu", () => {
     },
   );
 
-  it("pushes grains along a quick pointer flick but not a slow move to the same spot", () => {
+  it("pushes grains further along a quick pointer flick than a slow move to the same spot", () => {
     const after = (gap: number) => {
       const { unmount } = render(<ParticleMenu items={items} />);
       const control = screen.getByRole("button", { name: "Grace" });
@@ -96,12 +96,145 @@ describe("ParticleMenu", () => {
       act(() => vi.advanceTimersByTime(100));
       return xs;
     };
-    // Same start and end point: only the pointer's speed differs, and the flick moves grains right.
-    const slow = after(500);
+    // Same start and end point, both while the pointer is moving: only its speed differs, and the
+    // faster move carries the grains further right.
+    const slow = after(96);
     const flicked = after(16);
     const pushed = Math.max(...flicked.map((x, index) => x - slow[index]));
     expect(pushed).toBeGreaterThan(1);
     expect(Math.min(...flicked.map((x, index) => x - slow[index]))).toBeGreaterThan(-0.1);
+  });
+
+  // Every grain's x in the path, sampled each frame for a second and a half.
+  function trace(path: Element) {
+    const frames: number[][] = [];
+    for (let elapsed = 0; elapsed < 1500; elapsed += 16) {
+      act(() => vi.advanceTimersByTime(16));
+      frames.push([...path.getAttribute("d")!.matchAll(/M(-?[\d.]+)/g)].map((match) => Number(match[1])));
+    }
+    return frames;
+  }
+
+  // How far past its resting place the worst grain travelled on the way there.
+  function overshoot(frames: number[][]) {
+    const [start] = frames;
+    const end = frames[frames.length - 1];
+    return Math.max(
+      ...frames.flatMap((xs) =>
+        xs.map((x, index) => Math.abs(x - start[index]) - Math.abs(end[index] - start[index])),
+      ),
+    );
+  }
+
+  it("settles without overshoot under keyboard focus, and with a slight give after a moving pointer", () => {
+    const { unmount } = render(<ParticleMenu items={items} />);
+    const control = screen.getByRole("button", { name: "Grace" });
+    const path = control.querySelector("path")!;
+    const resting = path.getAttribute("d");
+
+    // jsdom reports no element as :focus-visible, so stand in for a keyboard focus.
+    const focusVisible = vi.spyOn(control, "matches").mockReturnValue(true);
+    fireEvent.focus(control);
+    const focused = trace(path);
+    expect(path.getAttribute("d")).not.toBe(resting);
+    expect(overshoot(focused)).toBeLessThan(0.02);
+    expect(vi.getTimerCount()).toBe(0);
+
+    focusVisible.mockRestore();
+    fireEvent.blur(control);
+    act(() => vi.advanceTimersByTime(6000));
+    expect(path).toHaveAttribute("d", resting);
+
+    fireEvent(control, new MouseEvent("pointermove", { clientX: 54, clientY: 60 }));
+    act(() => vi.advanceTimersByTime(16));
+    fireEvent(control, new MouseEvent("pointermove", { clientX: 60, clientY: 60 }));
+    expect(overshoot(trace(path))).toBeGreaterThan(0.1);
+    unmount();
+  });
+
+  // Motion's fades read a clock that moves on only between tasks, so let each frame run as its own.
+  const settle = (ms: number) => act(() => vi.advanceTimersByTimeAsync(ms));
+
+  it("dims on pointer down, before the click, and fades back on release", async () => {
+    const onSelect = vi.fn();
+    const { unmount } = render(<ParticleMenu items={[{ ...items[0], onSelect }]} />);
+    const control = screen.getByRole("button", { name: "Grace" });
+
+    fireEvent.pointerDown(control, { pointerType: "mouse", button: 0 });
+    await settle(17);
+    expect(control).toHaveStyle({ opacity: "0.6" });
+    expect(onSelect).not.toHaveBeenCalled();
+
+    fireEvent.pointerUp(control, { pointerType: "mouse", button: 0 });
+    await settle(50);
+    const fading = Number(control.style.opacity);
+    expect(fading).toBeGreaterThan(0.6);
+    expect(fading).toBeLessThan(1);
+    await settle(1000);
+    expect(control).toHaveStyle({ opacity: "1" });
+    unmount();
+  });
+
+  it("dims on hover and keyboard focus instead of scattering when motion is reduced", async () => {
+    preference.matches = true;
+    const { unmount } = render(<ParticleMenu items={items} />);
+    const control = screen.getByRole("button", { name: "Grace" });
+    const path = control.querySelector("path")!;
+    const resting = path.getAttribute("d");
+
+    fireEvent.pointerEnter(control, { pointerType: "mouse", clientX: 60, clientY: 60 });
+    await settle(1000);
+    expect(control).toHaveStyle({ opacity: "0.75" });
+    fireEvent.pointerLeave(control, { pointerType: "mouse" });
+    await settle(1000);
+    expect(control).toHaveStyle({ opacity: "1" });
+
+    // jsdom reports no element as :focus-visible, so stand in for a keyboard focus.
+    vi.spyOn(control, "matches").mockReturnValue(true);
+    fireEvent.focus(control);
+    await settle(1000);
+    expect(control).toHaveStyle({ opacity: "0.75" });
+    fireEvent.blur(control);
+    await settle(1000);
+    expect(control).toHaveStyle({ opacity: "1" });
+
+    expect(path).toHaveAttribute("d", resting);
+    expect(vi.getTimerCount()).toBe(0);
+    unmount();
+  });
+
+  it("swaps the scatter for the dim when reduced motion is turned on, and back when it is turned off", async () => {
+    const { unmount } = render(<ParticleMenu items={items} />);
+    const control = screen.getByRole("button", { name: "Grace" });
+    const path = control.querySelector("path")!;
+    const resting = path.getAttribute("d");
+
+    fireEvent.pointerEnter(control, { pointerType: "mouse", clientX: 60, clientY: 60 });
+    await settle(1000);
+    expect(path.getAttribute("d")).not.toBe(resting);
+    expect(control).not.toHaveStyle({ opacity: "0.75" });
+    fireEvent.pointerLeave(control, { pointerType: "mouse" });
+
+    act(() => {
+      preference.matches = true;
+      preference.dispatchEvent(new Event("change"));
+    });
+    expect(path).toHaveAttribute("d", resting);
+    fireEvent.pointerEnter(control, { pointerType: "mouse", clientX: 60, clientY: 60 });
+    await settle(1000);
+    expect(path).toHaveAttribute("d", resting);
+    expect(control).toHaveStyle({ opacity: "0.75" });
+    fireEvent.pointerLeave(control, { pointerType: "mouse" });
+
+    act(() => {
+      preference.matches = false;
+      preference.dispatchEvent(new Event("change"));
+    });
+    fireEvent.pointerEnter(control, { pointerType: "mouse", clientX: 60, clientY: 60 });
+    await settle(1000);
+    expect(path.getAttribute("d")).not.toBe(resting);
+    expect(control).toHaveStyle({ opacity: "1" });
+    unmount();
   });
 
   it("cancels movement immediately when the motion preference changes", () => {

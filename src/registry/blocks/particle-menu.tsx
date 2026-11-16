@@ -1,7 +1,15 @@
 "use client";
 
-import { cancelFrame, frame, spring, type FrameData, type KeyframeGenerator } from "motion";
-import { useEffect, useMemo, useRef, type ReactNode } from "react";
+import {
+  cancelFrame,
+  frame,
+  motion,
+  spring,
+  type FrameData,
+  type KeyframeGenerator,
+  type Transition,
+} from "motion/react";
+import { useEffect, useMemo, useRef, useSyncExternalStore, type ReactNode } from "react";
 
 /** Grainy sigils filled with fine particles. */
 export type GrainShape = "grace" | "runes" | "ashes" | "oaths";
@@ -697,9 +705,12 @@ function basis(physics: { stiffness: number; damping: number }): Basis {
     kick: spring({ ...precise, keyframes: [0, 0], velocity: 1 }),
   };
 }
-// Respond quickly to the pointer with a slight liquid give (damping ratio 0.8, response ~0.38s),
-// then let the grains drift home slowly and without overshoot after leaving (damping ratio 1.24).
-const SCATTER = basis({ stiffness: 267.6, damping: 26.17 });
+// Grains answer the pointer, a held finger or keyboard focus quickly and without overshoot
+// (critically damped, response ~0.38s). Only a moving pointer, which hands them its velocity,
+// earns a slight liquid give (damping ratio 0.8). After leaving they drift home slowly, again
+// without overshoot (damping ratio 1.24).
+const SCATTER = basis({ stiffness: 267.6, damping: 2 * Math.sqrt(267.6) });
+const SWEEP = basis({ stiffness: 267.6, damping: 26.17 });
 const RETURN = basis({ stiffness: 13.35, damping: 9.05 });
 // A grain counts as home once it is within this distance and slower than this speed (units/s).
 // 0.15 units is about a seventh of a pixel at the default size, so the snap home is invisible.
@@ -711,6 +722,24 @@ const FLICK = 0.5;
 const MAX_POINTER_SPEED = 600;
 // Pointer samples further apart than this (ms) are treated as a fresh start, not a swipe.
 const FLICK_WINDOW = 100;
+
+// Pressing dims an item the moment the pointer or the Enter key goes down, like a highlighted
+// menu row, and it fades back on release. With reduced motion the sigil stays still, so hover and
+// keyboard focus dim it slightly instead of scattering it.
+const PRESSED = { opacity: 0.6, transition: { duration: 0 } };
+const DIMMED = { opacity: 0.75 };
+const FADE: Transition = { type: "spring", visualDuration: 0.15, bounce: 0 };
+
+// Motion's useReducedMotion keeps the value from the first render. The menu follows the setting
+// as it changes, so it subscribes to the media query. The server renders as if motion is allowed.
+const REDUCED_MOTION = "(prefers-reduced-motion: reduce)";
+function subscribeToReducedMotion(onChange: () => void) {
+  const query = window.matchMedia?.(REDUCED_MOTION);
+  query?.addEventListener("change", onChange);
+  return () => query?.removeEventListener("change", onChange);
+}
+const prefersReducedMotion = () => window.matchMedia?.(REDUCED_MOTION).matches ?? false;
+const assumeMotion = () => false;
 
 type Grain = Point & {
   /** Target, offset from it, and velocity at the last retarget, and time since then in ms. */
@@ -737,11 +766,13 @@ function ParticleMenuEntry({
   item,
   strength,
   radius,
+  reducedMotion,
   renderItem,
 }: {
   item: ParticleMenuItem;
   strength: number;
   radius: number;
+  reducedMotion: boolean;
   renderItem?: ParticleMenuProps["renderItem"];
 }) {
   const itemRef = useRef<HTMLLIElement>(null);
@@ -754,9 +785,10 @@ function ParticleMenuEntry({
     const control = itemRef.current?.querySelector<HTMLElement>("a, button");
     const svg = svgRef.current;
     const path = pathRef.current;
-    if (!control || !svg || !path) return;
+    // With reduced motion the sigil is static. Turning the setting on mid-flight re-runs this
+    // effect, and the cleanup below puts every grain back at once.
+    if (!control || !svg || !path || strength <= 0 || reducedMotion) return;
 
-    const preference = window.matchMedia("(prefers-reduced-motion: reduce)");
     const grains: Grain[] = points.map((point) => ({
       ...point,
       targetX: point.x,
@@ -796,7 +828,7 @@ function ParticleMenuEntry({
     // tangential twist that gives the scatter a curling, liquid movement. A moving pointer also
     // hands its velocity to the grains it passes, which then spring back to those targets.
     const aim = (pushX = 0, pushY = 0) => {
-      const next = active ? SCATTER : RETURN;
+      const next = !active ? RETURN : pushX !== 0 || pushY !== 0 ? SWEEP : SCATTER;
       const phaseChanged = next !== curves;
       grains.forEach((grain, index) => {
         const home = points[index];
@@ -871,14 +903,14 @@ function ParticleMenuEntry({
     };
 
     const wake = () => {
-      if (strength > 0 && !running && !preference.matches && !document.hidden) {
+      if (!running && !document.hidden) {
         frame.render(draw, true);
         running = true;
       }
     };
 
     const steer = (pushX = 0, pushY = 0) => {
-      if (strength <= 0 || preference.matches || document.hidden) return;
+      if (document.hidden) return;
       aim(pushX, pushY);
       wake();
     };
@@ -927,10 +959,6 @@ function ParticleMenuEntry({
       if (event.pointerType !== "mouse") leave();
     };
 
-    const motionChanged = () => {
-      if (preference.matches) reset();
-      else steer();
-    };
     const visibilityChanged = () => {
       active = false;
       reset();
@@ -943,7 +971,6 @@ function ParticleMenuEntry({
     control.addEventListener("pointerup", endTouch);
     control.addEventListener("focus", focus);
     control.addEventListener("blur", leave);
-    preference.addEventListener("change", motionChanged);
     document.addEventListener("visibilitychange", visibilityChanged);
 
     return () => {
@@ -955,10 +982,9 @@ function ParticleMenuEntry({
       control.removeEventListener("pointerup", endTouch);
       control.removeEventListener("focus", focus);
       control.removeEventListener("blur", leave);
-      preference.removeEventListener("change", motionChanged);
       document.removeEventListener("visibilitychange", visibilityChanged);
     };
-  }, [points, restingPath, strength, radius, item.href]);
+  }, [points, restingPath, strength, radius, reducedMotion, item.href]);
 
   const content = (
     <>
@@ -973,20 +999,24 @@ function ParticleMenuEntry({
       <span className="text-xs leading-none font-medium tracking-wide uppercase">{item.label}</span>
     </>
   );
-  // Pressing dims the item the moment the pointer goes down, like a highlighted menu row. With
-  // reduced motion the sigil stays still, so hover dims it slightly instead of scattering it.
-  const className =
-    "text-foreground flex cursor-pointer flex-col items-center gap-2 rounded-sm bg-transparent px-3 pt-1 pb-4 font-sans no-underline outline-offset-4 transition-opacity duration-150 select-none focus-visible:outline-1 focus-visible:outline-current active:opacity-60 active:duration-0 motion-reduce:hover:opacity-75 motion-reduce:active:opacity-60";
+  const feedback = {
+    className:
+      "text-foreground flex cursor-pointer flex-col items-center gap-2 rounded-sm bg-transparent px-3 pt-1 pb-4 font-sans no-underline outline-offset-4 select-none focus-visible:outline-1 focus-visible:outline-current",
+    whileTap: PRESSED,
+    whileHover: reducedMotion ? DIMMED : undefined,
+    whileFocus: reducedMotion ? DIMMED : undefined,
+    transition: FADE,
+  };
 
   const control =
     item.href !== undefined ? (
-      <a href={item.href} onClick={item.onSelect} className={className}>
+      <motion.a href={item.href} onClick={item.onSelect} {...feedback}>
         {content}
-      </a>
+      </motion.a>
     ) : (
-      <button type="button" onClick={item.onSelect} className={className}>
+      <motion.button type="button" onClick={item.onSelect} {...feedback}>
         {content}
-      </button>
+      </motion.button>
     );
 
   // The particles follow the item's first link or button, so a wrapper must render the control first.
@@ -1003,6 +1033,7 @@ export function ParticleMenu({
 }: ParticleMenuProps) {
   const safeStrength = Number.isFinite(strength) ? Math.min(2, Math.max(0, strength)) : 1;
   const safeRadius = Number.isFinite(radius) ? Math.min(70, Math.max(10, radius)) : 38;
+  const reducedMotion = useSyncExternalStore(subscribeToReducedMotion, prefersReducedMotion, assumeMotion);
 
   return (
     <nav aria-label={ariaLabel} className={className}>
@@ -1013,6 +1044,7 @@ export function ParticleMenu({
             item={item}
             strength={safeStrength}
             radius={safeRadius}
+            reducedMotion={reducedMotion}
             renderItem={renderItem}
           />
         ))}
