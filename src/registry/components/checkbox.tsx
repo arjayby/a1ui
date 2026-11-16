@@ -4,6 +4,14 @@ import { Checkbox as CheckboxPrimitive } from "@base-ui/react/checkbox";
 import { motion, useReducedMotion } from "motion/react";
 import { useId, useState, type ReactNode } from "react";
 
+// A critically damped spring, the one Motion resolves `visualDuration` with no bounce to. Written as
+// stiffness and damping because Motion drops velocity on time-defined springs, and a quick tap
+// releases the box while it is still shrinking.
+function criticalSpring(visualDuration: number) {
+  const omega = (2 * Math.PI) / (visualDuration * 1.2);
+  return { type: "spring", stiffness: omega * omega, damping: 2 * omega } as const;
+}
+
 // Both marks use three points so the dash can morph into the check.
 const CHECK = "M4.5 9.5 L7.5 12.5 L13.5 5.5";
 const DASH = "M5 9 L9 9 L13 9";
@@ -78,7 +86,7 @@ export function Checkbox({
       render={
         <motion.span
           whileTap={disabled || seconds === 0 ? undefined : { scale: 0.86 }}
-          transition={{ type: "spring", visualDuration: 0.2, bounce: 0 }}
+          transition={criticalSpring(0.2)}
         />
       }
       className={`border-muted-foreground/50 hover:border-muted-foreground/80 bg-background text-primary-foreground data-checked:border-primary data-checked:bg-primary data-indeterminate:border-primary data-indeterminate:bg-primary focus-visible:ring-ring/30 relative inline-grid size-[18px] shrink-0 cursor-pointer place-items-center rounded-[5px] border shadow-xs transition-colors duration-150 outline-none focus-visible:ring-3 data-disabled:cursor-not-allowed ${label ? "mt-px" : `data-disabled:opacity-50 ${className ?? ""}`}`}
