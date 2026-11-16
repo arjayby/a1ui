@@ -34,8 +34,10 @@ export interface TextBannerProps extends Omit<
 
 // Critically damped, so the banner eases to a new speed or a stop without overshooting. A spring
 // starts from the velocity it already has: a change made mid-ease bends the motion instead of
-// cutting it, and a reversal slows through a stop rather than hitting a wall.
-const VELOCITY_SPRING = { type: "spring", visualDuration: 0.4, bounce: 0 } as const;
+// cutting it, and a reversal slows through a stop rather than hitting a wall. Motion only does
+// that for springs defined by stiffness and damping, so this one is, with a 0.48s response.
+const FREQUENCY = (2 * Math.PI) / 0.48;
+const VELOCITY_SPRING = { type: "spring", stiffness: FREQUENCY * FREQUENCY, damping: 2 * FREQUENCY } as const;
 
 // Motion's useReducedMotion reads the setting once. The banner also has to stop and restart when
 // the setting changes, so it subscribes to the query. The server snapshot is `false`, which keeps
