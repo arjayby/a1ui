@@ -8,6 +8,14 @@ import type { ZodType } from "zod";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
+// A critically damped spring, the one Motion resolves `visualDuration` with no bounce to. Written as
+// stiffness and damping because Motion drops velocity on time-defined springs, and the next
+// keystroke can flip the check back while it is still arriving.
+function criticalSpring(visualDuration: number) {
+  const omega = (2 * Math.PI) / (visualDuration * 1.2);
+  return { type: "spring", stiffness: omega * omega, damping: 2 * omega } as const;
+}
+
 export interface ValidatedInputProps extends Omit<
   ComponentProps<typeof Input>,
   "value" | "defaultValue" | "onChange" | "ref" | "children"
@@ -108,7 +116,7 @@ export function ValidatedInput({
               initial={reducedMotion ? false : { opacity: 0, scale: 0.5, filter: "blur(4px)" }}
               animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
               exit={reducedMotion ? { opacity: 0, transition: { duration: 0 } } : { opacity: 0, scale: 0.5 }}
-              transition={{ type: "spring", duration: reducedMotion ? 0 : 0.3, bounce: 0 }}
+              transition={reducedMotion ? { duration: 0 } : criticalSpring(0.17)}
             >
               <CheckIcon weight="bold" className="size-4" />
             </motion.span>
