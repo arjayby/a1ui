@@ -46,9 +46,14 @@ export interface BadgeProps {
   className?: string;
 }
 
-// Critically damped: discrete count changes settle without overshoot.
-const springOrInstant = (visualDuration: number) =>
-  visualDuration > 0 ? ({ type: "spring", visualDuration, bounce: 0 } as const) : { duration: 0 };
+// Critically damped: discrete count changes settle without overshoot. This is the spring Motion
+// resolves `visualDuration` to, written as stiffness and damping because Motion drops velocity on
+// time-defined springs, and a count that changes again mid-pop reverses the badge in flight.
+function springOrInstant(visualDuration: number) {
+  if (!(visualDuration > 0)) return { duration: 0 };
+  const omega = (2 * Math.PI) / (visualDuration * 1.2);
+  return { type: "spring", stiffness: omega * omega, damping: 2 * omega } as const;
+}
 
 const toCount = (count: number | undefined) =>
   count === undefined || !Number.isFinite(count) ? undefined : Math.max(0, Math.floor(count));
