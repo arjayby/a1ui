@@ -21,6 +21,14 @@ import {
   type Ref,
 } from "react";
 
+// A critically damped spring, the one Motion resolves `visualDuration` with no bounce to. Written as
+// stiffness and damping because Motion drops velocity on time-defined springs, and a segment can
+// come back while it is still leaving.
+function criticalSpring(visualDuration: number) {
+  const omega = (2 * Math.PI) / (visualDuration * 1.2);
+  return { type: "spring", stiffness: omega * omega, damping: 2 * omega } as const;
+}
+
 export interface BreadcrumbSegment {
   /** Visible text for the segment. */
   label: ReactNode;
@@ -223,12 +231,16 @@ export function Breadcrumb({
     (scope ?? nav.querySelector<HTMLElement>('[data-slot="breadcrumb-list"]'))?.focus();
   }, [expanded]);
 
-  const spring: Transition =
-    seconds === 0 ? { duration: 0 } : { type: "spring", visualDuration: seconds, bounce: 0 };
+  const spring: Transition = seconds === 0 ? { duration: 0 } : criticalSpring(seconds);
   const stagger = seconds * 0.15;
   const segmentVariants: Variants = {
     hidden: ({ reveal }: Custom) => ({ opacity: 0, x: reveal ? -8 : 16 }),
-    shown: ({ delay }: Custom) => ({ opacity: 1, x: 0, transition: { ...spring, delay } }),
+    shown: ({ delay }: Custom) => ({
+      opacity: 1,
+      x: 0,
+      // A staggered segment waits out its delay at rest, so it starts without any earlier velocity.
+      transition: { ...spring, delay, ...(delay > 0 ? { velocity: 0 } : null) },
+    }),
     exit: ({ reveal }: Custom) => ({
       opacity: 0,
       x: reveal ? -8 : 16,
