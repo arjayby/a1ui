@@ -20,6 +20,14 @@ import {
   type ReactNode,
 } from "react";
 
+// A critically damped spring, the one Motion resolves `visualDuration` with no bounce to. Written as
+// stiffness and damping because Motion drops velocity on time-defined springs, and paging quickly
+// sends a number back while it is still sliding out.
+function criticalSpring(visualDuration: number) {
+  const omega = (2 * Math.PI) / (visualDuration * 1.2);
+  return { type: "spring", stiffness: omega * omega, damping: 2 * omega } as const;
+}
+
 export type PaginationItem = number | "start-ellipsis" | "end-ellipsis";
 
 const range = (start: number, end: number) =>
@@ -166,8 +174,7 @@ export function Pagination({
   const direction = shown.page === current ? shown.direction : Math.sign(current - shown.page);
 
   const seconds = reducedMotion ? 0 : Number.isFinite(duration) ? Math.max(0, duration) : 0.35;
-  const transition: Transition =
-    seconds === 0 ? { duration: 0 } : { type: "spring", visualDuration: seconds, bounce: 0 };
+  const transition: Transition = seconds === 0 ? { duration: 0 } : criticalSpring(seconds);
   const fade: Transition = seconds === 0 ? { duration: 0 } : { duration: seconds * 0.6, ease: "easeOut" };
 
   // A disabled previous or next control drops focus, so hand it to the current page instead.
