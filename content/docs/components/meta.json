@@ -19,8 +19,8 @@
     "segmented-control",
     "select",
     "slider",
-    "wheel-picker",
     "switch",
+    "wheel-picker",
     "---Navigation---",
     "breadcrumb",
     "menu",
@@ -42,10 +42,10 @@
     "---Data Display---",
     "accordion",
     "avatar-group",
-    "lightbox",
     "badge",
-    "rolling-number",
     "kbd",
+    "lightbox",
+    "rolling-number",
     "swipe-row"
   ]
 }

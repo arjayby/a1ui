@@ -15,11 +15,10 @@
     "command-palette",
     "particle-menu",
     "section-rail",
-    "---Status---",
-    "activity-pill",
     "---Carousels---",
     "arc-reel",
     "---Status---",
+    "activity-pill",
     "task-steps"
   ]
 }
