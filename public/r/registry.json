@@ -311,6 +311,9 @@
       "type": "registry:block",
       "title": "Spiral Text",
       "description": "Text set on a responsive spiral that tightens under pressure and ripples on release.",
+      "dependencies": [
+        "motion"
+      ],
       "files": [
         {
           "path": "src/registry/blocks/spiral-text.tsx",
@@ -331,7 +334,7 @@
             "A decorative text composition, not a reading paragraph or changing-label effect."
           ],
           "requirements": [
-            "Supply text and room for the responsive spiral."
+            "Supply text and room for the responsive spiral, and a pause control for the rotation. Requires Motion. Reduced motion stops the rotation and answers a press with a fade."
           ],
           "docsUrl": "http://localhost:3000/docs/blocks/spiral-text.md",
           "registryUrl": "http://localhost:3000/r/spiral-text.json"

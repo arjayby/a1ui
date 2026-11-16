@@ -21,7 +21,7 @@ bun: bunx --bun shadcn@latest add http://localhost:3000/r/spiral-text.json --yes
 
 ## Dependencies
 
-None.
+- `motion`
 
 ## Code
 
@@ -62,14 +62,27 @@ export function Poster() {
 
 
 
+## Behaviour
+
+- **Press and release.** The rings start to gather the moment a press lands and settle without overshooting. Release sends a wave out from the center: each ring stays gathered until the wave reaches it, then returns to rest as the crest swells it outward and dims it. `rippleDuration` is the time the wave takes to cross the figure.
+- **Interrupting.** Every ring moves on a spring, so nothing has to finish first. A press during a ripple catches each ring at the size and speed it has and gathers it from there. A quick tap lets the rings spend their inward speed before the wave arrives. New `text`, `density` or `tightenStrength` during a gesture carries on from where the rings are.
+- **Rotation.** `rotating` and `rotationSpeed` change how fast the figure turns, not where it is. Pausing coasts to a stop at the current angle, resuming picks up from that angle, and a new speed blends in over about half a second. The rotation also holds while the figure is pressed, and stops while it is offscreen or its tab is hidden.
+- **Motion.** [Motion](https://motion.dev) drives every animation, and only `transform` and `opacity` change, so the glyphs are not laid out or drawn again while the figure moves.
+
+## Accessibility
+
+- The figure is an image named by `text`. The repeated glyphs are hidden from assistive technology.
+- The rotation runs for longer than five seconds, so give it a visible pause control wired to `rotating` (WCAG 2.2.2).
+- Under `prefers-reduced-motion`, the rotation stops at the angle it has reached and the rings stay still. A press dims the text with a short fade and release fades it back. A change to the setting takes effect at once, without a reload.
+
 ## API reference
 
-| Prop              | Type      | Default  | Description                                                                                                                                                              |
-| ----------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `text`            | `string`  | Required | Repeats along the spiral path and names the graphic for assistive technology.                                                                                            |
-| `density`         | `number`  | `1`      | Adjusts the number of resting turns between `0.65` and `1.6`.                                                                                                            |
-| `tightenStrength` | `number`  | `0.35`   | Controls how closely the coils draw together, clamped from `0.08` to `0.7`.                                                                                              |
-| `rippleDuration`  | `number`  | `1800`   | Sets the outward wave duration in milliseconds, with a `300ms` minimum.                                                                                                  |
-| `rotating`        | `boolean` | `true`   | Rotates the text clockwise. Set to `false` to pause at the current angle. Wire it to a visible pause control, since the spin runs longer than five seconds (WCAG 2.2.2). |
-| `rotationSpeed`   | `number`  | `1`      | Rotations per minute. Higher values spin faster. Non-positive or non-finite values use the default.                                                                      |
-| `className`       | `string`  | None     | Sets layout constraints such as width or placement.                                                                                                                      |
+| Prop              | Type      | Default  | Description                                                                                                                                                   |
+| ----------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `text`            | `string`  | Required | Repeats along the spiral path and names the graphic for assistive technology.                                                                                 |
+| `density`         | `number`  | `1`      | Adjusts the number of resting turns between `0.65` and `1.6`.                                                                                                 |
+| `tightenStrength` | `number`  | `0.35`   | Controls how closely the coils draw together, clamped from `0.08` to `0.7`.                                                                                   |
+| `rippleDuration`  | `number`  | `1800`   | The time the outward wave takes to cross the figure, in milliseconds, with a `300ms` minimum.                                                                 |
+| `rotating`        | `boolean` | `true`   | Rotates the text clockwise. Set to `false` to coast to a stop at the current angle, and back to `true` to resume from it. Wire it to a visible pause control. |
+| `rotationSpeed`   | `number`  | `1`      | Rotations per minute. Higher values spin faster, and a change blends in from the current speed. Non-positive or non-finite values use the default.            |
+| `className`       | `string`  | None     | Sets layout constraints such as width or placement.                                                                                                           |
