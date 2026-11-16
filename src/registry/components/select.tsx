@@ -22,6 +22,14 @@ import {
   type SetStateAction,
 } from "react";
 
+// A critically damped spring, the one Motion resolves `visualDuration` with no bounce to. Written as
+// stiffness and damping because Motion drops velocity on time-defined springs, and the list can
+// reopen, and the value can change again, while the last move is still running.
+function criticalSpring(visualDuration: number) {
+  const omega = (2 * Math.PI) / (visualDuration * 1.2);
+  return { type: "spring", stiffness: omega * omega, damping: 2 * omega } as const;
+}
+
 /** Labels for each value, so the trigger can show a label while the list is closed. */
 export type SelectItems = Record<string, ReactNode> | ReadonlyArray<{ value: string; label: ReactNode }>;
 
@@ -188,11 +196,7 @@ export function SelectTrigger({ className, children, ...props }: SelectTriggerPr
           <motion.span
             initial={false}
             animate={{ rotate: select.open ? 180 : 0 }}
-            transition={
-              select.seconds === 0
-                ? { duration: 0 }
-                : { type: "spring", visualDuration: select.seconds, bounce: 0 }
-            }
+            transition={select.seconds === 0 ? { duration: 0 } : criticalSpring(select.seconds)}
           />
         }
         className="text-muted-foreground flex size-4 shrink-0 items-center justify-center"
@@ -230,8 +234,7 @@ export function SelectValue({ placeholder, children, className }: SelectValuePro
       : children
         ? children(value)
         : (entries(select.items).find((item) => item.value === value)?.label ?? value);
-  const transition: Transition =
-    seconds === 0 ? { duration: 0 } : { type: "spring", visualDuration: seconds * 0.8, bounce: 0 };
+  const transition: Transition = seconds === 0 ? { duration: 0 } : criticalSpring(seconds * 0.8);
 
   // Both labels share one grid cell so the old one slides out while the new one slides in.
   return (
@@ -300,7 +303,7 @@ export function SelectContent({
       opacity: 0,
       scale: 0.92,
       transition: {
-        scale: { type: "spring", visualDuration: seconds * 0.6, bounce: 0 },
+        scale: seconds === 0 ? { duration: 0 } : criticalSpring(seconds * 0.6),
         opacity: { duration: seconds * 0.6, ease: [0.4, 0, 1, 1] },
       },
     },
@@ -308,7 +311,7 @@ export function SelectContent({
       opacity: 1,
       scale: 1,
       transition: {
-        scale: { type: "spring", visualDuration: seconds, bounce: 0 },
+        scale: seconds === 0 ? { duration: 0 } : criticalSpring(seconds),
         opacity: { duration: seconds * 0.5 },
         staggerChildren: Math.min(0.02, seconds / 15),
         delayChildren: seconds * 0.1,
@@ -403,6 +406,8 @@ function ItemRow({
             seconds === 0
               ? { duration: 0 }
               : {
+                  // Time-defined on purpose: it only runs the layout animation between items,
+                  // which Motion always starts from rest.
                   type: "spring",
                   visualDuration: seconds,
                   bounce: 0,
