@@ -188,12 +188,78 @@
   pointer-events: none;
   user-select: none;
 }
-.landing-preview .landing-preview-banner {
-  font-size: 2rem;
+/* The previews mount once the cards have landed, and fade in rather than appear. */
+.landing-preview[data-live] {
+  animation: landing-preview-in 180ms ease-out;
 }
-.landing-preview .landing-preview-spiral {
+@keyframes landing-preview-in {
+  from {
+    opacity: 0;
+  }
+}
+.landing-preview .landing-preview-banner {
+  font-size: 1.25rem;
+}
+/* Fills the whole picture area, over the block's own position and height. */
+.landing-preview .landing-preview-fill {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
+}
+/* Twice the card's width, cropped to the middle, so the coil's letters stay legible. */
+.landing-preview .landing-preview-spiral {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 200%;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+}
+/* The block's own turn rate, 6° a second. `rotate` composes with the transform the block writes. */
+.landing-preview-spiral [data-spiral-rotation] {
+  animation: landing-spiral-turn 60s linear infinite;
+}
+@keyframes landing-spiral-turn {
+  to {
+    rotate: 360deg;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .landing-preview-spiral [data-spiral-rotation] {
+    animation: none;
+  }
+}
+/* A miniature reel: thumbnail-sized cards with no names or controls. */
+.landing-preview .landing-preview-reel {
+  width: 100%;
+  --arc-reel-card-width: 2.5rem;
+  --arc-reel-gap: 0.375rem;
+  --arc-reel-stage-padding: 1.25rem;
+  --arc-reel-background: transparent;
+}
+.landing-preview-reel section > div:nth-child(2),
+.landing-preview-reel [aria-roledescription="slide"] > div > div:first-child {
+  display: none;
+}
+.landing-preview-reel [aria-roledescription="slide"] > div {
+  padding: 2px;
+}
+/* The four symbols in a row, without their labels. */
+.landing-preview .landing-preview-particles ul {
+  flex-wrap: nowrap;
+  gap: 0;
+}
+.landing-preview .landing-preview-particles :is(a, button) {
+  padding: 0;
+  gap: 0;
+}
+.landing-preview .landing-preview-particles svg {
+  width: 1.875rem;
+  height: 1.875rem;
+}
+.landing-preview .landing-preview-particles span {
+  display: none;
 }
 /* The block demo's phone size, so the ring fits a phone without dropping below its minimum scale. */
 @media (max-width: 30rem) {

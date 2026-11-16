@@ -1,13 +1,14 @@
 "use client";
 
 import { CheckIcon, XIcon } from "@phosphor-icons/react";
+import Image from "next/image";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { z } from "zod";
 
-import { ActivityPill, type Activity } from "@/registry/blocks/activity-pill";
+import { ArcReel, type ArcReelItem } from "@/registry/blocks/arc-reel";
 import { AsciiLens } from "@/registry/blocks/ascii-lens";
-import { AsciiMorph, type AsciiMorphShape } from "@/registry/blocks/ascii-morph";
 import { AsciiTerrain } from "@/registry/blocks/ascii-terrain";
+import { ParticleMenu, type ParticleMenuItem } from "@/registry/blocks/particle-menu";
 import { SpiralText } from "@/registry/blocks/spiral-text";
 import { TaskSteps, type TaskStep } from "@/registry/blocks/task-steps";
 import { TextBanner } from "@/registry/blocks/text-banner";
@@ -163,75 +164,6 @@ function ValidatedInputPreview() {
   );
 }
 
-const morphShapes: AsciiMorphShape[] = ["globe", "flower"];
-
-function AsciiMorphPreview() {
-  const tick = useTick(2600);
-  return (
-    <AsciiMorph
-      shape={morphShapes[tick % morphShapes.length]}
-      interactive={false}
-      duration={900}
-      className="h-full w-full"
-    />
-  );
-}
-
-function AsciiTerrainPreview() {
-  return <AsciiTerrain interactive={false} cellSize={8} className="absolute inset-0 size-full" />;
-}
-
-const phrases = ["MAKE IT CLEAR.", "MAKE IT COUNT.", "MAKE IT YOURS."];
-
-function TextScramblePreview() {
-  const tick = useTick(2200);
-  return <TextScramble text={phrases[tick % phrases.length]} duration={900} className="font-mono text-sm" />;
-}
-
-function TextBannerPreview() {
-  return <TextBanner items={["a1ui", "Blocks"]} speed={40} className="landing-preview-banner w-full" />;
-}
-
-function SpiralTextPreview() {
-  return <SpiralText text="A1UI · BLOCKS · " className="landing-preview-spiral" />;
-}
-
-const stepLabels = ["Install", "Build", "Deploy"];
-
-function TaskStepsPreview() {
-  const tick = useTick(900);
-  const phase = tick % (stepLabels.length * 2 + 2);
-  const steps: TaskStep[] = stepLabels.map((label, index) => {
-    const at = phase - index * 2;
-    return { id: label, label, status: at >= 2 ? "done" : at >= 0 ? "running" : "pending" };
-  });
-  return <TaskSteps steps={steps} className="w-full" />;
-}
-
-const activities: Activity[] = [
-  { id: "upload", status: "running", title: "Uploading" },
-  { id: "upload", status: "progress", title: "Uploading", value: 40 },
-  { id: "upload", status: "progress", title: "Uploading", value: 85 },
-  { id: "upload", status: "success", title: "Uploaded" },
-];
-
-function ActivityPillPreview() {
-  const tick = useTick(1000);
-  return <ActivityPill activity={activities[tick % activities.length]} contained successDuration={0} />;
-}
-
-function AsciiLensPreview() {
-  return (
-    <AsciiLens
-      src="/images/arc-reel/city.webp"
-      alt=""
-      cellSize={6}
-      interactive={false}
-      className="absolute inset-0 size-full"
-    />
-  );
-}
-
 /** Small, self-running versions of each demo, shown inside the landing page's Card Vortex cards. */
 export const componentPreviews: Record<string, () => ReactNode> = {
   switch: SwitchPreview,
@@ -244,13 +176,111 @@ export const componentPreviews: Record<string, () => ReactNode> = {
   "validated-input": ValidatedInputPreview,
 };
 
+// Blocks, kept small so each fits its card and eight of them stay smooth while the ring moves.
+
+function TextBannerPreview() {
+  return <TextBanner items={["a1ui", "Blocks"]} speed={30} className="landing-preview-banner w-full" />;
+}
+
+const reelScenes = ["astral", "city", "railway", "deep-ocean", "library", "sound-wave"];
+const reelItems: ArcReelItem[] = reelScenes.map((scene) => ({
+  id: scene,
+  name: "",
+  artwork: (
+    <Image
+      src={`/images/arc-reel/${scene}.webp`}
+      alt=""
+      fill
+      sizes="64px"
+      className="object-cover"
+      draggable={false}
+    />
+  ),
+}));
+
+function ArcReelPreview() {
+  const ref = useRef<HTMLSpanElement>(null);
+  // The reel has no autoplay, so the preview steps it with its own arrow key on a beat. A click
+  // on its next button would bubble up to the card's link and follow it.
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const viewport = ref.current?.querySelector("[tabindex='0']");
+      viewport?.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true }));
+    }, 1600);
+    return () => clearInterval(timer);
+  }, []);
+  return (
+    <span ref={ref} className="landing-preview-reel">
+      <ArcReel items={reelItems} initialIndex={1} ariaLabel="" />
+    </span>
+  );
+}
+
+function AsciiTerrainPreview() {
+  return <AsciiTerrain interactive={false} cellSize={7} className="landing-preview-fill" />;
+}
+
+const words = ["HELLO", "BLOCKS", "A1UI"];
+
+function TextScramblePreview() {
+  const tick = useTick(2000);
+  return <TextScramble text={words[tick % words.length]} duration={700} className="font-mono text-sm" />;
+}
+
+function SpiralTextPreview() {
+  // The block spins its coils from JavaScript, and inside an inert card it skips promoting them to
+  // their own layer, so every frame repainted thousands of SVG glyphs. Here the coils hold still
+  // and a CSS animation turns them on the compositor instead.
+  return <SpiralText text="A1UI · " density={0.65} rotating={false} className="landing-preview-spiral" />;
+}
+
+const stepLabels = ["Build", "Deploy"];
+
+function TaskStepsPreview() {
+  const tick = useTick(900);
+  const phase = tick % (stepLabels.length * 2 + 2);
+  const steps: TaskStep[] = stepLabels.map((label, index) => {
+    const at = phase - index * 2;
+    return { id: label, label, status: at >= 2 ? "done" : at >= 0 ? "running" : "pending" };
+  });
+  return (
+    <Fit zoom={0.8}>
+      <TaskSteps steps={steps} className="w-full" />
+    </Fit>
+  );
+}
+
+function AsciiLensPreview() {
+  return (
+    <AsciiLens
+      src="/images/arc-reel/city.webp"
+      alt=""
+      cellSize={6}
+      interactive={false}
+      className="landing-preview-fill"
+    />
+  );
+}
+
+const particleItems: ParticleMenuItem[] = [
+  { id: "grace", label: "Grace", shape: "grace" },
+  { id: "runes", label: "Runes", shape: "runes" },
+  { id: "ashes", label: "Ashes", shape: "ashes" },
+  { id: "oaths", label: "Oaths", shape: "oaths" },
+];
+
+function ParticleMenuPreview() {
+  return <ParticleMenu items={particleItems} ariaLabel="" className="landing-preview-particles" />;
+}
+
+/** In ring order: the first sits at the top and the rest go round clockwise. */
 export const blockPreviews: Record<string, () => ReactNode> = {
-  "ascii-morph": AsciiMorphPreview,
+  "text-banner": TextBannerPreview,
+  "arc-reel": ArcReelPreview,
   "ascii-terrain": AsciiTerrainPreview,
   "text-scramble": TextScramblePreview,
-  "text-banner": TextBannerPreview,
   "spiral-text": SpiralTextPreview,
   "task-steps": TaskStepsPreview,
-  "activity-pill": ActivityPillPreview,
   "ascii-lens": AsciiLensPreview,
+  "particle-menu": ParticleMenuPreview,
 };

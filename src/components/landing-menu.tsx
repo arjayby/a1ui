@@ -1,12 +1,15 @@
 "use client";
 
-import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
+import { startTransition, useEffect, useState, type CSSProperties, type ReactNode } from "react";
 
-import { componentPreviews } from "@/components/landing-previews";
+import { blockPreviews, componentPreviews } from "@/components/landing-previews";
+import { blocks } from "@/lib/block-catalog";
 import { components } from "@/lib/component-catalog";
 import { CardVortex, type CardVortexItem } from "@/registry/blocks/card-vortex";
 import { ParticleMenu, type ParticleMenuItem } from "@/registry/blocks/particle-menu";
 
+/** How long after opening the previews mount: the last card has landed by then. */
+const MOUNT_DELAY = 320;
 /** How long the previews stay mounted after the ring closes, so they don't vanish mid-exit. */
 const UNMOUNT_DELAY = 600;
 
@@ -16,6 +19,12 @@ const sections = {
     base: "/components",
     previews: componentPreviews,
     catalog: components,
+  },
+  blocks: {
+    label: "Blocks",
+    base: "/blocks",
+    previews: blockPreviews,
+    catalog: blocks,
   },
 };
 
@@ -28,7 +37,7 @@ const vortexStyle = { "--card-vortex-image": "var(--background)" } as CSSPropert
 function PreviewStage({ children }: { children: ReactNode }) {
   // A live render of the component, for looking at only: the card itself is the link.
   return (
-    <span className="landing-preview" inert aria-hidden="true">
+    <span className="landing-preview" data-live={children ? "" : undefined} inert aria-hidden="true">
       {children}
     </span>
   );
@@ -40,14 +49,12 @@ function SectionVortex({ id, control }: { id: SectionId; control: ReactNode }) {
   const [live, setLive] = useState(false);
 
   // The previews run only while the ring is open, and a moment after so the exit stays intact.
-  const changeOpen = (next: boolean) => {
-    setOpen(next);
-    if (next) setLive(true);
-  };
-
+  // The cards fly out on a main-thread spring, so the previews wait until they have landed: setting
+  // up eight live demos mid-flight dropped frames. The mount is a transition, so it can yield too.
   useEffect(() => {
-    if (open) return;
-    const timer = setTimeout(() => setLive(false), UNMOUNT_DELAY);
+    const timer = open
+      ? setTimeout(() => startTransition(() => setLive(true)), MOUNT_DELAY)
+      : setTimeout(() => setLive(false), UNMOUNT_DELAY);
     return () => clearTimeout(timer);
   }, [open]);
 
@@ -68,7 +75,7 @@ function SectionVortex({ id, control }: { id: SectionId; control: ReactNode }) {
     <CardVortex
       items={items}
       open={open}
-      onOpenChange={changeOpen}
+      onOpenChange={setOpen}
       ariaLabel={`${label} previews`}
       className="landing-vortex"
       style={vortexStyle}
