@@ -13,7 +13,9 @@ export function ShapeFlowDemo() {
         </div>
         <ShapeFlow text={text} />
       </div>
-      <p className="demo-caption text-center">Drag the duck. Follow the words. Arrow keys work, too.</p>
+      <p className="demo-caption text-center">
+        Drag the duck, or flick it. Follow the words. Arrow keys work, too.
+      </p>
     </>
   );
 }

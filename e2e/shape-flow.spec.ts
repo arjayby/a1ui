@@ -86,10 +86,17 @@ test("dragging reflows every word around the duck and releases pointer capture",
   });
   await expect(handle).toHaveAttribute("data-dragging", "true");
   await expect.poll(() => duckScale(handle)).toBeCloseTo(1.04, 2);
+  // The duck stays under the pointer where it was grabbed, moved by its transform alone.
+  await expect.poll(async () => (await handle.boundingBox())!.x).toBeCloseTo(before!.x - 90, 0);
+  expect((await handle.boundingBox())!.y).toBeCloseTo(before!.y + 70, 0);
+  expect(await handle.evaluate((element) => [element.style.left, element.style.top])).toEqual(["", ""]);
+  await expectReadableFlow(flow);
+  // Hold still before letting go, so the release carries no momentum.
+  await page.waitForTimeout(150);
   await page.mouse.up();
   await expect(handle).toHaveAttribute("data-dragging", "false");
   await expect(handle).toHaveCSS("outline-style", "none");
-  expect((await handle.boundingBox())!.x).toBeLessThan(before!.x - 60);
+  expect((await handle.boundingBox())!.x).toBeCloseTo(before!.x - 90, 0);
   expect(await flow.locator('[data-slot="shape-flow-line"]').allTextContents()).not.toEqual(initialLines);
   await expectReadableFlow(flow);
   await expect.poll(() => duckScale(handle)).toBe(1);
@@ -105,7 +112,7 @@ test("dragging reflows every word around the duck and releases pointer capture",
   await expectReadableFlow(flow);
 });
 
-test("a flick carries the duck past the release point, then reduced motion drops it in place", async ({
+test("a flick carries the duck past the release point, and reduced motion sets it down in place", async ({
   page,
 }) => {
   await page.goto("/blocks/shape-flow");
@@ -121,23 +128,70 @@ test("a flick carries the duck past the release point, then reduced motion drops
     await page.mouse.move(x, y);
     await page.mouse.down();
     await page.mouse.move(x + distance, y, { steps: 4 });
-    const released = (await handle.boundingBox())!.x;
     await page.mouse.up();
     // Let any momentum play out before measuring where the duck came to rest.
     await page.waitForTimeout(1200);
-    return { released, rested: (await handle.boundingBox())!.x };
+    // The duck tracks the pointer 1:1, so it was let go this far from where it started.
+    return { released: start.x + distance, rested: (await handle.boundingBox())!.x };
   };
 
   const flick = await throwDuck(-60);
   expect(flick.rested).toBeLessThan(flick.released - 10);
   await expectReadableFlow(flow);
 
+  // Motion reads the preference when the block mounts.
   await page.emulateMedia({ reducedMotion: "reduce" });
-  await handle.focus();
-  await page.keyboard.press("Home");
+  await page.reload();
+  await expect(flow).toHaveAttribute("data-state", "ready");
+  await handle.scrollIntoViewIfNeeded();
   const still = await throwDuck(60);
   expect(still.rested).toBeCloseTo(still.released, 0);
   expect(await duckScale(handle)).toBe(1);
+  await expectReadableFlow(flow);
+});
+
+test("an edge gives under the pointer, and stops the duck dead with reduced motion", async ({ page }) => {
+  await page.goto("/blocks/shape-flow");
+  const flow = page.locator('[data-slot="shape-flow"]');
+  await expect(flow).toHaveAttribute("data-state", "ready");
+  const handle = flow.getByRole("button", { name: "Move duck" });
+  await handle.scrollIntoViewIfNeeded();
+
+  // Drags the duck 300px past the paragraph's left edge and reports how far out it follows.
+  const pullPastEdge = async () => {
+    const start = (await handle.boundingBox())!;
+    const bounds = (await flow.boundingBox())!;
+    const x = start.x + start.width / 2;
+    const y = start.y + start.height / 2;
+    await page.mouse.move(x, y);
+    await page.mouse.down();
+    await page.mouse.move(x - (start.x - bounds.x) - 300, y, { steps: 6 });
+    await expect(handle).toHaveAttribute("data-dragging", "true");
+    return () => handle.boundingBox().then((duck) => bounds.x - duck!.x);
+  };
+
+  let overhang = await pullPastEdge();
+  // It follows with growing resistance: well short of the pointer, and never a full duck out.
+  await expect.poll(overhang).toBeGreaterThan(20);
+  expect(await overhang()).toBeLessThan(80);
+  await expectReadableFlow(flow);
+  await page.waitForTimeout(150);
+  await page.mouse.up();
+  await expect.poll(overhang).toBeCloseTo(0, 0);
+  await expectReadableFlow(flow);
+
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.reload();
+  await expect(flow).toHaveAttribute("data-state", "ready");
+  await handle.scrollIntoViewIfNeeded();
+  overhang = await pullPastEdge();
+  await expect.poll(overhang).toBeCloseTo(0, 0);
+  // The held duck dims instead of lifting.
+  await expect(handle.locator('[data-slot="shape-flow-duck"]')).toHaveCSS("opacity", "0.75");
+  expect(await duckScale(handle)).toBe(1);
+  await page.mouse.up();
+  await expect(handle.locator('[data-slot="shape-flow-duck"]')).toHaveCSS("opacity", "1");
+  expect(await overhang()).toBeCloseTo(0, 0);
   await expectReadableFlow(flow);
 });
 
@@ -154,9 +208,10 @@ test("keyboard movement, reset and responsive layout preserve readable text", as
   expect(initial!.y + initial!.height / 2).toBeCloseTo(area!.y + area!.height / 2, 0);
   await page.keyboard.press("Shift+ArrowRight");
   await expect(handle).toHaveCSS("outline-style", "solid");
-  expect((await handle.boundingBox())!.x - initial!.x).toBeCloseTo(32, 0);
+  // With reduced motion a step is placed on the next frame, without a spring.
+  await expect.poll(async () => (await handle.boundingBox())!.x - initial!.x).toBeCloseTo(32, 0);
   await page.keyboard.press("Home");
-  expect((await handle.boundingBox())!.x).toBeCloseTo(initial!.x, 0);
+  await expect.poll(async () => (await handle.boundingBox())!.x).toBeCloseTo(initial!.x, 0);
   for (const width of [752, 390, 280, 900]) {
     await page.setViewportSize({ width, height: 844 });
     await expect.poll(async () => (await flow.boundingBox())!.width).toBeLessThan(width);

@@ -9,6 +9,15 @@ import {
 } from "@chenglou/pretext";
 import { clsx } from "clsx";
 import {
+  animate,
+  cancelFrame,
+  frame,
+  motion,
+  useMotionValue,
+  useReducedMotion,
+  type MotionValue,
+} from "motion/react";
+import {
   useEffect,
   useId,
   useLayoutEffect,
@@ -18,6 +27,7 @@ import {
   type KeyboardEvent,
   type PointerEvent,
 } from "react";
+import { flushSync } from "react-dom";
 
 export type ShapeFlowProps = {
   text: string;
@@ -75,42 +85,34 @@ const duckRows = duckArt.map((row, index) => ({
 }));
 // Reserve room for the lifted duck so its glyphs never touch the paragraph while held.
 const liftPadding = 3;
-// The duck lifts the moment it is pressed and settles back without overshoot on release.
-const duckStyles = `
-  [data-slot="shape-flow-duck"] {
-    transform-origin: 50% 50%;
-    transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
-  }
-  [data-slot="shape-flow-handle"][data-dragging="true"] [data-slot="shape-flow-duck"] {
-    transform: scale(1.04);
-    transition-duration: 120ms;
-  }
-  @media (prefers-reduced-motion: reduce) {
-    [data-slot="shape-flow-duck"] { transition: none; }
-    [data-slot="shape-flow-handle"][data-dragging="true"] [data-slot="shape-flow-duck"] {
-      transform: none;
-      opacity: 0.75;
-    }
-  }
-`;
-// A flick hands its velocity to a lightly damped spring (damping 0.8, response 0.4s) that
-// settles on the momentum-projected point, as a thrown object would.
-const settleResponse = 0.4;
-const settleDamping = 0.8;
+// Apple's spring terms: a 0.4s response, and a damping ratio of 1 (no overshoot) or 0.8 (a slight
+// bounce). Written as stiffness and damping because Motion drops `velocity` on duration-based
+// springs, and every release hands its spring a velocity.
+const frequency = (2 * Math.PI) / 0.4;
+// Keyboard moves, and a duck let go at rest, ease into place without overshooting.
+const settleSpring = { type: "spring", stiffness: frequency ** 2, damping: 2 * frequency } as const;
+// Bounce is reserved for a flick: only a release that carried momentum overshoots.
+const throwSpring = { type: "spring", stiffness: frequency ** 2, damping: 1.6 * frequency } as const;
+const flickSpeed = 500;
+// The duck lifts the moment it is pressed and sets down a little slower on release.
+const liftSpring = { type: "spring", visualDuration: 0.15, bounce: 0 } as const;
+const dropSpring = { type: "spring", visualDuration: 0.3, bounce: 0 } as const;
+// Reduced motion: the held duck dims instead of lifting.
+const fade = { duration: 0.15, ease: "easeOut" } as const;
 const deceleration = 0.998;
 const velocityWindow = 100;
 const maxVelocity = 8000;
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
+// Where a value moving at `velocity` per second would coast to a stop, as a scroll view decelerates.
 const project = (velocity: number) => ((velocity / 1000) * deceleration) / (1 - deceleration);
-// Past an edge the duck follows with growing resistance instead of stopping dead.
 const rubberband = (overshoot: number, dimension: number) =>
   (overshoot * dimension * 0.55) / (dimension + 0.55 * Math.abs(overshoot));
-const soften = (value: number, travel: number, dimension: number) => {
-  const edge = clamp(value, 0, 1);
-  return travel > 0 && dimension > 0 ? edge + rubberband((value - edge) * travel, dimension) / travel : edge;
+// Where an offset along the duck's travel shows on screen. Past an edge the duck follows with
+// growing resistance instead of stopping dead; with reduced motion it stops at the edge.
+const place = (offset: number, travel: number, dimension: number, elastic: boolean) => {
+  const edge = clamp(offset, 0, travel);
+  return elastic && travel > 0 && dimension > 0 ? edge + rubberband(offset - edge, dimension) : edge;
 };
-const prefersReducedMotion = () =>
-  typeof window.matchMedia === "function" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const positive = (value: number, fallback: number) =>
   Number.isFinite(value) && value > 0 ? value : fallback;
 
@@ -124,22 +126,33 @@ export function ShapeFlow({
   fontFamily = "Georgia",
   className,
 }: ShapeFlowProps) {
+  const reducedMotion = useReducedMotion() ?? false;
   const containerRef = useRef<HTMLDivElement>(null);
+  // `originX` and `originY` are where the pointer would be with the duck at the start of its
+  // travel, so the offset from where it was grabbed holds for the whole drag.
   const dragRef = useRef<{
     id: number;
-    x: number;
-    y: number;
-    left: number;
-    top: number;
+    originX: number;
+    originY: number;
     samples: { x: number; y: number; time: number }[];
-    position: { x: number; y: number };
   } | null>(null);
-  const settleFrameRef = useRef(0);
-  const geometryRef = useRef({ travelX: 0, travelY: 0 });
+  // Where the duck rests, or is heading: keyboard steps add up from here while it is still moving.
+  const restRef = useRef(initialPosition);
+  // The paragraph changes height as it reflows, and a duck that is held or thrown must not move
+  // with it. Until it lands, `y` is measured against the vertical travel the duck had when it was
+  // picked up, which pins it to a pixel offset. At rest `y` is a share of the current travel, so
+  // the duck keeps its place when the paragraph is resized.
+  const spanRef = useRef<number | null>(null);
+  const travelRef = useRef(0);
   const instructionsId = useId();
   const duckGradientId = useId();
+  // The duck's live position as a share of its travel on each axis. A drag sets these 1:1 and a
+  // release springs each one on its own. They run past 0 and 1, and `place` softens what shows.
+  const x = useMotionValue(initialPosition.x);
+  const y = useMotionValue(initialPosition.y);
   const [width, setWidth] = useState(0);
-  const [position, setPosition] = useState(initialPosition);
+  // The motion values as of this frame, with the travel `y` is pinned to while there is one.
+  const [position, setPosition] = useState<{ x: number; y: number; span?: number }>(initialPosition);
   const [dragging, setDragging] = useState(false);
   const [measurement, setMeasurement] = useState<{
     text: string;
@@ -152,8 +165,9 @@ export function ShapeFlow({
   const areaHeight = positive(height, 320);
   const spacing = Number.isFinite(gap) ? Math.max(0, gap) : 4;
   const halfExtent = Math.min(positive(radius, 80), width / 3, areaHeight / 3);
+  const elastic = !reducedMotion;
   const travelX = Math.max(0, width - halfExtent * 2);
-  const centerX = halfExtent + position.x * travelX;
+  const centerX = halfExtent + place(position.x * travelX, travelX, halfExtent, elastic);
   const font = `400 ${size}px ${fontFamily}`;
   const prepared = measurement?.text === text && measurement.font === font ? measurement.prepared : null;
 
@@ -183,10 +197,29 @@ export function ShapeFlow({
     };
   }, [font, text]);
 
+  // The paragraph reflows around the duck's live position. Both axes commit as one layout in
+  // Motion's render step, so the text and the duck land on the same frame as the drag or spring
+  // that moved them.
+  useEffect(() => {
+    const commit = () =>
+      flushSync(() => setPosition({ x: x.get(), y: y.get(), span: spanRef.current ?? undefined }));
+    const schedule = () => frame.render(commit);
+    const stopX = x.on("change", schedule);
+    const stopY = y.on("change", schedule);
+    return () => {
+      stopX();
+      stopY();
+      cancelFrame(commit);
+      x.stop();
+      y.stop();
+    };
+  }, [x, y]);
+
   const flow = useMemo(() => {
     if (!prepared || width <= 0) return null;
     const layoutAtHeight = (layoutHeight: number) => {
-      const centerY = halfExtent + position.y * Math.max(0, layoutHeight - halfExtent * 2);
+      const travel = Math.max(0, layoutHeight - halfExtent * 2);
+      const centerY = halfExtent + place(position.y * (position.span ?? travel), travel, halfExtent, elastic);
       const fragments: { text: string; x: number; y: number; width: number }[] = [];
       let cursor: LayoutCursor = { segmentIndex: 0, graphemeIndex: 0 };
       let y = 0;
@@ -236,81 +269,92 @@ export function ShapeFlow({
       if (result.height <= layoutHeight) return result;
       layoutHeight = result.height;
     }
-  }, [prepared, width, halfExtent, spacing, centerX, position.y, leading, size, areaHeight]);
+  }, [
+    prepared,
+    width,
+    halfExtent,
+    spacing,
+    centerX,
+    position.y,
+    position.span,
+    elastic,
+    leading,
+    size,
+    areaHeight,
+  ]);
 
   const travelY = Math.max(0, (flow?.height ?? areaHeight) - halfExtent * 2);
-  const centerY = halfExtent + position.y * travelY;
+  const centerY = halfExtent + place(position.y * (position.span ?? travelY), travelY, halfExtent, elastic);
 
   useLayoutEffect(() => {
-    geometryRef.current = { travelX, travelY };
+    travelRef.current = travelY;
   });
 
-  useEffect(() => () => cancelAnimationFrame(settleFrameRef.current), []);
-
-  function stopSettling() {
-    cancelAnimationFrame(settleFrameRef.current);
-    settleFrameRef.current = 0;
+  // Lets go of the pixel offset: `y` becomes a share of the travel again, measured against the
+  // paragraph as it is laid out now, so nothing moves on screen.
+  function unpin() {
+    const span = spanRef.current;
+    if (span === null) return;
+    spanRef.current = null;
+    const scale = span > 0 && travelRef.current > 0 ? span / travelRef.current : 1;
+    y.jump(y.get() * scale);
+    restRef.current = { x: restRef.current.x, y: clamp(restRef.current.y * scale, 0, 1) };
+    setPosition({ x: x.get(), y: y.get() });
   }
 
-  // Animate from the on-screen position toward the projected resting point, carrying the
-  // release velocity (normalized units per second) so there is no seam between drag and spring.
-  function settle(from: { x: number; y: number }, velocity: { x: number; y: number }) {
-    stopSettling();
-    const omega = (2 * Math.PI) / settleResponse;
-    const axes = (["x", "y"] as const).map((axis) => ({
-      axis,
-      value: from[axis],
-      velocity: velocity[axis],
-      target: clamp(from[axis] + project(velocity[axis]), 0, 1),
-    }));
-    let previous: number | null = null;
-    const step = (now: number) => {
-      const elapsed = previous === null ? 1 / 60 : Math.min(0.064, (now - previous) / 1000);
-      previous = now;
-      const substeps = Math.max(1, Math.ceil(elapsed * 240));
-      const dt = elapsed / substeps;
-      const { travelX: currentX, travelY: currentY } = geometryRef.current;
-      let resting = true;
-      for (const state of axes) {
-        for (let index = 0; index < substeps; index += 1) {
-          const acceleration =
-            -omega * omega * (state.value - state.target) - 2 * settleDamping * omega * state.velocity;
-          state.velocity += acceleration * dt;
-          state.value += state.velocity * dt;
-        }
-        const travel = state.axis === "x" ? currentX : currentY;
-        const scale = Math.max(1, travel);
-        if (Math.abs(state.value - state.target) * scale > 0.5 || Math.abs(state.velocity) * scale > 10) {
-          resting = false;
-        }
-      }
-      const [x, y] = axes;
-      if (resting) {
-        settleFrameRef.current = 0;
-        setPosition({ x: x.target, y: y.target });
-        return;
-      }
-      setPosition({ x: soften(x.value, currentX, halfExtent), y: soften(y.value, currentY, halfExtent) });
-      settleFrameRef.current = requestAnimationFrame(step);
-    };
-    settleFrameRef.current = requestAnimationFrame(step);
+  // Sends the duck to a resting point. Each axis has its own spring, which starts from the value
+  // on screen and keeps the velocity it has (or is handed), so a duck in flight never jumps or
+  // stalls when it is given somewhere new to go. With reduced motion it is placed there at once.
+  function send(
+    target: { x: number; y: number },
+    transition: typeof settleSpring | typeof throwSpring = settleSpring,
+    velocity?: { x: number; y: number },
+  ) {
+    restRef.current = target;
+    const axes: [MotionValue<number>, "x" | "y", number][] = [
+      [x, "x", travelX],
+      [y, "y", spanRef.current ?? travelY],
+    ];
+    const flights = axes.map(([value, axis, travel]) => {
+      if (reducedMotion || travel <= 0) return void value.jump(target[axis]);
+      if (value.get() === target[axis] && !velocity?.[axis] && !value.isAnimating()) return;
+      return animate(value, target[axis], {
+        ...transition,
+        ...(velocity && { velocity: velocity[axis] }),
+        // The values are shares of the travel, so rest is half a pixel and 10 pixels a second.
+        restDelta: 0.5 / travel,
+        restSpeed: 10 / travel,
+      });
+    });
+    void Promise.all(flights).then(land);
+  }
+
+  // A thrown duck has come to rest. If it was thrown at the lower edge, or the paragraph has
+  // since moved that edge above it, it settles onto the edge where the paragraph has put it.
+  function land() {
+    if (spanRef.current === null || dragRef.current || x.isAnimating() || y.isAnimating()) return;
+    const bound = restRef.current.y === 1;
+    unpin();
+    if (y.get() > 1 || (bound && y.get() < 1)) send({ x: x.get(), y: 1 });
+    else restRef.current = { x: x.get(), y: y.get() };
   }
 
   function startDrag(event: PointerEvent<HTMLButtonElement>) {
     if (!event.isPrimary || event.button !== 0 || dragRef.current) return;
-    const bounds = containerRef.current?.getBoundingClientRect();
-    if (!bounds) return;
-    // Catch a settling duck where it is on screen, keeping the offset from where it was grabbed.
-    stopSettling();
-    event.currentTarget.setPointerCapture(event.pointerId);
+    // Catch a duck in flight where it is on screen. The springs stop on their live values and
+    // the drag carries on from them, so nothing jumps and the grab offset is kept.
+    x.stop();
+    y.stop();
+    spanRef.current ??= travelY;
+    // Capture keeps the drag alive outside the duck. It can fail if the pointer is already gone.
+    try {
+      event.currentTarget.setPointerCapture(event.pointerId);
+    } catch {}
     dragRef.current = {
       id: event.pointerId,
-      x: event.clientX - bounds.left - centerX,
-      y: event.clientY - bounds.top - centerY,
-      left: bounds.left,
-      top: bounds.top,
+      originX: event.clientX - x.get() * travelX,
+      originY: event.clientY - y.get() * spanRef.current,
       samples: [{ x: event.clientX, y: event.clientY, time: event.timeStamp }],
-      position,
     };
     setDragging(true);
   }
@@ -322,14 +366,10 @@ export function ShapeFlow({
     while (drag.samples.length > 2 && event.timeStamp - drag.samples[0].time > velocityWindow) {
       drag.samples.shift();
     }
-    const edge = prefersReducedMotion()
-      ? (value: number) => clamp(value, 0, 1)
-      : (value: number, travel: number) => soften(value, travel, halfExtent);
-    drag.position = {
-      x: travelX ? edge((event.clientX - drag.left - drag.x - halfExtent) / travelX, travelX) : 0.5,
-      y: travelY ? edge((event.clientY - drag.top - drag.y - halfExtent) / travelY, travelY) : 0.5,
-    };
-    setPosition(drag.position);
+    // 1:1 with the pointer. A container with no room to move in leaves the duck where it is.
+    const span = spanRef.current ?? 0;
+    if (travelX) x.set((event.clientX - drag.originX) / travelX);
+    if (span) y.set((event.clientY - drag.originY) / span);
   }
 
   function endDrag(event: PointerEvent<HTMLButtonElement>) {
@@ -340,23 +380,30 @@ export function ShapeFlow({
     if (event.currentTarget.hasPointerCapture(event.pointerId)) {
       event.currentTarget.releasePointerCapture(event.pointerId);
     }
-    if (prefersReducedMotion()) {
-      setPosition({ x: clamp(drag.position.x, 0, 1), y: clamp(drag.position.y, 0, 1) });
-      return;
+    if (reducedMotion) {
+      // No momentum and no spring: the duck stays where it was let go, inside the bounds.
+      unpin();
+      return send({ x: clamp(x.get(), 0, 1), y: clamp(y.get(), 0, 1) });
     }
-    // Only a release carries momentum. A cancelled gesture just eases back inside the bounds.
+    // Only a lifted pointer that was still moving carries momentum. Speed is measured up to the
+    // moment of release, so a pause before lifting bleeds it away, and a cancelled gesture has none:
+    // either way the duck just eases back inside the bounds.
     const recent = drag.samples.filter((sample) => event.timeStamp - sample.time <= velocityWindow);
     const first = recent[0];
     const last = recent[recent.length - 1];
-    const seconds = first && last ? (last.time - first.time) / 1000 : 0;
-    const velocity = (distance: number, travel: number) =>
-      event.type === "pointerup" && seconds > 0 && travel > 0
-        ? clamp(distance / seconds, -maxVelocity, maxVelocity) / travel
-        : 0;
-    settle(drag.position, {
-      x: velocity(last ? last.x - first.x : 0, travelX),
-      y: velocity(last ? last.y - first.y : 0, travelY),
-    });
+    const seconds = first ? (event.timeStamp - first.time) / 1000 : 0;
+    const moving = event.type === "pointerup" && seconds > 0;
+    const speedX = moving ? clamp((last.x - first.x) / seconds, -maxVelocity, maxVelocity) : 0;
+    const speedY = moving ? clamp((last.y - first.y) / seconds, -maxVelocity, maxVelocity) : 0;
+    // The springs take over at the pointer's velocity, so there is no seam between dragging and
+    // settling, and momentum decides where the duck comes to rest.
+    const span = spanRef.current ?? 0;
+    const velocity = { x: travelX ? speedX / travelX : 0, y: span ? speedY / span : 0 };
+    send(
+      { x: clamp(x.get() + project(velocity.x), 0, 1), y: clamp(y.get() + project(velocity.y), 0, 1) },
+      Math.hypot(speedX, speedY) >= flickSpeed ? throwSpring : settleSpring,
+      velocity,
+    );
   }
 
   function moveWithKeyboard(event: KeyboardEvent<HTMLButtonElement>) {
@@ -366,21 +413,18 @@ export function ShapeFlow({
       ArrowUp: [0, -1],
       ArrowDown: [0, 1],
     };
-    if (event.key === "Home") {
-      event.preventDefault();
-      stopSettling();
-      setPosition(initialPosition);
-      return;
-    }
     const direction = directions[event.key];
-    if (!direction) return;
+    if (!direction && event.key !== "Home") return;
     event.preventDefault();
-    stopSettling();
+    // A held duck belongs to the pointer.
+    if (dragRef.current) return;
+    unpin();
+    if (!direction) return send(initialPosition);
     const step = event.shiftKey ? 32 : 8;
-    setPosition((current) => ({
-      x: clamp(current.x + (direction[0] * step) / (travelX || 1), 0, 1),
-      y: clamp(current.y + (direction[1] * step) / (travelY || 1), 0, 1),
-    }));
+    send({
+      x: clamp(restRef.current.x + (direction[0] * step) / (travelX || 1), 0, 1),
+      y: clamp(restRef.current.y + (direction[1] * step) / (travelY || 1), 0, 1),
+    });
   }
 
   return (
@@ -425,12 +469,14 @@ export function ShapeFlow({
             aria-describedby={instructionsId}
             data-slot="shape-flow-handle"
             data-dragging={dragging}
-            className="text-foreground focus-visible:outline-ring absolute flex touch-none items-center justify-center border-0 bg-transparent p-0 outline-none select-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-solid"
+            className="text-foreground focus-visible:outline-ring absolute top-0 left-0 flex touch-none items-center justify-center border-0 bg-transparent p-0 outline-none select-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-solid"
             style={{
-              left: centerX - halfExtent,
-              top: centerY - halfExtent,
               width: halfExtent * 2,
               height: halfExtent * 2,
+              // Only the transform moves the duck. It is written in the same commit as the lines
+              // it displaces, so the two can never be a frame apart.
+              transform: `translate(${centerX - halfExtent}px, ${centerY - halfExtent}px)`,
+              willChange: "transform",
               cursor: dragging ? "grabbing" : "grab",
             }}
             onPointerDown={startDrag}
@@ -455,13 +501,21 @@ export function ShapeFlow({
                   <stop offset="100%" stopColor="#b4a22d" />
                 </linearGradient>
               </defs>
-              <g
+              <motion.g
                 data-slot="shape-flow-duck"
                 fill={`url(#${duckGradientId})`}
                 fontFamily="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
                 fontSize="3.8"
                 fontWeight="600"
                 style={{ fontKerning: "none", fontVariantLigatures: "none" }}
+                // Feedback starts on pointer-down: the held duck lifts, or dims with reduced motion.
+                initial={false}
+                animate={
+                  reducedMotion
+                    ? { scale: 1, opacity: dragging ? 0.75 : 1 }
+                    : { scale: dragging ? 1.04 : 1, opacity: 1 }
+                }
+                transition={reducedMotion ? fade : dragging ? liftSpring : dropSpring}
               >
                 {duckRows.map((row, index) => (
                   <text
@@ -483,9 +537,8 @@ export function ShapeFlow({
                     ))}
                   </text>
                 ))}
-              </g>
+              </motion.g>
             </svg>
-            <style>{duckStyles}</style>
           </button>
         </>
       ) : null}
