@@ -52,9 +52,14 @@ interface Slot {
 
 const mod = (value: number, modulus: number) => ((value % modulus) + modulus) % modulus;
 
-// Critically damped: a value change carries no momentum, so nothing overshoots.
-const springOrInstant = (visualDuration: number) =>
-  visualDuration > 0 ? ({ type: "spring", visualDuration, bounce: 0 } as const) : { duration: 0 };
+// Critically damped: a value change carries no momentum, so nothing overshoots. This is the spring
+// Motion resolves `visualDuration` to, written as stiffness and damping because Motion drops velocity
+// on time-defined springs, and a value that changes again mid-roll retargets the digits in flight.
+function springOrInstant(visualDuration: number) {
+  if (!(visualDuration > 0)) return { duration: 0 };
+  const omega = (2 * Math.PI) / (visualDuration * 1.2);
+  return { type: "spring", stiffness: omega * omega, damping: 2 * omega } as const;
+}
 
 /**
  * Splits formatted parts into slots with keys that survive value changes. Integer digits are keyed
@@ -293,13 +298,7 @@ function Wheel({
     }
     // Positions are in digits, not pixels, so the spring needs a finer rest threshold than
     // Motion's default or it would snap the last quarter of a digit.
-    animate(position, next, {
-      type: "spring",
-      visualDuration: seconds,
-      bounce: 0,
-      restDelta: 0.002,
-      restSpeed: 0.02,
-    });
+    animate(position, next, { ...springOrInstant(seconds), restDelta: 0.002, restSpeed: 0.02 });
   }, [digit, direction, seconds, position]);
 
   useEffect(() => () => position.stop(), [position]);
