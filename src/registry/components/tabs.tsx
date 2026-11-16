@@ -27,6 +27,14 @@ import {
   type SetStateAction,
 } from "react";
 
+// The spring Motion resolves `visualDuration` and `bounce` to, written as stiffness and damping. Motion
+// drops velocity on time-defined springs, even a velocity passed in, and the pill needs it: a release
+// hands over the pointer's velocity, and a quick switch or tap retargets it mid-flight.
+function physicsSpring(visualDuration: number, bounce = 0) {
+  const omega = (2 * Math.PI) / (visualDuration * 1.2);
+  return { type: "spring", stiffness: omega * omega, damping: 2 * (1 - bounce) * omega } as const;
+}
+
 type TabsVariant = "pill" | "underline";
 
 // One highlight follows the pointer. `at` is the tab it sits on, `on` is false while it fades out
@@ -61,7 +69,7 @@ type TabsContextValue = {
 };
 
 // Triggers shrink the moment they are pressed and settle back without overshoot on release.
-const PRESS: Transition = { type: "spring", visualDuration: 0.2, bounce: 0 };
+const PRESS: Transition = physicsSpring(0.2);
 // Reduced motion swaps travel for a short fade.
 const FADE = 0.2;
 // The pill follows the pointer only after it has clearly moved sideways, so a tap stays a tap.
@@ -130,6 +138,8 @@ export function Tabs({
     : reducedMotion
       ? { duration: 0, opacity: { duration: 0.15 } }
       : {
+          // Time-defined on purpose: it only runs the layout animation between tabs, which Motion
+          // always starts from rest.
           type: "spring",
           visualDuration: Math.min(visualDuration, 0.25),
           bounce: 0,
@@ -296,12 +306,10 @@ export function TabsList({ activateOnFocus = false, className, children, ...prop
       }
       opacity.jump(1);
       animate(center, nextCenter, {
-        type: "spring",
-        visualDuration,
-        bounce: handoff?.bounce ?? 0,
+        ...physicsSpring(visualDuration, handoff?.bounce),
         ...(handoff ? { velocity: handoff.velocity } : null),
       });
-      animate(width, nextWidth, { type: "spring", visualDuration, bounce: 0 });
+      animate(width, nextWidth, physicsSpring(visualDuration));
     },
     [center, width, opacity, visualDuration, instant, reducedMotion],
   );
@@ -593,7 +601,7 @@ export function TabsContent({ value, className, children }: TabsContentProps) {
       element.style.overflow = "hidden";
       element.style.height = `${from}px`;
       // Animate a plain number rather than the element, so nothing keeps writing a height after
-      // the animation ends.
+      // the animation ends. A new number always starts from rest, so this spring stays time-defined.
       controls = animate(from, to, {
         type: "spring",
         visualDuration,
