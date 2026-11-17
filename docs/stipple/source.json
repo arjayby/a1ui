@@ -23,7 +23,7 @@
       "date": "2026-11-14",
       "scope": "colour",
       "tokens": ["cobalt-ink", "success", "danger"],
-      "change": "Night uses Paper's cobalt-ink, success and danger lifted a third of the way toward Stipple's Night values: #5b66e6, #2f9057 and #ce4f43 in place of #a9acff, #5fd08d and #ff8f80. tokens.json is left as copied; the override is in src/app/stipple-tokens.css.",
+      "change": "Night uses Paper's cobalt-ink and success lifted a third of the way toward Stipple's Night values: #5b66e6 and #2f9057 in place of #a9acff and #5fd08d. Night's danger is Paper's #b62f25 in place of #ff8f80, so destructive fills match in both themes. tokens.json is left as copied; the override is in src/app/stipple-tokens.css.",
       "publishedTo": null
     }
   ]

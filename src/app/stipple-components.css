@@ -62,13 +62,19 @@
   .ui-button:is([data-variant="outline"], [data-variant="ghost"]):is(:hover, :active) {
     background: var(--paper-200);
   }
-  /* Destructive is local too: danger ink on its own tint, never a solid red. */
+  /* Destructive is local too: a solid danger fill with on-danger ink, matching Swipe Row's
+     destructive action, and darkening on hover and press like the primary fill. */
   .ui-button[data-variant="destructive"] {
-    background: var(--danger-soft);
-    color: var(--danger);
+    background: var(--danger);
+    color: var(--on-danger);
   }
-  .ui-button[data-variant="destructive"]:is(:hover, :active) {
-    background: var(--danger-soft-hover);
+  .ui-button[data-variant="destructive"]:hover,
+  .ui-button[data-variant="destructive"][data-preview-state="hover"] {
+    background: color-mix(in srgb, var(--danger) 88%, black);
+  }
+  .ui-button[data-variant="destructive"]:active:not(:disabled),
+  .ui-button[data-variant="destructive"][data-preview-state="active"] {
+    background: color-mix(in srgb, var(--danger) 78%, black);
   }
   .ui-button[data-size="sm"] {
     min-height: 28px;

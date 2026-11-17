@@ -67,8 +67,8 @@ function initialsOf(name: string) {
 }
 
 // Every colour in the theme: the five chart steps, the three status colours, ink and the neutral.
-// Each pairs with the theme's text for it. danger with on-danger (4.2:1) and other with foreground
-// (4.4:1) fall just under 4.5:1 in dark mode; every other pair clears it in both themes.
+// Each pairs with the theme's text for it. other with foreground (4.4:1) falls just under 4.5:1
+// in dark mode; every other pair clears it in both themes.
 const TONES = {
   "chart-1": "bg-chart-1 text-chart-5",
   "chart-2": "bg-chart-2 text-black",

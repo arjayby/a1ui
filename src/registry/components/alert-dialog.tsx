@@ -227,7 +227,7 @@ export function AlertDialogCancel(props: AlertDialogCancelProps) {
 }
 
 export type AlertDialogActionProps = ComponentProps<typeof AlertDialogPrimitive.Close> & {
-  /** `destructive` paints the action in a soft danger color for irreversible choices. */
+  /** `destructive` paints the action in a solid danger fill for irreversible choices. */
   variant?: "default" | "destructive";
 };
 

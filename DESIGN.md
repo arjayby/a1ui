@@ -47,7 +47,7 @@ Two themes share the same token names: **Paper** (light, the default) and **Nigh
 - Set headings and body copy in `ink`, secondary copy in `ink-muted`, and mono labels, durations and fine print in `ink-faint`. `ink-faint` reads on `paper-50` and `paper-100` only.
 - Use `cobalt-ink` whenever cobalt is text or a mark on paper. Do not use `cobalt-500` or `cobalt-600` as text.
 - **Local:** Night's cobalts stay close to Paper's. The fills are identical. `cobalt-ink` is `#5b66e6`: Paper's `#3444da` lifted a third of the way toward Stipple's `#a9acff`. On Night's grounds it is 3.9:1 on `paper-100` and 3.6:1 on `paper-50`, enough for the focus ring and marks but below the 4.5:1 that small text needs (flagged).
-- **Local:** Night's state colours are lifted the same way: `success` `#2f9057`, `danger` `#ce4f43` and `--warning` `#a17518`. On Night's `paper-100` they are 4.5:1, 4.2:1 and 4.4:1.
+- **Local:** Night's `success` and `--warning` are lifted the same way: `#2f9057` and `#a17518`, 4.5:1 and 4.4:1 on Night's `paper-100`. `danger` is Paper's `#b62f25` in both themes, so the destructive fill looks the same in each; as text on Night it is 3.0:1 on `paper-100` and 2.7:1 on `paper-50`, below the 4.5:1 that small text needs (flagged).
 - Use `cobalt-500` and `cobalt-600` only as fills, with `on-cobalt` on top.
 - Mark the current row with `cobalt-wash` behind `ink`: the sidebar does this for the current page.
 - Use `line` for decorative hairlines and `line-strong` for any border that is the only edge of a control or a floating layer.
@@ -73,7 +73,7 @@ Components read shadcn role names. Each one points at a Stipple token.
 | `ring`, `sidebar-ring`                 | `cobalt-ink`          | 5.8:1 on `paper-100` in Paper, 3.9:1 in Night.                                                       |
 | `primary`, `sidebar-primary`           | `cobalt-500`          | Fill only: the primary Button and on or selected controls. Hover `cobalt-600`, pressed `cobalt-700`. |
 | `on-primary`                           | `on-cobalt`           | 6.0:1 on `cobalt-500`.                                                                               |
-| `success`, `danger`                    | `success`, `danger`   | 5.0:1 on `paper-100` in Paper; 4.5:1 and 4.2:1 in Night. Always beside an icon or a sign.            |
+| `success`, `danger`                    | `success`, `danger`   | 5.0:1 on `paper-100` in Paper; 4.5:1 and 3.0:1 in Night. Always beside an icon or a sign.            |
 | `chart-1` to `chart-5`                 | cobalt ramp           | `cobalt-300`, a 300/500 mix, `cobalt-500`, `cobalt-700`, a darker mix.                               |
 
 ### Local colours
@@ -83,7 +83,7 @@ Stipple does not define these. They exist because the component library needs th
 | Token                                               | Paper                          | Night              | Why                                                                                  |
 | --------------------------------------------------- | ------------------------------ | ------------------ | ------------------------------------------------------------------------------------ |
 | `--warning`                                         | `#7d5400`                      | `#a17518`          | Password strength and warning badges. 5.5:1 on `paper-100` in Paper, 4.4:1 in Night. |
-| `--on-danger`                                       | `#ffffff`                      | same               | Text on a solid `danger` fill. 6.1:1 in Paper, 4.3:1 in Night.                       |
+| `--on-danger`                                       | `#ffffff`                      | same               | Text on a solid `danger` fill. 6.1:1 in both themes.                                 |
 | `--overlay`                                         | `rgb(42 38 31 / 0.32)`         | `rgb(0 0 0 / 0.6)` | The scrim behind modal dialogs and the mobile sidebar.                               |
 | `--success-soft`, `--warning-soft`, `--danger-soft` | 12% of the colour              | same               | Tints behind state text; `--danger-soft-hover` is 20%.                               |
 | `--chart-2`, `--chart-5`, `--chart-other`           | mixed from the Stipple cobalts | same               | Avatar tones and unread dots need five steps of one ramp.                            |
@@ -160,7 +160,7 @@ a1ui implements these in `src/components/ui`, built on Base UI, styled in `src/a
 
 Stipple has no equivalents for these; each follows its rules.
 
-- **Button** `outline` (a `line-strong` edge), `ghost` (no fill at rest) and `destructive` (`danger` on `danger-soft`). All three hover to a paper or tint fill, never to cobalt.
+- **Button** `outline` (a `line-strong` edge) and `ghost` (no fill at rest) hover to a paper fill, never to cobalt. `destructive` is a solid `danger` fill with `on-danger` text, the same as Swipe Row's destructive action, and darkens toward black on hover and press the way the primary fill does.
 - **Input, Textarea, Select**: `paper-50` inside a 1px `line-strong` edge, `radius-md`, 36px tall, `body` text. Hover turns the edge `ink`; invalid turns it `danger`.
 - **Checkbox, RadioGroup, Switch**: `paper-50` with a `line-strong` edge when off, `primary` with an `on-primary` mark when on.
 - **Card**: a `paper-50` sheet inside a `line` hairline. Catalog rows sit on `paper-100` and their name and arrow turn `cobalt-ink` on hover.
